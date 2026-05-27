@@ -13,6 +13,9 @@ namespace BusinessObject.Entities
     {
         [Key]
         public int Report_id { get; set; }
+        [ForeignKey("Account")]
+        public int Account_id { get; set; }
+
 
         [ForeignKey("Comment")]
         public int Comment_id { get; set; }
@@ -25,6 +28,7 @@ namespace BusinessObject.Entities
 
         // Navigation properties
         public virtual Comment Comment { get; set; }
+        public virtual Account Account { get; set; }
         public virtual Post Post { get; set; }
     }
 }

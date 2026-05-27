@@ -16,6 +16,8 @@ namespace BusinessObject.Entities
 
         [ForeignKey("Post")]
         public int Post_id { get; set; }
+        [ForeignKey("Account")]
+        public int Account_id { get; set; }
 
         [Required]
         public string Content { get; set; }
@@ -33,6 +35,7 @@ namespace BusinessObject.Entities
 
        
         public virtual Comment ParentComment { get; set; }
+        public virtual Account Account { get; set; }
         public virtual ICollection<Comment> Replies { get; set; }
         public virtual ICollection<Report> Reports { get; set; }
     }
