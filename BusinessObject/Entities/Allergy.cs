@@ -11,12 +11,13 @@ namespace BusinessObject.Entities
     public class Allergy
     {
         [Key]
-        public int Allergy_id { get; set; }
+        public Guid Allergy_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
-        public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
+        [ForeignKey("Account")]
+        public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         // Navigation properties
          public Ingredient Ingredient { get; set; }

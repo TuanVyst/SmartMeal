@@ -12,16 +12,16 @@ namespace BusinessObject.Entities
     public class Report
     {
         [Key]
-        public int Report_id { get; set; }
+        public Guid Report_id { get; set; } = Guid.NewGuid();
         [ForeignKey("Account")]
-        public int Account_id { get; set; }
+        public Guid Account_id { get; set; }
 
 
         [ForeignKey("Comment")]
-        public int Comment_id { get; set; }
+        public Guid Comment_id { get; set; }
 
         [ForeignKey("Post")]
-        public int Post_id { get; set; }
+        public Guid Post_id { get; set; }
 
         [Required]
         public string Content { get; set; }

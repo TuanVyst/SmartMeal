@@ -14,7 +14,7 @@ namespace DataAccessLayer
         public AppDbContext CreateDbContext(string[] args)
         {
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-            var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "SmartMeal");
+            var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "PresentationLayer");
 
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(baseDir)

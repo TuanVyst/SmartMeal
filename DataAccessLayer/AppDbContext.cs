@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BusinessObject.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,38 @@ namespace DataAccessLayer
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserInformation> UserInformations { get; set; }
+        public DbSet<Recipe> Recipes { get; set; }
+        public DbSet<RecipeLabel> RecipeLabels { get; set; }
+        public DbSet<RecipeTag> RecipeTags { get; set; }
+        public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<IngredientTag> IngredientTags { get; set; }
+        public DbSet<IngredientLabel> IngredientLabels { get; set; }
+        public DbSet<NutritionalValue> NutritionalValues { get; set; }
+        public DbSet<AffiliateProduct> AffiliateProducts { get; set; }
+        public DbSet<GroceryList> GroceryLists { get; set; }
+        public DbSet<GroceryItem> GroceryItems { get; set; }
+        public DbSet<Pantry> Pantries { get; set; }
+        public DbSet<Partner> Partners { get; set; }
+        public DbSet<Collection> Collections { get; set; }
+        public DbSet<SavedRecipe> SavedRecipes { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
+        public DbSet<Plan> Plans { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure entity relationships and keys here as needed.
         }
-        
     }
 }

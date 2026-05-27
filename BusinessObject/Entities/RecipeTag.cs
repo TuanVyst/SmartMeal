@@ -12,7 +12,7 @@ namespace BusinessObject.Entities
     public class RecipeTag
     {
         [Key]
-        public int Rt_Id { get; set; }
+        public Guid Rt_Id { get; set; } = Guid.NewGuid();
 
         [Required]
         [MaxLength(100)]

@@ -12,7 +12,7 @@ namespace BusinessObject.Entities
     public class Role
     {
         [Key]
-        public int Role_id { get; set; }
+        public Guid Role_id { get; set; } = Guid.NewGuid();
 
         [Required]
         [MaxLength(50)]

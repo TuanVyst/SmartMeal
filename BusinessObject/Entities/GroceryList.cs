@@ -11,10 +11,10 @@ namespace BusinessObject.Entities
     public class GroceryList
     {
         [Key]
-        public int List_id { get; set; }
+        public Guid List_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Account")]
-        public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
+        public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }

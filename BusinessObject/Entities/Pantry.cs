@@ -11,13 +11,13 @@ namespace BusinessObject.Entities
     public class Pantry
     {
         [Key]
-        public int Pantry_id { get; set; }
+        public Guid Pantry_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Account")]
-        public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
+        public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
         public double Quantity { get; set; }
         public string Unit { get; set; }

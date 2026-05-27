@@ -11,13 +11,13 @@ namespace BusinessObject.Entities
     public class RecipeIngredient
     {
         [Key]
-        public int RI_id { get; set; }
+        public Guid RI_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Recipe")]
-        public int Recipe_id { get; set; } // Khóa ngoại trỏ tới bảng Recipe 
+        public Guid Recipe_id { get; set; } // Khóa ngoại trỏ tới bảng Recipe 
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
         public int Quantity { get; set; }
         public string UOM { get; set; } // Đơn vị đo lường (Unit Of Measure)

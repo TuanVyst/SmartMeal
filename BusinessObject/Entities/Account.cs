@@ -13,10 +13,10 @@ namespace BusinessObject.Entities
     public class Account
     {
         [Key]
-        public int Account_id { get; set; }
+        public Guid Account_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Role")]
-        public int Role_id { get; set; }
+        public Guid Role_id { get; set; }
 
         [Required]
         [MaxLength(100)]

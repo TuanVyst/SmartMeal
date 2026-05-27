@@ -12,12 +12,12 @@ namespace BusinessObject.Entities
     public class Comment
     {
         [Key]
-        public int Comment_id { get; set; }
+        public Guid Comment_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Post")]
-        public int Post_id { get; set; }
+        public Guid Post_id { get; set; }
         [ForeignKey("Account")]
-        public int Account_id { get; set; }
+        public Guid Account_id { get; set; }
 
         [Required]
         public string Content { get; set; }

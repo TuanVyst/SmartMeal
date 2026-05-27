@@ -11,10 +11,10 @@ namespace BusinessObject.Entities
     public class NutritionalValue
     {
         [Key]
-        public int Nv_id { get; set; }
+        public Guid Nv_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
         public double Calories { get; set; }
 

@@ -12,10 +12,10 @@ namespace BusinessObject.Entities
     public class Collection
     {
         [Key]
-        public int Collection_id { get; set; }
+        public Guid Collection_id { get; set; } = Guid.NewGuid();
 
-        [ForeignKey("Account")]
-        public int Account_id { get; set; }
+    [ForeignKey("Account")]
+        public Guid Account_id { get; set; }
 
         [MaxLength(200)]
         public string Name { get; set; }

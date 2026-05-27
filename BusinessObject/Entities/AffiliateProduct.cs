@@ -11,13 +11,13 @@ namespace BusinessObject.Entities
     public class AffiliateProduct
     {
         [Key]
-        public int Product_id { get; set; }
+        public Guid Product_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Partner")]
-        public int Partner_id { get; set; }
+        public Guid Partner_id { get; set; }
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
         public string Name { get; set; }
         public string Link { get; set; }

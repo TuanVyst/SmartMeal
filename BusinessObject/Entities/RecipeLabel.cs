@@ -12,13 +12,13 @@ namespace BusinessObject.Entities
     public class RecipeLabel
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("RecipeTag")]
-        public int Rt_Id { get; set; }
+        public Guid Rt_Id { get; set; }
 
         [ForeignKey("Recipe")]
-        public int Recipe_Id { get; set; }
+        public Guid Recipe_Id { get; set; }
 
         // Navigation properties
         public virtual RecipeTag RecipeTag { get; set; }

@@ -12,7 +12,7 @@ namespace BusinessObject.Entities
     public class Plan
     {
         [Key]
-        public int Plan_id { get; set; }
+        public Guid Plan_id { get; set; } = Guid.NewGuid();
 
         [Required]
         [MaxLength(100)]

@@ -10,7 +10,7 @@ namespace BusinessObject.Entities
     public class IngredientTag
     {
         [Key]
-        public int It_id { get; set; }
+        public Guid It_id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; }
 

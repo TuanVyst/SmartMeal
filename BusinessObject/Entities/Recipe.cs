@@ -12,10 +12,10 @@ namespace BusinessObject.Entities
     public class Recipe
     {
         [Key]
-        public int Recipe_id { get; set; }
+        public Guid Recipe_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Account")]
-        public int Account_id { get; set; }
+        public Guid Account_id { get; set; }
 
         [Required]
         [MaxLength(200)]

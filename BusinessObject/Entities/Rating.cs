@@ -11,13 +11,13 @@ namespace BusinessObject.Entities
     public class Rating
     {
         [Key]
-        public int Rating_id { get; set; }
+        public Guid Rating_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Account")]
-        public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
+        public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         [ForeignKey("Recipe")]
-        public int Recipe_id { get; set; } // Khóa ngoại trỏ tới bảng Recipe
+        public Guid Recipe_id { get; set; } // Khóa ngoại trỏ tới bảng Recipe
 
         [Column("Rating")]
         public decimal RatingValue { get; set; }

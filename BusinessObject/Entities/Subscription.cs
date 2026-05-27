@@ -12,13 +12,13 @@ namespace BusinessObject.Entities
     public class Subscription
     {
         [Key]
-        public int Sub_id { get; set; }
+        public Guid Sub_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Account")]
-        public int Account_id { get; set; }
+        public Guid Account_id { get; set; }
 
         [ForeignKey("Plan")]
-        public int Plan_id { get; set; }
+        public Guid Plan_id { get; set; }
 
         public DateTime StartDate { get; set; }
 

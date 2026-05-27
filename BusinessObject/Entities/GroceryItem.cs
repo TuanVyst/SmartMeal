@@ -11,16 +11,16 @@ namespace BusinessObject.Entities
     public class GroceryItem
     {
         [Key]
-        public int Item_id { get; set; }
+        public Guid Item_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("GroceryList")]
-        public int List_id { get; set; }
+        public Guid List_id { get; set; }
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
         [ForeignKey("AffiliateProduct")] // Dựa theo tên Product_id
-        public int? Product_id { get; set; }
+        public Guid? Product_id { get; set; }
 
         public double Quantity { get; set; }
         public string Unit { get; set; }
@@ -32,6 +32,7 @@ namespace BusinessObject.Entities
         // Navigation properties
         public GroceryList GroceryList { get; set; }
          public Ingredient Ingredient { get; set; }
-         public AffiliateProduct Product { get; set; }
+         public AffiliateProduct AffiliateProduct { get; set; }
+
     }
 }

@@ -11,13 +11,13 @@ namespace BusinessObject.Entities
     public class IngredientLabel
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Ingredient_tag")]
-        public int It_id { get; set; }
+        public Guid It_id { get; set; }
 
         [ForeignKey("Ingredient")]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; }
 
         // Navigation properties
         public IngredientTag Ingredient_tag { get; set; }

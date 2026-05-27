@@ -11,7 +11,7 @@ namespace BusinessObject.Entities
     public class Ingredient
     {
         [Key]
-        public int Ingredient_id { get; set; }
+        public Guid Ingredient_id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; }
         public double AveragePrice { get; set; }

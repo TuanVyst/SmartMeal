@@ -13,10 +13,10 @@ namespace BusinessObject.Entities
     public class Post
     {
         [Key]
-        public int Post_id { get; set; }
+        public Guid Post_id { get; set; } = Guid.NewGuid();
 
         [ForeignKey("Account")]
-        public int Account_id { get; set; }
+        public Guid Account_id { get; set; }
 
         [MaxLength(2000)]
         public string Description { get; set; }

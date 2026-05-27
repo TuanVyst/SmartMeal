@@ -13,13 +13,13 @@ namespace BusinessObject.Entities
         public class SavedRecipe
         {
             [Key]
-            public int Id { get; set; }
+            public Guid Id { get; set; } = Guid.NewGuid();
 
             [ForeignKey("Collection")]
-            public int Collection_Id { get; set; }
+            public Guid Collection_Id { get; set; }
 
             [ForeignKey("Recipe")]
-            public int Recipe_Id { get; set; }
+            public Guid Recipe_Id { get; set; }
 
             // Navigation properties
             public virtual Collection Collection { get; set; }

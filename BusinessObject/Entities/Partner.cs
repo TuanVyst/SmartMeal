@@ -10,7 +10,7 @@ namespace BusinessObject.Entities
     public class Partner
     {
         [Key]
-        public int Partner_id { get; set; }
+        public Guid Partner_id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; }
         public string Address { get; set; }
