@@ -13,6 +13,7 @@ namespace BusinessObject.Entities
         [Key]
         public int RI_id { get; set; }
 
+        [ForeignKey("Recipe")]
         public int Recipe_id { get; set; } // Khóa ngoại trỏ tới bảng Recipe 
 
         [ForeignKey("Ingredient")]
@@ -23,5 +24,6 @@ namespace BusinessObject.Entities
 
         // Navigation properties
         public Ingredient Ingredient { get; set; }
+        public Recipe Recipe { get; set; }
     }
 }

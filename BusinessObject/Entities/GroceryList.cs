@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace BusinessObject.Entities
         [Key]
         public int List_id { get; set; }
 
+        [ForeignKey("Account")]
         public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         public DateTime CreatedAt { get; set; }
@@ -19,6 +21,7 @@ namespace BusinessObject.Entities
 
         // Navigation properties
         public ICollection<GroceryItem> GroceryItems { get; set; }
+        public Account Account { get; set; }
         // public Account Account { get; set; }
     }
 }

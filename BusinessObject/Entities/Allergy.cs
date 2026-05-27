@@ -19,7 +19,7 @@ namespace BusinessObject.Entities
         public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         // Navigation properties
-        // public Ingredient Ingredient { get; set; }
-        // public Account Account { get; set; }
+         public Ingredient Ingredient { get; set; }
+         public Account Account { get; set; }
     }
 }

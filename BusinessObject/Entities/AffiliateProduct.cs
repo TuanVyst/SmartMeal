@@ -26,5 +26,6 @@ namespace BusinessObject.Entities
         // Navigation properties
         public Partner Partner { get; set; }
         public Ingredient Ingredient { get; set; }
+        public ICollection<GroceryItem> GroceryItems { get; set; } = new List<GroceryItem>();
     }
 }

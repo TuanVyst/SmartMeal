@@ -21,7 +21,8 @@ namespace BusinessObject.Entities
         public string Content { get; set; }
 
         /// <summary>Null if top-level comment, set if reply</summary>
-        public int? Reply_id { get; set; }
+        /// 
+     
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -30,7 +31,7 @@ namespace BusinessObject.Entities
         // Navigation properties
         public virtual Post Post { get; set; }
 
-        [ForeignKey("Reply_id")]
+       
         public virtual Comment ParentComment { get; set; }
         public virtual ICollection<Comment> Replies { get; set; }
         public virtual ICollection<Report> Reports { get; set; }

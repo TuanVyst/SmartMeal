@@ -36,5 +36,15 @@ namespace BusinessObject.Entities
         public virtual Role Role { get; set; }
         public virtual UserInformation UserInformation { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
+        public virtual ICollection<Recipe> Recipes { get; set; }
+        public virtual ICollection<GroceryList> GroceryLists { get; set; }
+        public virtual ICollection<Pantry> Pantries { get; set; }
+        public virtual ICollection<SavedRecipe> SavedRecipes { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<Comment> Comments { get; set; }
+        public virtual ICollection<Collection> Collections { get; set; }
+        public virtual ICollection<Report> Reports { get; set; }
+
     }
 }

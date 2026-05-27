@@ -13,6 +13,7 @@ namespace BusinessObject.Entities
         [Key]
         public int Pantry_id { get; set; }
 
+        [ForeignKey("Account")]
         public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
         [ForeignKey("Ingredient")]
@@ -26,7 +27,7 @@ namespace BusinessObject.Entities
         public DateTime UpdatedAt { get; set; }
 
         // Navigation properties
-        // public Ingredient Ingredient { get; set; }
-        // public Account Account { get; set; }
+         public Ingredient Ingredient { get; set; }
+         public Account Account { get; set; }
     }
 }

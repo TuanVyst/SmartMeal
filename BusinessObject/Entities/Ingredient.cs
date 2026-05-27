@@ -13,17 +13,17 @@ namespace BusinessObject.Entities
         [Key]
         public int Ingredient_id { get; set; }
 
-        [ForeignKey("Nutritional_value")]
-        public int? Nv_id { get; set; } // Khóa ngoại liên kết tới Nutritional_value
-
         public string Name { get; set; }
         public double AveragePrice { get; set; }
         public string ImageUrl { get; set; }
 
         // Navigation properties
-        public Nutritional_value Nutritional_value { get; set; }
+        public NutritionalValue Nutritional_value { get; set; }
         public ICollection<AffiliateProduct> AffiliateProducts { get; set; }
-        public ICollection<Recipe_Ingredient> Recipe_Ingredients { get; set; }
+        public ICollection<RecipeIngredient> Recipe_Ingredients { get; set; }
         public ICollection<IngredientLabel> IngredientLabels { get; set; }
+        public ICollection<GroceryItem> GroceryItems { get; set; }
+         public ICollection<Pantry> Pantries { get; set; }
+        public ICollection<Allergy> Allergy { get; set; }
     }
 }

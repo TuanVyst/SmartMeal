@@ -13,8 +13,10 @@ namespace BusinessObject.Entities
         [Key]
         public int Rating_id { get; set; }
 
+        [ForeignKey("Account")]
         public int Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
+        [ForeignKey("Recipe")]
         public int Recipe_id { get; set; } // Khóa ngoại trỏ tới bảng Recipe
 
         [Column("Rating")]
@@ -23,7 +25,7 @@ namespace BusinessObject.Entities
         public string Review { get; set; }
 
         // Navigation properties
-        // public Account Account { get; set; }
-        // public Recipe Recipe { get; set; }
+         public Account Account { get; set; }
+         public Recipe Recipe { get; set; }
     }
 }
