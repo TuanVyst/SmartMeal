@@ -11,7 +11,7 @@ namespace Service.Interfaces
         Task<List<AffiliateProduct>> GetAllAffiliateProducts();
         Task<AffiliateProduct?> GetAffiliateProductById(Guid id);
         Task<AffiliateProduct> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct);
-        Task<AffiliateProduct> UpdateAffiliateProduct(AffiliateProduct affiliateProduct);
+        Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct);
         Task<AffiliateProduct> SoftDeleteAffiliateProduct(Guid id);
     }
 }

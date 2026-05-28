@@ -63,9 +63,35 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Partner> UpdatePartner(Partner partner)
+        public async Task<Partner> UpdatePartner(Guid id, PartnerRequest partner)
         {
-            return await _partnerRepo.UpdatePartner(partner);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(partner.Name))
+                    throw new ArgumentException("Name is required", nameof(partner.Name));
+                if (partner.Name.Length > 256)
+                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(partner.Name));
+                if (string.IsNullOrWhiteSpace(partner.Address))
+                    throw new ArgumentException("Address is required", nameof(partner.Address));
+                
+                var existingPartner = await _partnerRepo.GetPartnerById(id);
+                if (existingPartner == null)
+                    throw new KeyNotFoundException($"Partner with id {id} not found");
+
+                existingPartner.Name = partner.Name;
+                existingPartner.Address = partner.Address;
+                existingPartner.Image = partner.Image;
+                existingPartner.Website = partner.Website;
+
+                var result = await _partnerRepo.UpdatePartner(existingPartner);
+                _logger.LogInformation("Partner '{PartnerId}' updated successfully", existingPartner.Partner_id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating partner '{PartnerId}'", id);
+                throw;
+            }
         }
 
         public async Task<Partner> SoftDeletePartner(Guid id)

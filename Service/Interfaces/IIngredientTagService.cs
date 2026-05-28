@@ -11,7 +11,7 @@ namespace Service.Interfaces
         Task<List<IngredientTag>> GetAllIngredientTags();
         Task<IngredientTag?> GetIngredientTagById(Guid id);
         Task<IngredientTag> CreateIngredientTag(IngredientTagRequest ingredientTag);
-        Task<IngredientTag> UpdateIngredientTag(IngredientTag ingredientTag);
+        Task<IngredientTag> UpdateIngredientTag(Guid id, IngredientTagRequest ingredientTag);
         Task<IngredientTag> SoftDeleteIngredientTag(Guid id);
     }
 }

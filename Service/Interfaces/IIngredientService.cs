@@ -11,7 +11,7 @@ namespace Service.Interfaces
         Task<List<Ingredient>> GetAllIngredients();
         Task<Ingredient?> GetIngredientById(Guid id);
         Task<Ingredient> CreateIngredient(IngredientRequest ingredient);
-        Task<Ingredient> UpdateIngredient(Ingredient ingredient);
+        Task<Ingredient> UpdateIngredient(Guid id, IngredientRequest ingredient);
         Task<Ingredient> SoftDeleteIngredient(Guid id);
     }
 }
