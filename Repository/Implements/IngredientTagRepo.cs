@@ -20,11 +20,17 @@ namespace Repository.Implements
         }
         public async Task<List<IngredientTag>> GetAllIngredientTags()
         {
-            return await _ctx.IngredientTags.Where(i => i.IsDeleted == false).ToListAsync();
+            return await _ctx.IngredientTags
+                .Include(i => i.IngredientLabels)
+                .Where(i => i.IsDeleted == false)
+                .ToListAsync();
         }
 
         public async Task<IngredientTag?> GetIngredientTagById(Guid id)
-            => await _ctx.IngredientTags.Where(i => !i.IsDeleted).FirstOrDefaultAsync(i => i.It_id == id);
+            => await _ctx.IngredientTags
+                .Include(i => i.IngredientLabels)
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.It_id == id);
 
         public async Task<IngredientTag> CreateIngredientTag(IngredientTag ingredientTag)
         {
