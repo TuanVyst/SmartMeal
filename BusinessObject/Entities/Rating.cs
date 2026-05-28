@@ -23,6 +23,8 @@ namespace BusinessObject.Entities
         public decimal RatingValue { get; set; }
 
         public string Review { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
          public Account Account { get; set; }

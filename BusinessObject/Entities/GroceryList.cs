@@ -18,6 +18,7 @@ namespace BusinessObject.Entities
 
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public ICollection<GroceryItem> GroceryItems { get; set; }

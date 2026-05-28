@@ -25,6 +25,7 @@ namespace BusinessObject.Entities
         public DateTime ExpiryDate { get; set; }
         public DateTime AddedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
          public Ingredient Ingredient { get; set; }

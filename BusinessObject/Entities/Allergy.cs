@@ -19,6 +19,8 @@ namespace BusinessObject.Entities
         [ForeignKey("Account")]
         public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
+        public bool IsDeleted { get; set; } = false;
+
         // Navigation properties
          public Ingredient Ingredient { get; set; }
          public Account Account { get; set; }
