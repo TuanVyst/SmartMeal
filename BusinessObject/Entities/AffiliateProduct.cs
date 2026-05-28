@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -22,6 +22,7 @@ namespace BusinessObject.Entities
         public string Name { get; set; }
         public string Link { get; set; }
         public double Price { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public Partner Partner { get; set; }

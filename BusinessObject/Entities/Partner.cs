@@ -17,6 +17,7 @@ namespace BusinessObject.Entities
         public string Image { get; set; }
         public string Website { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation property: 1 Partner có nhiều AffiliateProduct
         public ICollection<AffiliateProduct> AffiliateProducts { get; set; }
