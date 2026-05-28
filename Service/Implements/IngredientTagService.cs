@@ -60,9 +60,33 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientTag> UpdateIngredientTag(IngredientTag ingredientTag)
+        public async Task<IngredientTag> UpdateIngredientTag(Guid id, IngredientTagRequest ingredientTag)
         {
-            return await _ingredientTagRepo.UpdateIngredientTag(ingredientTag);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ingredientTag.Name))
+                    throw new ArgumentException("Name is required", nameof(ingredientTag.Name));
+                if (ingredientTag.Name.Length > 256)
+                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(ingredientTag.Name));
+                if (string.IsNullOrWhiteSpace(ingredientTag.Category))
+                    throw new ArgumentException("Category is required", nameof(ingredientTag.Category));
+                
+                var existingIngredientTag = await _ingredientTagRepo.GetIngredientTagById(id);
+                if (existingIngredientTag == null)
+                    throw new KeyNotFoundException($"IngredientTag with id {id} not found");
+
+                existingIngredientTag.Name = ingredientTag.Name;
+                existingIngredientTag.Category = ingredientTag.Category;
+
+                var result = await _ingredientTagRepo.UpdateIngredientTag(existingIngredientTag);
+                _logger.LogInformation("IngredientTag '{It_id}' updated successfully", existingIngredientTag.It_id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating ingredient tag '{It_id}'", id);
+                throw;
+            }
         }
 
         public async Task<IngredientTag> SoftDeleteIngredientTag(Guid id)

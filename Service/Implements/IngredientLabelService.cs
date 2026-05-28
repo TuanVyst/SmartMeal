@@ -58,9 +58,31 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientLabel> UpdateIngredientLabel(IngredientLabel ingredientLabel)
+        public async Task<IngredientLabel> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel)
         {
-            return await _ingredientLabelRepo.UpdateIngredientLabel(ingredientLabel);
+            try
+            {
+                if (ingredientLabel.It_id == Guid.Empty)
+                    throw new ArgumentException("Valid Tag It_id is required", nameof(ingredientLabel.It_id));
+                if (ingredientLabel.Ingredient_id == Guid.Empty)
+                    throw new ArgumentException("Valid Ingredient_id is required", nameof(ingredientLabel.Ingredient_id));
+
+                var existingIngredientLabel = await _ingredientLabelRepo.GetIngredientLabelById(id);
+                if (existingIngredientLabel == null)
+                    throw new KeyNotFoundException($"IngredientLabel with id {id} not found");
+
+                existingIngredientLabel.It_id = ingredientLabel.It_id;
+                existingIngredientLabel.Ingredient_id = ingredientLabel.Ingredient_id;
+
+                var result = await _ingredientLabelRepo.UpdateIngredientLabel(existingIngredientLabel);
+                _logger.LogInformation("IngredientLabel '{Id}' updated successfully", existingIngredientLabel.Id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating ingredient label '{Id}'", id);
+                throw;
+            }
         }
 
         public async Task<IngredientLabel> SoftDeleteIngredientLabel(Guid id)

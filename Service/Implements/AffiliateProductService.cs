@@ -69,9 +69,42 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AffiliateProduct> UpdateAffiliateProduct(AffiliateProduct affiliateProduct)
+        public async Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
         {
-            return await _affiliateProductRepo.UpdateAffiliateProduct(affiliateProduct);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(affiliateProduct.Name))
+                    throw new ArgumentException("Name is required", nameof(affiliateProduct.Name));
+                if (affiliateProduct.Name.Length > 256)
+                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(affiliateProduct.Name));
+                if (string.IsNullOrWhiteSpace(affiliateProduct.Link))
+                    throw new ArgumentException("Link is required", nameof(affiliateProduct.Link));
+                if (affiliateProduct.Price < 0)
+                    throw new ArgumentException("Price cannot be negative", nameof(affiliateProduct.Price));
+                if (affiliateProduct.Partner_id == Guid.Empty)
+                    throw new ArgumentException("Valid Partner_id is required", nameof(affiliateProduct.Partner_id));
+                if (affiliateProduct.Ingredient_id == Guid.Empty)
+                    throw new ArgumentException("Valid Ingredient_id is required", nameof(affiliateProduct.Ingredient_id));
+
+                var existingAffiliateProduct = await _affiliateProductRepo.GetAffiliateProductById(id);
+                if (existingAffiliateProduct == null)
+                    throw new KeyNotFoundException($"AffiliateProduct with id {id} not found");
+
+                existingAffiliateProduct.Name = affiliateProduct.Name;
+                existingAffiliateProduct.Link = affiliateProduct.Link;
+                existingAffiliateProduct.Price = affiliateProduct.Price;
+                existingAffiliateProduct.Partner_id = affiliateProduct.Partner_id;
+                existingAffiliateProduct.Ingredient_id = affiliateProduct.Ingredient_id;
+
+                var result = await _affiliateProductRepo.UpdateAffiliateProduct(existingAffiliateProduct);
+                _logger.LogInformation("AffiliateProduct '{ProductId}' updated successfully", existingAffiliateProduct.Product_id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating affiliate product '{ProductId}'", id);
+                throw;
+            }
         }
 
         public async Task<AffiliateProduct> SoftDeleteAffiliateProduct(Guid id)
