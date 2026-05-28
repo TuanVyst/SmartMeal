@@ -14,6 +14,10 @@ namespace BusinessObject.Entities
 
         public string Name { get; set; }
 
+        public string Category { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+
         // Navigation property: 1 Tag có thể nằm trong nhiều IngredientLabel
         public ICollection<IngredientLabel> IngredientLabels { get; set; }
     }
