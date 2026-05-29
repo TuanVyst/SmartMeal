@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,29 +13,23 @@ namespace DataAccessLayer
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            // Load .env file
-            try
-            {
-                var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-                DotNetEnv.Env.Load(envPath);
-            }
-            catch
-            {
-                // .env file not found - use system environment variables
-            }
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+            var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "PresentationLayer");
 
-            var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-            var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
-            var dbName = Environment.GetEnvironmentVariable("DB_NAME");
-            var dbUser = Environment.GetEnvironmentVariable("DB_USER");
-            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(baseDir)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+                .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: false)
+                .AddEnvironmentVariables();
 
-            var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Trust Server Certificate=true";
+            var config = configBuilder.Build();
+
+            var connectionString = config.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new InvalidOperationException(
-                    "Connection string not found in environment variables or .env file.");
+                    "Connection string 'DefaultConnection' not found in appsettings.json or environment variables.");
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
