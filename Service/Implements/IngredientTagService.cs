@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using System.Linq;
 
 namespace Service.Implements
 {
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<IngredientTag>> GetAllIngredientTags()
+        public async Task<List<IngredientTagResponseDto>> GetAllIngredientTags()
         {
-            return await _ingredientTagRepo.GetAllIngredientTags();
+            var tags = await _ingredientTagRepo.GetAllIngredientTags();
+            return tags.Select(MapToDto).ToList();
         }
 
-        public async Task<IngredientTag?> GetIngredientTagById(Guid id)
+        public async Task<IngredientTagResponseDto?> GetIngredientTagById(Guid id)
         {
-            return await _ingredientTagRepo.GetIngredientTagById(id);
+            var tag = await _ingredientTagRepo.GetIngredientTagById(id);
+            return tag == null ? null : MapToDto(tag);
         }
 
-        public async Task<IngredientTag> CreateIngredientTag(IngredientTagRequest ingredientTag)
+        public async Task<IngredientTagResponseDto> CreateIngredientTag(IngredientTagRequest ingredientTag)
         {
             try
             {
@@ -51,7 +55,7 @@ namespace Service.Implements
 
                 var result = await _ingredientTagRepo.CreateIngredientTag(newIngredientTag);
                 _logger.LogInformation("IngredientTag '{It_id}' ({Name}) created successfully", newIngredientTag.It_id, newIngredientTag.Name);
-                return result ?? throw new InvalidOperationException("Failed to add ingredient tag to database");
+                return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient tag to database"));
             }
             catch (Exception ex)
             {
@@ -60,7 +64,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientTag> UpdateIngredientTag(Guid id, IngredientTagRequest ingredientTag)
+        public async Task<IngredientTagResponseDto> UpdateIngredientTag(Guid id, IngredientTagRequest ingredientTag)
         {
             try
             {
@@ -80,7 +84,7 @@ namespace Service.Implements
 
                 var result = await _ingredientTagRepo.UpdateIngredientTag(existingIngredientTag);
                 _logger.LogInformation("IngredientTag '{It_id}' updated successfully", existingIngredientTag.It_id);
-                return result;
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
@@ -89,9 +93,21 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientTag> SoftDeleteIngredientTag(Guid id)
+        public async Task<IngredientTagResponseDto> SoftDeleteIngredientTag(Guid id)
         {
-            return await _ingredientTagRepo.SoftDeleteIngredientTag(id);
+            var result = await _ingredientTagRepo.SoftDeleteIngredientTag(id);
+            return MapToDto(result);
+        }
+        
+        private IngredientTagResponseDto MapToDto(IngredientTag tag)
+        {
+            return new IngredientTagResponseDto
+            {
+                Tag_id = tag.It_id,
+                Name = tag.Name,
+                Category = tag.Category,
+                IsDeleted = tag.IsDeleted
+            };
         }
     }
 }

@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using System.Linq;
 
 namespace Service.Implements
 {
@@ -20,17 +22,21 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<AffiliateProduct>> GetAllAffiliateProducts()
+        // ...existing code...
+
+        public async Task<List<AffiliateProductResponseDto>> GetAllAffiliateProducts()
         {
-            return await _affiliateProductRepo.GetAllAffiliateProducts();
+            var products = await _affiliateProductRepo.GetAllAffiliateProducts();
+            return products.Select(MapToDto).ToList();
         }
 
-        public async Task<AffiliateProduct?> GetAffiliateProductById(Guid id)
+        public async Task<AffiliateProductResponseDto?> GetAffiliateProductById(Guid id)
         {
-            return await _affiliateProductRepo.GetAffiliateProductById(id);
+            var product = await _affiliateProductRepo.GetAffiliateProductById(id);
+            return product == null ? null : MapToDto(product);
         }
 
-        public async Task<AffiliateProduct> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct)
+        public async Task<AffiliateProductResponseDto> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct)
         {
             try
             {
@@ -60,7 +66,7 @@ namespace Service.Implements
 
                 var result = await _affiliateProductRepo.CreateAffiliateProduct(newAffiliateProduct);
                 _logger.LogInformation("AffiliateProduct '{ProductId}' ({Name}) created successfully", newAffiliateProduct.Product_id, newAffiliateProduct.Name);
-                return result ?? throw new InvalidOperationException("Failed to add affiliate product to database");
+                return MapToDto(result ?? throw new InvalidOperationException("Failed to add affiliate product to database"));
             }
             catch (Exception ex)
             {
@@ -69,7 +75,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
+        public async Task<AffiliateProductResponseDto> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
         {
             try
             {
@@ -98,7 +104,7 @@ namespace Service.Implements
 
                 var result = await _affiliateProductRepo.UpdateAffiliateProduct(existingAffiliateProduct);
                 _logger.LogInformation("AffiliateProduct '{ProductId}' updated successfully", existingAffiliateProduct.Product_id);
-                return result;
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
@@ -107,9 +113,36 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AffiliateProduct> SoftDeleteAffiliateProduct(Guid id)
+        public async Task<AffiliateProductResponseDto> SoftDeleteAffiliateProduct(Guid id)
         {
-            return await _affiliateProductRepo.SoftDeleteAffiliateProduct(id);
+            var result = await _affiliateProductRepo.SoftDeleteAffiliateProduct(id);
+            return MapToDto(result);
+        }
+
+        private AffiliateProductResponseDto MapToDto(AffiliateProduct product)
+        {
+            return new AffiliateProductResponseDto
+            {
+                Product_id = product.Product_id,
+                Partner_id = product.Partner_id,
+                Ingredient_id = product.Ingredient_id,
+                Name = product.Name,
+                Link = product.Link,
+                Price = product.Price,
+                IsDeleted = product.IsDeleted,
+                Partner = product.Partner != null ? new PartnerSimpleDto
+                {
+                    Partner_id = product.Partner.Partner_id,
+                    Name = product.Partner.Name
+                } : null,
+                Ingredient = product.Ingredient != null ? new IngredientSimpleDto
+                {
+                    Ingredient_id = product.Ingredient.Ingredient_id,
+                    Name = product.Ingredient.Name,
+                    AveragePrice = product.Ingredient.AveragePrice,
+                    ImageUrl = product.Ingredient.ImageUrl
+                } : null
+            };
         }
     }
 }

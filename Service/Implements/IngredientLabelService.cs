@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using System.Linq;
 
 namespace Service.Implements
 {
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<IngredientLabel>> GetAllIngredientLabels()
+        public async Task<List<IngredientLabelResponseDto>> GetAllIngredientLabels()
         {
-            return await _ingredientLabelRepo.GetAllIngredientLabels();
+            var labels = await _ingredientLabelRepo.GetAllIngredientLabels();
+            return labels.Select(MapToDto).ToList();
         }
 
-        public async Task<IngredientLabel?> GetIngredientLabelById(Guid id)
+        public async Task<IngredientLabelResponseDto?> GetIngredientLabelById(Guid id)
         {
-            return await _ingredientLabelRepo.GetIngredientLabelById(id);
+            var label = await _ingredientLabelRepo.GetIngredientLabelById(id);
+            return label == null ? null : MapToDto(label);
         }
 
-        public async Task<IngredientLabel> CreateIngredientLabel(IngredientLabelRequest ingredientLabel)
+        public async Task<IngredientLabelResponseDto> CreateIngredientLabel(IngredientLabelRequest ingredientLabel)
         {
             try
             {
@@ -49,7 +53,7 @@ namespace Service.Implements
 
                 var result = await _ingredientLabelRepo.CreateIngredientLabel(newIngredientLabel);
                 _logger.LogInformation("IngredientLabel '{Id}' created successfully", newIngredientLabel.Id);
-                return result ?? throw new InvalidOperationException("Failed to add ingredient label to database");
+                return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient label to database"));
             }
             catch (Exception ex)
             {
@@ -58,7 +62,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientLabel> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel)
+        public async Task<IngredientLabelResponseDto> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel)
         {
             try
             {
@@ -76,7 +80,7 @@ namespace Service.Implements
 
                 var result = await _ingredientLabelRepo.UpdateIngredientLabel(existingIngredientLabel);
                 _logger.LogInformation("IngredientLabel '{Id}' updated successfully", existingIngredientLabel.Id);
-                return result;
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
@@ -85,9 +89,35 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientLabel> SoftDeleteIngredientLabel(Guid id)
+        public async Task<IngredientLabelResponseDto> SoftDeleteIngredientLabel(Guid id)
         {
-            return await _ingredientLabelRepo.SoftDeleteIngredientLabel(id);
+            var result = await _ingredientLabelRepo.SoftDeleteIngredientLabel(id);
+            return MapToDto(result);
+        }
+        
+        private IngredientLabelResponseDto MapToDto(IngredientLabel label)
+        {
+            if (label == null) return null;
+            return new IngredientLabelResponseDto
+            {
+                Label_id = label.Id,
+                Tag_id = label.It_id,
+                Ingredient_id = label.Ingredient_id,
+                IsDeleted = label.IsDeleted,
+                Ingredient_tag = label.Ingredient_tag != null ? new IngredientTagSimpleDto
+                {
+                    Tag_id = label.Ingredient_tag.It_id,
+                    Name = label.Ingredient_tag.Name,
+                    Category = label.Ingredient_tag.Category
+                } : null,
+                Ingredient = label.Ingredient != null ? new IngredientSimpleDto
+                {
+                    Ingredient_id = label.Ingredient.Ingredient_id,
+                    Name = label.Ingredient.Name,
+                    AveragePrice = label.Ingredient.AveragePrice,
+                    ImageUrl = label.Ingredient.ImageUrl
+                } : null
+            };
         }
     }
 }

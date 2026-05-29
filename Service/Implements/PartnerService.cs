@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+﻿﻿using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using System.Linq;
 
 namespace Service.Implements
 {
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<Partner>> GetAllPartners()
+        public async Task<List<PartnerResponseDto>> GetAllPartners()
         {
-            return await _partnerRepo.GetAllPartners();
+            var partners = await _partnerRepo.GetAllPartners();
+            return partners.Select(MapToDto).ToList();
         }
 
-        public async Task<Partner?> GetPartnerById(Guid id)
+        public async Task<PartnerResponseDto?> GetPartnerById(Guid id)
         {
-            return await _partnerRepo.GetPartnerById(id);
+            var partner = await _partnerRepo.GetPartnerById(id);
+            return partner == null ? null : MapToDto(partner);
         }
 
-        public async Task<Partner> CreatePartner(PartnerRequest partner)
+        public async Task<PartnerResponseDto> CreatePartner(PartnerRequest partner)
         {
             try
             {
@@ -54,7 +58,7 @@ namespace Service.Implements
 
                 var result = await _partnerRepo.CreatePartner(newPartner);
                 _logger.LogInformation("Partner '{PartnerId}' ({Name}) created successfully", newPartner.Partner_id, newPartner.Name);
-                return result ?? throw new InvalidOperationException("Failed to add partner to database");
+                return MapToDto(result ?? throw new InvalidOperationException("Failed to add partner to database"));
             }
             catch (Exception ex)
             {
@@ -63,7 +67,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Partner> UpdatePartner(Guid id, PartnerRequest partner)
+        public async Task<PartnerResponseDto> UpdatePartner(Guid id, PartnerRequest partner)
         {
             try
             {
@@ -85,7 +89,7 @@ namespace Service.Implements
 
                 var result = await _partnerRepo.UpdatePartner(existingPartner);
                 _logger.LogInformation("Partner '{PartnerId}' updated successfully", existingPartner.Partner_id);
-                return result;
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
@@ -94,9 +98,24 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Partner> SoftDeletePartner(Guid id)
+        public async Task<PartnerResponseDto> SoftDeletePartner(Guid id)
         {
-            return await _partnerRepo.SoftDeletePartner(id);
+            var result = await _partnerRepo.SoftDeletePartner(id);
+            return MapToDto(result);
+        }
+        
+        private PartnerResponseDto MapToDto(Partner partner)
+        {
+            return new PartnerResponseDto
+            {
+                Partner_id = partner.Partner_id,
+                Name = partner.Name,
+                Address = partner.Address,
+                Image = partner.Image,
+                Website = partner.Website,
+                IsActive = partner.IsActive,
+                IsDeleted = partner.IsDeleted
+            };
         }
     }
 }

@@ -1,5 +1,9 @@
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
+using Service.Interfaces;
+using Service.Implements;
+using Repository.Interfaces;
+using Repository.Implements;
 
 // 1. Nạp biến môi trường từ .env TRƯỚC TIÊN
 try
@@ -29,7 +33,25 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
+// Register Repositories
+builder.Services.AddScoped<IIngredientRepo, IngredientRepo>();
+builder.Services.AddScoped<IIngredientLabelRepo, IngredientLabelRepo>();
+builder.Services.AddScoped<IIngredientTagRepo, IngredientTagRepo>();
+builder.Services.AddScoped<IAffiliateProductRepo, AffiliateProductRepo>();
+builder.Services.AddScoped<IPartnerRepo, PartnerRepo>();
+
+// Register Services
+builder.Services.AddScoped<IIngredientService, IngredientService>();
+builder.Services.AddScoped<IIngredientLabelService, IngredientLabelService>();
+builder.Services.AddScoped<IIngredientTagService, IngredientTagService>();
+builder.Services.AddScoped<IAffiliateProductService, AffiliateProductService>();
+builder.Services.AddScoped<IPartnerService, PartnerService>();
 
 // [CẬP NHẬT QUAN TRỌNG] Phải có 2 dòng này thì Swagger mới hoạt động được
 builder.Services.AddEndpointsApiExplorer();

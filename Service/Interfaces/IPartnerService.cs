@@ -3,15 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
 
 namespace Service.Interfaces
 {
     public interface IPartnerService
     {
-        Task<List<Partner>> GetAllPartners();
-        Task<Partner?> GetPartnerById(Guid id);
-        Task<Partner> CreatePartner(PartnerRequest partner);
-        Task<Partner> UpdatePartner(Guid id, PartnerRequest partner);
-        Task<Partner> SoftDeletePartner(Guid id);
+        Task<List<PartnerResponseDto>> GetAllPartners();
+        Task<PartnerResponseDto?> GetPartnerById(Guid id);
+        Task<PartnerResponseDto> CreatePartner(PartnerRequest partner);
+        Task<PartnerResponseDto> UpdatePartner(Guid id, PartnerRequest partner);
+        Task<PartnerResponseDto> SoftDeletePartner(Guid id);
     }
 }
