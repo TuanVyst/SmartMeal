@@ -1,9 +1,11 @@
 ﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.ResponseModels;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
 
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<Partner>> GetAllPartners()
+        public async Task<List<PartnerResponse>> GetAllPartners()
         {
-            return await _partnerRepo.GetAllPartners();
+            var partners = await _partnerRepo.GetAllPartners();
+            return partners.Select(MapToResponse).ToList();
         }
 
-        public async Task<Partner?> GetPartnerById(Guid id)
+        public async Task<PartnerResponse?> GetPartnerById(Guid id)
         {
-            return await _partnerRepo.GetPartnerById(id);
+            var partner = await _partnerRepo.GetPartnerById(id);
+            return partner == null ? null : MapToResponse(partner);
         }
 
-        public async Task<Partner> CreatePartner(PartnerRequest partner)
+        public async Task<PartnerResponse> CreatePartner(PartnerRequest partner)
         {
             try
             {
@@ -54,7 +58,9 @@ namespace Service.Implements
 
                 var result = await _partnerRepo.CreatePartner(newPartner);
                 _logger.LogInformation("Partner '{PartnerId}' ({Name}) created successfully", newPartner.Partner_id, newPartner.Name);
-                return result ?? throw new InvalidOperationException("Failed to add partner to database");
+                return result == null
+                    ? throw new InvalidOperationException("Failed to add partner to database")
+                    : MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -63,7 +69,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Partner> UpdatePartner(Guid id, PartnerRequest partner)
+        public async Task<PartnerResponse> UpdatePartner(Guid id, PartnerRequest partner)
         {
             try
             {
@@ -85,7 +91,7 @@ namespace Service.Implements
 
                 var result = await _partnerRepo.UpdatePartner(existingPartner);
                 _logger.LogInformation("Partner '{PartnerId}' updated successfully", existingPartner.Partner_id);
-                return result;
+                return MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -94,9 +100,24 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Partner> SoftDeletePartner(Guid id)
+        public async Task<PartnerResponse> SoftDeletePartner(Guid id)
         {
-            return await _partnerRepo.SoftDeletePartner(id);
+            var result = await _partnerRepo.SoftDeletePartner(id);
+            return MapToResponse(result);
+        }
+
+        private static PartnerResponse MapToResponse(Partner partner)
+        {
+            return new PartnerResponse
+            {
+                Partner_id = partner.Partner_id,
+                Name = partner.Name,
+                Address = partner.Address,
+                Image = partner.Image,
+                Website = partner.Website,
+                IsActive = partner.IsActive,
+                IsDeleted = partner.IsDeleted
+            };
         }
     }
 }

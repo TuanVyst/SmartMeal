@@ -1,9 +1,11 @@
 ﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.ResponseModels;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
 
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<AffiliateProduct>> GetAllAffiliateProducts()
+        public async Task<List<AffiliateProductResponse>> GetAllAffiliateProducts()
         {
-            return await _affiliateProductRepo.GetAllAffiliateProducts();
+            var affiliateProducts = await _affiliateProductRepo.GetAllAffiliateProducts();
+            return affiliateProducts.Select(MapToResponse).ToList();
         }
 
-        public async Task<AffiliateProduct?> GetAffiliateProductById(Guid id)
+        public async Task<AffiliateProductResponse?> GetAffiliateProductById(Guid id)
         {
-            return await _affiliateProductRepo.GetAffiliateProductById(id);
+            var affiliateProduct = await _affiliateProductRepo.GetAffiliateProductById(id);
+            return affiliateProduct == null ? null : MapToResponse(affiliateProduct);
         }
 
-        public async Task<AffiliateProduct> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct)
+        public async Task<AffiliateProductResponse> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct)
         {
             try
             {
@@ -60,7 +64,9 @@ namespace Service.Implements
 
                 var result = await _affiliateProductRepo.CreateAffiliateProduct(newAffiliateProduct);
                 _logger.LogInformation("AffiliateProduct '{ProductId}' ({Name}) created successfully", newAffiliateProduct.Product_id, newAffiliateProduct.Name);
-                return result ?? throw new InvalidOperationException("Failed to add affiliate product to database");
+                return result == null
+                    ? throw new InvalidOperationException("Failed to add affiliate product to database")
+                    : MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -69,7 +75,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
+        public async Task<AffiliateProductResponse> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
         {
             try
             {
@@ -98,7 +104,7 @@ namespace Service.Implements
 
                 var result = await _affiliateProductRepo.UpdateAffiliateProduct(existingAffiliateProduct);
                 _logger.LogInformation("AffiliateProduct '{ProductId}' updated successfully", existingAffiliateProduct.Product_id);
-                return result;
+                return MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -107,9 +113,24 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AffiliateProduct> SoftDeleteAffiliateProduct(Guid id)
+        public async Task<AffiliateProductResponse> SoftDeleteAffiliateProduct(Guid id)
         {
-            return await _affiliateProductRepo.SoftDeleteAffiliateProduct(id);
+            var result = await _affiliateProductRepo.SoftDeleteAffiliateProduct(id);
+            return MapToResponse(result);
+        }
+
+        private static AffiliateProductResponse MapToResponse(AffiliateProduct affiliateProduct)
+        {
+            return new AffiliateProductResponse
+            {
+                Product_id = affiliateProduct.Product_id,
+                Partner_id = affiliateProduct.Partner_id,
+                Ingredient_id = affiliateProduct.Ingredient_id,
+                Name = affiliateProduct.Name,
+                Link = affiliateProduct.Link,
+                Price = affiliateProduct.Price,
+                IsDeleted = affiliateProduct.IsDeleted
+            };
         }
     }
 }

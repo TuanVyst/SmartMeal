@@ -1,9 +1,11 @@
 ﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.ResponseModels;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
 
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<IngredientLabel>> GetAllIngredientLabels()
+        public async Task<List<IngredientLabelResponse>> GetAllIngredientLabels()
         {
-            return await _ingredientLabelRepo.GetAllIngredientLabels();
+            var ingredientLabels = await _ingredientLabelRepo.GetAllIngredientLabels();
+            return ingredientLabels.Select(MapToResponse).ToList();
         }
 
-        public async Task<IngredientLabel?> GetIngredientLabelById(Guid id)
+        public async Task<IngredientLabelResponse?> GetIngredientLabelById(Guid id)
         {
-            return await _ingredientLabelRepo.GetIngredientLabelById(id);
+            var ingredientLabel = await _ingredientLabelRepo.GetIngredientLabelById(id);
+            return ingredientLabel == null ? null : MapToResponse(ingredientLabel);
         }
 
-        public async Task<IngredientLabel> CreateIngredientLabel(IngredientLabelRequest ingredientLabel)
+        public async Task<IngredientLabelResponse> CreateIngredientLabel(IngredientLabelRequest ingredientLabel)
         {
             try
             {
@@ -49,7 +53,9 @@ namespace Service.Implements
 
                 var result = await _ingredientLabelRepo.CreateIngredientLabel(newIngredientLabel);
                 _logger.LogInformation("IngredientLabel '{Id}' created successfully", newIngredientLabel.Id);
-                return result ?? throw new InvalidOperationException("Failed to add ingredient label to database");
+                return result == null
+                    ? throw new InvalidOperationException("Failed to add ingredient label to database")
+                    : MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -58,7 +64,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientLabel> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel)
+        public async Task<IngredientLabelResponse> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel)
         {
             try
             {
@@ -76,7 +82,7 @@ namespace Service.Implements
 
                 var result = await _ingredientLabelRepo.UpdateIngredientLabel(existingIngredientLabel);
                 _logger.LogInformation("IngredientLabel '{Id}' updated successfully", existingIngredientLabel.Id);
-                return result;
+                return MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -85,9 +91,21 @@ namespace Service.Implements
             }
         }
 
-        public async Task<IngredientLabel> SoftDeleteIngredientLabel(Guid id)
+        public async Task<IngredientLabelResponse> SoftDeleteIngredientLabel(Guid id)
         {
-            return await _ingredientLabelRepo.SoftDeleteIngredientLabel(id);
+            var result = await _ingredientLabelRepo.SoftDeleteIngredientLabel(id);
+            return MapToResponse(result);
+        }
+
+        private static IngredientLabelResponse MapToResponse(IngredientLabel ingredientLabel)
+        {
+            return new IngredientLabelResponse
+            {
+                Id = ingredientLabel.Id,
+                It_id = ingredientLabel.It_id,
+                Ingredient_id = ingredientLabel.Ingredient_id,
+                IsDeleted = ingredientLabel.IsDeleted
+            };
         }
     }
 }

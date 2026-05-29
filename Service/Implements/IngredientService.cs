@@ -1,9 +1,11 @@
 ﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.ResponseModels;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
 
@@ -20,17 +22,19 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<Ingredient>> GetAllIngredients()
+        public async Task<List<IngredientResponse>> GetAllIngredients()
         {
-            return await _ingredientRepo.GetAllIngredients();
+            var ingredients = await _ingredientRepo.GetAllIngredients();
+            return ingredients.Select(MapToResponse).ToList();
         }
 
-        public async Task<Ingredient?> GetIngredientById(Guid id)
+        public async Task<IngredientResponse?> GetIngredientById(Guid id)
         {
-            return await _ingredientRepo.GetIngredientById(id);
+            var ingredient = await _ingredientRepo.GetIngredientById(id);
+            return ingredient == null ? null : MapToResponse(ingredient);
         }
 
-        public async Task<Ingredient> CreateIngredient(IngredientRequest ingredient)
+        public async Task<IngredientResponse> CreateIngredient(IngredientRequest ingredient)
         {
             try
             {
@@ -52,7 +56,9 @@ namespace Service.Implements
 
                 var result = await _ingredientRepo.CreateIngredient(newIngredient);
                 _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) created successfully", newIngredient.Ingredient_id, newIngredient.Name);
-                return result ?? throw new InvalidOperationException("Failed to add ingredient to database");
+                return result == null
+                    ? throw new InvalidOperationException("Failed to add ingredient to database")
+                    : MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -61,7 +67,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Ingredient> UpdateIngredient(Guid id, IngredientRequest ingredient)
+        public async Task<IngredientResponse> UpdateIngredient(Guid id, IngredientRequest ingredient)
         {
             try
             {
@@ -82,7 +88,7 @@ namespace Service.Implements
 
                 var result = await _ingredientRepo.UpdateIngredient(existingIngredient);
                 _logger.LogInformation("Ingredient '{Ingredient_id}' updated successfully", existingIngredient.Ingredient_id);
-                return result;
+                return MapToResponse(result);
             }
             catch (Exception ex)
             {
@@ -91,9 +97,22 @@ namespace Service.Implements
             }
         }
 
-        public async Task<Ingredient> SoftDeleteIngredient(Guid id)
+        public async Task<IngredientResponse> SoftDeleteIngredient(Guid id)
         {
-            return await _ingredientRepo.SoftDeleteIngredient(id);
+            var result = await _ingredientRepo.SoftDeleteIngredient(id);
+            return MapToResponse(result);
+        }
+
+        private static IngredientResponse MapToResponse(Ingredient ingredient)
+        {
+            return new IngredientResponse
+            {
+                Ingredient_id = ingredient.Ingredient_id,
+                Name = ingredient.Name,
+                AveragePrice = ingredient.AveragePrice,
+                ImageUrl = ingredient.ImageUrl,
+                IsDeleted = ingredient.IsDeleted
+            };
         }
     }
 }

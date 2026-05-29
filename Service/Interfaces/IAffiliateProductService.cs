@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+﻿using BusinessObject.Dtos.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,10 +8,10 @@ namespace Service.Interfaces
 {
     public interface IAffiliateProductService
     {
-        Task<List<AffiliateProduct>> GetAllAffiliateProducts();
-        Task<AffiliateProduct?> GetAffiliateProductById(Guid id);
-        Task<AffiliateProduct> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct);
-        Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct);
-        Task<AffiliateProduct> SoftDeleteAffiliateProduct(Guid id);
+        Task<List<AffiliateProductResponse>> GetAllAffiliateProducts();
+        Task<AffiliateProductResponse?> GetAffiliateProductById(Guid id);
+        Task<AffiliateProductResponse> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct);
+        Task<AffiliateProductResponse> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct);
+        Task<AffiliateProductResponse> SoftDeleteAffiliateProduct(Guid id);
     }
 }

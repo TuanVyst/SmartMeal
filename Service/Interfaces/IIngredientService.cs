@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+﻿using BusinessObject.Dtos.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,10 +8,10 @@ namespace Service.Interfaces
 {
     public interface IIngredientService
     {
-        Task<List<Ingredient>> GetAllIngredients();
-        Task<Ingredient?> GetIngredientById(Guid id);
-        Task<Ingredient> CreateIngredient(IngredientRequest ingredient);
-        Task<Ingredient> UpdateIngredient(Guid id, IngredientRequest ingredient);
-        Task<Ingredient> SoftDeleteIngredient(Guid id);
+        Task<List<IngredientResponse>> GetAllIngredients();
+        Task<IngredientResponse?> GetIngredientById(Guid id);
+        Task<IngredientResponse> CreateIngredient(IngredientRequest ingredient);
+        Task<IngredientResponse> UpdateIngredient(Guid id, IngredientRequest ingredient);
+        Task<IngredientResponse> SoftDeleteIngredient(Guid id);
     }
 }

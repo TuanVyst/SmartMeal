@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+﻿using BusinessObject.Dtos.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,10 +8,10 @@ namespace Service.Interfaces
 {
     public interface IPartnerService
     {
-        Task<List<Partner>> GetAllPartners();
-        Task<Partner?> GetPartnerById(Guid id);
-        Task<Partner> CreatePartner(PartnerRequest partner);
-        Task<Partner> UpdatePartner(Guid id, PartnerRequest partner);
-        Task<Partner> SoftDeletePartner(Guid id);
+        Task<List<PartnerResponse>> GetAllPartners();
+        Task<PartnerResponse?> GetPartnerById(Guid id);
+        Task<PartnerResponse> CreatePartner(PartnerRequest partner);
+        Task<PartnerResponse> UpdatePartner(Guid id, PartnerRequest partner);
+        Task<PartnerResponse> SoftDeletePartner(Guid id);
     }
 }
