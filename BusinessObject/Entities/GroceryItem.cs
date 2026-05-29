@@ -34,6 +34,7 @@ namespace BusinessObject.Entities
         public GroceryList GroceryList { get; set; }
          public Ingredient Ingredient { get; set; }
          public AffiliateProduct AffiliateProduct { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
     }
 }

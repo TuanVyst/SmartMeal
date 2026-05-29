@@ -35,6 +35,26 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// GroceryList
+builder.Services.AddScoped<Repository.Interfaces.IGroceryListRepo, Repository.Implements.GroceryListRepo>();
+builder.Services.AddScoped<Service.Interfaces.IGroceryListService, Service.Implements.GroceryListService>();
+
+// GroceryItem
+builder.Services.AddScoped<Repository.Interfaces.IGroceryItemRepo, Repository.Implements.GroceryItemRepo>();
+builder.Services.AddScoped<Service.Interfaces.IGroceryItemService, Service.Implements.GroceryItemService>();
+
+// Rating
+builder.Services.AddScoped<Repository.Interfaces.IRatingRepo, Repository.Implements.RatingRepo>();
+builder.Services.AddScoped<Service.Interfaces.IRatingService, Service.Implements.RatingService>();
+
+// Allergy
+builder.Services.AddScoped<Repository.Interfaces.IAllergyRepo, Repository.Implements.AllergyRepo>();
+builder.Services.AddScoped<Service.Interfaces.IAllergyService, Service.Implements.AllergyService>();
+
+// Pantry
+builder.Services.AddScoped<Repository.Interfaces.IPantryRepo, Repository.Implements.PantryRepo>();
+builder.Services.AddScoped<Service.Interfaces.IPantryService, Service.Implements.PantryService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

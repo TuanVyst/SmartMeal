@@ -23,6 +23,6 @@ namespace BusinessObject.Entities
         // Navigation properties
         public ICollection<GroceryItem> GroceryItems { get; set; }
         public Account Account { get; set; }
-        // public Account Account { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

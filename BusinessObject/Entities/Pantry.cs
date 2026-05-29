@@ -30,5 +30,6 @@ namespace BusinessObject.Entities
         // Navigation properties
          public Ingredient Ingredient { get; set; }
          public Account Account { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

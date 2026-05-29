@@ -29,5 +29,7 @@ namespace BusinessObject.Entities
         // Navigation properties
          public Account Account { get; set; }
          public Recipe Recipe { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
