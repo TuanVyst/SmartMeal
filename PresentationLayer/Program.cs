@@ -31,6 +31,24 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<Repository.Interfaces.IRecipeRepo, Repository.Implements.RecipeRepo>();
+builder.Services.AddScoped<Service.Interfaces.IRecipeService, Service.Implements.RecipeService>();
+
+builder.Services.AddScoped<Repository.Interfaces.ICollectionRepo, Repository.Implements.CollectionRepo>();
+builder.Services.AddScoped<Service.Interfaces.ICollectionService, Service.Implements.CollectionService>();
+
+builder.Services.AddScoped<Repository.Interfaces.ISavedRecipeRepo, Repository.Implements.SavedRecipeRepo>();
+builder.Services.AddScoped<Service.Interfaces.ISavedRecipeService, Service.Implements.SavedRecipeService>();
+
+builder.Services.AddScoped<Repository.Interfaces.IRecipeTagRepo, Repository.Implements.RecipeTagRepo>();
+builder.Services.AddScoped<Service.Interfaces.IRecipeTagService, Service.Implements.RecipeTagService>();
+
+builder.Services.AddScoped<Repository.Interfaces.IRecipeLabelRepo, Repository.Implements.RecipeLabelRepo>();
+builder.Services.AddScoped<Service.Interfaces.IRecipeLabelService, Service.Implements.RecipeLabelService>();
+
+builder.Services.AddScoped<Repository.Interfaces.IRecipeIngredientRepo, Repository.Implements.RecipeIngredientRepo>();
+builder.Services.AddScoped<Service.Interfaces.IRecipeIngredientService, Service.Implements.RecipeIngredientService>();
+
 // [CẬP NHẬT QUAN TRỌNG] Phải có 2 dòng này thì Swagger mới hoạt động được
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
