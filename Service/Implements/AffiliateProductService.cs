@@ -68,7 +68,7 @@ namespace Service.Implements
                 throw;
             }
         }
-
+        //
         public async Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
         {
             try
