@@ -25,11 +25,10 @@ namespace BusinessObject.Entities
         public string Review { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties
          public Account Account { get; set; }
          public Recipe Recipe { get; set; }
-        public bool IsDeleted { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

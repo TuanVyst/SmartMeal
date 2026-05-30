@@ -54,6 +54,12 @@ namespace Service.Implements
                 if (request.RatingValue < 0.5m || request.RatingValue > 5.0m)
                     throw new ArgumentException("Rating value must be between 0.5 and 5.0", nameof(request.RatingValue));
 
+                if (string.IsNullOrWhiteSpace(request.Review))
+                    throw new ArgumentException("Review must not be null or empty", nameof(request.Review));
+
+                if (request.Recipe_id == Guid.Empty)
+                    throw new ArgumentException("Recipe_id is required", nameof(request.Recipe_id));
+
                 var existingRating = await _ratingRepo.GetRatingByAccountAndRecipe(accountId, request.Recipe_id);
                 if (existingRating != null)
                     throw new InvalidOperationException("You have already rated this recipe");

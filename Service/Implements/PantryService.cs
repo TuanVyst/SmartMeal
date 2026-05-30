@@ -61,6 +61,9 @@ namespace Service.Implements
                 if (request.Quantity <= 0)
                     throw new ArgumentException("Quantity must be greater than 0", nameof(request.Quantity));
 
+                if (string.IsNullOrWhiteSpace(request.Unit))
+                    throw new ArgumentException("Unit must not be null or empty", nameof(request.Unit));
+
                 if (request.ExpiryDate <= DateTime.UtcNow)
                     throw new ArgumentException("Expiry date must be in the future", nameof(request.ExpiryDate));
 
@@ -71,8 +74,8 @@ namespace Service.Implements
                     Ingredient_id = request.Ingredient_id,
                     Quantity = request.Quantity,
                     Unit = request.Unit,
-                    ExpiryDate = request.ExpiryDate,
-                    AddedAt = DateTime.UtcNow,
+                    ExpiryDate = DateTime.SpecifyKind(request.ExpiryDate, DateTimeKind.Utc),
+                    CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     IsDeleted = false
                 };
@@ -95,6 +98,9 @@ namespace Service.Implements
                 if (request.Quantity <= 0)
                     throw new ArgumentException("Quantity must be greater than 0", nameof(request.Quantity));
 
+                if (request.Unit != null && string.IsNullOrWhiteSpace(request.Unit))
+                    throw new ArgumentException("Unit must not be empty", nameof(request.Unit));
+
                 var existingPantry = await _pantryRepo.GetPantryById(id);
                 if (existingPantry == null)
                     throw new KeyNotFoundException($"Pantry with id {id} not found");
@@ -109,7 +115,7 @@ namespace Service.Implements
                 if (!string.IsNullOrEmpty(request.Unit))
                     existingPantry.Unit = request.Unit;
                 if (request.ExpiryDate.HasValue)
-                    existingPantry.ExpiryDate = request.ExpiryDate.Value;
+                    existingPantry.ExpiryDate = DateTime.SpecifyKind(request.ExpiryDate.Value, DateTimeKind.Utc);
                 existingPantry.UpdatedAt = DateTime.UtcNow;
 
                 var result = await _pantryRepo.UpdatePantry(existingPantry);
@@ -156,7 +162,7 @@ namespace Service.Implements
                 Quantity = pantry.Quantity,
                 Unit = pantry.Unit,
                 ExpiryDate = pantry.ExpiryDate,
-                AddedAt = pantry.AddedAt,
+                CreatedAt = pantry.CreatedAt,
                 UpdatedAt = pantry.UpdatedAt
             };
         }
