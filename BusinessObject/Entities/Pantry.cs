@@ -23,13 +23,12 @@ namespace BusinessObject.Entities
         public string Unit { get; set; }
 
         public DateTime ExpiryDate { get; set; }
-        public DateTime AddedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; }
         public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
          public Ingredient Ingredient { get; set; }
          public Account Account { get; set; }
-        public bool IsDeleted { get; set; } = false;
     }
 }

@@ -21,6 +21,7 @@ namespace Repository.Implements
         {
             return await _ctx.GroceryLists
                 .Include(g => g.GroceryItems)
+                .Include(g => g.Account)
                 .Where(g => g.IsDeleted == false)
                 .ToListAsync();
         }
@@ -28,12 +29,14 @@ namespace Repository.Implements
         public async Task<GroceryList?> GetGroceryListById(Guid id)
             => await _ctx.GroceryLists
                 .Include(g => g.GroceryItems)
+                .Include(g => g.Account)
                 .Where(g => !g.IsDeleted)
                 .FirstOrDefaultAsync(g => g.List_id == id);
 
         public async Task<List<GroceryList>> GetGroceryListsByAccountId(Guid accountId)
             => await _ctx.GroceryLists
                 .Include(g => g.GroceryItems)
+                .Include(g => g.Account)
                 .Where(g => g.Account_id == accountId && g.IsDeleted == false)
                 .ToListAsync();
 

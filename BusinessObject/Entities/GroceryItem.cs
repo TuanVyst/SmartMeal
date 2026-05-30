@@ -28,13 +28,14 @@ namespace BusinessObject.Entities
 
         // Thuộc tính Field có kiểu "Type" trong sơ đồ, thường sẽ map thành string
         public string Field { get; set; }
-        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public GroceryList GroceryList { get; set; }
          public Ingredient Ingredient { get; set; }
          public AffiliateProduct AffiliateProduct { get; set; }
-        public bool IsDeleted { get; set; } = false;
 
     }
 }

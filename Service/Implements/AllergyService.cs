@@ -14,11 +14,13 @@ namespace Service.Implements
     public class AllergyService : IAllergyService
     {
         private readonly IAllergyRepo _allergyRepo;
+        private readonly IIngredientRepo _ingredientRepo;
         private readonly ILogger<AllergyService> _logger;
 
-        public AllergyService(IAllergyRepo allergyRepo, ILogger<AllergyService> logger)
+        public AllergyService(IAllergyRepo allergyRepo, IIngredientRepo ingredientRepo, ILogger<AllergyService> logger)
         {
             _allergyRepo = allergyRepo;
+            _ingredientRepo = ingredientRepo;
             _logger = logger;
         }
 
@@ -45,6 +47,10 @@ namespace Service.Implements
         {
             try
             {
+                var ingredientExists = await _ingredientRepo.GetIngredientById(request.Ingredient_id);
+                if (ingredientExists == null)
+                    throw new ArgumentException($"Ingredient with id {request.Ingredient_id} not found", nameof(request.Ingredient_id));
+
                 var existingAllergy = await _allergyRepo.GetAllergyByAccountAndIngredient(accountId, request.Ingredient_id);
                 if (existingAllergy != null)
                     throw new InvalidOperationException("You already have this allergy recorded");
@@ -78,6 +84,10 @@ namespace Service.Implements
 
                 if (existingAllergy.Account_id != accountId)
                     throw new UnauthorizedAccessException("You do not have permission to update this allergy");
+
+                var ingredientExists = await _ingredientRepo.GetIngredientById(request.Ingredient_id);
+                if (ingredientExists == null)
+                    throw new ArgumentException($"Ingredient with id {request.Ingredient_id} not found", nameof(request.Ingredient_id));
 
                 existingAllergy.Ingredient_id = request.Ingredient_id;
 

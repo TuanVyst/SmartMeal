@@ -43,7 +43,7 @@ namespace Service.Implements
             return items.Select(MapToResponse).ToList();
         }
 
-        public async Task<GroceryItemResponse> CreateGroceryItem(GroceryItemRequest request)
+        public async Task<GroceryItemResponse> CreateGroceryItem(GroceryItemRequest request, Guid accountId)
         {
             try
             {
@@ -53,6 +53,9 @@ namespace Service.Implements
                 var groceryList = await _groceryListRepo.GetGroceryListById(request.List_id);
                 if (groceryList == null)
                     throw new KeyNotFoundException($"GroceryList with id {request.List_id} not found");
+
+                if (groceryList.Account_id != accountId)
+                    throw new UnauthorizedAccessException("You are not authorized to add items to this grocery list");
 
                 var newItem = new GroceryItem
                 {
@@ -64,7 +67,8 @@ namespace Service.Implements
                     Unit = request.Unit,
                     IsPurchased = request.IsPurchased,
                     Field = request.Field,
-                    IsDeleted = false
+                    IsDeleted = false,
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 var result = await _groceryItemRepo.CreateGroceryItem(newItem);
@@ -78,7 +82,7 @@ namespace Service.Implements
             }
         }
 
-        public async Task<GroceryItemResponse> UpdateGroceryItem(Guid id, GroceryItemUpdateRequest request)
+        public async Task<GroceryItemResponse> UpdateGroceryItem(Guid id, GroceryItemUpdateRequest request, Guid accountId)
         {
             try
             {
@@ -88,6 +92,10 @@ namespace Service.Implements
                 var existingItem = await _groceryItemRepo.GetGroceryItemById(id);
                 if (existingItem == null)
                     throw new KeyNotFoundException($"GroceryItem with id {id} not found");
+
+                var groceryList = await _groceryListRepo.GetGroceryListById(existingItem.List_id);
+                if (groceryList == null || groceryList.Account_id != accountId)
+                    throw new UnauthorizedAccessException("You are not authorized to update this grocery item");
 
                 if (request.Ingredient_id.HasValue)
                     existingItem.Ingredient_id = request.Ingredient_id.Value;
@@ -102,6 +110,8 @@ namespace Service.Implements
                 if (!string.IsNullOrEmpty(request.Field))
                     existingItem.Field = request.Field;
 
+                existingItem.UpdatedAt = DateTime.UtcNow;
+
                 var result = await _groceryItemRepo.UpdateGroceryItem(existingItem);
                 _logger.LogInformation("GroceryItem '{ItemId}' updated successfully", id);
                 return MapToResponse(result);
@@ -113,13 +123,17 @@ namespace Service.Implements
             }
         }
 
-        public async Task<GroceryItemResponse> SoftDeleteGroceryItem(Guid id)
+        public async Task<GroceryItemResponse> SoftDeleteGroceryItem(Guid id, Guid accountId)
         {
             try
             {
                 var existingItem = await _groceryItemRepo.GetGroceryItemById(id);
                 if (existingItem == null)
                     throw new KeyNotFoundException($"GroceryItem with id {id} not found");
+
+                var groceryList = await _groceryListRepo.GetGroceryListById(existingItem.List_id);
+                if (groceryList == null || groceryList.Account_id != accountId)
+                    throw new UnauthorizedAccessException("You are not authorized to delete this grocery item");
 
                 var result = await _groceryItemRepo.SoftDeleteGroceryItem(id);
                 _logger.LogInformation("GroceryItem '{ItemId}' soft deleted", id);
