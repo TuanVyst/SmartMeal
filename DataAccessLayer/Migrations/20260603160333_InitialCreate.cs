@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate2 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Account",
+                columns: table => new
+                {
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    Username = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Password = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Account", x => x.Account_id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Ingredients",
                 columns: table => new
@@ -18,7 +35,8 @@ namespace DataAccessLayer.Migrations
                     Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     AveragePrice = table.Column<double>(type: "double precision", nullable: false),
-                    ImageUrl = table.Column<string>(type: "text", nullable: false)
+                    ImageUrl = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +48,9 @@ namespace DataAccessLayer.Migrations
                 columns: table => new
                 {
                     It_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Category = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,7 +66,8 @@ namespace DataAccessLayer.Migrations
                     Address = table.Column<string>(type: "text", nullable: false),
                     Image = table.Column<string>(type: "text", nullable: false),
                     Website = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -83,139 +104,6 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Role",
-                columns: table => new
-                {
-                    Role_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Role", x => x.Role_id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "NutritionalValues",
-                columns: table => new
-                {
-                    Nv_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Calories = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_NutritionalValues", x => x.Nv_id);
-                    table.ForeignKey(
-                        name: "FK_NutritionalValues_Ingredients_Ingredient_id",
-                        column: x => x.Ingredient_id,
-                        principalTable: "Ingredients",
-                        principalColumn: "Ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "IngredientLabels",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    It_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IngredientLabels", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_IngredientLabels_IngredientTags_It_id",
-                        column: x => x.It_id,
-                        principalTable: "IngredientTags",
-                        principalColumn: "It_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_IngredientLabels_Ingredients_Ingredient_id",
-                        column: x => x.Ingredient_id,
-                        principalTable: "Ingredients",
-                        principalColumn: "Ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AffiliateProducts",
-                columns: table => new
-                {
-                    Product_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Partner_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Link = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AffiliateProducts", x => x.Product_id);
-                    table.ForeignKey(
-                        name: "FK_AffiliateProducts_Ingredients_Ingredient_id",
-                        column: x => x.Ingredient_id,
-                        principalTable: "Ingredients",
-                        principalColumn: "Ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AffiliateProducts_Partners_Partner_id",
-                        column: x => x.Partner_id,
-                        principalTable: "Partners",
-                        principalColumn: "Partner_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Account",
-                columns: table => new
-                {
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Role_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Username = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Password = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Account", x => x.Account_id);
-                    table.ForeignKey(
-                        name: "FK_Account_Role_Role_id",
-                        column: x => x.Role_id,
-                        principalTable: "Role",
-                        principalColumn: "Role_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Allergy",
-                columns: table => new
-                {
-                    Allergy_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Allergy", x => x.Allergy_id);
-                    table.ForeignKey(
-                        name: "FK_Allergy_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Allergy_Ingredients_Ingredient_id",
-                        column: x => x.Ingredient_id,
-                        principalTable: "Ingredients",
-                        principalColumn: "Ingredient_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Collection",
                 columns: table => new
                 {
@@ -243,7 +131,9 @@ namespace DataAccessLayer.Migrations
                     List_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Account_id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -253,36 +143,6 @@ namespace DataAccessLayer.Migrations
                         column: x => x.Account_id,
                         principalTable: "Account",
                         principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Pantries",
-                columns: table => new
-                {
-                    Pantry_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Quantity = table.Column<double>(type: "double precision", nullable: false),
-                    Unit = table.Column<string>(type: "text", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    AddedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Pantries", x => x.Pantry_id);
-                    table.ForeignKey(
-                        name: "FK_Pantries_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Pantries_Ingredients_Ingredient_id",
-                        column: x => x.Ingredient_id,
-                        principalTable: "Ingredients",
-                        principalColumn: "Ingredient_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -314,6 +174,161 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserInformation",
+                columns: table => new
+                {
+                    User_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserInformation", x => x.User_id);
+                    table.ForeignKey(
+                        name: "FK_UserInformation_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Allergies",
+                columns: table => new
+                {
+                    Allergy_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Allergies", x => x.Allergy_id);
+                    table.ForeignKey(
+                        name: "FK_Allergies_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Allergies_Ingredients_Ingredient_id",
+                        column: x => x.Ingredient_id,
+                        principalTable: "Ingredients",
+                        principalColumn: "Ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NutritionalValues",
+                columns: table => new
+                {
+                    Nv_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Calories = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NutritionalValues", x => x.Nv_id);
+                    table.ForeignKey(
+                        name: "FK_NutritionalValues_Ingredients_Ingredient_id",
+                        column: x => x.Ingredient_id,
+                        principalTable: "Ingredients",
+                        principalColumn: "Ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pantries",
+                columns: table => new
+                {
+                    Pantry_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<double>(type: "double precision", nullable: false),
+                    Unit = table.Column<string>(type: "text", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pantries", x => x.Pantry_id);
+                    table.ForeignKey(
+                        name: "FK_Pantries_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Pantries_Ingredients_Ingredient_id",
+                        column: x => x.Ingredient_id,
+                        principalTable: "Ingredients",
+                        principalColumn: "Ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "IngredientLabels",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    It_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IngredientLabels", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_IngredientLabels_IngredientTags_It_id",
+                        column: x => x.It_id,
+                        principalTable: "IngredientTags",
+                        principalColumn: "It_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_IngredientLabels_Ingredients_Ingredient_id",
+                        column: x => x.Ingredient_id,
+                        principalTable: "Ingredients",
+                        principalColumn: "Ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AffiliateProducts",
+                columns: table => new
+                {
+                    Product_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Partner_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Link = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<double>(type: "double precision", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AffiliateProducts", x => x.Product_id);
+                    table.ForeignKey(
+                        name: "FK_AffiliateProducts_Ingredients_Ingredient_id",
+                        column: x => x.Ingredient_id,
+                        principalTable: "Ingredients",
+                        principalColumn: "Ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AffiliateProducts_Partners_Partner_id",
+                        column: x => x.Partner_id,
+                        principalTable: "Partners",
+                        principalColumn: "Partner_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Subscription",
                 columns: table => new
                 {
@@ -339,63 +354,6 @@ namespace DataAccessLayer.Migrations
                         column: x => x.Plan_id,
                         principalTable: "Plan",
                         principalColumn: "Plan_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserInformation",
-                columns: table => new
-                {
-                    User_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserInformation", x => x.User_id);
-                    table.ForeignKey(
-                        name: "FK_UserInformation_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GroceryItems",
-                columns: table => new
-                {
-                    Item_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    List_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Product_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    Quantity = table.Column<double>(type: "double precision", nullable: false),
-                    Unit = table.Column<string>(type: "text", nullable: false),
-                    IsPurchased = table.Column<bool>(type: "boolean", nullable: false),
-                    Field = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GroceryItems", x => x.Item_id);
-                    table.ForeignKey(
-                        name: "FK_GroceryItems_AffiliateProducts_Product_id",
-                        column: x => x.Product_id,
-                        principalTable: "AffiliateProducts",
-                        principalColumn: "Product_id");
-                    table.ForeignKey(
-                        name: "FK_GroceryItems_GroceryLists_List_id",
-                        column: x => x.List_id,
-                        principalTable: "GroceryLists",
-                        principalColumn: "List_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GroceryItems_Ingredients_Ingredient_id",
-                        column: x => x.Ingredient_id,
-                        principalTable: "Ingredients",
-                        principalColumn: "Ingredient_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -435,7 +393,10 @@ namespace DataAccessLayer.Migrations
                     Account_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Recipe_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Rating = table.Column<decimal>(type: "numeric", nullable: false),
-                    Review = table.Column<string>(type: "text", nullable: false)
+                    Review = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -538,6 +499,44 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GroceryItems",
+                columns: table => new
+                {
+                    Item_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    List_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Product_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    Quantity = table.Column<double>(type: "double precision", nullable: false),
+                    Unit = table.Column<string>(type: "text", nullable: false),
+                    IsPurchased = table.Column<bool>(type: "boolean", nullable: false),
+                    Field = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroceryItems", x => x.Item_id);
+                    table.ForeignKey(
+                        name: "FK_GroceryItems_AffiliateProducts_Product_id",
+                        column: x => x.Product_id,
+                        principalTable: "AffiliateProducts",
+                        principalColumn: "Product_id");
+                    table.ForeignKey(
+                        name: "FK_GroceryItems_GroceryLists_List_id",
+                        column: x => x.List_id,
+                        principalTable: "GroceryLists",
+                        principalColumn: "List_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GroceryItems_Ingredients_Ingredient_id",
+                        column: x => x.Ingredient_id,
+                        principalTable: "Ingredients",
+                        principalColumn: "Ingredient_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Comment",
                 columns: table => new
                 {
@@ -606,11 +605,6 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Account_Role_id",
-                table: "Account",
-                column: "Role_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AffiliateProducts_Ingredient_id",
                 table: "AffiliateProducts",
                 column: "Ingredient_id");
@@ -621,13 +615,13 @@ namespace DataAccessLayer.Migrations
                 column: "Partner_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Allergy_Account_id",
-                table: "Allergy",
+                name: "IX_Allergies_Account_id",
+                table: "Allergies",
                 column: "Account_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Allergy_Ingredient_id",
-                table: "Allergy",
+                name: "IX_Allergies_Ingredient_id",
+                table: "Allergies",
                 column: "Ingredient_id");
 
             migrationBuilder.CreateIndex(
@@ -792,7 +786,7 @@ namespace DataAccessLayer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Allergy");
+                name: "Allergies");
 
             migrationBuilder.DropTable(
                 name: "GroceryItems");
@@ -862,9 +856,6 @@ namespace DataAccessLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Account");
-
-            migrationBuilder.DropTable(
-                name: "Role");
         }
     }
 }

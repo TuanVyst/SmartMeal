@@ -42,8 +42,8 @@ namespace DataAccessLayer.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<Guid>("Role_id")
-                        .HasColumnType("uuid");
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -51,8 +51,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Account_id");
-
-                    b.HasIndex("Role_id");
 
                     b.ToTable("Account");
                 });
@@ -685,27 +683,6 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Report");
                 });
 
-            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Role_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Role_id");
-
-                    b.ToTable("Role");
-                });
-
             modelBuilder.Entity("BusinessObject.Entities.SavedRecipe", b =>
                 {
                     b.Property<Guid>("Id")
@@ -804,17 +781,6 @@ namespace DataAccessLayer.Migrations
                         .IsUnique();
 
                     b.ToTable("UserInformation");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Account", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.Role", "Role")
-                        .WithMany("Accounts")
-                        .HasForeignKey("Role_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -1243,11 +1209,6 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("BusinessObject.Entities.RecipeTag", b =>
                 {
                     b.Navigation("RecipeLabels");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
-                {
-                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

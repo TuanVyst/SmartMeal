@@ -13,7 +13,7 @@ namespace DataAccessLayer
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<Role> Roles { get; set; }
+ 
         public DbSet<UserInformation> UserInformations { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<RecipeLabel> RecipeLabels { get; set; }

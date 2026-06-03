@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260529090257_AddRecipeModules")]
-    partial class AddRecipeModules
+    [Migration("20260603160333_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,8 +45,8 @@ namespace DataAccessLayer.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<Guid>("Role_id")
-                        .HasColumnType("uuid");
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -54,8 +54,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Account_id");
-
-                    b.HasIndex("Role_id");
 
                     b.ToTable("Account");
                 });
@@ -104,8 +102,17 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Account_id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Allergy_id");
 
@@ -113,7 +120,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Ingredient_id");
 
-                    b.ToTable("Allergy");
+                    b.ToTable("Allergies");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Collection", b =>
@@ -185,12 +192,18 @@ namespace DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Field")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsPurchased")
                         .HasColumnType("boolean");
@@ -207,6 +220,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Item_id");
 
@@ -231,9 +247,15 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("List_id");
 
@@ -342,7 +364,7 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Account_id")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("AddedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ExpiryDate")
@@ -350,6 +372,9 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
@@ -482,6 +507,12 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Account_id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal>("RatingValue")
                         .HasColumnType("numeric")
                         .HasColumnName("Rating");
@@ -492,6 +523,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<string>("Review")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Rating_id");
 
@@ -652,27 +686,6 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Report");
                 });
 
-            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Role_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Role_id");
-
-                    b.ToTable("Role");
-                });
-
             modelBuilder.Entity("BusinessObject.Entities.SavedRecipe", b =>
                 {
                     b.Property<Guid>("Id")
@@ -771,17 +784,6 @@ namespace DataAccessLayer.Migrations
                         .IsUnique();
 
                     b.ToTable("UserInformation");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Account", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.Role", "Role")
-                        .WithMany("Accounts")
-                        .HasForeignKey("Role_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -1210,11 +1212,6 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("BusinessObject.Entities.RecipeTag", b =>
                 {
                     b.Navigation("RecipeLabels");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
-                {
-                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

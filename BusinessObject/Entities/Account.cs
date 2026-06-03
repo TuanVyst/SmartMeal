@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObject.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,8 +16,8 @@ namespace BusinessObject.Entities
         [Key]
         public Guid Account_id { get; set; } = Guid.NewGuid();
 
-        [ForeignKey("Role")]
-        public Guid Role_id { get; set; }
+     
+        public RoleEnum Role { get; set; } = RoleEnum.User;
 
         [Required]
         [MaxLength(100)]
@@ -33,7 +34,7 @@ namespace BusinessObject.Entities
         public DateTime? LastLogin { get; set; }
 
         // Navigation properties
-        public virtual Role Role { get; set; }
+    
         public virtual UserInformation UserInformation { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
         public virtual ICollection<Recipe> Recipes { get; set; }

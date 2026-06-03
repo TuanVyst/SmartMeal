@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccessLayer
 {
@@ -13,27 +8,29 @@ namespace DataAccessLayer
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-            var baseDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "PresentationLayer");
+            var baseDir = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "..",
+                "PresentationLayer"
+            );
 
-            var configBuilder = new ConfigurationBuilder()
+            IConfiguration config = new ConfigurationBuilder()
                 .SetBasePath(baseDir)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
-                .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: false)
-                .AddEnvironmentVariables();
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
 
-            var config = configBuilder.Build();
-
-            var connectionString = config.GetConnectionString("DefaultConnection");
+            var connectionString =
+                config.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new InvalidOperationException(
-                    "Connection string 'DefaultConnection' not found in appsettings.json or environment variables.");
+                    "Connection string 'DefaultConnection' not found in appsettings.json.");
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseNpgsql(connectionString);
+
             return new AppDbContext(optionsBuilder.Options);
         }
     }
