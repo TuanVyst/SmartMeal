@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -23,6 +23,8 @@ namespace BusinessObject.Entities
         public decimal RatingValue { get; set; }
 
         public string Review { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
          public Account Account { get; set; }
