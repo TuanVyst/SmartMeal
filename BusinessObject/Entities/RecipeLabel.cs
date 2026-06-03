@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,6 +19,8 @@ namespace BusinessObject.Entities
 
         [ForeignKey("Recipe")]
         public Guid Recipe_Id { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual RecipeTag RecipeTag { get; set; }
