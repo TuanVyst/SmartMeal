@@ -16,12 +16,13 @@ namespace BusinessObject.Entities
         [ForeignKey("Account")]
         public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
         public string Status { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public ICollection<GroceryItem> GroceryItems { get; set; }
         public Account Account { get; set; }
-        // public Account Account { get; set; }
     }
 }
