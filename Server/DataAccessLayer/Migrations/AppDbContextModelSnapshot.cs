@@ -52,7 +52,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Account_id");
 
-                    b.ToTable("Account");
+                    b.ToTable("Account", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -87,7 +87,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Partner_id");
 
-                    b.ToTable("AffiliateProducts");
+                    b.ToTable("AffiliateProducts", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Allergy", b =>
@@ -117,7 +117,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Ingredient_id");
 
-                    b.ToTable("Allergies");
+                    b.ToTable("Allergies", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Collection", b =>
@@ -144,7 +144,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Account_id");
 
-                    b.ToTable("Collection");
+                    b.ToTable("Collection", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Comment", b =>
@@ -180,7 +180,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Post_id");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comment", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
@@ -229,7 +229,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Product_id");
 
-                    b.ToTable("GroceryItems");
+                    b.ToTable("GroceryItems", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryList", b =>
@@ -258,7 +258,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Account_id");
 
-                    b.ToTable("GroceryLists");
+                    b.ToTable("GroceryLists", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Ingredient", b =>
@@ -283,7 +283,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Ingredient_id");
 
-                    b.ToTable("Ingredients");
+                    b.ToTable("Ingredients", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.IngredientLabel", b =>
@@ -307,7 +307,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("It_id");
 
-                    b.ToTable("IngredientLabels");
+                    b.ToTable("IngredientLabels", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.IngredientTag", b =>
@@ -329,7 +329,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("It_id");
 
-                    b.ToTable("IngredientTags");
+                    b.ToTable("IngredientTags", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.NutritionalValue", b =>
@@ -349,7 +349,7 @@ namespace DataAccessLayer.Migrations
                     b.HasIndex("Ingredient_id")
                         .IsUnique();
 
-                    b.ToTable("NutritionalValues");
+                    b.ToTable("NutritionalValues", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Pantry", b =>
@@ -389,7 +389,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Ingredient_id");
 
-                    b.ToTable("Pantries");
+                    b.ToTable("Pantries", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Partner", b =>
@@ -422,7 +422,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Partner_id");
 
-                    b.ToTable("Partners");
+                    b.ToTable("Partners", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Plan", b =>
@@ -453,7 +453,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Plan_id");
 
-                    b.ToTable("Plan");
+                    b.ToTable("Plan", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Post", b =>
@@ -492,7 +492,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_id");
 
-                    b.ToTable("Post");
+                    b.ToTable("Post", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Rating", b =>
@@ -530,7 +530,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_id");
 
-                    b.ToTable("Ratings");
+                    b.ToTable("Ratings", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Recipe", b =>
@@ -580,7 +580,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Account_id");
 
-                    b.ToTable("Recipe");
+                    b.ToTable("Recipe", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.RecipeIngredient", b =>
@@ -608,7 +608,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_id");
 
-                    b.ToTable("RecipeIngredients");
+                    b.ToTable("RecipeIngredients", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.RecipeLabel", b =>
@@ -629,7 +629,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Rt_Id");
 
-                    b.ToTable("RecipeLabel");
+                    b.ToTable("RecipeLabel", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.RecipeTag", b =>
@@ -650,7 +650,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Rt_Id");
 
-                    b.ToTable("Recipe_tag");
+                    b.ToTable("Recipe_tag", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Report", b =>
@@ -680,7 +680,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Post_id");
 
-                    b.ToTable("Report");
+                    b.ToTable("Report", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.SavedRecipe", b =>
@@ -706,7 +706,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_Id");
 
-                    b.ToTable("SavedRecipe");
+                    b.ToTable("SavedRecipe", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Subscription", b =>
@@ -743,7 +743,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Plan_id");
 
-                    b.ToTable("Subscription");
+                    b.ToTable("Subscription", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.UserInformation", b =>
@@ -780,7 +780,7 @@ namespace DataAccessLayer.Migrations
                     b.HasIndex("Account_id")
                         .IsUnique();
 
-                    b.ToTable("UserInformation");
+                    b.ToTable("UserInformation", (string)null);
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
