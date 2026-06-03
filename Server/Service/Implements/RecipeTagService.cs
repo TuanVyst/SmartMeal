@@ -3,6 +3,7 @@ using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,62 +13,87 @@ namespace Service.Implements
 {
     public class RecipeTagService : IRecipeTagService
     {
-        private readonly IRecipeTagRepo _repo;
+        private readonly IRecipeTagRepo _recipeTagRepo;
+        private readonly ILogger<RecipeTagService> _logger;
 
-        public RecipeTagService(IRecipeTagRepo repo)
+        public RecipeTagService(IRecipeTagRepo recipeTagRepo, ILogger<RecipeTagService> logger)
         {
-            _repo = repo;
+            _recipeTagRepo = recipeTagRepo;
+            _logger = logger;
         }
 
-        public async Task<List<RecipeTagResponse>> GetAllRecipeTags()
+        public async Task<List<RecipeTagResponseDto>> GetAllRecipeTags()
         {
-            var list = await _repo.GetAllRecipeTags();
-            return list.Select(x => MapToResponse(x)).ToList();
+            var items = await _recipeTagRepo.GetAllRecipeTags();
+            return items.Select(MapToDto).ToList();
         }
 
-        public async Task<RecipeTagResponse?> GetRecipeTagById(Guid id)
+        public async Task<RecipeTagResponseDto?> GetRecipeTagById(Guid id)
         {
-            var item = await _repo.GetRecipeTagById(id);
-            if (item == null) return null;
-            return MapToResponse(item);
+            var item = await _recipeTagRepo.GetRecipeTagById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<RecipeTagResponse> CreateRecipeTag(RecipeTagRequest request)
+        public async Task<RecipeTagResponseDto> CreateRecipeTag(RecipeTagRequest request)
         {
-            var item = new RecipeTag
+            try
             {
-                Name = request.Name,
-                Type = request.Type
-            };
-            var created = await _repo.CreateRecipeTag(item);
-            return MapToResponse(created);
-        }
+                var newItem = new RecipeTag
+                {
+                    Rt_Id = Guid.NewGuid(),
+                    Name = request.Name,
+                    Type = request.Type,
+                    IsDeleted = false
+                };
 
-        public async Task<RecipeTagResponse> UpdateRecipeTag(Guid id, RecipeTagRequest request)
-        {
-            var existing = await _repo.GetRecipeTagById(id);
-            if (existing == null) throw new Exception("RecipeTag not found");
-
-            existing.Name = request.Name;
-            existing.Type = request.Type;
-
-            var updated = await _repo.UpdateRecipeTag(existing);
-            return MapToResponse(updated);
-        }
-
-        public async Task<RecipeTagResponse> DeleteRecipeTag(Guid id)
-        {
-            var deleted = await _repo.DeleteRecipeTag(id);
-            return MapToResponse(deleted);
-        }
-
-        private RecipeTagResponse MapToResponse(RecipeTag item)
-        {
-            return new RecipeTagResponse
+                var result = await _recipeTagRepo.CreateRecipeTag(newItem);
+                _logger.LogInformation("RecipeTag '{Rt_Id}' created successfully", newItem.Rt_Id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
             {
-                Rt_Id = item.Rt_Id,
-                Name = item.Name,
-                Type = item.Type
+                _logger.LogError(ex, "Error creating RecipeTag");
+                throw;
+            }
+        }
+
+        public async Task<RecipeTagResponseDto> UpdateRecipeTag(Guid id, RecipeTagRequest request)
+        {
+            try
+            {
+                var existingItem = await _recipeTagRepo.GetRecipeTagById(id);
+                if (existingItem == null)
+                    throw new KeyNotFoundException($"RecipeTag with id {id} not found");
+
+                existingItem.Name = request.Name;
+                existingItem.Type = request.Type;
+
+                var result = await _recipeTagRepo.UpdateRecipeTag(existingItem);
+                _logger.LogInformation("RecipeTag '{Rt_Id}' updated successfully", existingItem.Rt_Id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating RecipeTag '{Rt_Id}'", id);
+                throw;
+            }
+        }
+
+        public async Task<RecipeTagResponseDto> SoftDeleteRecipeTag(Guid id)
+        {
+            var result = await _recipeTagRepo.SoftDeleteRecipeTag(id);
+            return MapToDto(result);
+        }
+        
+        private RecipeTagResponseDto MapToDto(RecipeTag entity)
+        {
+            if (entity == null) return null;
+            return new RecipeTagResponseDto
+            {
+                Rt_Id = entity.Rt_Id,
+                Name = entity.Name,
+                Type = entity.Type,
+                IsDeleted = entity.IsDeleted
             };
         }
     }

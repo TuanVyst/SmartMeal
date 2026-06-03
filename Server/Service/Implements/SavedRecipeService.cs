@@ -3,6 +3,7 @@ using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,62 +13,87 @@ namespace Service.Implements
 {
     public class SavedRecipeService : ISavedRecipeService
     {
-        private readonly ISavedRecipeRepo _repo;
+        private readonly ISavedRecipeRepo _savedRecipeRepo;
+        private readonly ILogger<SavedRecipeService> _logger;
 
-        public SavedRecipeService(ISavedRecipeRepo repo)
+        public SavedRecipeService(ISavedRecipeRepo savedRecipeRepo, ILogger<SavedRecipeService> logger)
         {
-            _repo = repo;
+            _savedRecipeRepo = savedRecipeRepo;
+            _logger = logger;
         }
 
-        public async Task<List<SavedRecipeResponse>> GetAllSavedRecipes()
+        public async Task<List<SavedRecipeResponseDto>> GetAllSavedRecipes()
         {
-            var list = await _repo.GetAllSavedRecipes();
-            return list.Select(x => MapToResponse(x)).ToList();
+            var items = await _savedRecipeRepo.GetAllSavedRecipes();
+            return items.Select(MapToDto).ToList();
         }
 
-        public async Task<SavedRecipeResponse?> GetSavedRecipeById(Guid id)
+        public async Task<SavedRecipeResponseDto?> GetSavedRecipeById(Guid id)
         {
-            var item = await _repo.GetSavedRecipeById(id);
-            if (item == null) return null;
-            return MapToResponse(item);
+            var item = await _savedRecipeRepo.GetSavedRecipeById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<SavedRecipeResponse> CreateSavedRecipe(SavedRecipeRequest request)
+        public async Task<SavedRecipeResponseDto> CreateSavedRecipe(SavedRecipeRequest request)
         {
-            var item = new SavedRecipe
+            try
             {
-                Collection_Id = request.Collection_Id,
-                Recipe_Id = request.Recipe_Id
-            };
-            var created = await _repo.CreateSavedRecipe(item);
-            return MapToResponse(created);
-        }
+                var newItem = new SavedRecipe
+                {
+                    Id = Guid.NewGuid(),
+                    Collection_Id = request.Collection_Id,
+                    Recipe_Id = request.Recipe_Id,
+                    IsDeleted = false
+                };
 
-        public async Task<SavedRecipeResponse> UpdateSavedRecipe(Guid id, SavedRecipeRequest request)
-        {
-            var existing = await _repo.GetSavedRecipeById(id);
-            if (existing == null) throw new Exception("SavedRecipe not found");
-
-            existing.Collection_Id = request.Collection_Id;
-            existing.Recipe_Id = request.Recipe_Id;
-
-            var updated = await _repo.UpdateSavedRecipe(existing);
-            return MapToResponse(updated);
-        }
-
-        public async Task<SavedRecipeResponse> DeleteSavedRecipe(Guid id)
-        {
-            var deleted = await _repo.DeleteSavedRecipe(id);
-            return MapToResponse(deleted);
-        }
-
-        private SavedRecipeResponse MapToResponse(SavedRecipe item)
-        {
-            return new SavedRecipeResponse
+                var result = await _savedRecipeRepo.CreateSavedRecipe(newItem);
+                _logger.LogInformation("SavedRecipe '{Id}' created successfully", newItem.Id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
             {
-                Id = item.Id,
-                Collection_Id = item.Collection_Id,
-                Recipe_Id = item.Recipe_Id
+                _logger.LogError(ex, "Error creating SavedRecipe");
+                throw;
+            }
+        }
+
+        public async Task<SavedRecipeResponseDto> UpdateSavedRecipe(Guid id, SavedRecipeRequest request)
+        {
+            try
+            {
+                var existingItem = await _savedRecipeRepo.GetSavedRecipeById(id);
+                if (existingItem == null)
+                    throw new KeyNotFoundException($"SavedRecipe with id {id} not found");
+
+                existingItem.Collection_Id = request.Collection_Id;
+                existingItem.Recipe_Id = request.Recipe_Id;
+
+                var result = await _savedRecipeRepo.UpdateSavedRecipe(existingItem);
+                _logger.LogInformation("SavedRecipe '{Id}' updated successfully", existingItem.Id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating SavedRecipe '{Saved_id}'", id);
+                throw;
+            }
+        }
+
+        public async Task<SavedRecipeResponseDto> SoftDeleteSavedRecipe(Guid id)
+        {
+            var result = await _savedRecipeRepo.SoftDeleteSavedRecipe(id);
+            return MapToDto(result);
+        }
+        
+        private SavedRecipeResponseDto MapToDto(SavedRecipe entity)
+        {
+            if (entity == null) return null;
+            return new SavedRecipeResponseDto
+            {
+                Saved_id = entity.Id,
+                Collection_id = entity.Collection_Id,
+                Recipe_id = entity.Recipe_Id,
+                IsDeleted = entity.IsDeleted
             };
         }
     }

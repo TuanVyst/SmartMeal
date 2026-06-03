@@ -11,6 +11,6 @@ namespace Repository.Interfaces
         Task<RecipeIngredient?> GetRecipeIngredientById(Guid id);
         Task<RecipeIngredient> CreateRecipeIngredient(RecipeIngredient recipeIngredient);
         Task<RecipeIngredient> UpdateRecipeIngredient(RecipeIngredient recipeIngredient);
-        Task<RecipeIngredient> DeleteRecipeIngredient(Guid id);
+        Task<RecipeIngredient> SoftDeleteRecipeIngredient(Guid id);
     }
 }

@@ -1,10 +1,9 @@
-using BusinessObject.Dtos.RequestModels;
-using BusinessObject.Dtos.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using BusinessObject.Dtos.RequestModels;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -13,93 +12,95 @@ namespace PresentationLayer.Controllers
     public class GroceryItemController : ControllerBase
     {
         private readonly IGroceryItemService _groceryItemService;
+        private readonly ILogger<GroceryItemController> _logger;
 
-        public GroceryItemController(IGroceryItemService groceryItemService)
+        public GroceryItemController(IGroceryItemService groceryItemService, ILogger<GroceryItemController> logger)
         {
             _groceryItemService = groceryItemService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GroceryItemResponse>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _groceryItemService.GetAllGroceryItems();
-            return Ok(result);
+            try
+            {
+                var items = await _groceryItemService.GetAllGroceryItems();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all groceryItems");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        [HttpGet("list/{listId:guid}")]
-        public async Task<ActionResult<IEnumerable<GroceryItemResponse>>> GetByListId(Guid listId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _groceryItemService.GetGroceryItemsByListId(listId);
-            return Ok(result);
-        }
+            try
+            {
+                var item = await _groceryItemService.GetGroceryItemById(id);
+                if (item == null)
+                    return NotFound(new { success = false, message = "GroceryItem not found" });
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<GroceryItemResponse>> GetById(Guid id)
-        {
-            var result = await _groceryItemService.GetGroceryItemById(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting groceryItem by id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<GroceryItemResponse>> Create([FromBody] GroceryItemRequest request, [FromQuery] Guid accountId)
+        public async Task<IActionResult> Create([FromBody] GroceryItemRequest request)
         {
             try
             {
-                var result = await _groceryItemService.CreateGroceryItem(request, accountId);
-                return CreatedAtAction(nameof(GetById), new { id = result.Item_id }, result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _groceryItemService.CreateGroceryItem(request);
+                return Ok(new { success = true, data = item });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error creating groceryItem");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<GroceryItemResponse>> Update(Guid id, [FromBody] GroceryItemUpdateRequest request, [FromQuery] Guid accountId)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] GroceryItemRequest request)
         {
             try
             {
-                var result = await _groceryItemService.UpdateGroceryItem(id, request, accountId);
-                return Ok(result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _groceryItemService.UpdateGroceryItem(id, request);
+                return Ok(new { success = true, data = item });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error updating groceryItem");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<GroceryItemResponse>> SoftDelete(Guid id, [FromQuery] Guid accountId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var result = await _groceryItemService.SoftDeleteGroceryItem(id, accountId);
-                return Ok(result);
+                var item = await _groceryItemService.SoftDeleteGroceryItem(id);
+                return Ok(new { success = true, message = "GroceryItem deleted successfully", data = item });
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error deleting groceryItem");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }

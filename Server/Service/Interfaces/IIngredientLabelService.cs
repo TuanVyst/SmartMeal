@@ -1,17 +1,17 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BusinessObject.Dtos.RequestModels;
 
 namespace Service.Interfaces
 {
     public interface IIngredientLabelService
     {
-        Task<List<IngredientLabel>> GetAllIngredientLabels();
-        Task<IngredientLabel?> GetIngredientLabelById(Guid id);
-        Task<IngredientLabel> CreateIngredientLabel(IngredientLabelRequest ingredientLabel);
-        Task<IngredientLabel> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel);
-        Task<IngredientLabel> SoftDeleteIngredientLabel(Guid id);
+        Task<List<IngredientLabelResponseDto>> GetAllIngredientLabels();
+        Task<IngredientLabelResponseDto?> GetIngredientLabelById(Guid id);
+        Task<IngredientLabelResponseDto> CreateIngredientLabel(IngredientLabelRequest ingredientLabel);
+        Task<IngredientLabelResponseDto> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel);
+        Task<IngredientLabelResponseDto> SoftDeleteIngredientLabel(Guid id);
     }
 }

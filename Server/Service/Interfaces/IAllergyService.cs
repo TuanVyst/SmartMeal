@@ -8,11 +8,10 @@ namespace Service.Interfaces
 {
     public interface IAllergyService
     {
-        Task<List<AllergyResponse>> GetAllAllergies();
-        Task<AllergyResponse?> GetAllergyById(Guid id);
-        Task<List<AllergyResponse>> GetAllergiesByAccountId(Guid accountId);
-        Task<AllergyResponse> CreateAllergy(AllergyRequest request, Guid accountId);
-        Task<AllergyResponse> UpdateAllergy(Guid id, AllergyRequest request, Guid accountId);
-        Task<AllergyResponse> SoftDeleteAllergy(Guid id, Guid accountId);
+        Task<List<AllergyResponseDto>> GetAllAllergies();
+        Task<AllergyResponseDto?> GetAllergyById(Guid id);
+        Task<AllergyResponseDto> CreateAllergy(AllergyRequest allergy);
+        Task<AllergyResponseDto> UpdateAllergy(Guid id, AllergyRequest allergy);
+        Task<AllergyResponseDto> SoftDeleteAllergy(Guid id);
     }
 }

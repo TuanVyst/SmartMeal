@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repository.Implements
@@ -11,7 +12,6 @@ namespace Repository.Implements
     public class SavedRecipeRepo : ISavedRecipeRepo
     {
         private readonly AppDbContext _ctx;
-        
         public SavedRecipeRepo(AppDbContext context)
         {
             _ctx = context;
@@ -19,13 +19,15 @@ namespace Repository.Implements
 
         public async Task<List<SavedRecipe>> GetAllSavedRecipes()
         {
-            return await _ctx.SavedRecipes.ToListAsync();
+            return await _ctx.SavedRecipes
+                .Where(i => i.IsDeleted == false)
+                .ToListAsync();
         }
 
         public async Task<SavedRecipe?> GetSavedRecipeById(Guid id)
-        {
-            return await _ctx.SavedRecipes.FindAsync(id);
-        }
+            => await _ctx.SavedRecipes
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Id == id);
 
         public async Task<SavedRecipe> CreateSavedRecipe(SavedRecipe savedRecipe)
         {
@@ -41,13 +43,13 @@ namespace Repository.Implements
             return savedRecipe;
         }
 
-        public async Task<SavedRecipe> DeleteSavedRecipe(Guid id)
+        public async Task<SavedRecipe> SoftDeleteSavedRecipe(Guid id)
         {
-            var savedRecipe = await _ctx.SavedRecipes.FindAsync(id);
+            var savedRecipe = _ctx.SavedRecipes.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Id == id);
             if (savedRecipe == null)
                 throw new Exception("SavedRecipe not found");
-                
-            _ctx.SavedRecipes.Remove(savedRecipe);
+            savedRecipe.IsDeleted = true;
+            _ctx.SavedRecipes.Update(savedRecipe);
             await _ctx.SaveChangesAsync();
             return savedRecipe;
         }

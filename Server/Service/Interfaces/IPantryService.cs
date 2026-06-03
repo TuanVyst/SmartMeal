@@ -8,13 +8,10 @@ namespace Service.Interfaces
 {
     public interface IPantryService
     {
-        Task<List<PantryResponse>> GetAllPantries();
-        Task<PantryResponse?> GetPantryById(Guid id);
-        Task<List<PantryResponse>> GetPantriesByAccountId(Guid accountId);
-        Task<List<PantryResponse>> GetPantriesByIngredientId(Guid ingredientId);
-        Task<List<PantryResponse>> GetExpiringPantries(Guid accountId, int daysThreshold);
-        Task<PantryResponse> CreatePantry(PantryRequest request, Guid accountId);
-        Task<PantryResponse> UpdatePantry(Guid id, PantryUpdateRequest request, Guid accountId);
-        Task<PantryResponse> SoftDeletePantry(Guid id, Guid accountId);
+        Task<List<PantryResponseDto>> GetAllPantries();
+        Task<PantryResponseDto?> GetPantryById(Guid id);
+        Task<PantryResponseDto> CreatePantry(PantryRequest pantry);
+        Task<PantryResponseDto> UpdatePantry(Guid id, PantryRequest pantry);
+        Task<PantryResponseDto> SoftDeletePantry(Guid id);
     }
 }

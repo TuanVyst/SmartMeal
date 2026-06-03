@@ -20,51 +20,38 @@ namespace Repository.Implements
         public async Task<List<GroceryList>> GetAllGroceryLists()
         {
             return await _ctx.GroceryLists
-                .Include(g => g.GroceryItems)
-                .Include(g => g.Account)
-                .Where(g => g.IsDeleted == false)
+                .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
         public async Task<GroceryList?> GetGroceryListById(Guid id)
             => await _ctx.GroceryLists
-                .Include(g => g.GroceryItems)
-                .Include(g => g.Account)
-                .Where(g => !g.IsDeleted)
-                .FirstOrDefaultAsync(g => g.List_id == id);
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.List_id == id);
 
-        public async Task<List<GroceryList>> GetGroceryListsByAccountId(Guid accountId)
-            => await _ctx.GroceryLists
-                .Include(g => g.GroceryItems)
-                .Include(g => g.Account)
-                .Where(g => g.Account_id == accountId && g.IsDeleted == false)
-                .ToListAsync();
-
-        public async Task<GroceryList> CreateGroceryList(GroceryList list)
+        public async Task<GroceryList> CreateGroceryList(GroceryList groceryList)
         {
-            _ctx.GroceryLists.Add(list);
+            _ctx.GroceryLists.Add(groceryList);
             await _ctx.SaveChangesAsync();
-            return list;
+            return groceryList;
         }
 
-        public async Task<GroceryList> UpdateGroceryList(GroceryList list)
+        public async Task<GroceryList> UpdateGroceryList(GroceryList groceryList)
         {
-            _ctx.GroceryLists.Update(list);
+            _ctx.GroceryLists.Update(groceryList);
             await _ctx.SaveChangesAsync();
-            return list;
+            return groceryList;
         }
 
         public async Task<GroceryList> SoftDeleteGroceryList(Guid id)
         {
-            var existingList = await _ctx.GroceryLists
-                .Where(g => g.IsDeleted == false && g.List_id == id)
-                .FirstOrDefaultAsync();
-            if (existingList == null)
-                throw new KeyNotFoundException($"GroceryList with id {id} not found");
-            existingList.IsDeleted = true;
-            _ctx.GroceryLists.Update(existingList);
+            var groceryList = _ctx.GroceryLists.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.List_id == id);
+            if (groceryList == null)
+                throw new Exception("GroceryList not found");
+            groceryList.IsDeleted = true;
+            _ctx.GroceryLists.Update(groceryList);
             await _ctx.SaveChangesAsync();
-            return existingList;
+            return groceryList;
         }
     }
 }

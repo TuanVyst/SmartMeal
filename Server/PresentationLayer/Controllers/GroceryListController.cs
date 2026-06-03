@@ -1,10 +1,9 @@
-using BusinessObject.Dtos.RequestModels;
-using BusinessObject.Dtos.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using BusinessObject.Dtos.RequestModels;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -13,74 +12,95 @@ namespace PresentationLayer.Controllers
     public class GroceryListController : ControllerBase
     {
         private readonly IGroceryListService _groceryListService;
+        private readonly ILogger<GroceryListController> _logger;
 
-        public GroceryListController(IGroceryListService groceryListService)
+        public GroceryListController(IGroceryListService groceryListService, ILogger<GroceryListController> logger)
         {
             _groceryListService = groceryListService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GroceryListResponse>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _groceryListService.GetAllGroceryLists();
-            return Ok(result);
+            try
+            {
+                var items = await _groceryListService.GetAllGroceryLists();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all groceryLists");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        [HttpGet("account/{accountId:guid}")]
-        public async Task<ActionResult<IEnumerable<GroceryListResponse>>> GetByAccountId(Guid accountId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _groceryListService.GetGroceryListsByAccountId(accountId);
-            return Ok(result);
-        }
+            try
+            {
+                var item = await _groceryListService.GetGroceryListById(id);
+                if (item == null)
+                    return NotFound(new { success = false, message = "GroceryList not found" });
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<GroceryListResponse>> GetById(Guid id)
-        {
-            var result = await _groceryListService.GetGroceryListById(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting groceryList by id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<GroceryListResponse>> Create([FromBody] GroceryListRequest request, [FromQuery] Guid accountId)
-        {
-            var result = await _groceryListService.CreateGroceryList(request, accountId);
-            return CreatedAtAction(nameof(GetById), new { id = result.List_id }, result);
-        }
-
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<GroceryListResponse>> Update(Guid id, [FromBody] GroceryListUpdateRequest request, [FromQuery] Guid accountId)
+        public async Task<IActionResult> Create([FromBody] GroceryListRequest request)
         {
             try
             {
-                var result = await _groceryListService.UpdateGroceryList(id, request, accountId);
-                return Ok(result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _groceryListService.CreateGroceryList(request);
+                return Ok(new { success = true, data = item });
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error creating groceryList");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<GroceryListResponse>> SoftDelete(Guid id, [FromQuery] Guid accountId)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] GroceryListRequest request)
         {
             try
             {
-                var result = await _groceryListService.SoftDeleteGroceryList(id, accountId);
-                return Ok(result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _groceryListService.UpdateGroceryList(id, request);
+                return Ok(new { success = true, data = item });
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return NotFound();
+                _logger.LogError(ex, "Error updating groceryList");
+                return BadRequest(new { success = false, message = ex.Message });
             }
-            catch (UnauthorizedAccessException ex)
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
             {
-                return StatusCode(403, ex.Message);
+                var item = await _groceryListService.SoftDeleteGroceryList(id);
+                return Ok(new { success = true, message = "GroceryList deleted successfully", data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting groceryList");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }

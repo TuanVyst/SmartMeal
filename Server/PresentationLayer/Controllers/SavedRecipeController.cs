@@ -1,27 +1,38 @@
-using BusinessObject.Dtos.RequestModels;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class SavedRecipeController : ControllerBase
     {
-        private readonly ISavedRecipeService _service;
+        private readonly ISavedRecipeService _savedRecipeService;
+        private readonly ILogger<SavedRecipeController> _logger;
 
-        public SavedRecipeController(ISavedRecipeService service)
+        public SavedRecipeController(ISavedRecipeService savedRecipeService, ILogger<SavedRecipeController> logger)
         {
-            _service = service;
+            _savedRecipeService = savedRecipeService;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try { return Ok(await _service.GetAllSavedRecipes()); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            try
+            {
+                var items = await _savedRecipeService.GetAllSavedRecipes();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all savedRecipes");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
@@ -29,11 +40,17 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _service.GetSavedRecipeById(id);
-                if (item == null) return NotFound();
-                return Ok(item);
+                var item = await _savedRecipeService.GetSavedRecipeById(id);
+                if (item == null)
+                    return NotFound(new { success = false, message = "SavedRecipe not found" });
+
+                return Ok(new { success = true, data = item });
             }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting savedRecipe by id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -41,24 +58,50 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var created = await _service.CreateSavedRecipe(request);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _savedRecipeService.CreateSavedRecipe(request);
+                return Ok(new { success = true, data = item });
             }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating savedRecipe");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SavedRecipeRequest request)
         {
-            try { return Ok(await _service.UpdateSavedRecipe(id, request)); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _savedRecipeService.UpdateSavedRecipe(id, request);
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating savedRecipe");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            try { return Ok(await _service.DeleteSavedRecipe(id)); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            try
+            {
+                var item = await _savedRecipeService.SoftDeleteSavedRecipe(id);
+                return Ok(new { success = true, message = "SavedRecipe deleted successfully", data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting savedRecipe");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }

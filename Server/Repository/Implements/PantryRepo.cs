@@ -20,46 +20,14 @@ namespace Repository.Implements
         public async Task<List<Pantry>> GetAllPantries()
         {
             return await _ctx.Pantries
-                .Include(p => p.Account)
-                .Include(p => p.Ingredient)
-                .Where(p => p.IsDeleted == false)
+                .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
         public async Task<Pantry?> GetPantryById(Guid id)
             => await _ctx.Pantries
-                .Include(p => p.Account)
-                .Include(p => p.Ingredient)
-                .Where(p => !p.IsDeleted)
-                .FirstOrDefaultAsync(p => p.Pantry_id == id);
-
-        public async Task<List<Pantry>> GetPantriesByAccountId(Guid accountId)
-            => await _ctx.Pantries
-                .Include(p => p.Account)
-                .Include(p => p.Ingredient)
-                .Where(p => p.Account_id == accountId && p.IsDeleted == false)
-                .ToListAsync();
-
-        public async Task<List<Pantry>> GetPantriesByIngredientId(Guid ingredientId)
-            => await _ctx.Pantries
-                .Include(p => p.Account)
-                .Include(p => p.Ingredient)
-                .Where(p => p.Ingredient_id == ingredientId && p.IsDeleted == false)
-                .ToListAsync();
-
-        public async Task<Pantry?> GetPantryByAccountAndIngredient(Guid accountId, Guid ingredientId)
-            => await _ctx.Pantries
-                .Include(p => p.Account)
-                .Include(p => p.Ingredient)
-                .Where(p => p.Account_id == accountId && p.Ingredient_id == ingredientId && p.IsDeleted == false)
-                .FirstOrDefaultAsync();
-
-        public async Task<List<Pantry>> GetExpiringPantries(Guid accountId, DateTime thresholdDate)
-            => await _ctx.Pantries
-                .Include(p => p.Account)
-                .Include(p => p.Ingredient)
-                .Where(p => p.Account_id == accountId && p.ExpiryDate <= thresholdDate && p.IsDeleted == false)
-                .ToListAsync();
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Pantry_id == id);
 
         public async Task<Pantry> CreatePantry(Pantry pantry)
         {
@@ -77,15 +45,13 @@ namespace Repository.Implements
 
         public async Task<Pantry> SoftDeletePantry(Guid id)
         {
-            var existingPantry = await _ctx.Pantries
-                .Where(p => p.IsDeleted == false && p.Pantry_id == id)
-                .FirstOrDefaultAsync();
-            if (existingPantry == null)
-                throw new KeyNotFoundException($"Pantry with id {id} not found");
-            existingPantry.IsDeleted = true;
-            _ctx.Pantries.Update(existingPantry);
+            var pantry = _ctx.Pantries.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Pantry_id == id);
+            if (pantry == null)
+                throw new Exception("Pantry not found");
+            pantry.IsDeleted = true;
+            _ctx.Pantries.Update(pantry);
             await _ctx.SaveChangesAsync();
-            return existingPantry;
+            return pantry;
         }
     }
 }

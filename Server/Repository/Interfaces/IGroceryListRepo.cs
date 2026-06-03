@@ -9,9 +9,8 @@ namespace Repository.Interfaces
     {
         Task<List<GroceryList>> GetAllGroceryLists();
         Task<GroceryList?> GetGroceryListById(Guid id);
-        Task<List<GroceryList>> GetGroceryListsByAccountId(Guid accountId);
-        Task<GroceryList> CreateGroceryList(GroceryList list);
-        Task<GroceryList> UpdateGroceryList(GroceryList list);
+        Task<GroceryList> CreateGroceryList(GroceryList groceryList);
+        Task<GroceryList> UpdateGroceryList(GroceryList groceryList);
         Task<GroceryList> SoftDeleteGroceryList(Guid id);
     }
 }

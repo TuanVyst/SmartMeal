@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,6 +20,7 @@ namespace BusinessObject.Entities
         public DateTime? UpdatedAt { get; set; }
         public string Status { get; set; }
         public bool IsDeleted { get; set; } = false;
+
 
         // Navigation properties
         public ICollection<GroceryItem> GroceryItems { get; set; }

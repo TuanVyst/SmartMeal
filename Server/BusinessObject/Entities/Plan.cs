@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -34,6 +34,8 @@ namespace BusinessObject.Entities
         /// e.g. ["ai_basic","meal_plan","calorie_tracking"]
         /// </summary>
         public string Features { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual ICollection<Subscription> Subscriptions { get; set; }

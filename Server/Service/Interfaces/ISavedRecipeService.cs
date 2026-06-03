@@ -8,10 +8,10 @@ namespace Service.Interfaces
 {
     public interface ISavedRecipeService
     {
-        Task<List<SavedRecipeResponse>> GetAllSavedRecipes();
-        Task<SavedRecipeResponse?> GetSavedRecipeById(Guid id);
-        Task<SavedRecipeResponse> CreateSavedRecipe(SavedRecipeRequest request);
-        Task<SavedRecipeResponse> UpdateSavedRecipe(Guid id, SavedRecipeRequest request);
-        Task<SavedRecipeResponse> DeleteSavedRecipe(Guid id);
+        Task<List<SavedRecipeResponseDto>> GetAllSavedRecipes();
+        Task<SavedRecipeResponseDto?> GetSavedRecipeById(Guid id);
+        Task<SavedRecipeResponseDto> CreateSavedRecipe(SavedRecipeRequest savedRecipe);
+        Task<SavedRecipeResponseDto> UpdateSavedRecipe(Guid id, SavedRecipeRequest savedRecipe);
+        Task<SavedRecipeResponseDto> SoftDeleteSavedRecipe(Guid id);
     }
 }

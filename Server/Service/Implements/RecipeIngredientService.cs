@@ -3,6 +3,7 @@ using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,68 +13,93 @@ namespace Service.Implements
 {
     public class RecipeIngredientService : IRecipeIngredientService
     {
-        private readonly IRecipeIngredientRepo _repo;
+        private readonly IRecipeIngredientRepo _recipeIngredientRepo;
+        private readonly ILogger<RecipeIngredientService> _logger;
 
-        public RecipeIngredientService(IRecipeIngredientRepo repo)
+        public RecipeIngredientService(IRecipeIngredientRepo recipeIngredientRepo, ILogger<RecipeIngredientService> logger)
         {
-            _repo = repo;
+            _recipeIngredientRepo = recipeIngredientRepo;
+            _logger = logger;
         }
 
-        public async Task<List<RecipeIngredientResponse>> GetAllRecipeIngredients()
+        public async Task<List<RecipeIngredientResponseDto>> GetAllRecipeIngredients()
         {
-            var list = await _repo.GetAllRecipeIngredients();
-            return list.Select(x => MapToResponse(x)).ToList();
+            var recipeIngredients = await _recipeIngredientRepo.GetAllRecipeIngredients();
+            return recipeIngredients.Select(MapToDto).ToList();
         }
 
-        public async Task<RecipeIngredientResponse?> GetRecipeIngredientById(Guid id)
+        public async Task<RecipeIngredientResponseDto?> GetRecipeIngredientById(Guid id)
         {
-            var item = await _repo.GetRecipeIngredientById(id);
-            if (item == null) return null;
-            return MapToResponse(item);
+            var recipeIngredient = await _recipeIngredientRepo.GetRecipeIngredientById(id);
+            return recipeIngredient == null ? null : MapToDto(recipeIngredient);
         }
 
-        public async Task<RecipeIngredientResponse> CreateRecipeIngredient(RecipeIngredientRequest request)
+        public async Task<RecipeIngredientResponseDto> CreateRecipeIngredient(RecipeIngredientRequest request)
         {
-            var item = new RecipeIngredient
+            try
             {
-                Recipe_id = request.Recipe_id,
-                Ingredient_id = request.Ingredient_id,
-                Quantity = request.Quantity,
-                UOM = request.UOM
-            };
-            var created = await _repo.CreateRecipeIngredient(item);
-            return MapToResponse(created);
-        }
+                var newRecipeIngredient = new RecipeIngredient
+                {
+                    RI_id = Guid.NewGuid(),
+                    Recipe_id = request.Recipe_id,
+                    Ingredient_id = request.Ingredient_id,
+                    Quantity = request.Quantity,
+                    UOM = request.UOM,
+                    IsDeleted = false
+                };
 
-        public async Task<RecipeIngredientResponse> UpdateRecipeIngredient(Guid id, RecipeIngredientRequest request)
-        {
-            var existing = await _repo.GetRecipeIngredientById(id);
-            if (existing == null) throw new Exception("RecipeIngredient not found");
-
-            existing.Recipe_id = request.Recipe_id;
-            existing.Ingredient_id = request.Ingredient_id;
-            existing.Quantity = request.Quantity;
-            existing.UOM = request.UOM;
-
-            var updated = await _repo.UpdateRecipeIngredient(existing);
-            return MapToResponse(updated);
-        }
-
-        public async Task<RecipeIngredientResponse> DeleteRecipeIngredient(Guid id)
-        {
-            var deleted = await _repo.DeleteRecipeIngredient(id);
-            return MapToResponse(deleted);
-        }
-
-        private RecipeIngredientResponse MapToResponse(RecipeIngredient item)
-        {
-            return new RecipeIngredientResponse
+                var result = await _recipeIngredientRepo.CreateRecipeIngredient(newRecipeIngredient);
+                _logger.LogInformation("RecipeIngredient '{RI_id}' created successfully", newRecipeIngredient.RI_id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
             {
-                RI_id = item.RI_id,
-                Recipe_id = item.Recipe_id,
-                Ingredient_id = item.Ingredient_id,
-                Quantity = item.Quantity,
-                UOM = item.UOM
+                _logger.LogError(ex, "Error creating RecipeIngredient");
+                throw;
+            }
+        }
+
+        public async Task<RecipeIngredientResponseDto> UpdateRecipeIngredient(Guid id, RecipeIngredientRequest request)
+        {
+            try
+            {
+                var existingItem = await _recipeIngredientRepo.GetRecipeIngredientById(id);
+                if (existingItem == null)
+                    throw new KeyNotFoundException($"RecipeIngredient with id {id} not found");
+
+                existingItem.Recipe_id = request.Recipe_id;
+                existingItem.Ingredient_id = request.Ingredient_id;
+                existingItem.Quantity = request.Quantity;
+                existingItem.UOM = request.UOM;
+
+                var result = await _recipeIngredientRepo.UpdateRecipeIngredient(existingItem);
+                _logger.LogInformation("RecipeIngredient '{RI_id}' updated successfully", existingItem.RI_id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating RecipeIngredient '{RI_id}'", id);
+                throw;
+            }
+        }
+
+        public async Task<RecipeIngredientResponseDto> SoftDeleteRecipeIngredient(Guid id)
+        {
+            var result = await _recipeIngredientRepo.SoftDeleteRecipeIngredient(id);
+            return MapToDto(result);
+        }
+        
+        private RecipeIngredientResponseDto MapToDto(RecipeIngredient entity)
+        {
+            if (entity == null) return null;
+            return new RecipeIngredientResponseDto
+            {
+                RI_id = entity.RI_id,
+                Recipe_id = entity.Recipe_id,
+                Ingredient_id = entity.Ingredient_id,
+                Quantity = entity.Quantity,
+                UOM = entity.UOM,
+                IsDeleted = entity.IsDeleted
             };
         }
     }

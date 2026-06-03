@@ -1,11 +1,13 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using BusinessObject.Dtos.RequestModels;
 
 namespace Service.Implements
 {
@@ -20,78 +22,79 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<IngredientTag>> GetAllIngredientTags()
+        public async Task<List<IngredientTagResponseDto>> GetAllIngredientTags()
         {
-            return await _ingredientTagRepo.GetAllIngredientTags();
+            var items = await _ingredientTagRepo.GetAllIngredientTags();
+            return items.Select(MapToDto).ToList();
         }
 
-        public async Task<IngredientTag?> GetIngredientTagById(Guid id)
+        public async Task<IngredientTagResponseDto?> GetIngredientTagById(Guid id)
         {
-            return await _ingredientTagRepo.GetIngredientTagById(id);
+            var item = await _ingredientTagRepo.GetIngredientTagById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<IngredientTag> CreateIngredientTag(IngredientTagRequest ingredientTag)
+        public async Task<IngredientTagResponseDto> CreateIngredientTag(IngredientTagRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(ingredientTag.Name))
-                    throw new ArgumentException("Name is required", nameof(ingredientTag.Name));
-                if (ingredientTag.Name.Length > 256)
-                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(ingredientTag.Name));
-                if (string.IsNullOrWhiteSpace(ingredientTag.Category))
-                    throw new ArgumentException("Category is required", nameof(ingredientTag.Category));
-                
-                var newIngredientTag = new IngredientTag
+                var newItem = new IngredientTag
                 {
                     It_id = Guid.NewGuid(),
-                    Name = ingredientTag.Name,
-                    Category = ingredientTag.Category,
+                    Name = request.Name,
+                    Category = request.Category,
                     IsDeleted = false
                 };
 
-                var result = await _ingredientTagRepo.CreateIngredientTag(newIngredientTag);
-                _logger.LogInformation("IngredientTag '{It_id}' ({Name}) created successfully", newIngredientTag.It_id, newIngredientTag.Name);
-                return result ?? throw new InvalidOperationException("Failed to add ingredient tag to database");
+                var result = await _ingredientTagRepo.CreateIngredientTag(newItem);
+                _logger.LogInformation("IngredientTag '{It_id}' created successfully", newItem.It_id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding ingredient tag");
+                _logger.LogError(ex, "Error creating IngredientTag");
                 throw;
             }
         }
 
-        public async Task<IngredientTag> UpdateIngredientTag(Guid id, IngredientTagRequest ingredientTag)
+        public async Task<IngredientTagResponseDto> UpdateIngredientTag(Guid id, IngredientTagRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(ingredientTag.Name))
-                    throw new ArgumentException("Name is required", nameof(ingredientTag.Name));
-                if (ingredientTag.Name.Length > 256)
-                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(ingredientTag.Name));
-                if (string.IsNullOrWhiteSpace(ingredientTag.Category))
-                    throw new ArgumentException("Category is required", nameof(ingredientTag.Category));
-                
-                var existingIngredientTag = await _ingredientTagRepo.GetIngredientTagById(id);
-                if (existingIngredientTag == null)
+                var existingItem = await _ingredientTagRepo.GetIngredientTagById(id);
+                if (existingItem == null)
                     throw new KeyNotFoundException($"IngredientTag with id {id} not found");
 
-                existingIngredientTag.Name = ingredientTag.Name;
-                existingIngredientTag.Category = ingredientTag.Category;
+                existingItem.Name = request.Name;
+                existingItem.Category = request.Category;
 
-                var result = await _ingredientTagRepo.UpdateIngredientTag(existingIngredientTag);
-                _logger.LogInformation("IngredientTag '{It_id}' updated successfully", existingIngredientTag.It_id);
-                return result;
+                var result = await _ingredientTagRepo.UpdateIngredientTag(existingItem);
+                _logger.LogInformation("IngredientTag '{It_id}' updated successfully", existingItem.It_id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating ingredient tag '{It_id}'", id);
+                _logger.LogError(ex, "Error updating IngredientTag '{It_id}'", id);
                 throw;
             }
         }
 
-        public async Task<IngredientTag> SoftDeleteIngredientTag(Guid id)
+        public async Task<IngredientTagResponseDto> SoftDeleteIngredientTag(Guid id)
         {
-            return await _ingredientTagRepo.SoftDeleteIngredientTag(id);
+            var result = await _ingredientTagRepo.SoftDeleteIngredientTag(id);
+            return MapToDto(result);
+        }
+        
+        private IngredientTagResponseDto MapToDto(IngredientTag entity)
+        {
+            if (entity == null) return null;
+            return new IngredientTagResponseDto
+            {
+                Tag_id = entity.It_id,
+                Name = entity.Name,
+                Category = entity.Category,
+                IsDeleted = entity.IsDeleted
+            };
         }
     }
 }

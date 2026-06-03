@@ -1,27 +1,38 @@
-using BusinessObject.Dtos.RequestModels;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class RecipeIngredientController : ControllerBase
     {
-        private readonly IRecipeIngredientService _service;
+        private readonly IRecipeIngredientService _recipeIngredientService;
+        private readonly ILogger<RecipeIngredientController> _logger;
 
-        public RecipeIngredientController(IRecipeIngredientService service)
+        public RecipeIngredientController(IRecipeIngredientService recipeIngredientService, ILogger<RecipeIngredientController> logger)
         {
-            _service = service;
+            _recipeIngredientService = recipeIngredientService;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try { return Ok(await _service.GetAllRecipeIngredients()); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            try
+            {
+                var items = await _recipeIngredientService.GetAllRecipeIngredients();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all recipeIngredients");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
@@ -29,11 +40,17 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _service.GetRecipeIngredientById(id);
-                if (item == null) return NotFound();
-                return Ok(item);
+                var item = await _recipeIngredientService.GetRecipeIngredientById(id);
+                if (item == null)
+                    return NotFound(new { success = false, message = "RecipeIngredient not found" });
+
+                return Ok(new { success = true, data = item });
             }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recipeIngredient by id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -41,24 +58,50 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var created = await _service.CreateRecipeIngredient(request);
-                return CreatedAtAction(nameof(GetById), new { id = created.RI_id }, created);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _recipeIngredientService.CreateRecipeIngredient(request);
+                return Ok(new { success = true, data = item });
             }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating recipeIngredient");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientRequest request)
         {
-            try { return Ok(await _service.UpdateRecipeIngredient(id, request)); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _recipeIngredientService.UpdateRecipeIngredient(id, request);
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating recipeIngredient");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            try { return Ok(await _service.DeleteRecipeIngredient(id)); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            try
+            {
+                var item = await _recipeIngredientService.SoftDeleteRecipeIngredient(id);
+                return Ok(new { success = true, message = "RecipeIngredient deleted successfully", data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting recipeIngredient");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }
