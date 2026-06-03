@@ -3,6 +3,7 @@ using Service.Interfaces;
 using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -19,48 +20,39 @@ namespace PresentationLayer.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả các nhãn nguyên liệu
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             try
             {
-                var ingredientLabels = await _ingredientLabelService.GetAllIngredientLabels();
-                return Ok(new { success = true, data = ingredientLabels });
+                var items = await _ingredientLabelService.GetAllIngredientLabels();
+                return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all ingredient labels");
+                _logger.LogError(ex, "Error getting all ingredientLabels");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Lấy nhãn nguyên liệu theo ID
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
-                var ingredientLabel = await _ingredientLabelService.GetIngredientLabelById(id);
-                if (ingredientLabel == null)
+                var item = await _ingredientLabelService.GetIngredientLabelById(id);
+                if (item == null)
                     return NotFound(new { success = false, message = "IngredientLabel not found" });
 
-                return Ok(new { success = true, data = ingredientLabel });
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting ingredient label by id");
+                _logger.LogError(ex, "Error getting ingredientLabel by id");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Tạo nhãn nguyên liệu mới
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] IngredientLabelRequest request)
         {
@@ -69,19 +61,16 @@ namespace PresentationLayer.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var ingredientLabel = await _ingredientLabelService.CreateIngredientLabel(request);
-                return CreatedAtAction(nameof(GetById), new { id = ingredientLabel.Label_id }, new { success = true, data = ingredientLabel });
+                var item = await _ingredientLabelService.CreateIngredientLabel(request);
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating ingredient label");
+                _logger.LogError(ex, "Error creating ingredientLabel");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Cập nhật nhãn nguyên liệu
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] IngredientLabelRequest request)
         {
@@ -90,33 +79,29 @@ namespace PresentationLayer.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var ingredientLabel = await _ingredientLabelService.UpdateIngredientLabel(id, request);
-                return Ok(new { success = true, data = ingredientLabel });
+                var item = await _ingredientLabelService.UpdateIngredientLabel(id, request);
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating ingredient label");
+                _logger.LogError(ex, "Error updating ingredientLabel");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Xóa mềm nhãn nguyên liệu
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var ingredientLabel = await _ingredientLabelService.SoftDeleteIngredientLabel(id);
-                return Ok(new { success = true, message = "IngredientLabel deleted successfully", data = ingredientLabel });
+                var item = await _ingredientLabelService.SoftDeleteIngredientLabel(id);
+                return Ok(new { success = true, message = "IngredientLabel deleted successfully", data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting ingredient label");
+                _logger.LogError(ex, "Error deleting ingredientLabel");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }
 }
-

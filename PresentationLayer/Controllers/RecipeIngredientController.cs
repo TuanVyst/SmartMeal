@@ -9,14 +9,14 @@ namespace PresentationLayer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class IngredientTagController : ControllerBase
+    public class RecipeIngredientController : ControllerBase
     {
-        private readonly IIngredientTagService _ingredientTagService;
-        private readonly ILogger<IngredientTagController> _logger;
+        private readonly IRecipeIngredientService _recipeIngredientService;
+        private readonly ILogger<RecipeIngredientController> _logger;
 
-        public IngredientTagController(IIngredientTagService ingredientTagService, ILogger<IngredientTagController> logger)
+        public RecipeIngredientController(IRecipeIngredientService recipeIngredientService, ILogger<RecipeIngredientController> logger)
         {
-            _ingredientTagService = ingredientTagService;
+            _recipeIngredientService = recipeIngredientService;
             _logger = logger;
         }
 
@@ -25,12 +25,12 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var items = await _ingredientTagService.GetAllIngredientTags();
+                var items = await _recipeIngredientService.GetAllRecipeIngredients();
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all ingredientTags");
+                _logger.LogError(ex, "Error getting all recipeIngredients");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
@@ -40,51 +40,51 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _ingredientTagService.GetIngredientTagById(id);
+                var item = await _recipeIngredientService.GetRecipeIngredientById(id);
                 if (item == null)
-                    return NotFound(new { success = false, message = "IngredientTag not found" });
+                    return NotFound(new { success = false, message = "RecipeIngredient not found" });
 
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting ingredientTag by id");
+                _logger.LogError(ex, "Error getting recipeIngredient by id");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] IngredientTagRequest request)
+        public async Task<IActionResult> Create([FromBody] RecipeIngredientRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var item = await _ingredientTagService.CreateIngredientTag(request);
+                var item = await _recipeIngredientService.CreateRecipeIngredient(request);
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating ingredientTag");
+                _logger.LogError(ex, "Error creating recipeIngredient");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] IngredientTagRequest request)
+        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeIngredientRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var item = await _ingredientTagService.UpdateIngredientTag(id, request);
+                var item = await _recipeIngredientService.UpdateRecipeIngredient(id, request);
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating ingredientTag");
+                _logger.LogError(ex, "Error updating recipeIngredient");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
@@ -94,12 +94,12 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _ingredientTagService.SoftDeleteIngredientTag(id);
-                return Ok(new { success = true, message = "IngredientTag deleted successfully", data = item });
+                var item = await _recipeIngredientService.SoftDeleteRecipeIngredient(id);
+                return Ok(new { success = true, message = "RecipeIngredient deleted successfully", data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting ingredientTag");
+                _logger.LogError(ex, "Error deleting recipeIngredient");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
