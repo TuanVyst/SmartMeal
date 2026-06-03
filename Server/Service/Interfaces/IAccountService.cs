@@ -1,3 +1,5 @@
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 
 namespace Service.Interfaces
@@ -5,9 +7,11 @@ namespace Service.Interfaces
     public interface IAccountService
     {
         Task<List<Account>> GetAllAccounts();
-        Task<Account> GetAccountById(int id);
+        Task<Account> GetAccountById(Guid id);
         Task<Account> AddAccount(Account account);
         Task<Account> UpdateAccount(Account account);
-        Task DeleteAccount(int id);
+        Task DeleteAccount(Guid id);
+        Task<AuthResponseDto> Login(LoginRequest request);
+        Task<AuthResponseDto> Register(RegisterRequest request);
     }
 }

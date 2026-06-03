@@ -7,9 +7,10 @@ namespace Repository.Interfaces
     public interface IAccountRepo
     {
         Task<List<Account>> GetAllAccounts();
-        Task<Account> GetAccountById(int id);
+        Task<Account> GetAccountById(Guid id);
+        Task<Account> GetAccountByUsername(string username);
         Task<Account> AddAccount(Account account);
         Task<Account> UpdateAccount(Account account);
-        Task DeleteAccount(int id);
+        Task DeleteAccount(Guid id);
     }
 }

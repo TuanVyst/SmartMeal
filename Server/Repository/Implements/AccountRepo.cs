@@ -21,7 +21,7 @@ namespace Repository.Implements
             return account;
         }
 
-        public async Task DeleteAccount(int id)
+        public async Task DeleteAccount(Guid id)
         {
             var account = await _context.Accounts.FindAsync(id);
             if (account != null)
@@ -31,9 +31,14 @@ namespace Repository.Implements
             }
         }
 
-        public async Task<Account> GetAccountById(int id)
+        public async Task<Account> GetAccountById(Guid id)
         {
             return await _context.Accounts.FindAsync(id);
+        }
+
+        public async Task<Account> GetAccountByUsername(string username)
+        {
+            return await _context.Accounts.FirstOrDefaultAsync(a => a.Username == username);
         }
 
         public async Task<List<Account>> GetAllAccounts()
