@@ -21,7 +21,6 @@ namespace BusinessObject.Entities
         public string Status { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public ICollection<GroceryItem> GroceryItems { get; set; }

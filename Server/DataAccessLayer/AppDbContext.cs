@@ -37,7 +37,7 @@ namespace DataAccessLayer
         public DbSet<Allergy> Allergies { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<Allergy> Allergies { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

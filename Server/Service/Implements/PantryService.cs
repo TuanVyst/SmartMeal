@@ -46,7 +46,7 @@ namespace Service.Implements
                     Quantity = request.Quantity,
                     Unit = request.Unit,
                     ExpiryDate = request.ExpiryDate,
-                    AddedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     IsDeleted = false
                 };
@@ -105,7 +105,7 @@ namespace Service.Implements
                 Quantity = entity.Quantity,
                 Unit = entity.Unit,
                 ExpiryDate = entity.ExpiryDate,
-                AddedAt = entity.AddedAt,
+                AddedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt,
                 IsDeleted = entity.IsDeleted
             };

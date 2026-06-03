@@ -27,7 +27,6 @@ namespace BusinessObject.Entities
         public DateTime UpdatedAt { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
          public Ingredient Ingredient { get; set; }

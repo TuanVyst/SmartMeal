@@ -32,7 +32,6 @@ namespace BusinessObject.Entities
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; } = false;
 
-        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public GroceryList GroceryList { get; set; }
