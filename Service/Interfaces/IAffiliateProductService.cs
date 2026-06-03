@@ -1,9 +1,8 @@
-﻿﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BusinessObject.Dtos.RequestModels;
-using BusinessObject.Dtos.ResponseModels;
 
 namespace Service.Interfaces
 {

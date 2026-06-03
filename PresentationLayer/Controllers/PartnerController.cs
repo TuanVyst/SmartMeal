@@ -3,6 +3,7 @@ using Service.Interfaces;
 using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -19,16 +20,13 @@ namespace PresentationLayer.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả các đối tác
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             try
             {
-                var partners = await _partnerService.GetAllPartners();
-                return Ok(new { success = true, data = partners });
+                var items = await _partnerService.GetAllPartners();
+                return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
             {
@@ -37,19 +35,16 @@ namespace PresentationLayer.Controllers
             }
         }
 
-        /// <summary>
-        /// Lấy đối tác theo ID
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
-                var partner = await _partnerService.GetPartnerById(id);
-                if (partner == null)
+                var item = await _partnerService.GetPartnerById(id);
+                if (item == null)
                     return NotFound(new { success = false, message = "Partner not found" });
 
-                return Ok(new { success = true, data = partner });
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
@@ -58,9 +53,6 @@ namespace PresentationLayer.Controllers
             }
         }
 
-        /// <summary>
-        /// Tạo đối tác mới
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] PartnerRequest request)
         {
@@ -69,8 +61,8 @@ namespace PresentationLayer.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var partner = await _partnerService.CreatePartner(request);
-                return CreatedAtAction(nameof(GetById), new { id = partner.Partner_id }, new { success = true, data = partner });
+                var item = await _partnerService.CreatePartner(request);
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
@@ -79,9 +71,6 @@ namespace PresentationLayer.Controllers
             }
         }
 
-        /// <summary>
-        /// Cập nhật đối tác
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] PartnerRequest request)
         {
@@ -90,8 +79,8 @@ namespace PresentationLayer.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var partner = await _partnerService.UpdatePartner(id, request);
-                return Ok(new { success = true, data = partner });
+                var item = await _partnerService.UpdatePartner(id, request);
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
@@ -100,16 +89,13 @@ namespace PresentationLayer.Controllers
             }
         }
 
-        /// <summary>
-        /// Xóa mềm đối tác
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var partner = await _partnerService.SoftDeletePartner(id);
-                return Ok(new { success = true, message = "Partner deleted successfully", data = partner });
+                var item = await _partnerService.SoftDeletePartner(id);
+                return Ok(new { success = true, message = "Partner deleted successfully", data = item });
             }
             catch (Exception ex)
             {
@@ -119,4 +105,3 @@ namespace PresentationLayer.Controllers
         }
     }
 }
-

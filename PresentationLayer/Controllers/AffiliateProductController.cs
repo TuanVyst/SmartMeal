@@ -3,6 +3,7 @@ using Service.Interfaces;
 using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -19,48 +20,39 @@ namespace PresentationLayer.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả sản phẩm liên kết
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             try
             {
-                var affiliateProducts = await _affiliateProductService.GetAllAffiliateProducts();
-                return Ok(new { success = true, data = affiliateProducts });
+                var items = await _affiliateProductService.GetAllAffiliateProducts();
+                return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all affiliate products");
+                _logger.LogError(ex, "Error getting all affiliateProducts");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Lấy sản phẩm liên kết theo ID
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
             {
-                var affiliateProduct = await _affiliateProductService.GetAffiliateProductById(id);
-                if (affiliateProduct == null)
+                var item = await _affiliateProductService.GetAffiliateProductById(id);
+                if (item == null)
                     return NotFound(new { success = false, message = "AffiliateProduct not found" });
 
-                return Ok(new { success = true, data = affiliateProduct });
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting affiliate product by id");
+                _logger.LogError(ex, "Error getting affiliateProduct by id");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Tạo sản phẩm liên kết mới
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AffiliateProductRequest request)
         {
@@ -69,19 +61,16 @@ namespace PresentationLayer.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var affiliateProduct = await _affiliateProductService.CreateAffiliateProduct(request);
-                return CreatedAtAction(nameof(GetById), new { id = affiliateProduct.Product_id }, new { success = true, data = affiliateProduct });
+                var item = await _affiliateProductService.CreateAffiliateProduct(request);
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating affiliate product");
+                _logger.LogError(ex, "Error creating affiliateProduct");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Cập nhật sản phẩm liên kết
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] AffiliateProductRequest request)
         {
@@ -90,33 +79,29 @@ namespace PresentationLayer.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var affiliateProduct = await _affiliateProductService.UpdateAffiliateProduct(id, request);
-                return Ok(new { success = true, data = affiliateProduct });
+                var item = await _affiliateProductService.UpdateAffiliateProduct(id, request);
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating affiliate product");
+                _logger.LogError(ex, "Error updating affiliateProduct");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Xóa mềm sản phẩm liên kết
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var affiliateProduct = await _affiliateProductService.SoftDeleteAffiliateProduct(id);
-                return Ok(new { success = true, message = "AffiliateProduct deleted successfully", data = affiliateProduct });
+                var item = await _affiliateProductService.SoftDeleteAffiliateProduct(id);
+                return Ok(new { success = true, message = "AffiliateProduct deleted successfully", data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting affiliate product");
+                _logger.LogError(ex, "Error deleting affiliateProduct");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }
 }
-

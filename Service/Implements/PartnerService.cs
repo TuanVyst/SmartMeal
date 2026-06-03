@@ -1,13 +1,13 @@
-﻿﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using BusinessObject.Dtos.RequestModels;
-using BusinessObject.Dtos.ResponseModels;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Service.Implements
 {
@@ -24,76 +24,62 @@ namespace Service.Implements
 
         public async Task<List<PartnerResponseDto>> GetAllPartners()
         {
-            var partners = await _partnerRepo.GetAllPartners();
-            return partners.Select(MapToDto).ToList();
+            var items = await _partnerRepo.GetAllPartners();
+            return items.Select(MapToDto).ToList();
         }
 
         public async Task<PartnerResponseDto?> GetPartnerById(Guid id)
         {
-            var partner = await _partnerRepo.GetPartnerById(id);
-            return partner == null ? null : MapToDto(partner);
+            var item = await _partnerRepo.GetPartnerById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<PartnerResponseDto> CreatePartner(PartnerRequest partner)
+        public async Task<PartnerResponseDto> CreatePartner(PartnerRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(partner.Name))
-                    throw new ArgumentException("Name is required", nameof(partner.Name));
-                if (partner.Name.Length > 256)
-                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(partner.Name));
-                if (string.IsNullOrWhiteSpace(partner.Address))
-                    throw new ArgumentException("Address is required", nameof(partner.Address));
-                
-                var newPartner = new Partner
+                var newItem = new Partner
                 {
                     Partner_id = Guid.NewGuid(),
-                    Name = partner.Name,
-                    Address = partner.Address,
-                    Image = partner.Image,
-                    Website = partner.Website,
+                    Name = request.Name,
+                    Address = request.Address,
+                    Image = request.Image,
+                    Website = request.Website,
                     IsActive = true,
                     IsDeleted = false
                 };
 
-                var result = await _partnerRepo.CreatePartner(newPartner);
-                _logger.LogInformation("Partner '{PartnerId}' ({Name}) created successfully", newPartner.Partner_id, newPartner.Name);
-                return MapToDto(result ?? throw new InvalidOperationException("Failed to add partner to database"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding partner");
-                throw;
-            }
-        }
-
-        public async Task<PartnerResponseDto> UpdatePartner(Guid id, PartnerRequest partner)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(partner.Name))
-                    throw new ArgumentException("Name is required", nameof(partner.Name));
-                if (partner.Name.Length > 256)
-                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(partner.Name));
-                if (string.IsNullOrWhiteSpace(partner.Address))
-                    throw new ArgumentException("Address is required", nameof(partner.Address));
-                
-                var existingPartner = await _partnerRepo.GetPartnerById(id);
-                if (existingPartner == null)
-                    throw new KeyNotFoundException($"Partner with id {id} not found");
-
-                existingPartner.Name = partner.Name;
-                existingPartner.Address = partner.Address;
-                existingPartner.Image = partner.Image;
-                existingPartner.Website = partner.Website;
-
-                var result = await _partnerRepo.UpdatePartner(existingPartner);
-                _logger.LogInformation("Partner '{PartnerId}' updated successfully", existingPartner.Partner_id);
+                var result = await _partnerRepo.CreatePartner(newItem);
+                _logger.LogInformation("Partner '{Partner_id}' created successfully", newItem.Partner_id);
                 return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating partner '{PartnerId}'", id);
+                _logger.LogError(ex, "Error creating Partner");
+                throw;
+            }
+        }
+
+        public async Task<PartnerResponseDto> UpdatePartner(Guid id, PartnerRequest request)
+        {
+            try
+            {
+                var existingItem = await _partnerRepo.GetPartnerById(id);
+                if (existingItem == null)
+                    throw new KeyNotFoundException($"Partner with id {id} not found");
+
+                existingItem.Name = request.Name;
+                existingItem.Address = request.Address;
+                existingItem.Image = request.Image;
+                existingItem.Website = request.Website;
+
+                var result = await _partnerRepo.UpdatePartner(existingItem);
+                _logger.LogInformation("Partner '{Partner_id}' updated successfully", existingItem.Partner_id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating Partner '{Partner_id}'", id);
                 throw;
             }
         }
@@ -104,17 +90,18 @@ namespace Service.Implements
             return MapToDto(result);
         }
         
-        private PartnerResponseDto MapToDto(Partner partner)
+        private PartnerResponseDto MapToDto(Partner entity)
         {
+            if (entity == null) return null;
             return new PartnerResponseDto
             {
-                Partner_id = partner.Partner_id,
-                Name = partner.Name,
-                Address = partner.Address,
-                Image = partner.Image,
-                Website = partner.Website,
-                IsActive = partner.IsActive,
-                IsDeleted = partner.IsDeleted
+                Partner_id = entity.Partner_id,
+                Name = entity.Name,
+                Address = entity.Address,
+                Image = entity.Image,
+                Website = entity.Website,
+                IsActive = entity.IsActive,
+                IsDeleted = entity.IsDeleted
             };
         }
     }
