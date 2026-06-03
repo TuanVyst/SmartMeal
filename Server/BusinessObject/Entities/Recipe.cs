@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -41,6 +41,8 @@ namespace BusinessObject.Entities
         public bool IsPublic { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual Account Account { get; set; }

@@ -1,10 +1,9 @@
-using BusinessObject.Dtos.RequestModels;
-using BusinessObject.Dtos.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using BusinessObject.Dtos.RequestModels;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -13,89 +12,95 @@ namespace PresentationLayer.Controllers
     public class AllergyController : ControllerBase
     {
         private readonly IAllergyService _allergyService;
+        private readonly ILogger<AllergyController> _logger;
 
-        public AllergyController(IAllergyService allergyService)
+        public AllergyController(IAllergyService allergyService, ILogger<AllergyController> logger)
         {
             _allergyService = allergyService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AllergyResponse>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _allergyService.GetAllAllergies();
-            return Ok(result);
+            try
+            {
+                var items = await _allergyService.GetAllAllergies();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all allergys");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<AllergyResponse>> GetById(Guid id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _allergyService.GetAllergyById(id);
-            if (result == null) return NotFound();
-            return Ok(result);
-        }
+            try
+            {
+                var item = await _allergyService.GetAllergyById(id);
+                if (item == null)
+                    return NotFound(new { success = false, message = "Allergy not found" });
 
-        [HttpGet("account/{accountId:guid}")]
-        public async Task<ActionResult<IEnumerable<AllergyResponse>>> GetByAccountId(Guid accountId)
-        {
-            var result = await _allergyService.GetAllergiesByAccountId(accountId);
-            return Ok(result);
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting allergy by id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<AllergyResponse>> Create([FromBody] AllergyRequest request, [FromQuery] Guid accountId)
+        public async Task<IActionResult> Create([FromBody] AllergyRequest request)
         {
             try
             {
-                var result = await _allergyService.CreateAllergy(request, accountId);
-                return CreatedAtAction(nameof(GetById), new { id = result.Allergy_id }, result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _allergyService.CreateAllergy(request);
+                return Ok(new { success = true, data = item });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Error creating allergy");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<AllergyResponse>> Update(Guid id, [FromBody] AllergyRequest request, [FromQuery] Guid accountId)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] AllergyRequest request)
         {
             try
             {
-                var result = await _allergyService.UpdateAllergy(id, request, accountId);
-                return Ok(result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _allergyService.UpdateAllergy(id, request);
+                return Ok(new { success = true, data = item });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error updating allergy");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<AllergyResponse>> SoftDelete(Guid id, [FromQuery] Guid accountId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var result = await _allergyService.SoftDeleteAllergy(id, accountId);
-                return Ok(result);
+                var item = await _allergyService.SoftDeleteAllergy(id);
+                return Ok(new { success = true, message = "Allergy deleted successfully", data = item });
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error deleting allergy");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }

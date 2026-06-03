@@ -3,6 +3,7 @@ using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,62 +13,87 @@ namespace Service.Implements
 {
     public class RecipeLabelService : IRecipeLabelService
     {
-        private readonly IRecipeLabelRepo _repo;
+        private readonly IRecipeLabelRepo _recipeLabelRepo;
+        private readonly ILogger<RecipeLabelService> _logger;
 
-        public RecipeLabelService(IRecipeLabelRepo repo)
+        public RecipeLabelService(IRecipeLabelRepo recipeLabelRepo, ILogger<RecipeLabelService> logger)
         {
-            _repo = repo;
+            _recipeLabelRepo = recipeLabelRepo;
+            _logger = logger;
         }
 
-        public async Task<List<RecipeLabelResponse>> GetAllRecipeLabels()
+        public async Task<List<RecipeLabelResponseDto>> GetAllRecipeLabels()
         {
-            var list = await _repo.GetAllRecipeLabels();
-            return list.Select(x => MapToResponse(x)).ToList();
+            var items = await _recipeLabelRepo.GetAllRecipeLabels();
+            return items.Select(MapToDto).ToList();
         }
 
-        public async Task<RecipeLabelResponse?> GetRecipeLabelById(Guid id)
+        public async Task<RecipeLabelResponseDto?> GetRecipeLabelById(Guid id)
         {
-            var item = await _repo.GetRecipeLabelById(id);
-            if (item == null) return null;
-            return MapToResponse(item);
+            var item = await _recipeLabelRepo.GetRecipeLabelById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<RecipeLabelResponse> CreateRecipeLabel(RecipeLabelRequest request)
+        public async Task<RecipeLabelResponseDto> CreateRecipeLabel(RecipeLabelRequest request)
         {
-            var item = new RecipeLabel
+            try
             {
-                Rt_Id = request.Rt_Id,
-                Recipe_Id = request.Recipe_Id
-            };
-            var created = await _repo.CreateRecipeLabel(item);
-            return MapToResponse(created);
-        }
+                var newItem = new RecipeLabel
+                {
+                    Id = Guid.NewGuid(),
+                    Rt_Id = request.Rt_Id,
+                    Recipe_Id = request.Recipe_Id,
+                    IsDeleted = false
+                };
 
-        public async Task<RecipeLabelResponse> UpdateRecipeLabel(Guid id, RecipeLabelRequest request)
-        {
-            var existing = await _repo.GetRecipeLabelById(id);
-            if (existing == null) throw new Exception("RecipeLabel not found");
-
-            existing.Rt_Id = request.Rt_Id;
-            existing.Recipe_Id = request.Recipe_Id;
-
-            var updated = await _repo.UpdateRecipeLabel(existing);
-            return MapToResponse(updated);
-        }
-
-        public async Task<RecipeLabelResponse> DeleteRecipeLabel(Guid id)
-        {
-            var deleted = await _repo.DeleteRecipeLabel(id);
-            return MapToResponse(deleted);
-        }
-
-        private RecipeLabelResponse MapToResponse(RecipeLabel item)
-        {
-            return new RecipeLabelResponse
+                var result = await _recipeLabelRepo.CreateRecipeLabel(newItem);
+                _logger.LogInformation("RecipeLabel '{Id}' created successfully", newItem.Id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
             {
-                Id = item.Id,
-                Rt_Id = item.Rt_Id,
-                Recipe_Id = item.Recipe_Id
+                _logger.LogError(ex, "Error creating RecipeLabel");
+                throw;
+            }
+        }
+
+        public async Task<RecipeLabelResponseDto> UpdateRecipeLabel(Guid id, RecipeLabelRequest request)
+        {
+            try
+            {
+                var existingItem = await _recipeLabelRepo.GetRecipeLabelById(id);
+                if (existingItem == null)
+                    throw new KeyNotFoundException($"RecipeLabel with id {id} not found");
+
+                existingItem.Rt_Id = request.Rt_Id;
+                existingItem.Recipe_Id = request.Recipe_Id;
+
+                var result = await _recipeLabelRepo.UpdateRecipeLabel(existingItem);
+                _logger.LogInformation("RecipeLabel '{Id}' updated successfully", existingItem.Id);
+                return MapToDto(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating RecipeLabel '{Id}'", id);
+                throw;
+            }
+        }
+
+        public async Task<RecipeLabelResponseDto> SoftDeleteRecipeLabel(Guid id)
+        {
+            var result = await _recipeLabelRepo.SoftDeleteRecipeLabel(id);
+            return MapToDto(result);
+        }
+        
+        private RecipeLabelResponseDto MapToDto(RecipeLabel entity)
+        {
+            if (entity == null) return null;
+            return new RecipeLabelResponseDto
+            {
+                Id = entity.Id,
+                Rt_Id = entity.Rt_Id,
+                Recipe_Id = entity.Recipe_Id,
+                IsDeleted = entity.IsDeleted
             };
         }
     }

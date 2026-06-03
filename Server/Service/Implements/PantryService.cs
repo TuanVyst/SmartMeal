@@ -1,9 +1,9 @@
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
-using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Service.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,148 +22,92 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<PantryResponse>> GetAllPantries()
+        public async Task<List<PantryResponseDto>> GetAllPantries()
         {
             var pantries = await _pantryRepo.GetAllPantries();
-            return pantries.Select(MapToResponse).ToList();
+            return pantries.Select(MapToDto).ToList();
         }
 
-        public async Task<List<PantryResponse>> GetPantriesByAccountId(Guid accountId)
-        {
-            var pantries = await _pantryRepo.GetPantriesByAccountId(accountId);
-            return pantries.Select(MapToResponse).ToList();
-        }
-
-        public async Task<PantryResponse?> GetPantryById(Guid id)
+        public async Task<PantryResponseDto?> GetPantryById(Guid id)
         {
             var pantry = await _pantryRepo.GetPantryById(id);
-            if (pantry == null) return null;
-            return MapToResponse(pantry);
+            return pantry == null ? null : MapToDto(pantry);
         }
 
-        public async Task<List<PantryResponse>> GetPantriesByIngredientId(Guid ingredientId)
-        {
-            var pantries = await _pantryRepo.GetPantriesByIngredientId(ingredientId);
-            return pantries.Select(MapToResponse).ToList();
-        }
-
-        public async Task<List<PantryResponse>> GetExpiringPantries(Guid accountId, int daysThreshold)
-        {
-            var thresholdDate = DateTime.UtcNow.AddDays(daysThreshold);
-            var pantries = await _pantryRepo.GetExpiringPantries(accountId, thresholdDate);
-            return pantries.Select(MapToResponse).ToList();
-        }
-
-        public async Task<PantryResponse> CreatePantry(PantryRequest request, Guid accountId)
+        public async Task<PantryResponseDto> CreatePantry(PantryRequest request)
         {
             try
             {
-                if (request.Quantity <= 0)
-                    throw new ArgumentException("Quantity must be greater than 0", nameof(request.Quantity));
-
-                if (string.IsNullOrWhiteSpace(request.Unit))
-                    throw new ArgumentException("Unit must not be null or empty", nameof(request.Unit));
-
-                if (request.ExpiryDate <= DateTime.UtcNow)
-                    throw new ArgumentException("Expiry date must be in the future", nameof(request.ExpiryDate));
-
                 var newPantry = new Pantry
                 {
                     Pantry_id = Guid.NewGuid(),
-                    Account_id = accountId,
+                    Account_id = request.Account_id,
                     Ingredient_id = request.Ingredient_id,
                     Quantity = request.Quantity,
                     Unit = request.Unit,
-                    ExpiryDate = DateTime.SpecifyKind(request.ExpiryDate, DateTimeKind.Utc),
+                    ExpiryDate = request.ExpiryDate,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     IsDeleted = false
                 };
 
                 var result = await _pantryRepo.CreatePantry(newPantry);
-                _logger.LogInformation("Pantry '{PantryId}' created for Account '{AccountId}'", newPantry.Pantry_id, accountId);
-                return MapToResponse(result);
+                _logger.LogInformation("Pantry '{Pantry_id}' created successfully", newPantry.Pantry_id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating pantry for account '{AccountId}'", accountId);
+                _logger.LogError(ex, "Error creating Pantry");
                 throw;
             }
         }
 
-        public async Task<PantryResponse> UpdatePantry(Guid id, PantryUpdateRequest request, Guid accountId)
+        public async Task<PantryResponseDto> UpdatePantry(Guid id, PantryRequest request)
         {
             try
             {
-                if (request.Quantity <= 0)
-                    throw new ArgumentException("Quantity must be greater than 0", nameof(request.Quantity));
-
-                if (request.Unit != null && string.IsNullOrWhiteSpace(request.Unit))
-                    throw new ArgumentException("Unit must not be empty", nameof(request.Unit));
-
-                var existingPantry = await _pantryRepo.GetPantryById(id);
-                if (existingPantry == null)
+                var existingItem = await _pantryRepo.GetPantryById(id);
+                if (existingItem == null)
                     throw new KeyNotFoundException($"Pantry with id {id} not found");
 
-                if (existingPantry.Account_id != accountId)
-                    throw new UnauthorizedAccessException("You do not have permission to update this pantry");
+                existingItem.Account_id = request.Account_id;
+                existingItem.Ingredient_id = request.Ingredient_id;
+                existingItem.Quantity = request.Quantity;
+                existingItem.Unit = request.Unit;
+                existingItem.ExpiryDate = request.ExpiryDate;
+                existingItem.UpdatedAt = DateTime.UtcNow;
 
-                if (request.Ingredient_id.HasValue)
-                    existingPantry.Ingredient_id = request.Ingredient_id.Value;
-                if (request.Quantity.HasValue)
-                    existingPantry.Quantity = request.Quantity.Value;
-                if (!string.IsNullOrEmpty(request.Unit))
-                    existingPantry.Unit = request.Unit;
-                if (request.ExpiryDate.HasValue)
-                    existingPantry.ExpiryDate = DateTime.SpecifyKind(request.ExpiryDate.Value, DateTimeKind.Utc);
-                existingPantry.UpdatedAt = DateTime.UtcNow;
-
-                var result = await _pantryRepo.UpdatePantry(existingPantry);
-                _logger.LogInformation("Pantry '{PantryId}' updated successfully", id);
-                return MapToResponse(result);
+                var result = await _pantryRepo.UpdatePantry(existingItem);
+                _logger.LogInformation("Pantry '{Pantry_id}' updated successfully", existingItem.Pantry_id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating pantry '{PantryId}'", id);
+                _logger.LogError(ex, "Error updating Pantry '{Pantry_id}'", id);
                 throw;
             }
         }
 
-        public async Task<PantryResponse> SoftDeletePantry(Guid id, Guid accountId)
+        public async Task<PantryResponseDto> SoftDeletePantry(Guid id)
         {
-            try
-            {
-                var existingPantry = await _pantryRepo.GetPantryById(id);
-                if (existingPantry == null)
-                    throw new KeyNotFoundException($"Pantry with id {id} not found");
-
-                if (existingPantry.Account_id != accountId)
-                    throw new UnauthorizedAccessException("You do not have permission to delete this pantry");
-
-                var result = await _pantryRepo.SoftDeletePantry(id);
-                _logger.LogInformation("Pantry '{PantryId}' soft deleted", id);
-                return MapToResponse(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error soft deleting pantry '{PantryId}'", id);
-                throw;
-            }
+            var result = await _pantryRepo.SoftDeletePantry(id);
+            return MapToDto(result);
         }
-
-        private PantryResponse MapToResponse(Pantry pantry)
+        
+        private PantryResponseDto MapToDto(Pantry entity)
         {
-            return new PantryResponse
+            if (entity == null) return null;
+            return new PantryResponseDto
             {
-                Pantry_id = pantry.Pantry_id,
-                Account_id = pantry.Account_id,
-                Ingredient_id = pantry.Ingredient_id,
-                IngredientName = pantry.Ingredient?.Name ?? string.Empty,
-                Quantity = pantry.Quantity,
-                Unit = pantry.Unit,
-                ExpiryDate = pantry.ExpiryDate,
-                CreatedAt = pantry.CreatedAt,
-                UpdatedAt = pantry.UpdatedAt
+                Pantry_id = entity.Pantry_id,
+                Account_id = entity.Account_id,
+                Ingredient_id = entity.Ingredient_id,
+                Quantity = entity.Quantity,
+                Unit = entity.Unit,
+                ExpiryDate = entity.ExpiryDate,
+                AddedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
+                IsDeleted = entity.IsDeleted
             };
         }
     }

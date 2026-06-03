@@ -8,11 +8,10 @@ namespace Service.Interfaces
 {
     public interface IGroceryListService
     {
-        Task<List<GroceryListResponse>> GetAllGroceryLists();
-        Task<GroceryListResponse?> GetGroceryListById(Guid id);
-        Task<List<GroceryListResponse>> GetGroceryListsByAccountId(Guid accountId);
-        Task<GroceryListResponse> CreateGroceryList(GroceryListRequest request, Guid accountId);
-        Task<GroceryListResponse> UpdateGroceryList(Guid id, GroceryListUpdateRequest request, Guid accountId);
-        Task<GroceryListResponse> SoftDeleteGroceryList(Guid id, Guid accountId);
+        Task<List<GroceryListResponseDto>> GetAllGroceryLists();
+        Task<GroceryListResponseDto?> GetGroceryListById(Guid id);
+        Task<GroceryListResponseDto> CreateGroceryList(GroceryListRequest groceryList);
+        Task<GroceryListResponseDto> UpdateGroceryList(Guid id, GroceryListRequest groceryList);
+        Task<GroceryListResponseDto> SoftDeleteGroceryList(Guid id);
     }
 }

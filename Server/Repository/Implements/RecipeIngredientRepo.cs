@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repository.Implements
@@ -11,7 +12,6 @@ namespace Repository.Implements
     public class RecipeIngredientRepo : IRecipeIngredientRepo
     {
         private readonly AppDbContext _ctx;
-        
         public RecipeIngredientRepo(AppDbContext context)
         {
             _ctx = context;
@@ -19,13 +19,15 @@ namespace Repository.Implements
 
         public async Task<List<RecipeIngredient>> GetAllRecipeIngredients()
         {
-            return await _ctx.RecipeIngredients.ToListAsync();
+            return await _ctx.RecipeIngredients
+                .Where(i => i.IsDeleted == false)
+                .ToListAsync();
         }
 
         public async Task<RecipeIngredient?> GetRecipeIngredientById(Guid id)
-        {
-            return await _ctx.RecipeIngredients.FindAsync(id);
-        }
+            => await _ctx.RecipeIngredients
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.RI_id == id);
 
         public async Task<RecipeIngredient> CreateRecipeIngredient(RecipeIngredient recipeIngredient)
         {
@@ -41,13 +43,13 @@ namespace Repository.Implements
             return recipeIngredient;
         }
 
-        public async Task<RecipeIngredient> DeleteRecipeIngredient(Guid id)
+        public async Task<RecipeIngredient> SoftDeleteRecipeIngredient(Guid id)
         {
-            var recipeIngredient = await _ctx.RecipeIngredients.FindAsync(id);
+            var recipeIngredient = _ctx.RecipeIngredients.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.RI_id == id);
             if (recipeIngredient == null)
                 throw new Exception("RecipeIngredient not found");
-                
-            _ctx.RecipeIngredients.Remove(recipeIngredient);
+            recipeIngredient.IsDeleted = true;
+            _ctx.RecipeIngredients.Update(recipeIngredient);
             await _ctx.SaveChangesAsync();
             return recipeIngredient;
         }

@@ -20,32 +20,14 @@ namespace Repository.Implements
         public async Task<List<Allergy>> GetAllAllergies()
         {
             return await _ctx.Allergies
-                .Include(a => a.Account)
-                .Include(a => a.Ingredient)
-                .Where(a => a.IsDeleted == false)
+                .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
         public async Task<Allergy?> GetAllergyById(Guid id)
             => await _ctx.Allergies
-                .Include(a => a.Account)
-                .Include(a => a.Ingredient)
-                .Where(a => !a.IsDeleted)
-                .FirstOrDefaultAsync(a => a.Allergy_id == id);
-
-        public async Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId)
-            => await _ctx.Allergies
-                .Include(a => a.Account)
-                .Include(a => a.Ingredient)
-                .Where(a => a.Account_id == accountId && a.IsDeleted == false)
-                .ToListAsync();
-
-        public async Task<Allergy?> GetAllergyByAccountAndIngredient(Guid accountId, Guid ingredientId)
-            => await _ctx.Allergies
-                .Include(a => a.Account)
-                .Include(a => a.Ingredient)
-                .Where(a => a.Account_id == accountId && a.Ingredient_id == ingredientId && a.IsDeleted == false)
-                .FirstOrDefaultAsync();
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Allergy_id == id);
 
         public async Task<Allergy> CreateAllergy(Allergy allergy)
         {
@@ -63,15 +45,13 @@ namespace Repository.Implements
 
         public async Task<Allergy> SoftDeleteAllergy(Guid id)
         {
-            var existingAllergy = await _ctx.Allergies
-                .Where(a => a.IsDeleted == false && a.Allergy_id == id)
-                .FirstOrDefaultAsync();
-            if (existingAllergy == null)
-                throw new KeyNotFoundException($"Allergy with id {id} not found");
-            existingAllergy.IsDeleted = true;
-            _ctx.Allergies.Update(existingAllergy);
+            var allergy = _ctx.Allergies.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Allergy_id == id);
+            if (allergy == null)
+                throw new Exception("Allergy not found");
+            allergy.IsDeleted = true;
+            _ctx.Allergies.Update(allergy);
             await _ctx.SaveChangesAsync();
-            return existingAllergy;
+            return allergy;
         }
     }
 }

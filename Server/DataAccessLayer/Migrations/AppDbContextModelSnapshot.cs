@@ -45,6 +45,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("Role_id")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -52,7 +55,9 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Account_id");
 
-                    b.ToTable("Account", (string)null);
+                    b.HasIndex("Role_id");
+
+                    b.ToTable("Account");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -87,7 +92,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Partner_id");
 
-                    b.ToTable("AffiliateProducts", (string)null);
+                    b.ToTable("AffiliateProducts");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Allergy", b =>
@@ -99,17 +104,11 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Account_id")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Allergy_id");
 
@@ -117,7 +116,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Ingredient_id");
 
-                    b.ToTable("Allergies", (string)null);
+                    b.ToTable("Allergies");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Collection", b =>
@@ -132,6 +131,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
@@ -144,7 +146,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Account_id");
 
-                    b.ToTable("Collection", (string)null);
+                    b.ToTable("Collection");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Comment", b =>
@@ -163,6 +165,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsEdited")
                         .HasColumnType("boolean");
 
@@ -180,7 +185,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Post_id");
 
-                    b.ToTable("Comment", (string)null);
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
@@ -229,7 +234,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Product_id");
 
-                    b.ToTable("GroceryItems", (string)null);
+                    b.ToTable("GroceryItems");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryList", b =>
@@ -258,7 +263,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Account_id");
 
-                    b.ToTable("GroceryLists", (string)null);
+                    b.ToTable("GroceryLists");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Ingredient", b =>
@@ -283,7 +288,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Ingredient_id");
 
-                    b.ToTable("Ingredients", (string)null);
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.IngredientLabel", b =>
@@ -307,7 +312,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("It_id");
 
-                    b.ToTable("IngredientLabels", (string)null);
+                    b.ToTable("IngredientLabels");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.IngredientTag", b =>
@@ -329,7 +334,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("It_id");
 
-                    b.ToTable("IngredientTags", (string)null);
+                    b.ToTable("IngredientTags");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.NutritionalValue", b =>
@@ -344,12 +349,15 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Nv_id");
 
                     b.HasIndex("Ingredient_id")
                         .IsUnique();
 
-                    b.ToTable("NutritionalValues", (string)null);
+                    b.ToTable("NutritionalValues");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Pantry", b =>
@@ -389,7 +397,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Ingredient_id");
 
-                    b.ToTable("Pantries", (string)null);
+                    b.ToTable("Pantries");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Partner", b =>
@@ -422,7 +430,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Partner_id");
 
-                    b.ToTable("Partners", (string)null);
+                    b.ToTable("Partners");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Plan", b =>
@@ -443,6 +451,9 @@ namespace DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -453,7 +464,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Plan_id");
 
-                    b.ToTable("Plan", (string)null);
+                    b.ToTable("Plan");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Post", b =>
@@ -478,6 +489,9 @@ namespace DataAccessLayer.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("Recipe_id")
                         .HasColumnType("uuid");
 
@@ -492,7 +506,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_id");
 
-                    b.ToTable("Post", (string)null);
+                    b.ToTable("Post");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Rating", b =>
@@ -530,7 +544,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_id");
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Recipe", b =>
@@ -562,6 +576,9 @@ namespace DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
@@ -580,7 +597,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Account_id");
 
-                    b.ToTable("Recipe", (string)null);
+                    b.ToTable("Recipe");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.RecipeIngredient", b =>
@@ -591,6 +608,9 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
@@ -608,7 +628,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_id");
 
-                    b.ToTable("RecipeIngredients", (string)null);
+                    b.ToTable("RecipeIngredients");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.RecipeLabel", b =>
@@ -616,6 +636,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("Recipe_Id")
                         .HasColumnType("uuid");
@@ -629,7 +652,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Rt_Id");
 
-                    b.ToTable("RecipeLabel", (string)null);
+                    b.ToTable("RecipeLabel");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.RecipeTag", b =>
@@ -637,6 +660,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Rt_Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -650,7 +676,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Rt_Id");
 
-                    b.ToTable("Recipe_tag", (string)null);
+                    b.ToTable("Recipe_tag");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Report", b =>
@@ -669,6 +695,9 @@ namespace DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("Post_id")
                         .HasColumnType("uuid");
 
@@ -680,7 +709,31 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Post_id");
 
-                    b.ToTable("Report", (string)null);
+                    b.ToTable("Report");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Role_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Role_id");
+
+                    b.ToTable("Role");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.SavedRecipe", b =>
@@ -695,6 +748,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Collection_Id")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("Recipe_Id")
                         .HasColumnType("uuid");
 
@@ -706,7 +762,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Recipe_Id");
 
-                    b.ToTable("SavedRecipe", (string)null);
+                    b.ToTable("SavedRecipe");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Subscription", b =>
@@ -720,6 +776,9 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PaymentRef")
                         .IsRequired()
@@ -743,7 +802,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("Plan_id");
 
-                    b.ToTable("Subscription", (string)null);
+                    b.ToTable("Subscription");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.UserInformation", b =>
@@ -765,6 +824,9 @@ namespace DataAccessLayer.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -780,7 +842,14 @@ namespace DataAccessLayer.Migrations
                     b.HasIndex("Account_id")
                         .IsUnique();
 
-                    b.ToTable("UserInformation", (string)null);
+                    b.ToTable("UserInformation");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Account", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Role", null)
+                        .WithMany("Accounts")
+                        .HasForeignKey("Role_id");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -1209,6 +1278,11 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("BusinessObject.Entities.RecipeTag", b =>
                 {
                     b.Navigation("RecipeLabels");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
+                {
+                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

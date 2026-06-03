@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,9 +19,7 @@ namespace BusinessObject.Entities
         [ForeignKey("Account")]
         public Guid Account_id { get; set; } // Khóa ngoại trỏ tới bảng Account
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
-    public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
          public Ingredient Ingredient { get; set; }

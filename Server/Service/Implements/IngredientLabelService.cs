@@ -1,11 +1,13 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using BusinessObject.Dtos.RequestModels;
 
 namespace Service.Implements
 {
@@ -20,74 +22,92 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<IngredientLabel>> GetAllIngredientLabels()
+        public async Task<List<IngredientLabelResponseDto>> GetAllIngredientLabels()
         {
-            return await _ingredientLabelRepo.GetAllIngredientLabels();
+            var items = await _ingredientLabelRepo.GetAllIngredientLabels();
+            return items.Select(MapToDto).ToList();
         }
 
-        public async Task<IngredientLabel?> GetIngredientLabelById(Guid id)
+        public async Task<IngredientLabelResponseDto?> GetIngredientLabelById(Guid id)
         {
-            return await _ingredientLabelRepo.GetIngredientLabelById(id);
+            var item = await _ingredientLabelRepo.GetIngredientLabelById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<IngredientLabel> CreateIngredientLabel(IngredientLabelRequest ingredientLabel)
+        public async Task<IngredientLabelResponseDto> CreateIngredientLabel(IngredientLabelRequest request)
         {
             try
             {
-                if (ingredientLabel.It_id == Guid.Empty)
-                    throw new ArgumentException("Valid Tag It_id is required", nameof(ingredientLabel.It_id));
-                if (ingredientLabel.Ingredient_id == Guid.Empty)
-                    throw new ArgumentException("Valid Ingredient_id is required", nameof(ingredientLabel.Ingredient_id));
-
-                var newIngredientLabel = new IngredientLabel
+                var newItem = new IngredientLabel
                 {
                     Id = Guid.NewGuid(),
-                    It_id = ingredientLabel.It_id,
-                    Ingredient_id = ingredientLabel.Ingredient_id,
+                    It_id = request.It_id,
+                    Ingredient_id = request.Ingredient_id,
                     IsDeleted = false
                 };
 
-                var result = await _ingredientLabelRepo.CreateIngredientLabel(newIngredientLabel);
-                _logger.LogInformation("IngredientLabel '{Id}' created successfully", newIngredientLabel.Id);
-                return result ?? throw new InvalidOperationException("Failed to add ingredient label to database");
+                var result = await _ingredientLabelRepo.CreateIngredientLabel(newItem);
+                _logger.LogInformation("IngredientLabel '{Id}' created successfully", newItem.Id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding ingredient label");
+                _logger.LogError(ex, "Error creating IngredientLabel");
                 throw;
             }
         }
 
-        public async Task<IngredientLabel> UpdateIngredientLabel(Guid id, IngredientLabelRequest ingredientLabel)
+        public async Task<IngredientLabelResponseDto> UpdateIngredientLabel(Guid id, IngredientLabelRequest request)
         {
             try
             {
-                if (ingredientLabel.It_id == Guid.Empty)
-                    throw new ArgumentException("Valid Tag It_id is required", nameof(ingredientLabel.It_id));
-                if (ingredientLabel.Ingredient_id == Guid.Empty)
-                    throw new ArgumentException("Valid Ingredient_id is required", nameof(ingredientLabel.Ingredient_id));
-
-                var existingIngredientLabel = await _ingredientLabelRepo.GetIngredientLabelById(id);
-                if (existingIngredientLabel == null)
+                var existingItem = await _ingredientLabelRepo.GetIngredientLabelById(id);
+                if (existingItem == null)
                     throw new KeyNotFoundException($"IngredientLabel with id {id} not found");
 
-                existingIngredientLabel.It_id = ingredientLabel.It_id;
-                existingIngredientLabel.Ingredient_id = ingredientLabel.Ingredient_id;
+                existingItem.It_id = request.It_id;
+                existingItem.Ingredient_id = request.Ingredient_id;
 
-                var result = await _ingredientLabelRepo.UpdateIngredientLabel(existingIngredientLabel);
-                _logger.LogInformation("IngredientLabel '{Id}' updated successfully", existingIngredientLabel.Id);
-                return result;
+                var result = await _ingredientLabelRepo.UpdateIngredientLabel(existingItem);
+                _logger.LogInformation("IngredientLabel '{Id}' updated successfully", existingItem.Id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating ingredient label '{Id}'", id);
+                _logger.LogError(ex, "Error updating IngredientLabel '{Id}'", id);
                 throw;
             }
         }
 
-        public async Task<IngredientLabel> SoftDeleteIngredientLabel(Guid id)
+        public async Task<IngredientLabelResponseDto> SoftDeleteIngredientLabel(Guid id)
         {
-            return await _ingredientLabelRepo.SoftDeleteIngredientLabel(id);
+            var result = await _ingredientLabelRepo.SoftDeleteIngredientLabel(id);
+            return MapToDto(result);
+        }
+        
+        private IngredientLabelResponseDto MapToDto(IngredientLabel entity)
+        {
+            if (entity == null) return null;
+            return new IngredientLabelResponseDto
+            {
+                Label_id = entity.Id,
+                Tag_id = entity.It_id,
+                Ingredient_id = entity.Ingredient_id,
+                IsDeleted = entity.IsDeleted,
+                Ingredient_tag = entity.Ingredient_tag != null ? new IngredientTagSimpleDto
+                {
+                    Tag_id = entity.Ingredient_tag.It_id,
+                    Name = entity.Ingredient_tag.Name,
+                    Category = entity.Ingredient_tag.Category
+                } : null,
+                Ingredient = entity.Ingredient != null ? new IngredientSimpleDto
+                {
+                    Ingredient_id = entity.Ingredient.Ingredient_id,
+                    Name = entity.Ingredient.Name,
+                    AveragePrice = entity.Ingredient.AveragePrice,
+                    ImageUrl = entity.Ingredient.ImageUrl
+                } : null
+            };
         }
     }
 }

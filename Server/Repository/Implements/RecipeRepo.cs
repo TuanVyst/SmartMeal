@@ -12,7 +12,6 @@ namespace Repository.Implements
     public class RecipeRepo : IRecipeRepo
     {
         private readonly AppDbContext _ctx;
-        
         public RecipeRepo(AppDbContext context)
         {
             _ctx = context;
@@ -21,18 +20,14 @@ namespace Repository.Implements
         public async Task<List<Recipe>> GetAllRecipes()
         {
             return await _ctx.Recipes
-                .Include(r => r.RecipeLabels)
-                .Include(r => r.SavedRecipes)
+                .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
         public async Task<Recipe?> GetRecipeById(Guid id)
-        {
-            return await _ctx.Recipes
-                .Include(r => r.RecipeLabels)
-                .Include(r => r.SavedRecipes)
-                .FirstOrDefaultAsync(r => r.Recipe_id == id);
-        }
+            => await _ctx.Recipes
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Recipe_id == id);
 
         public async Task<Recipe> CreateRecipe(Recipe recipe)
         {
@@ -48,13 +43,13 @@ namespace Repository.Implements
             return recipe;
         }
 
-        public async Task<Recipe> DeleteRecipe(Guid id)
+        public async Task<Recipe> SoftDeleteRecipe(Guid id)
         {
-            var recipe = await _ctx.Recipes.FindAsync(id);
+            var recipe = _ctx.Recipes.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Recipe_id == id);
             if (recipe == null)
                 throw new Exception("Recipe not found");
-                
-            _ctx.Recipes.Remove(recipe);
+            recipe.IsDeleted = true;
+            _ctx.Recipes.Update(recipe);
             await _ctx.SaveChangesAsync();
             return recipe;
         }

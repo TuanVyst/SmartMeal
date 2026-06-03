@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repository.Implements
@@ -11,7 +12,6 @@ namespace Repository.Implements
     public class RecipeLabelRepo : IRecipeLabelRepo
     {
         private readonly AppDbContext _ctx;
-        
         public RecipeLabelRepo(AppDbContext context)
         {
             _ctx = context;
@@ -19,13 +19,15 @@ namespace Repository.Implements
 
         public async Task<List<RecipeLabel>> GetAllRecipeLabels()
         {
-            return await _ctx.RecipeLabels.ToListAsync();
+            return await _ctx.RecipeLabels
+                .Where(i => i.IsDeleted == false)
+                .ToListAsync();
         }
 
         public async Task<RecipeLabel?> GetRecipeLabelById(Guid id)
-        {
-            return await _ctx.RecipeLabels.FindAsync(id);
-        }
+            => await _ctx.RecipeLabels
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Id == id);
 
         public async Task<RecipeLabel> CreateRecipeLabel(RecipeLabel recipeLabel)
         {
@@ -41,13 +43,13 @@ namespace Repository.Implements
             return recipeLabel;
         }
 
-        public async Task<RecipeLabel> DeleteRecipeLabel(Guid id)
+        public async Task<RecipeLabel> SoftDeleteRecipeLabel(Guid id)
         {
-            var recipeLabel = await _ctx.RecipeLabels.FindAsync(id);
+            var recipeLabel = _ctx.RecipeLabels.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Id == id);
             if (recipeLabel == null)
                 throw new Exception("RecipeLabel not found");
-                
-            _ctx.RecipeLabels.Remove(recipeLabel);
+            recipeLabel.IsDeleted = true;
+            _ctx.RecipeLabels.Update(recipeLabel);
             await _ctx.SaveChangesAsync();
             return recipeLabel;
         }

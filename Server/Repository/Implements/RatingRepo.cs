@@ -20,39 +20,14 @@ namespace Repository.Implements
         public async Task<List<Rating>> GetAllRatings()
         {
             return await _ctx.Ratings
-                .Include(r => r.Account)
-                .Include(r => r.Recipe)
-                .Where(r => r.IsDeleted == false)
+                .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
         public async Task<Rating?> GetRatingById(Guid id)
             => await _ctx.Ratings
-                .Include(r => r.Account)
-                .Include(r => r.Recipe)
-                .Where(r => !r.IsDeleted)
-                .FirstOrDefaultAsync(r => r.Rating_id == id);
-
-        public async Task<List<Rating>> GetRatingsByRecipeId(Guid recipeId)
-            => await _ctx.Ratings
-                .Include(r => r.Account)
-                .Include(r => r.Recipe)
-                .Where(r => r.Recipe_id == recipeId && r.IsDeleted == false)
-                .ToListAsync();
-
-        public async Task<List<Rating>> GetRatingsByAccountId(Guid accountId)
-            => await _ctx.Ratings
-                .Include(r => r.Account)
-                .Include(r => r.Recipe)
-                .Where(r => r.Account_id == accountId && r.IsDeleted == false)
-                .ToListAsync();
-
-        public async Task<Rating?> GetRatingByAccountAndRecipe(Guid accountId, Guid recipeId)
-            => await _ctx.Ratings
-                .Include(r => r.Account)
-                .Include(r => r.Recipe)
-                .Where(r => r.Account_id == accountId && r.Recipe_id == recipeId && r.IsDeleted == false)
-                .FirstOrDefaultAsync();
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Rating_id == id);
 
         public async Task<Rating> CreateRating(Rating rating)
         {
@@ -70,15 +45,13 @@ namespace Repository.Implements
 
         public async Task<Rating> SoftDeleteRating(Guid id)
         {
-            var existingRating = await _ctx.Ratings
-                .Where(r => r.IsDeleted == false && r.Rating_id == id)
-                .FirstOrDefaultAsync();
-            if (existingRating == null)
-                throw new KeyNotFoundException($"Rating with id {id} not found");
-            existingRating.IsDeleted = true;
-            _ctx.Ratings.Update(existingRating);
+            var rating = _ctx.Ratings.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Rating_id == id);
+            if (rating == null)
+                throw new Exception("Rating not found");
+            rating.IsDeleted = true;
+            _ctx.Ratings.Update(rating);
             await _ctx.SaveChangesAsync();
-            return existingRating;
+            return rating;
         }
     }
 }

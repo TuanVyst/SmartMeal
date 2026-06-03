@@ -9,9 +9,8 @@ namespace Repository.Interfaces
     {
         Task<List<GroceryItem>> GetAllGroceryItems();
         Task<GroceryItem?> GetGroceryItemById(Guid id);
-        Task<List<GroceryItem>> GetGroceryItemsByListId(Guid listId);
-        Task<GroceryItem> CreateGroceryItem(GroceryItem item);
-        Task<GroceryItem> UpdateGroceryItem(GroceryItem item);
+        Task<GroceryItem> CreateGroceryItem(GroceryItem groceryItem);
+        Task<GroceryItem> UpdateGroceryItem(GroceryItem groceryItem);
         Task<GroceryItem> SoftDeleteGroceryItem(Guid id);
     }
 }

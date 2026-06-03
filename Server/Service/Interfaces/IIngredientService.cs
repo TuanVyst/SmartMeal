@@ -3,15 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
 
 namespace Service.Interfaces
 {
     public interface IIngredientService
     {
-        Task<List<Ingredient>> GetAllIngredients();
-        Task<Ingredient?> GetIngredientById(Guid id);
-        Task<Ingredient> CreateIngredient(IngredientRequest ingredient);
-        Task<Ingredient> UpdateIngredient(Guid id, IngredientRequest ingredient);
-        Task<Ingredient> SoftDeleteIngredient(Guid id);
+        Task<List<IngredientResponseDto>> GetAllIngredients();
+        Task<IngredientResponseDto?> GetIngredientById(Guid id);
+        Task<IngredientResponseDto> CreateIngredient(IngredientRequest ingredient);
+        Task<IngredientResponseDto> UpdateIngredient(Guid id, IngredientRequest ingredient);
+        Task<IngredientResponseDto> SoftDeleteIngredient(Guid id);
     }
 }

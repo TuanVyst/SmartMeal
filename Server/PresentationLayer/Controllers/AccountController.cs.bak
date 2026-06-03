@@ -1,0 +1,62 @@
+using BusinessObject.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Service.Interfaces;
+
+namespace PresentationLayer.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AccountController : ControllerBase
+    {
+        private readonly IAccountService _service;
+
+        public AccountController(IAccountService service)
+        {
+            _service = service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var accounts = await _service.GetAllAccounts();
+            return Ok(accounts);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var account = await _service.GetAccountById(id);
+            if (account == null)
+            {
+                return NotFound();
+            }
+            return Ok(account);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Account account)
+        {
+            var newAccount = await _service.AddAccount(account);
+            return CreatedAtAction(nameof(Get), new { id = newAccount.Account_id }, newAccount);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(Guid id, [FromBody] Account account)
+        {
+            if (id != account.Account_id)
+            {
+                return BadRequest();
+            }
+
+            var updatedAccount = await _service.UpdateAccount(account);
+            return Ok(updatedAccount);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _service.DeleteAccount(id);
+            return NoContent();
+        }
+    }
+}

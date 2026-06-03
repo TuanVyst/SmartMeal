@@ -8,10 +8,10 @@ namespace Service.Interfaces
 {
     public interface IRecipeService
     {
-        Task<List<RecipeResponse>> GetAllRecipes();
-        Task<RecipeResponse?> GetRecipeById(Guid id);
-        Task<RecipeResponse> CreateRecipe(RecipeRequest request);
-        Task<RecipeResponse> UpdateRecipe(Guid id, RecipeRequest request);
-        Task<RecipeResponse> DeleteRecipe(Guid id);
+        Task<List<RecipeResponseDto>> GetAllRecipes();
+        Task<RecipeResponseDto?> GetRecipeById(Guid id);
+        Task<RecipeResponseDto> CreateRecipe(RecipeRequest recipe);
+        Task<RecipeResponseDto> UpdateRecipe(Guid id, RecipeRequest recipe);
+        Task<RecipeResponseDto> SoftDeleteRecipe(Guid id);
     }
 }

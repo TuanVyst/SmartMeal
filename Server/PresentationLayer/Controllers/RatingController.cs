@@ -1,10 +1,9 @@
-using BusinessObject.Dtos.RequestModels;
-using BusinessObject.Dtos.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using BusinessObject.Dtos.RequestModels;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PresentationLayer.Controllers
 {
@@ -13,92 +12,95 @@ namespace PresentationLayer.Controllers
     public class RatingController : ControllerBase
     {
         private readonly IRatingService _ratingService;
+        private readonly ILogger<RatingController> _logger;
 
-        public RatingController(IRatingService ratingService)
+        public RatingController(IRatingService ratingService, ILogger<RatingController> logger)
         {
             _ratingService = ratingService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RatingResponse>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _ratingService.GetAllRatings();
-            return Ok(result);
+            try
+            {
+                var items = await _ratingService.GetAllRatings();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all ratings");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        [HttpGet("recipe/{recipeId:guid}")]
-        public async Task<ActionResult<IEnumerable<RatingResponse>>> GetByRecipeId(Guid recipeId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _ratingService.GetRatingsByRecipeId(recipeId);
-            return Ok(result);
-        }
+            try
+            {
+                var item = await _ratingService.GetRatingById(id);
+                if (item == null)
+                    return NotFound(new { success = false, message = "Rating not found" });
 
-        [HttpGet("user/{accountId:guid}")]
-        public async Task<ActionResult<IEnumerable<RatingResponse>>> GetByAccountId(Guid accountId)
-        {
-            var result = await _ratingService.GetRatingsByAccountId(accountId);
-            return Ok(result);
-        }
-
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<RatingResponse>> GetById(Guid id)
-        {
-            var result = await _ratingService.GetRatingById(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting rating by id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<RatingResponse>> Create([FromBody] RatingRequest request, [FromQuery] Guid accountId)
+        public async Task<IActionResult> Create([FromBody] RatingRequest request)
         {
             try
             {
-                var result = await _ratingService.CreateRating(request, accountId);
-                return CreatedAtAction(nameof(GetById), new { id = result.Rating_id }, result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _ratingService.CreateRating(request);
+                return Ok(new { success = true, data = item });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "Error creating rating");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<RatingResponse>> Update(Guid id, [FromBody] RatingUpdateRequest request, [FromQuery] Guid accountId)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] RatingRequest request)
         {
             try
             {
-                var result = await _ratingService.UpdateRating(id, request, accountId);
-                return Ok(result);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var item = await _ratingService.UpdateRating(id, request);
+                return Ok(new { success = true, data = item });
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error updating rating");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<RatingResponse>> SoftDelete(Guid id, [FromQuery] Guid accountId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var result = await _ratingService.SoftDeleteRating(id, accountId);
-                return Ok(result);
+                var item = await _ratingService.SoftDeleteRating(id);
+                return Ok(new { success = true, message = "Rating deleted successfully", data = item });
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return StatusCode(403, ex.Message);
+                _logger.LogError(ex, "Error deleting rating");
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }

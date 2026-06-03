@@ -1,7 +1,4 @@
 using BusinessObject.Entities;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Repository.Interfaces
 {
@@ -11,6 +8,6 @@ namespace Repository.Interfaces
         Task<Collection?> GetCollectionById(Guid id);
         Task<Collection> CreateCollection(Collection collection);
         Task<Collection> UpdateCollection(Collection collection);
-        Task<Collection> DeleteCollection(Guid id);
+        Task<Collection> SoftDeleteCollection(Guid id);
     }
 }

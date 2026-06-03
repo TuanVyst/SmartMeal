@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repository.Implements
@@ -11,7 +12,6 @@ namespace Repository.Implements
     public class RecipeTagRepo : IRecipeTagRepo
     {
         private readonly AppDbContext _ctx;
-        
         public RecipeTagRepo(AppDbContext context)
         {
             _ctx = context;
@@ -19,13 +19,15 @@ namespace Repository.Implements
 
         public async Task<List<RecipeTag>> GetAllRecipeTags()
         {
-            return await _ctx.RecipeTags.ToListAsync();
+            return await _ctx.RecipeTags
+                .Where(i => i.IsDeleted == false)
+                .ToListAsync();
         }
 
         public async Task<RecipeTag?> GetRecipeTagById(Guid id)
-        {
-            return await _ctx.RecipeTags.FindAsync(id);
-        }
+            => await _ctx.RecipeTags
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Rt_Id == id);
 
         public async Task<RecipeTag> CreateRecipeTag(RecipeTag recipeTag)
         {
@@ -41,13 +43,13 @@ namespace Repository.Implements
             return recipeTag;
         }
 
-        public async Task<RecipeTag> DeleteRecipeTag(Guid id)
+        public async Task<RecipeTag> SoftDeleteRecipeTag(Guid id)
         {
-            var recipeTag = await _ctx.RecipeTags.FindAsync(id);
+            var recipeTag = _ctx.RecipeTags.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Rt_Id == id);
             if (recipeTag == null)
                 throw new Exception("RecipeTag not found");
-                
-            _ctx.RecipeTags.Remove(recipeTag);
+            recipeTag.IsDeleted = true;
+            _ctx.RecipeTags.Update(recipeTag);
             await _ctx.SaveChangesAsync();
             return recipeTag;
         }

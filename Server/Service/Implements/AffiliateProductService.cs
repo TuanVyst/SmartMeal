@@ -1,11 +1,13 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Dtos.ResponseModels;
+using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using BusinessObject.Dtos.RequestModels;
 
 namespace Service.Implements
 {
@@ -20,96 +22,100 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<AffiliateProduct>> GetAllAffiliateProducts()
+        public async Task<List<AffiliateProductResponseDto>> GetAllAffiliateProducts()
         {
-            return await _affiliateProductRepo.GetAllAffiliateProducts();
+            var items = await _affiliateProductRepo.GetAllAffiliateProducts();
+            return items.Select(MapToDto).ToList();
         }
 
-        public async Task<AffiliateProduct?> GetAffiliateProductById(Guid id)
+        public async Task<AffiliateProductResponseDto?> GetAffiliateProductById(Guid id)
         {
-            return await _affiliateProductRepo.GetAffiliateProductById(id);
+            var item = await _affiliateProductRepo.GetAffiliateProductById(id);
+            return item == null ? null : MapToDto(item);
         }
 
-        public async Task<AffiliateProduct> CreateAffiliateProduct(AffiliateProductRequest affiliateProduct)
+        public async Task<AffiliateProductResponseDto> CreateAffiliateProduct(AffiliateProductRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(affiliateProduct.Name))
-                    throw new ArgumentException("Name is required", nameof(affiliateProduct.Name));
-                if (affiliateProduct.Name.Length > 256)
-                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(affiliateProduct.Name));
-                if (string.IsNullOrWhiteSpace(affiliateProduct.Link))
-                    throw new ArgumentException("Link is required", nameof(affiliateProduct.Link));
-                if (affiliateProduct.Price < 0)
-                    throw new ArgumentException("Price cannot be negative", nameof(affiliateProduct.Price));
-                if (affiliateProduct.Partner_id == Guid.Empty)
-                    throw new ArgumentException("Valid Partner_id is required", nameof(affiliateProduct.Partner_id));
-                if (affiliateProduct.Ingredient_id == Guid.Empty)
-                    throw new ArgumentException("Valid Ingredient_id is required", nameof(affiliateProduct.Ingredient_id));
-
-                var newAffiliateProduct = new AffiliateProduct
+                var newItem = new AffiliateProduct
                 {
                     Product_id = Guid.NewGuid(),
-                    Partner_id = affiliateProduct.Partner_id,
-                    Ingredient_id = affiliateProduct.Ingredient_id,
-                    Name = affiliateProduct.Name,
-                    Link = affiliateProduct.Link,
-                    Price = affiliateProduct.Price,
+                    Partner_id = request.Partner_id,
+                    Ingredient_id = request.Ingredient_id,
+                    Name = request.Name,
+                    Link = request.Link,
+                    Price = request.Price,
                     IsDeleted = false
                 };
 
-                var result = await _affiliateProductRepo.CreateAffiliateProduct(newAffiliateProduct);
-                _logger.LogInformation("AffiliateProduct '{ProductId}' ({Name}) created successfully", newAffiliateProduct.Product_id, newAffiliateProduct.Name);
-                return result ?? throw new InvalidOperationException("Failed to add affiliate product to database");
+                var result = await _affiliateProductRepo.CreateAffiliateProduct(newItem);
+                _logger.LogInformation("AffiliateProduct '{Product_id}' created successfully", newItem.Product_id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding affiliate product");
+                _logger.LogError(ex, "Error creating AffiliateProduct");
                 throw;
             }
         }
-        //
-        public async Task<AffiliateProduct> UpdateAffiliateProduct(Guid id, AffiliateProductRequest affiliateProduct)
+
+        public async Task<AffiliateProductResponseDto> UpdateAffiliateProduct(Guid id, AffiliateProductRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(affiliateProduct.Name))
-                    throw new ArgumentException("Name is required", nameof(affiliateProduct.Name));
-                if (affiliateProduct.Name.Length > 256)
-                    throw new ArgumentException("Name cannot exceed 256 characters", nameof(affiliateProduct.Name));
-                if (string.IsNullOrWhiteSpace(affiliateProduct.Link))
-                    throw new ArgumentException("Link is required", nameof(affiliateProduct.Link));
-                if (affiliateProduct.Price < 0)
-                    throw new ArgumentException("Price cannot be negative", nameof(affiliateProduct.Price));
-                if (affiliateProduct.Partner_id == Guid.Empty)
-                    throw new ArgumentException("Valid Partner_id is required", nameof(affiliateProduct.Partner_id));
-                if (affiliateProduct.Ingredient_id == Guid.Empty)
-                    throw new ArgumentException("Valid Ingredient_id is required", nameof(affiliateProduct.Ingredient_id));
-
-                var existingAffiliateProduct = await _affiliateProductRepo.GetAffiliateProductById(id);
-                if (existingAffiliateProduct == null)
+                var existingItem = await _affiliateProductRepo.GetAffiliateProductById(id);
+                if (existingItem == null)
                     throw new KeyNotFoundException($"AffiliateProduct with id {id} not found");
 
-                existingAffiliateProduct.Name = affiliateProduct.Name;
-                existingAffiliateProduct.Link = affiliateProduct.Link;
-                existingAffiliateProduct.Price = affiliateProduct.Price;
-                existingAffiliateProduct.Partner_id = affiliateProduct.Partner_id;
-                existingAffiliateProduct.Ingredient_id = affiliateProduct.Ingredient_id;
+                existingItem.Partner_id = request.Partner_id;
+                existingItem.Ingredient_id = request.Ingredient_id;
+                existingItem.Name = request.Name;
+                existingItem.Link = request.Link;
+                existingItem.Price = request.Price;
 
-                var result = await _affiliateProductRepo.UpdateAffiliateProduct(existingAffiliateProduct);
-                _logger.LogInformation("AffiliateProduct '{ProductId}' updated successfully", existingAffiliateProduct.Product_id);
-                return result;
+                var result = await _affiliateProductRepo.UpdateAffiliateProduct(existingItem);
+                _logger.LogInformation("AffiliateProduct '{Product_id}' updated successfully", existingItem.Product_id);
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating affiliate product '{ProductId}'", id);
+                _logger.LogError(ex, "Error updating AffiliateProduct '{Product_id}'", id);
                 throw;
             }
         }
 
-        public async Task<AffiliateProduct> SoftDeleteAffiliateProduct(Guid id)
+        public async Task<AffiliateProductResponseDto> SoftDeleteAffiliateProduct(Guid id)
         {
-            return await _affiliateProductRepo.SoftDeleteAffiliateProduct(id);
+            var result = await _affiliateProductRepo.SoftDeleteAffiliateProduct(id);
+            return MapToDto(result);
+        }
+        
+        private AffiliateProductResponseDto MapToDto(AffiliateProduct entity)
+        {
+            if (entity == null) return null;
+            return new AffiliateProductResponseDto
+            {
+                Product_id = entity.Product_id,
+                Partner_id = entity.Partner_id,
+                Ingredient_id = entity.Ingredient_id,
+                Name = entity.Name,
+                Link = entity.Link,
+                Price = entity.Price,
+                IsDeleted = entity.IsDeleted,
+                Partner = entity.Partner != null ? new PartnerSimpleDto
+                {
+                    Partner_id = entity.Partner.Partner_id,
+                    Name = entity.Partner.Name
+                } : null,
+                Ingredient = entity.Ingredient != null ? new IngredientSimpleDto
+                {
+                    Ingredient_id = entity.Ingredient.Ingredient_id,
+                    Name = entity.Ingredient.Name,
+                    AveragePrice = entity.Ingredient.AveragePrice,
+                    ImageUrl = entity.Ingredient.ImageUrl
+                } : null
+            };
         }
     }
 }

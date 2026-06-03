@@ -8,10 +8,10 @@ namespace Service.Interfaces
 {
     public interface ICollectionService
     {
-        Task<List<CollectionResponse>> GetAllCollections();
-        Task<CollectionResponse?> GetCollectionById(Guid id);
-        Task<CollectionResponse> CreateCollection(CollectionRequest request);
-        Task<CollectionResponse> UpdateCollection(Guid id, CollectionRequest request);
-        Task<CollectionResponse> DeleteCollection(Guid id);
+        Task<List<CollectionResponseDto>> GetAllCollections();
+        Task<CollectionResponseDto?> GetCollectionById(Guid id);
+        Task<CollectionResponseDto> CreateCollection(CollectionRequest collection);
+        Task<CollectionResponseDto> UpdateCollection(Guid id, CollectionRequest collection);
+        Task<CollectionResponseDto> SoftDeleteCollection(Guid id);
     }
 }

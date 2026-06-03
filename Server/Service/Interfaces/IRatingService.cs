@@ -8,12 +8,10 @@ namespace Service.Interfaces
 {
     public interface IRatingService
     {
-        Task<List<RatingResponse>> GetAllRatings();
-        Task<RatingResponse?> GetRatingById(Guid id);
-        Task<List<RatingResponse>> GetRatingsByRecipeId(Guid recipeId);
-        Task<List<RatingResponse>> GetRatingsByAccountId(Guid accountId);
-        Task<RatingResponse> CreateRating(RatingRequest request, Guid accountId);
-        Task<RatingResponse> UpdateRating(Guid id, RatingUpdateRequest request, Guid accountId);
-        Task<RatingResponse> SoftDeleteRating(Guid id, Guid accountId);
+        Task<List<RatingResponseDto>> GetAllRatings();
+        Task<RatingResponseDto?> GetRatingById(Guid id);
+        Task<RatingResponseDto> CreateRating(RatingRequest rating);
+        Task<RatingResponseDto> UpdateRating(Guid id, RatingRequest rating);
+        Task<RatingResponseDto> SoftDeleteRating(Guid id);
     }
 }

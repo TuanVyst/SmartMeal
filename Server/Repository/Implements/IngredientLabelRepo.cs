@@ -1,11 +1,8 @@
-﻿using BusinessObject.Entities;
+﻿
+using BusinessObject.Entities;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Repository.Implements
 {
@@ -58,4 +55,5 @@ namespace Repository.Implements
             return ingredientLabel;
         }
     }
+    
 }

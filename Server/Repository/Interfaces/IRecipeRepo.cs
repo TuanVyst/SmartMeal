@@ -1,7 +1,6 @@
 using BusinessObject.Entities;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Repository.Interfaces
 {
@@ -11,6 +10,6 @@ namespace Repository.Interfaces
         Task<Recipe?> GetRecipeById(Guid id);
         Task<Recipe> CreateRecipe(Recipe recipe);
         Task<Recipe> UpdateRecipe(Recipe recipe);
-        Task<Recipe> DeleteRecipe(Guid id);
+        Task<Recipe> SoftDeleteRecipe(Guid id);
     }
 }
