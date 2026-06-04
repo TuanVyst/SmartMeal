@@ -1,3 +1,4 @@
+using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
@@ -41,12 +42,25 @@ namespace Repository.Implements
             return recipe;
         }
 
+
         public async Task<Recipe> UpdateRecipe(Recipe recipe)
         {
             _ctx.Recipes.Update(recipe);
             await _ctx.SaveChangesAsync();
             return recipe;
         }
+        public async Task<List<Recipe>> GetRecipesByIngredientIds(List<Guid> ingredientIds)
+        {
+            var recipes = await _ctx.Recipes
+                .Where(r => r.RecipeIngredients.Any(ri => ingredientIds.Contains(ri.Ingredient_id)))
+                .Include(r => r.RecipeLabels)
+                .Include(r => r.SavedRecipes)
+                .ToListAsync();
+            return recipes;
+        }
+
+              
+        
 
         public async Task<Recipe> DeleteRecipe(Guid id)
         {

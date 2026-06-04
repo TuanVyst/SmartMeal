@@ -25,6 +25,12 @@ namespace Service.Implements
             return recipes.Select(r => MapToResponse(r)).ToList();
         }
 
+        public async Task<List<RecipeResponse>> GetRecipesByIngredientIds(List<Guid> ingredientIds)
+        {
+            var recipes = await _recipeRepo.GetRecipesByIngredientIds(ingredientIds);
+            return recipes.Select(r => MapToResponse(r)).ToList();
+        }
+
         public async Task<RecipeResponse?> GetRecipeById(Guid id)
         {
             var recipe = await _recipeRepo.GetRecipeById(id);

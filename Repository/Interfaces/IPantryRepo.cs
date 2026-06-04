@@ -15,6 +15,6 @@ namespace Repository.Interfaces
         Task<List<Pantry>> GetExpiringPantries(Guid accountId, DateTime thresholdDate);
         Task<Pantry> CreatePantry(Pantry pantry);
         Task<Pantry> UpdatePantry(Pantry pantry);
-        Task<Pantry> SoftDeletePantry(Guid id);
+        Task<Pantry> HotDeletePantry(Guid id);
     }
 }

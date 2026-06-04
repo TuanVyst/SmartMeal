@@ -30,6 +30,19 @@ namespace PresentationLayer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> GetRecipesByIngredientIds([FromQuery] List<Guid> ingredientIds)
+        {
+            try
+            {
+                var recipes = await _recipeService.GetRecipesByIngredientIds(ingredientIds);
+                return Ok(recipes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRecipeById(Guid id)

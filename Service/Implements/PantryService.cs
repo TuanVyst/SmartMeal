@@ -77,7 +77,7 @@ namespace Service.Implements
                     ExpiryDate = DateTime.SpecifyKind(request.ExpiryDate, DateTimeKind.Utc),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    IsDeleted = false
+                  
                 };
 
                 var result = await _pantryRepo.CreatePantry(newPantry);
@@ -140,7 +140,7 @@ namespace Service.Implements
                 if (existingPantry.Account_id != accountId)
                     throw new UnauthorizedAccessException("You do not have permission to delete this pantry");
 
-                var result = await _pantryRepo.SoftDeletePantry(id);
+                var result = await _pantryRepo.HotDeletePantry(id);
                 _logger.LogInformation("Pantry '{PantryId}' soft deleted", id);
                 return MapToResponse(result);
             }

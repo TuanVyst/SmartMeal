@@ -11,6 +11,7 @@ namespace Service.Interfaces
         Task<List<RecipeResponse>> GetAllRecipes();
         Task<RecipeResponse?> GetRecipeById(Guid id);
         Task<RecipeResponse> CreateRecipe(RecipeRequest request);
+        Task<List<RecipeResponse>> GetRecipesByIngredientIds(List<Guid> ingredientIds);
         Task<RecipeResponse> UpdateRecipe(Guid id, RecipeRequest request);
         Task<RecipeResponse> DeleteRecipe(Guid id);
     }
