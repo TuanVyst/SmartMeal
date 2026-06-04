@@ -14,9 +14,7 @@ public static class DbInitializer
         if (await context.Accounts.AnyAsync()) return;
 
         // Roles
-        var adminRole = new Role { Role_id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" };
-        var userRole = new Role { Role_id = Guid.NewGuid(), Name = "User", Description = "Regular user" };
-        context.Roles.AddRange(adminRole, userRole);
+    
         await context.SaveChangesAsync();
 
         // Accounts
@@ -33,7 +31,7 @@ public static class DbInitializer
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
-        context.Entry(adminAccount).Property("Role_id").CurrentValue = adminRole.Role_id;
+
 
         var testUser = new Account
         {
@@ -48,7 +46,7 @@ public static class DbInitializer
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
-        context.Entry(testUser).Property("Role_id").CurrentValue = userRole.Role_id;
+
 
         context.Accounts.AddRange(adminAccount, testUser);
         await context.SaveChangesAsync();
