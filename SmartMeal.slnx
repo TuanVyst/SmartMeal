@@ -1,7 +1,7 @@
 <Solution>
-  <Project Path="BusinessObject/BusinessObject.csproj" />
-  <Project Path="DataAccessLayer/DataAccessLayer.csproj" />
-  <Project Path="PresentationLayer/PresentationLayer.csproj" />
-  <Project Path="Repository/Repository.csproj" />
-  <Project Path="Service/Service.csproj" />
+  <Project Path="Server/BusinessObject/BusinessObject.csproj" />
+  <Project Path="Server/DataAccessLayer/DataAccessLayer.csproj" />
+  <Project Path="Server/PresentationLayer/PresentationLayer.csproj" />
+  <Project Path="Server/Repository/Repository.csproj" />
+  <Project Path="Server/Service/Service.csproj" />
 </Solution>

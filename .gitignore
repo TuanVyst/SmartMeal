@@ -365,6 +365,4 @@ FodyWeavers.xsd
 .env
 .env.local
 .env.*.local
-/ChatBot/.env
-.env.*.local
-/PresentationLayer/appsettings.json
+/Server/PresentationLayer/appsettings.json
