@@ -2,6 +2,7 @@ using DataAccessLayer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PresentationLayer;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +64,7 @@ builder.Services.AddScoped<Service.Interfaces.IPantryService, Service.Implements
 
 // Ingredient (for cross-repo validation in AllergyService/PantryService)
 builder.Services.AddScoped<Repository.Interfaces.IIngredientRepo, Repository.Implements.IngredientRepo>();
+builder.Services.AddScoped<Service.Interfaces.IIngredientService, Service.Implements.IngredientService>();
 
 // Account
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
@@ -98,6 +100,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Seed database
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DataAccessLayer.AppDbContext>();
+    await DbInitializer.Initialize(dbContext);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
