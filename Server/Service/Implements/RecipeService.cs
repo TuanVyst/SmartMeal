@@ -34,6 +34,11 @@ namespace Service.Implements
             return item == null ? null : MapToDto(item);
         }
 
+        public async Task<List<RecipeResponseDto>> GetRecipeByIngredients(List<Guid> ingredientIds)
+        {
+            var items = await _recipeRepo.GetRecipesByIngredientIds(ingredientIds);
+            return items.Select(MapToDto).ToList();
+        }
         public async Task<RecipeResponseDto> CreateRecipe(RecipeRequest request)
         {
             try

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Dtos\ResponseModels\" />
-    <Folder Include="Dtos\RequestModels\" />
   </ItemGroup>
 
 </Project>

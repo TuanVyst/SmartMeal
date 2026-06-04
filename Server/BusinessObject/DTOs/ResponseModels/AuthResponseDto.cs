@@ -2,6 +2,7 @@ namespace BusinessObject.Dtos.ResponseModels
 {
     public class AuthResponseDto
     {
+        public bool RequiresOtp { get; set; } = false;
         public string Token { get; set; }
         public Guid AccountId { get; set; }
         public string Username { get; set; }
