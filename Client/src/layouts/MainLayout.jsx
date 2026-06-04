@@ -1,6 +1,12 @@
-import { Outlet } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { FiGrid, FiBox, FiLogOut } from 'react-icons/fi';
+
+const navItems = [
+  { to: '/', label: 'Dashboard', icon: <FiGrid size={20} /> },
+  { to: '/ingredients', label: 'Ingredients', icon: <FiBox size={20} /> },
+];
 
 export default function MainLayout() {
   const { user, logout } = useAuth();
@@ -13,16 +19,34 @@ export default function MainLayout() {
 
   return (
     <div className="main-layout">
-      <header className="main-header">
-        <h1 className="logo">SmartMeal</h1>
-        <div className="header-right">
-          <span>{user?.username}</span>
-          <button onClick={handleLogout}>Logout</button>
+      <aside className="sidebar">
+        <div className="sidebar-logo">SmartMeal</div>
+        <nav className="sidebar-nav">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <div className="sidebar-user">{user?.username}</div>
+          <button className="logout-btn" onClick={handleLogout}>
+            <FiLogOut size={18} />
+            <span>Logout</span>
+          </button>
         </div>
-      </header>
-      <main className="main-content">
-        <Outlet />
-      </main>
+      </aside>
+      <div className="main-area">
+        <main className="main-content">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
