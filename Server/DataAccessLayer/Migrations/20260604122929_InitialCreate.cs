@@ -188,6 +188,10 @@ namespace DataAccessLayer.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     Role_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
@@ -281,8 +285,7 @@ namespace DataAccessLayer.Migrations
                     Unit = table.Column<string>(type: "text", nullable: false),
                     ExpiryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -356,29 +359,6 @@ namespace DataAccessLayer.Migrations
                         column: x => x.Plan_id,
                         principalTable: "Plan",
                         principalColumn: "Plan_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserInformation",
-                columns: table => new
-                {
-                    User_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserInformation", x => x.User_id);
-                    table.ForeignKey(
-                        name: "FK_UserInformation_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -810,12 +790,6 @@ namespace DataAccessLayer.Migrations
                 name: "IX_Subscription_Plan_id",
                 table: "Subscription",
                 column: "Plan_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserInformation_Account_id",
-                table: "UserInformation",
-                column: "Account_id",
-                unique: true);
         }
 
         /// <inheritdoc />
@@ -853,9 +827,6 @@ namespace DataAccessLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Subscription");
-
-            migrationBuilder.DropTable(
-                name: "UserInformation");
 
             migrationBuilder.DropTable(
                 name: "AffiliateProducts");

@@ -49,10 +49,11 @@ namespace Service.Implements
 
         public async Task<AuthResponseDto> Login(LoginRequest request)
         {
-            var account = await _repo.GetAccountByUsername(request.Username);
+            var account = await _repo.GetAccountByUsername(request.EmailOrUsername)
+                         ?? await _repo.GetAccountByEmail(request.EmailOrUsername);
             if (account == null || !BCrypt.Net.BCrypt.Verify(request.Password, account.Password))
             {
-                throw new UnauthorizedAccessException("Invalid username or password");
+                throw new UnauthorizedAccessException("Invalid username/email or password");
             }
 
             if (!account.IsActive)
@@ -68,10 +69,16 @@ namespace Service.Implements
 
         public async Task<AuthResponseDto> Register(RegisterRequest request)
         {
-            var existing = await _repo.GetAccountByUsername(request.Username);
-            if (existing != null)
+            var existingUsername = await _repo.GetAccountByUsername(request.Username);
+            if (existingUsername != null)
             {
                 throw new InvalidOperationException("Username already exists");
+            }
+
+            var existingEmail = await _repo.GetAccountByEmail(request.Email);
+            if (existingEmail != null)
+            {
+                throw new InvalidOperationException("Email already exists");
             }
 
             var account = new Account
@@ -79,6 +86,10 @@ namespace Service.Implements
                 Account_id = Guid.NewGuid(),
                 Username = request.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Name = request.Name,
+                Email = request.Email,
+                Phone = request.Phone,
+                Address = request.Address,
                 Role = BusinessObject.Enums.RoleEnum.User,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
@@ -114,7 +125,10 @@ namespace Service.Implements
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 AccountId = account.Account_id,
                 Username = account.Username,
-                Role = account.Role.ToString()
+                Role = account.Role.ToString(),
+                Name = account.Name,
+                Email = account.Email,
+                Phone = account.Phone
             };
         }
     }

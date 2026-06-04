@@ -41,6 +41,11 @@ namespace Repository.Implements
             return await _context.Accounts.FirstOrDefaultAsync(a => a.Username == username);
         }
 
+        public async Task<Account> GetAccountByEmail(string email)
+        {
+            return await _context.Accounts.FirstOrDefaultAsync(a => a.Email == email);
+        }
+
         public async Task<List<Account>> GetAllAccounts()
         {
             return await _context.Accounts.ToListAsync();
