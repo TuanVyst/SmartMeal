@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using PresentationLayer;
 using System.Text;
 
+
+DotNetEnv.Env.Load(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"));
+
 var builder = WebApplication.CreateBuilder(args);
 // Use connection string from appsettings.json (ConnectionStrings:DefaultConnection)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -12,6 +15,8 @@ if (string.IsNullOrWhiteSpace(connectionString))
 {
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found. Please configure it in appsettings.json.");
 }
+
+builder.Services.AddMemoryCache();
 
 // Register DbContext using configured connection string
 builder.Services.AddDbContext<AppDbContext>(options =>
