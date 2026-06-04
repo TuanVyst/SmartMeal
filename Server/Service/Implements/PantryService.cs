@@ -48,7 +48,7 @@ namespace Service.Implements
                     ExpiryDate = request.ExpiryDate,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    IsDeleted = false
+                  
                 };
 
                 var result = await _pantryRepo.CreatePantry(newPantry);
@@ -88,9 +88,9 @@ namespace Service.Implements
             }
         }
 
-        public async Task<PantryResponseDto> SoftDeletePantry(Guid id)
+        public async Task<PantryResponseDto> HardDeletePantry(Guid id)
         {
-            var result = await _pantryRepo.SoftDeletePantry(id);
+            var result = await _pantryRepo.HardDeletePantry(id);
             return MapToDto(result);
         }
         
@@ -107,7 +107,7 @@ namespace Service.Implements
                 ExpiryDate = entity.ExpiryDate,
                 AddedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt,
-                IsDeleted = entity.IsDeleted
+            
             };
         }
     }

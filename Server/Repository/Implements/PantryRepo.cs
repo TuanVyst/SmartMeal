@@ -20,13 +20,13 @@ namespace Repository.Implements
         public async Task<List<Pantry>> GetAllPantries()
         {
             return await _ctx.Pantries
-                .Where(i => i.IsDeleted == false)
+                
                 .ToListAsync();
         }
 
         public async Task<Pantry?> GetPantryById(Guid id)
             => await _ctx.Pantries
-                .Where(i => !i.IsDeleted)
+             
                 .FirstOrDefaultAsync(i => i.Pantry_id == id);
 
         public async Task<Pantry> CreatePantry(Pantry pantry)
@@ -43,12 +43,12 @@ namespace Repository.Implements
             return pantry;
         }
 
-        public async Task<Pantry> SoftDeletePantry(Guid id)
+        public async Task<Pantry> HardDeletePantry(Guid id)
         {
-            var pantry = _ctx.Pantries.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Pantry_id == id);
+            var pantry = _ctx.Pantries.FirstOrDefault(i => i.Pantry_id == id);
             if (pantry == null)
                 throw new Exception("Pantry not found");
-            pantry.IsDeleted = true;
+            
             _ctx.Pantries.Update(pantry);
             await _ctx.SaveChangesAsync();
             return pantry;

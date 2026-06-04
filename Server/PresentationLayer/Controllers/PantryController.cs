@@ -94,7 +94,7 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _pantryService.SoftDeletePantry(id);
+                var item = await _pantryService.HardDeletePantry(id);
                 return Ok(new { success = true, message = "Pantry deleted successfully", data = item });
             }
             catch (Exception ex)

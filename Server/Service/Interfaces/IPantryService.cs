@@ -12,6 +12,6 @@ namespace Service.Interfaces
         Task<PantryResponseDto?> GetPantryById(Guid id);
         Task<PantryResponseDto> CreatePantry(PantryRequest pantry);
         Task<PantryResponseDto> UpdatePantry(Guid id, PantryRequest pantry);
-        Task<PantryResponseDto> SoftDeletePantry(Guid id);
+        Task<PantryResponseDto> HardDeletePantry(Guid id);
     }
 }
