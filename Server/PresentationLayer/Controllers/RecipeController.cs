@@ -53,6 +53,21 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("ingredients")]
+        public async Task<IActionResult> GetByIngredients([FromQuery] List<Guid> ingredientIds)
+        {
+            try
+            {
+                var items = await _recipeService.GetRecipeByIngredients(ingredientIds);
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recipes by ingredients");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] RecipeRequest request)
         {

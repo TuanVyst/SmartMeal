@@ -12,6 +12,8 @@ namespace Service.Interfaces
         Task<Account> UpdateAccount(Account account);
         Task DeleteAccount(Guid id);
         Task<AuthResponseDto> Login(LoginRequest request);
+        Task<AuthResponseDto> VerifyOtp(VerifyOtpRequest request);
+        Task<AuthResponseDto> VerifyRegisterOtp(VerifyOtpRequest request);
         Task<AuthResponseDto> Register(RegisterRequest request);
     }
 }

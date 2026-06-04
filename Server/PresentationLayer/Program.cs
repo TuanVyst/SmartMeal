@@ -2,11 +2,13 @@ using DataAccessLayer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using PresentationLayer;
 using System.Text;
 
 
-DotNetEnv.Env.Load(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env"));
+
+DotNetEnv.Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 // Use connection string from appsettings.json (ConnectionStrings:DefaultConnection)
@@ -45,7 +47,39 @@ builder.Services.AddScoped<Service.Interfaces.IRecipeIngredientService, Service.
 
 // [CẬP NHẬT QUAN TRỌNG] Phải có 2 dòng này thì Swagger mới hoạt động được
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Định nghĩa security scheme cho Swagger (Nút Authorize)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"JWT Authorization header sử dụng Bearer scheme. \r\n\r\n
+                      Nhập 'Bearer' [khoảng trắng] và sau đó dán token của bạn vào.
+                      \r\n\r\nVí dụ: 'Bearer 12345abcdef'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // Yêu cầu security scheme này cho tất cả các endpoint
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+});
 
 // GroceryList
 builder.Services.AddScoped<Repository.Interfaces.IGroceryListRepo, Repository.Implements.GroceryListRepo>();
@@ -74,6 +108,9 @@ builder.Services.AddScoped<Service.Interfaces.IIngredientService, Service.Implem
 // Account
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
 builder.Services.AddScoped<Service.Interfaces.IAccountService, Service.Implements.AccountService>();
+
+//Email
+builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
