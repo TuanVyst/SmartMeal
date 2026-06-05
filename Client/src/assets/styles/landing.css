@@ -294,11 +294,11 @@
   object-fit: contain;
 }
 
-.f-tomato    { top: 28%;  left: 5%;   width: 110px; height: 110px; animation-delay: 0s; }
+.f-tomato    { top: 28%;  left: calc(5% - 50px);   width: 110px; height: 110px; animation-delay: 0s; }
 .f-broccoli  { top: -2%;  right: -2%; width: 150px; height: 150px; animation-delay: 0.4s; }
-.f-avocado   { bottom: 14%; right: -4%; width: 150px; height: 150px; animation-delay: 0.8s; }
+.f-avocado   { bottom: calc(14% - 100px); right: calc(-4% - 50px); width: 150px; height: 150px; animation-delay: 0.8s; }
 .f-mushroom  { bottom: 4%; left: 28%;  width: 100px; height: 100px; animation-delay: 1.2s; }
-.f-sauce     { bottom: 28%; left: 0%;   width: 110px; height: 110px; animation-delay: 1.6s; }
+.f-sauce     { bottom: calc(28% - 220px); left: -110px;   width: 220px; height: 220px; animation-delay: 1.6s; }
 
 @keyframes float-rotate {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -984,7 +984,7 @@
   .f-broccoli  { width: 90px;  height: 90px;  }
   .f-avocado   { width: 95px;  height: 95px;  }
   .f-mushroom  { width: 65px;  height: 65px;  }
-  .f-sauce     { width: 70px;  height: 70px;  }
+  .f-sauce     { width: 140px;  height: 140px;  }
 
   .hero-content {
     max-width: 100%;
@@ -1018,5 +1018,5 @@
   .f-broccoli  { width: 70px;  height: 70px;  }
   .f-avocado   { width: 75px;  height: 75px;  }
   .f-mushroom  { width: 50px;  height: 50px;  }
-  .f-sauce     { width: 55px;  height: 55px;  }
+  .f-sauce     { width: 110px;  height: 110px;  }
 }

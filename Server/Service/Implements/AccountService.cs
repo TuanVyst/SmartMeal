@@ -196,6 +196,66 @@ namespace Service.Implements
             return GenerateAuthResponse(account);
         }
 
+        public async Task<AuthResponseDto> GoogleLogin(GoogleLoginRequest request)
+        {
+            var clientId = _config["Google:ClientId"];
+            if (string.IsNullOrWhiteSpace(clientId))
+                throw new InvalidOperationException("Google login is not configured");
+
+            Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(request.IdToken,
+                    new Google.Apis.Auth.GoogleJsonWebSignature.ValidationSettings
+                    {
+                        Audience = new[] { clientId }
+                    });
+            }
+            catch (Exception)
+            {
+                throw new UnauthorizedAccessException("Invalid Google token");
+            }
+
+            var email = payload.Email;
+            if (string.IsNullOrWhiteSpace(email))
+                throw new UnauthorizedAccessException("Google account has no email");
+
+            var account = await _accountRepo.GetAccountByEmail(email);
+
+            if (account == null)
+            {
+                var username = email.Split('@')[0];
+                var existingUsername = await _accountRepo.GetAccountByUsername(username);
+                if (existingUsername != null)
+                    username += new Random().Next(1000, 9999);
+
+                account = new Account
+                {
+                    Account_id = Guid.NewGuid(),
+                    Username = username,
+                    Password = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                    Name = payload.Name ?? username,
+                    Email = email,
+                    Role = BusinessObject.Enums.RoleEnum.User,
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    LastLogin = DateTime.UtcNow
+                };
+
+                await _accountRepo.AddAccount(account);
+            }
+            else
+            {
+                if (!account.IsActive)
+                    throw new UnauthorizedAccessException("Account is disabled");
+
+                account.LastLogin = DateTime.UtcNow;
+                await _accountRepo.UpdateAccount(account);
+            }
+
+            return GenerateAuthResponse(account);
+        }
+
         private AuthResponseDto GenerateAuthResponse(Account account)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(

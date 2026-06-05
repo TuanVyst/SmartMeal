@@ -15,5 +15,6 @@ namespace Service.Interfaces
         Task<AuthResponseDto> VerifyOtp(VerifyOtpRequest request);
         Task<AuthResponseDto> VerifyRegisterOtp(VerifyOtpRequest request);
         Task<AuthResponseDto> Register(RegisterRequest request);
+        Task<AuthResponseDto> GoogleLogin(GoogleLoginRequest request);
     }
 }
