@@ -29,6 +29,11 @@ namespace Repository.Implements
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.Collection_id == id);
 
+        public async Task<Collection?> GetDefaultCollectionByAccountId(Guid accountId)
+            => await _ctx.Collections
+                .Where(i => !i.IsDeleted && i.Account_id == accountId && i.Name == "Favorites")
+                .FirstOrDefaultAsync();
+
         public async Task<Collection> CreateCollection(Collection collection)
         {
             _ctx.Collections.Add(collection);

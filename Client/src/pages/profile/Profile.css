@@ -1,0 +1,136 @@
+.profile-container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+.profile-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.btn-back:hover {
+  color: #1e293b;
+}
+
+.profile-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.profile-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.form-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+}
+
+.form-input:focus {
+  border-color: #00a859;
+  box-shadow: 0 0 0 3px rgba(0, 168, 89, 0.1);
+}
+
+.textarea-input {
+  resize: vertical;
+}
+
+.readonly-input {
+  background-color: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.readonly-input:focus {
+  border-color: #e2e8f0;
+  box-shadow: none;
+}
+
+.help-text {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.form-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-save {
+  background-color: #00a859;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+  background-color: #008f4c;
+}
+
+.btn-save:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.alert-success {
+  background-color: #e6f7ef;
+  color: #00a859;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  border: 1px solid #bbf7d0;
+}

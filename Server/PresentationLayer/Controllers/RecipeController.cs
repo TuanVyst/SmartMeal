@@ -103,5 +103,20 @@ namespace PresentationLayer.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet("suggest/pantry/{accountId}")]
+        public async Task<IActionResult> SuggestRecipesBasedOnPantry(Guid accountId)
+        {
+            try
+            {
+                var suggestions = await _recipeService.SuggestRecipesBasedOnPantry(accountId);
+                return Ok(new { success = true, data = suggestions });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error suggesting recipes based on pantry");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

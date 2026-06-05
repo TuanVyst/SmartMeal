@@ -10,6 +10,8 @@ namespace Service.Interfaces
     {
         Task<List<SavedRecipeResponseDto>> GetAllSavedRecipes();
         Task<SavedRecipeResponseDto?> GetSavedRecipeById(Guid id);
+        Task<List<SavedRecipeResponseDto>> GetSavedRecipesByCollectionId(Guid collectionId);
+        Task<bool> ToggleSavedRecipe(Guid collectionId, Guid recipeId);
         Task<SavedRecipeResponseDto> CreateSavedRecipe(SavedRecipeRequest savedRecipe);
         Task<SavedRecipeResponseDto> UpdateSavedRecipe(Guid id, SavedRecipeRequest savedRecipe);
         Task<SavedRecipeResponseDto> SoftDeleteSavedRecipe(Guid id);

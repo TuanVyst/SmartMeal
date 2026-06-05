@@ -6,6 +6,7 @@ namespace Repository.Interfaces
     {
         Task<List<Collection>> GetAllCollections();
         Task<Collection?> GetCollectionById(Guid id);
+        Task<Collection?> GetDefaultCollectionByAccountId(Guid accountId);
         Task<Collection> CreateCollection(Collection collection);
         Task<Collection> UpdateCollection(Collection collection);
         Task<Collection> SoftDeleteCollection(Guid id);

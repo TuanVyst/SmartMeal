@@ -1,0 +1,28 @@
+.meal-suggestion-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: #f8fafc; /* light bluish grey background for contrast */
+  min-height: 100vh;
+}
+
+.sidebar-section {
+  flex: 0 0 350px;
+}
+
+.main-section {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .meal-suggestion-container {
+    flex-direction: column;
+  }
+  .sidebar-section {
+    flex: auto;
+  }
+}

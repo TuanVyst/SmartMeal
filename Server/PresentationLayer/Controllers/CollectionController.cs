@@ -53,6 +53,24 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("account/{accountId}/default")]
+        public async Task<IActionResult> GetDefaultCollection(Guid accountId)
+        {
+            try
+            {
+                var item = await _collectionService.GetDefaultCollectionByAccountId(accountId);
+                if (item == null)
+                    return NotFound(new { success = false, message = "Default collection not found and could not be created" });
+
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting default collection");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CollectionRequest request)
         {

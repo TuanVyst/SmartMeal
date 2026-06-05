@@ -6,6 +6,7 @@ namespace Repository.Interfaces
     {
         Task<List<UserInformation>> GetAllUserInformations();
         Task<UserInformation?> GetUserInformationById(Guid id);
+        Task<UserInformation?> GetUserInformationByAccountId(Guid accountId);
         Task<UserInformation> CreateUserInformation(UserInformation userInformation);
         Task<UserInformation> UpdateUserInformation(UserInformation userInformation);
         Task<UserInformation> SoftDeleteUserInformation(Guid id);

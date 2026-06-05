@@ -1,0 +1,115 @@
+.ingredient-sidebar {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.sidebar-title:first-child {
+  margin-top: 0;
+}
+
+/* Pantry Items (Selected) */
+.pantry-items-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pantry-item-pill {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e6f7ef;
+  color: #00a859;
+  padding: 0.5rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.pantry-item-pill .remove-btn {
+  background: none;
+  border: none;
+  color: #00a859;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+/* Custom Input */
+.custom-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.custom-input-group input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.custom-input-group input:focus {
+  border-color: #00a859;
+}
+
+.custom-input-group .add-btn {
+  background-color: #00a859;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.custom-input-group .add-btn:hover {
+  background-color: #008f4c;
+}
+
+.plus-icon {
+  font-size: 1.1rem;
+}
+
+/* Common Ingredients */
+.common-ingredients-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.common-ingredient-pill {
+  background-color: #f1f5f9;
+  color: #334155;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.common-ingredient-pill:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}

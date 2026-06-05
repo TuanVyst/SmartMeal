@@ -29,6 +29,11 @@ namespace Repository.Implements
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.User_id == id);
 
+        public async Task<UserInformation?> GetUserInformationByAccountId(Guid accountId)
+            => await _ctx.UserInformations
+                .Where(i => !i.IsDeleted)
+                .FirstOrDefaultAsync(i => i.Account_id == accountId);
+
         public async Task<UserInformation> CreateUserInformation(UserInformation userInformation)
         {
             _ctx.UserInformations.Add(userInformation);

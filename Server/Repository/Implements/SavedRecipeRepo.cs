@@ -29,6 +29,16 @@ namespace Repository.Implements
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.Id == id);
 
+        public async Task<SavedRecipe?> GetSavedRecipeByCollectionAndRecipe(Guid collectionId, Guid recipeId)
+            => await _ctx.SavedRecipes
+                .FirstOrDefaultAsync(i => i.Collection_Id == collectionId && i.Recipe_Id == recipeId);
+
+        public async Task<List<SavedRecipe>> GetSavedRecipesByCollectionId(Guid collectionId)
+            => await _ctx.SavedRecipes
+                .Include(i => i.Recipe)
+                .Where(i => !i.IsDeleted && i.Collection_Id == collectionId)
+                .ToListAsync();
+
         public async Task<SavedRecipe> CreateSavedRecipe(SavedRecipe savedRecipe)
         {
             _ctx.SavedRecipes.Add(savedRecipe);

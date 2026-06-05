@@ -34,6 +34,27 @@ namespace Service.Implements
             return item == null ? null : MapToDto(item);
         }
 
+        public async Task<CollectionResponseDto?> GetDefaultCollectionByAccountId(Guid accountId)
+        {
+            var item = await _collectionRepo.GetDefaultCollectionByAccountId(accountId);
+            if (item == null)
+            {
+                // Auto create "Favorites" collection for the user
+                var newCollection = new Collection
+                {
+                    Collection_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    Name = "Favorites",
+                    IsPublic = false,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                var created = await _collectionRepo.CreateCollection(newCollection);
+                return MapToDto(created);
+            }
+            return MapToDto(item);
+        }
+
         public async Task<CollectionResponseDto> CreateCollection(CollectionRequest request)
         {
             try

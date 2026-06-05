@@ -103,5 +103,21 @@ namespace PresentationLayer.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet("account/{accountId}")]
+        public async Task<IActionResult> GetByAccountId(Guid accountId)
+        {
+            try
+            {
+                var item = await _userInformationService.GetUserInformationByAccountId(accountId);
+                // Return 200 OK with null data if not found, to indicate they haven't created a profile yet.
+                return Ok(new { success = true, data = item });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting userInformation by account id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

@@ -34,6 +34,12 @@ namespace Service.Implements
             return item == null ? null : MapToDto(item);
         }
 
+        public async Task<UserInformationResponseDto?> GetUserInformationByAccountId(Guid accountId)
+        {
+            var item = await _userInformationRepo.GetUserInformationByAccountId(accountId);
+            return item == null ? null : MapToDto(item);
+        }
+
         public async Task<UserInformationResponseDto> CreateUserInformation(UserInformationRequest request)
         {
             try
