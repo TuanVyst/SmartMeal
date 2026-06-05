@@ -5,4 +5,5 @@ export const authService = {
   register: (data) => api.post('/auth/register', data),
   verifyOtp: (data) => api.post('/auth/verify-otp', data),
   verifyRegisterOtp: (data) => api.post('/auth/verify-register-otp', data),
+  googleLogin: (idToken) => api.post('/auth/google-login', { idToken }),
 };

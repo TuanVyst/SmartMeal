@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const [form, setForm] = useState({ emailOrUsername: '', password: '' });
@@ -9,7 +9,7 @@ export default function Login() {
   const [otpStep, setOtpStep] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
-  const { login, verifyOtp } = useAuth();
+  const { login, verifyOtp, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -49,6 +49,22 @@ export default function Login() {
         setError('Cannot connect to server. Make sure the backend is running.');
       } else {
         setError('OTP verification failed');
+      }
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate('/dashboard');
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Cannot connect to server. Make sure the backend is running.');
+      } else {
+        setError('Google login failed');
       }
     }
   };
@@ -117,9 +133,14 @@ export default function Login() {
           <button type="submit" className="btn-submit">Sign In</button>
         </form>
         <div className="divider">or continue with</div>
-        <button className="btn-google" onClick={() => alert('Google login coming soon!')}>
-          <FcGoogle size={20} /> Sign in with Google
-        </button>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError('Google login failed')}
+          shape="pill"
+          text="signin_with"
+          theme="outline"
+          size="large"
+        />
         <p className="auth-footer-text">
           Don&apos;t have an account? <Link to="/register">Create one</Link>
         </p>
