@@ -18,6 +18,15 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials);
+    if (data.requiresOtp) return data;
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
+    return data;
+  };
+
+  const verifyOtp = async (email, otpCode) => {
+    const { data } = await authService.verifyOtp({ email, otpCode });
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
@@ -26,6 +35,15 @@ export function AuthProvider({ children }) {
 
   const register = async (credentials) => {
     const { data } = await authService.register(credentials);
+    if (data.requiresOtp) return data;
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
+    return data;
+  };
+
+  const verifyRegisterOtp = async (email, otpCode) => {
+    const { data } = await authService.verifyRegisterOtp({ email, otpCode });
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
@@ -39,7 +57,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, logout }}>
       {children}
     </AuthContext.Provider>
   );

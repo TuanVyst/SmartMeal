@@ -1,3 +1,5 @@
+import logo from '../../../assets/SmartMealLogo.png';
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -6,9 +8,7 @@ export default function Footer() {
       <div className="footer-container">
         <div className="footer-grid">
           <div className="footer-brand">
-            <div className="footer-logo">
-              <span>&#127858;</span> SmartMeal
-            </div>
+            <img src={logo} alt="SmartMeal" className="footer-logo-img" />
             <p>Cook your own meal, your way.</p>
           </div>
           <div className="footer-links">

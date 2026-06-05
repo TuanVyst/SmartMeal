@@ -1,33 +1,37 @@
 import { FiClock, FiZap } from 'react-icons/fi';
+import saladImg from '../../../assets/Salad.png';
+import avocadoImg from '../../../assets/Avocado.png';
+import broccoliImg from '../../../assets/Broccoli.png';
+import tomatoImg from '../../../assets/Tomato.png';
 
 const meals = [
   {
-    name: 'Grilled Salmon Bowl',
-    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop',
+    name: 'Garden Fresh Bowl',
+    image: saladImg,
     cookTime: '25 min',
     calories: 450,
     difficulty: 'Easy',
     tags: ['Healthy', 'Protein'],
   },
   {
-    name: 'Avocado Toast Deluxe',
-    image: 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400&h=300&fit=crop',
+    name: 'Avocado Delight',
+    image: avocadoImg,
     cookTime: '15 min',
     calories: 320,
     difficulty: 'Easy',
     tags: ['Vegan', 'Quick'],
   },
   {
-    name: 'Chicken Stir Fry',
-    image: 'https://images.unsplash.com/photo-1606756790138-261d2b21cd75?w=400&h=300&fit=crop',
+    name: 'Green Goodness',
+    image: broccoliImg,
     cookTime: '20 min',
     calories: 380,
     difficulty: 'Medium',
     tags: ['High Protein'],
   },
   {
-    name: 'Berry Smoothie Bowl',
-    image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&h=300&fit=crop',
+    name: 'Tomato Harvest',
+    image: tomatoImg,
     cookTime: '10 min',
     calories: 280,
     difficulty: 'Easy',

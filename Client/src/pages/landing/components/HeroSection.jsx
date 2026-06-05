@@ -1,4 +1,11 @@
 import { Link } from 'react-router-dom';
+import saladImg from '../../../assets/Salad.png';
+import tomatoImg from '../../../assets/Tomato.png';
+import broccoliImg from '../../../assets/Broccoli.png';
+import avocadoImg from '../../../assets/Avocado.png';
+import mushroomImg from '../../../assets/Mushroom.png';
+import sauceImg from '../../../assets/Sauce.png';
+import leaf2Img from '../../../assets/Leaf_2.png';
 
 export default function HeroSection() {
   return (
@@ -18,14 +25,19 @@ export default function HeroSection() {
           </div>
         </div>
         <div className="hero-illustration">
-          <div className="illustration-circle">
-            <div className="food-icon plate">&#127858;</div>
-            <div className="food-icon leaf">&#127807;</div>
-            <div className="food-icon carrot">&#129365;</div>
-            <div className="food-icon berry">&#127827;</div>
-            <div className="food-icon avocado">&#129361;</div>
-            <div className="food-icon bowl">&#127837;</div>
+          <div className="hero-blob hero-blob-1" />
+          <div className="hero-blob hero-blob-2" />
+          <img src={leaf2Img} alt="" className="hero-leaf l-1" />
+          <img src={leaf2Img} alt="" className="hero-leaf l-2" />
+          <img src={leaf2Img} alt="" className="hero-leaf l-3" />
+          <div className="hero-bowl">
+            <img src={saladImg} alt="Healthy meal bowl" className="hero-bowl-img" />
           </div>
+          <img src={tomatoImg} alt="" className="floating-food f-tomato" />
+          <img src={broccoliImg} alt="" className="floating-food f-broccoli" />
+          <img src={avocadoImg} alt="" className="floating-food f-avocado" />
+          <img src={mushroomImg} alt="" className="floating-food f-mushroom" />
+          <img src={sauceImg} alt="" className="floating-food f-sauce" />
         </div>
       </div>
     </section>
