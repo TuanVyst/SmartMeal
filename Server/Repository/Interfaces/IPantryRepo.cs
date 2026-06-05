@@ -11,6 +11,6 @@ namespace Repository.Interfaces
         Task<Pantry?> GetPantryById(Guid id);
         Task<Pantry> CreatePantry(Pantry pantry);
         Task<Pantry> UpdatePantry(Pantry pantry);
-        Task<Pantry> SoftDeletePantry(Guid id);
+        Task<Pantry> HardDeletePantry(Guid id);
     }
 }

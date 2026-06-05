@@ -25,7 +25,7 @@ namespace BusinessObject.Entities
         public DateTime ExpiryDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; } = false;
+
 
 
         // Navigation properties

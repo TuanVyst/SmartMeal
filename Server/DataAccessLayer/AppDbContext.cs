@@ -14,7 +14,6 @@ namespace DataAccessLayer
 
         public DbSet<Account> Accounts { get; set; }
  
-        public DbSet<UserInformation> UserInformations { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<RecipeLabel> RecipeLabels { get; set; }
         public DbSet<RecipeTag> RecipeTags { get; set; }
@@ -37,7 +36,7 @@ namespace DataAccessLayer
         public DbSet<Allergy> Allergies { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<Role> Roles { get; set; }
+     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

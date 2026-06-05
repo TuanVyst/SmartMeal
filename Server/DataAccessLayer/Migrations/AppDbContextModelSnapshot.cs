@@ -28,8 +28,16 @@ namespace DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -37,16 +45,21 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<int>("Role")
                         .HasColumnType("integer");
-
-                    b.Property<Guid?>("Role_id")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -54,8 +67,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Account_id");
-
-                    b.HasIndex("Role_id");
 
                     b.ToTable("Account");
                 });
@@ -377,9 +388,6 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
@@ -712,30 +720,6 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Report");
                 });
 
-            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Role_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Role_id");
-
-                    b.ToTable("Role");
-                });
-
             modelBuilder.Entity("BusinessObject.Entities.SavedRecipe", b =>
                 {
                     b.Property<Guid>("Id")
@@ -803,53 +787,6 @@ namespace DataAccessLayer.Migrations
                     b.HasIndex("Plan_id");
 
                     b.ToTable("Subscription");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.UserInformation", b =>
-                {
-                    b.Property<Guid>("User_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Account_id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.HasKey("User_id");
-
-                    b.HasIndex("Account_id")
-                        .IsUnique();
-
-                    b.ToTable("UserInformation");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Account", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.Role", null)
-                        .WithMany("Accounts")
-                        .HasForeignKey("Role_id");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -1067,7 +1004,7 @@ namespace DataAccessLayer.Migrations
                         .IsRequired();
 
                     b.HasOne("BusinessObject.Entities.Recipe", "Recipe")
-                        .WithMany()
+                        .WithMany("RecipeIngredients")
                         .HasForeignKey("Recipe_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1165,17 +1102,6 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Plan");
                 });
 
-            modelBuilder.Entity("BusinessObject.Entities.UserInformation", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.Account", "Account")
-                        .WithOne("UserInformation")
-                        .HasForeignKey("BusinessObject.Entities.UserInformation", "Account_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
             modelBuilder.Entity("BusinessObject.Entities.Account", b =>
                 {
                     b.Navigation("Collections");
@@ -1197,9 +1123,6 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("SavedRecipes");
 
                     b.Navigation("Subscriptions");
-
-                    b.Navigation("UserInformation")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
@@ -1270,6 +1193,8 @@ namespace DataAccessLayer.Migrations
 
                     b.Navigation("Ratings");
 
+                    b.Navigation("RecipeIngredients");
+
                     b.Navigation("RecipeLabels");
 
                     b.Navigation("SavedRecipes");
@@ -1278,11 +1203,6 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("BusinessObject.Entities.RecipeTag", b =>
                 {
                     b.Navigation("RecipeLabels");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Role", b =>
-                {
-                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

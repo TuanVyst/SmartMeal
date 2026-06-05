@@ -3,10 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessObject.Entities
 {
@@ -16,7 +12,6 @@ namespace BusinessObject.Entities
         [Key]
         public Guid Account_id { get; set; } = Guid.NewGuid();
 
-     
         public RoleEnum Role { get; set; } = RoleEnum.User;
 
         [Required]
@@ -33,9 +28,20 @@ namespace BusinessObject.Entities
 
         public DateTime? LastLogin { get; set; }
 
+        // UserInformation fields merged directly into Account
+        [MaxLength(100)]
+        public string? Name { get; set; }
+
+        [MaxLength(20)]
+        public string? Phone { get; set; }
+
+        [MaxLength(150)]
+        public string? Email { get; set; }
+
+        [MaxLength(255)]
+        public string? Address { get; set; }
+
         // Navigation properties
-    
-        public virtual UserInformation UserInformation { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
         public virtual ICollection<Recipe> Recipes { get; set; }
         public virtual ICollection<GroceryList> GroceryLists { get; set; }
@@ -46,6 +52,5 @@ namespace BusinessObject.Entities
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Collection> Collections { get; set; }
         public virtual ICollection<Report> Reports { get; set; }
-
     }
 }
