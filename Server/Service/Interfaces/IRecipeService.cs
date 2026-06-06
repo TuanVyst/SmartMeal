@@ -14,5 +14,6 @@ namespace Service.Interfaces
         Task<RecipeResponseDto> CreateRecipe(RecipeRequest recipe);
         Task<RecipeResponseDto> UpdateRecipe(Guid id, RecipeRequest recipe);
         Task<RecipeResponseDto> SoftDeleteRecipe(Guid id);
+        Task<List<RecipeSuggestionResponseDto>> SuggestRecipesBasedOnPantry(Guid accountId);
     }
 }

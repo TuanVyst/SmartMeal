@@ -14,11 +14,17 @@ namespace Service.Implements
     public class RecipeService : IRecipeService
     {
         private readonly IRecipeRepo _recipeRepo;
+        private readonly IPantryRepo _pantryRepo;
+        private readonly IIngredientRepo _ingredientRepo;
+        private readonly IRecipeIngredientRepo _recipeIngredientRepo;
         private readonly ILogger<RecipeService> _logger;
 
-        public RecipeService(IRecipeRepo recipeRepo, ILogger<RecipeService> logger)
+        public RecipeService(IRecipeRepo recipeRepo, IPantryRepo pantryRepo, IIngredientRepo ingredientRepo, IRecipeIngredientRepo recipeIngredientRepo, ILogger<RecipeService> logger)
         {
             _recipeRepo = recipeRepo;
+            _pantryRepo = pantryRepo;
+            _ingredientRepo = ingredientRepo;
+            _recipeIngredientRepo = recipeIngredientRepo;
             _logger = logger;
         }
 
@@ -103,6 +109,82 @@ namespace Service.Implements
         {
             var result = await _recipeRepo.SoftDeleteRecipe(id);
             return MapToDto(result);
+        }
+        
+        public async Task<List<RecipeSuggestionResponseDto>> SuggestRecipesBasedOnPantry(Guid accountId)
+        {
+            try
+            {
+                // 1. Get user's pantry
+                var allPantries = await _pantryRepo.GetAllPantries();
+                var userPantry = allPantries.Where(p => p.Account_id == accountId).ToList();
+                var userIngredientIds = userPantry.Select(p => p.Ingredient_id).ToHashSet();
+
+                // 2. Get all recipes
+                var allRecipes = await _recipeRepo.GetAllRecipes();
+
+                // 3. Get all recipe ingredients and map to recipes
+                var allRecipeIngredients = await _recipeIngredientRepo.GetAllRecipeIngredients();
+                var allIngredients = await _ingredientRepo.GetAllIngredients();
+                var ingredientDict = allIngredients.ToDictionary(i => i.Ingredient_id, i => i.Name);
+
+                var suggestions = new List<RecipeSuggestionResponseDto>();
+
+                foreach (var recipe in allRecipes)
+                {
+                    var recipeIngs = allRecipeIngredients.Where(ri => ri.Recipe_id == recipe.Recipe_id).ToList();
+                    
+                    if (!recipeIngs.Any()) continue;
+
+                    int matchCount = 0;
+                    var missing = new List<string>();
+                    var allIngDetails = new List<IngredientStatusDto>();
+
+                    foreach (var ri in recipeIngs)
+                    {
+                        var ingName = ingredientDict.ContainsKey(ri.Ingredient_id) ? ingredientDict[ri.Ingredient_id] : "Unknown";
+                        bool isPossessed = userIngredientIds.Contains(ri.Ingredient_id);
+
+                        allIngDetails.Add(new IngredientStatusDto
+                        {
+                            Name = ingName,
+                            Possessed = isPossessed
+                        });
+
+                        if (isPossessed)
+                        {
+                            matchCount++;
+                        }
+                        else
+                        {
+                            missing.Add(ingName);
+                        }
+                    }
+
+                    double matchPercentage = (double)matchCount / recipeIngs.Count * 100;
+
+                    suggestions.Add(new RecipeSuggestionResponseDto
+                    {
+                        Recipe_id = recipe.Recipe_id,
+                        Recipe_name = recipe.Recipe_name,
+                        Description = recipe.Description,
+                        CookTime = recipe.CookTime,
+                        PrepTime = recipe.PrepTime,
+                        Difficulty = recipe.Difficulty,
+                        MatchPercentage = Math.Round(matchPercentage, 0),
+                        MissingIngredients = missing,
+                        AllIngredients = allIngDetails
+                    });
+                }
+
+                // Sort by highest match percentage
+                return suggestions.OrderByDescending(s => s.MatchPercentage).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error suggesting recipes based on pantry for account {AccountId}", accountId);
+                throw;
+            }
         }
         
         private RecipeResponseDto MapToDto(Recipe entity)

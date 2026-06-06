@@ -53,6 +53,39 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("collection/{collectionId}")]
+        public async Task<IActionResult> GetByCollectionId(Guid collectionId)
+        {
+            try
+            {
+                var items = await _savedRecipeService.GetSavedRecipesByCollectionId(collectionId);
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting saved recipes by collection id");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("toggle")]
+        public async Task<IActionResult> Toggle([FromBody] SavedRecipeRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+
+                var isAdded = await _savedRecipeService.ToggleSavedRecipe(request.Collection_Id, request.Recipe_Id);
+                return Ok(new { success = true, isAdded = isAdded });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling saved recipe");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] SavedRecipeRequest request)
         {

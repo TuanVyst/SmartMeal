@@ -34,6 +34,45 @@ namespace Service.Implements
             return item == null ? null : MapToDto(item);
         }
 
+        public async Task<List<SavedRecipeResponseDto>> GetSavedRecipesByCollectionId(Guid collectionId)
+        {
+            var items = await _savedRecipeRepo.GetSavedRecipesByCollectionId(collectionId);
+            return items.Select(MapToDto).ToList();
+        }
+
+        public async Task<bool> ToggleSavedRecipe(Guid collectionId, Guid recipeId)
+        {
+            var existing = await _savedRecipeRepo.GetSavedRecipeByCollectionAndRecipe(collectionId, recipeId);
+            
+            if (existing != null)
+            {
+                if (existing.IsDeleted)
+                {
+                    existing.IsDeleted = false;
+                    await _savedRecipeRepo.UpdateSavedRecipe(existing);
+                    return true; // Added (restored)
+                }
+                else
+                {
+                    existing.IsDeleted = true;
+                    await _savedRecipeRepo.UpdateSavedRecipe(existing);
+                    return false; // Removed
+                }
+            }
+            else
+            {
+                var newSaved = new SavedRecipe
+                {
+                    Id = Guid.NewGuid(),
+                    Collection_Id = collectionId,
+                    Recipe_Id = recipeId,
+                    IsDeleted = false
+                };
+                await _savedRecipeRepo.CreateSavedRecipe(newSaved);
+                return true; // Added
+            }
+        }
+
         public async Task<SavedRecipeResponseDto> CreateSavedRecipe(SavedRecipeRequest request)
         {
             try

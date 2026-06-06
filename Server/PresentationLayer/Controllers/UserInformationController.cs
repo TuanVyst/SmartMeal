@@ -9,14 +9,14 @@ namespace PresentationLayer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RecipeController : ControllerBase
+    public class UserInformationController : ControllerBase
     {
-        private readonly IRecipeService _recipeService;
-        private readonly ILogger<RecipeController> _logger;
+        private readonly IUserInformationService _userInformationService;
+        private readonly ILogger<UserInformationController> _logger;
 
-        public RecipeController(IRecipeService recipeService, ILogger<RecipeController> logger)
+        public UserInformationController(IUserInformationService userInformationService, ILogger<UserInformationController> logger)
         {
-            _recipeService = recipeService;
+            _userInformationService = userInformationService;
             _logger = logger;
         }
 
@@ -25,12 +25,12 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var items = await _recipeService.GetAllRecipes();
+                var items = await _userInformationService.GetAllUserInformations();
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all recipes");
+                _logger.LogError(ex, "Error getting all userInformations");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
@@ -40,66 +40,51 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _recipeService.GetRecipeById(id);
+                var item = await _userInformationService.GetUserInformationById(id);
                 if (item == null)
-                    return NotFound(new { success = false, message = "Recipe not found" });
+                    return NotFound(new { success = false, message = "UserInformation not found" });
 
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting recipe by id");
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet("ingredients")]
-        public async Task<IActionResult> GetByIngredients([FromQuery] List<Guid> ingredientIds)
-        {
-            try
-            {
-                var items = await _recipeService.GetRecipeByIngredients(ingredientIds);
-                return Ok(new { success = true, data = items });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting recipes by ingredients");
+                _logger.LogError(ex, "Error getting userInformation by id");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RecipeRequest request)
+        public async Task<IActionResult> Create([FromBody] UserInformationRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var item = await _recipeService.CreateRecipe(request);
+                var item = await _userInformationService.CreateUserInformation(request);
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating recipe");
+                _logger.LogError(ex, "Error creating userInformation");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] RecipeRequest request)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UserInformationRequest request)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var item = await _recipeService.UpdateRecipe(id, request);
+                var item = await _userInformationService.UpdateUserInformation(id, request);
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating recipe");
+                _logger.LogError(ex, "Error updating userInformation");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
@@ -109,27 +94,28 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var item = await _recipeService.SoftDeleteRecipe(id);
-                return Ok(new { success = true, message = "Recipe deleted successfully", data = item });
+                var item = await _userInformationService.SoftDeleteUserInformation(id);
+                return Ok(new { success = true, message = "UserInformation deleted successfully", data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting recipe");
+                _logger.LogError(ex, "Error deleting userInformation");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpGet("suggest/pantry/{accountId}")]
-        public async Task<IActionResult> SuggestRecipesBasedOnPantry(Guid accountId)
+        [HttpGet("account/{accountId}")]
+        public async Task<IActionResult> GetByAccountId(Guid accountId)
         {
             try
             {
-                var suggestions = await _recipeService.SuggestRecipesBasedOnPantry(accountId);
-                return Ok(new { success = true, data = suggestions });
+                var item = await _userInformationService.GetUserInformationByAccountId(accountId);
+                // Return 200 OK with null data if not found, to indicate they haven't created a profile yet.
+                return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error suggesting recipes based on pantry");
+                _logger.LogError(ex, "Error getting userInformation by account id");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
