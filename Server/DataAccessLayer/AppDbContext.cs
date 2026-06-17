@@ -48,6 +48,14 @@ namespace DataAccessLayer
             base.OnModelCreating(modelBuilder);
 
             // Configure entity relationships and keys here as needed.
+            // Add unique indices for tag names
+            modelBuilder.Entity<BusinessObject.Entities.IngredientTag>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<BusinessObject.Entities.RecipeTag>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Entities;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
@@ -23,7 +23,7 @@ namespace Repository.Implements
                 .Include(i => i.Nutritional_value)
                 .Include(i => i.AffiliateProducts)
                 .Include(i => i.Recipe_Ingredients)
-                .Include(i => i.IngredientLabels)
+                .Include(i => i.IngredientLabels).ThenInclude(il => il.Ingredient_tag)
                 .Include(i => i.GroceryItems)
                 .Include(i => i.Pantries)
                 .Include(i => i.Allergy)
@@ -36,7 +36,7 @@ namespace Repository.Implements
                 .Include(i => i.Nutritional_value)
                 .Include(i => i.AffiliateProducts)
                 .Include(i => i.Recipe_Ingredients)
-                .Include(i => i.IngredientLabels)
+                .Include(i => i.IngredientLabels).ThenInclude(il => il.Ingredient_tag)
                 .Include(i => i.GroceryItems)
                 .Include(i => i.Pantries)
                 .Include(i => i.Allergy)

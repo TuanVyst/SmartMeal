@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -14,12 +14,18 @@ namespace Service.Implements
     public class IngredientService : IIngredientService
     {
         private readonly IIngredientRepo _ingredientRepo;
+        private readonly IIngredientLabelRepo _ingredientLabelRepo;
+        private readonly INutritionalValueRepo _nutritionalValueRepo;
+        private readonly IIngredientTagRepo _ingredientTagRepo;
         private readonly ILogger<IngredientService> _logger;
 
-        public IngredientService(IIngredientRepo ingredientRepo, ILogger<IngredientService> logger)
+        public IngredientService(IIngredientRepo ingredientRepo, ILogger<IngredientService> logger, IIngredientLabelRepo ingredientLabelRepo, INutritionalValueRepo nutritionalValueRepo, IIngredientTagRepo ingredientTagRepo)
         {
             _ingredientRepo = ingredientRepo;
             _logger = logger;
+            _ingredientLabelRepo = ingredientLabelRepo;
+            _nutritionalValueRepo = nutritionalValueRepo;
+            _ingredientTagRepo = ingredientTagRepo;
         }
 
         public async Task<List<IngredientResponseDto>> GetAllIngredients()
@@ -45,6 +51,28 @@ namespace Service.Implements
                 if (ingredient.AveragePrice < 0)
                     throw new ArgumentException("AveragePrice cannot be negative", nameof(ingredient.AveragePrice));
 
+                // Support single tag (IngredientTagId) or multiple tags (IngredientTagIds)
+                var tagIds = new List<Guid>();
+                if (ingredient.IngredientTagIds != null && ingredient.IngredientTagIds.Any())
+                {
+                    foreach (var tid in ingredient.IngredientTagIds)
+                    {
+                        if (Guid.TryParse(tid, out var parsed)) tagIds.Add(parsed);
+                    }
+                }
+
+                if (!tagIds.Any())
+                    throw new ArgumentException("At least one ingredient tag id is required");
+
+                // Validate tags exist
+                var existingTags = new List<BusinessObject.Entities.IngredientTag>();
+                foreach (var tid in tagIds.Distinct())
+                {
+                    var t = await _ingredientTagRepo.GetIngredientTagById(tid);
+                    if (t == null) throw new ArgumentException($"Invalid ingredient tag id: {tid}");
+                    existingTags.Add(t);
+                }
+
                 var newIngredient = new Ingredient
                 {
                     Ingredient_id = Guid.NewGuid(),
@@ -55,7 +83,23 @@ namespace Service.Implements
                 };
 
                 var result = await _ingredientRepo.CreateIngredient(newIngredient);
-                _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) created successfully", newIngredient.Ingredient_id, newIngredient.Name);
+
+                // Create one IngredientLabel per provided tag
+                var createdLabels = new List<IngredientLabel>();
+                foreach (var tag in existingTags)
+                {
+                    var label = new IngredientLabel
+                    {
+                        Id = Guid.NewGuid(),
+                        Ingredient_id = newIngredient.Ingredient_id,
+                        It_id = tag.It_id,
+                        IsDeleted = false
+                    };
+                    var created = await _ingredientLabelRepo.CreateIngredientLabel(label);
+                    createdLabels.Add(created);
+                }
+
+                _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) with {LabelCount} labels created successfully", newIngredient.Ingredient_id, newIngredient.Name, createdLabels.Count);
                 return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient to database"));
             }
             catch (Exception ex)
@@ -84,9 +128,56 @@ namespace Service.Implements
                 existingIngredient.AveragePrice = ingredient.AveragePrice;
                 existingIngredient.ImageUrl = ingredient.ImageUrl;
 
-                var result = await _ingredientRepo.UpdateIngredient(existingIngredient);
-                _logger.LogInformation("Ingredient '{Ingredient_id}' updated successfully", existingIngredient.Ingredient_id);
-                return MapToDto(result);
+                await _ingredientRepo.UpdateIngredient(existingIngredient);
+
+                if (ingredient.IngredientTagIds != null)
+                {
+                    var tags = new List<IngredientTag>();
+                    foreach (var tagId in ingredient.IngredientTagIds)
+                    {
+                        var existingTag = await _ingredientTagRepo.GetIngredientTagById(tagId);
+                        if (existingTag == null)
+                            throw new ArgumentException($"Invalid ingredient tag: {tagId}");
+                        tags.Add(existingTag);
+                    }
+
+                    var currentLabels = existingIngredient.IngredientLabels ?? new List<IngredientLabel>();
+                    var currentActiveLabels = currentLabels.Where(l => !l.IsDeleted).ToList();
+                    var currentActiveTagIds = currentActiveLabels.Select(l => l.It_id).ToHashSet();
+
+                    var tagIdsToAdd = ingredient.IngredientTagIds.Where(tid => !currentActiveTagIds.Contains(tid)).ToList();
+                    var labelsToRemove = currentActiveLabels.Where(l => !ingredient.IngredientTagIds.Contains(l.It_id)).ToList();
+
+                    foreach (var label in labelsToRemove)
+                    {
+                        await _ingredientLabelRepo.SoftDeleteIngredientLabel(label.Id);
+                    }
+
+                    foreach (var tagId in tagIdsToAdd)
+                    {
+                        var softDeletedLabel = currentLabels.FirstOrDefault(l => l.IsDeleted && l.It_id == tagId);
+                        if (softDeletedLabel != null)
+                        {
+                            softDeletedLabel.IsDeleted = false;
+                            await _ingredientLabelRepo.UpdateIngredientLabel(softDeletedLabel);
+                        }
+                        else
+                        {
+                            var newLabel = new IngredientLabel
+                            {
+                                Id = Guid.NewGuid(),
+                                Ingredient_id = existingIngredient.Ingredient_id,
+                                It_id = tagId,
+                                IsDeleted = false
+                            };
+                            await _ingredientLabelRepo.CreateIngredientLabel(newLabel);
+                        }
+                    }
+                }
+
+                var updatedIngredient = await _ingredientRepo.GetIngredientById(id);
+                _logger.LogInformation("Ingredient '{Ingredient_id}' updated successfully", id);
+                return MapToDto(updatedIngredient);
             }
             catch (Exception ex)
             {
@@ -117,7 +208,7 @@ namespace Service.Implements
                     Calories = ingredient.Nutritional_value.Calories,
                     
                 } : null,
-                IngredientLabels = ingredient.IngredientLabels?.Select(l => new IngredientLabelSimpleDto
+                IngredientLabels = ingredient.IngredientLabels?.Where(l => !l.IsDeleted).Select(l => new IngredientLabelSimpleDto
                 {
                     Label_id = l.Id,
                     LabelName = l.Ingredient_tag?.Name

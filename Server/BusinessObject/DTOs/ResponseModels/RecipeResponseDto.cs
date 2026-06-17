@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BusinessObject.Dtos.ResponseModels
 {
@@ -16,5 +17,13 @@ namespace BusinessObject.Dtos.ResponseModels
         public bool IsPublic { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsDeleted { get; set; }
+
+        public ICollection<RecipeLabelSimpleDto> RecipeLabels { get; set; }
+    }
+
+    public class RecipeLabelSimpleDto
+    {
+        public Guid Label_id { get; set; }
+        public string LabelName { get; set; }
     }
 }

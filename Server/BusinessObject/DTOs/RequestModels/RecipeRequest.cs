@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BusinessObject.Dtos.RequestModels
 {
@@ -13,5 +14,6 @@ namespace BusinessObject.Dtos.RequestModels
         public int Servings { get; set; }
         public string Difficulty { get; set; }
         public bool IsPublic { get; set; }
+        public List<Guid> RecipeTagIds { get; set; } = new List<Guid>();
     }
 }
