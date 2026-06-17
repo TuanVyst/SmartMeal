@@ -89,9 +89,6 @@ builder.Services.AddScoped<Service.Interfaces.IGroceryListService, Service.Imple
 builder.Services.AddScoped<Repository.Interfaces.IGroceryItemRepo, Repository.Implements.GroceryItemRepo>();
 builder.Services.AddScoped<Service.Interfaces.IGroceryItemService, Service.Implements.GroceryItemService>();
 
-// Rating
-builder.Services.AddScoped<Repository.Interfaces.IRatingRepo, Repository.Implements.RatingRepo>();
-builder.Services.AddScoped<Service.Interfaces.IRatingService, Service.Implements.RatingService>();
 
 // Allergy
 builder.Services.AddScoped<Repository.Interfaces.IAllergyRepo, Repository.Implements.AllergyRepo>();

@@ -49,7 +49,6 @@ namespace BusinessObject.Entities
         public virtual ICollection<RecipeLabel> RecipeLabels { get; set; }
         public virtual ICollection<SavedRecipe> SavedRecipes { get; set; }
         public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; }
-        public virtual ICollection<Rating> Ratings { get; set; }
-        public virtual ICollection<Post> Posts { get; set; }
+
     }
 }
