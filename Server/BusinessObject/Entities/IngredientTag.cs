@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace BusinessObject.Entities
 {
+    [Table("IngredientTags")]
     public class IngredientTag
     {
         [Key]
         public Guid It_id { get; set; } = Guid.NewGuid();
 
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; }
 
         public string Category { get; set; }

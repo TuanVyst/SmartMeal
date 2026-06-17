@@ -68,11 +68,13 @@ namespace Service.Implements
                 {
                     Id = Guid.NewGuid(),
                     Ingredient_id = newIngredient.Ingredient_id,
-                  
+                    It_id = existingTag.It_id,
+                    IsDeleted = false,
                 };
 
                 var result = await _ingredientRepo.CreateIngredient(newIngredient);
-                _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) created successfully", newIngredient.Ingredient_id, newIngredient.Name);
+                await _ingredientLabelRepo.CreateIngredientLabel(newIngredientLabel);
+                _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) ({IngredientLabel}) created successfully", newIngredient.Ingredient_id, newIngredient.Name, newIngredientLabel.Ingredient_tag?.Name);
                 return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient to database"));
             }
             catch (Exception ex)
