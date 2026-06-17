@@ -21,12 +21,14 @@ namespace Repository.Implements
         public async Task<List<Recipe>> GetAllRecipes()
         {
             return await _ctx.Recipes
+                .Include(r => r.RecipeLabels).ThenInclude(rl => rl.RecipeTag)
                 .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
         public async Task<Recipe?> GetRecipeById(Guid id)
             => await _ctx.Recipes
+                .Include(r => r.RecipeLabels).ThenInclude(rl => rl.RecipeTag)
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.Recipe_id == id);
 
