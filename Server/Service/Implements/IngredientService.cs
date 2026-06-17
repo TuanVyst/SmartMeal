@@ -51,9 +51,27 @@ namespace Service.Implements
                 if (ingredient.AveragePrice < 0)
                     throw new ArgumentException("AveragePrice cannot be negative", nameof(ingredient.AveragePrice));
 
-                var existingTag = await _ingredientTagRepo.GetIngredientTagById(Guid.Parse(ingredient.IngredientTagId));
-                if (existingTag == null)
-                    throw new ArgumentException("Invalid ingredient tag");
+                // Support single tag (IngredientTagId) or multiple tags (IngredientTagIds)
+                var tagIds = new List<Guid>();
+                if (ingredient.IngredientTagIds != null && ingredient.IngredientTagIds.Any())
+                {
+                    foreach (var tid in ingredient.IngredientTagIds)
+                    {
+                        if (Guid.TryParse(tid, out var parsed)) tagIds.Add(parsed);
+                    }
+                }
+
+                if (!tagIds.Any())
+                    throw new ArgumentException("At least one ingredient tag id is required");
+
+                // Validate tags exist
+                var existingTags = new List<BusinessObject.Entities.IngredientTag>();
+                foreach (var tid in tagIds.Distinct())
+                {
+                    var t = await _ingredientTagRepo.GetIngredientTagById(tid);
+                    if (t == null) throw new ArgumentException($"Invalid ingredient tag id: {tid}");
+                    existingTags.Add(t);
+                }
 
                 var newIngredient = new Ingredient
                 {
@@ -64,17 +82,24 @@ namespace Service.Implements
                     IsDeleted = false
                 };
 
-                var newIngredientLabel = new IngredientLabel
-                {
-                    Id = Guid.NewGuid(),
-                    Ingredient_id = newIngredient.Ingredient_id,
-                    It_id = existingTag.It_id,
-                    IsDeleted = false,
-                };
-
                 var result = await _ingredientRepo.CreateIngredient(newIngredient);
-                await _ingredientLabelRepo.CreateIngredientLabel(newIngredientLabel);
-                _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) ({IngredientLabel}) created successfully", newIngredient.Ingredient_id, newIngredient.Name, newIngredientLabel.Ingredient_tag?.Name);
+
+                // Create one IngredientLabel per provided tag
+                var createdLabels = new List<IngredientLabel>();
+                foreach (var tag in existingTags)
+                {
+                    var label = new IngredientLabel
+                    {
+                        Id = Guid.NewGuid(),
+                        Ingredient_id = newIngredient.Ingredient_id,
+                        It_id = tag.It_id,
+                        IsDeleted = false
+                    };
+                    var created = await _ingredientLabelRepo.CreateIngredientLabel(label);
+                    createdLabels.Add(created);
+                }
+
+                _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) with {LabelCount} labels created successfully", newIngredient.Ingredient_id, newIngredient.Name, createdLabels.Count);
                 return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient to database"));
             }
             catch (Exception ex)
