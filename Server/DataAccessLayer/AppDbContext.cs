@@ -23,6 +23,14 @@ namespace DataAccessLayer
         public DbSet<IngredientLabel> IngredientLabels { get; set; }
         public DbSet<NutritionalValue> NutritionalValues { get; set; }
         public DbSet<AffiliateProduct> AffiliateProducts { get; set; }
+        public DbSet<HealthProfile> HealthProfiles { get; set; }
+        public DbSet<MedicalCondition> MedicalConditions { get; set; }
+        public DbSet<UserCondition> UserConditions { get; set; }
+        public DbSet<DietPlan> DietPlans { get; set; }
+        public DbSet<UserDietPlan> UserDietPlans { get; set; }
+        public DbSet<ConditionDietRecommendation> ConditionDietRecommendations { get; set; }
+        public DbSet<NutritionGoal> NutritionGoals { get; set; }
+        public DbSet<NutritionLog> NutritionLogs { get; set; }
         public DbSet<GroceryList> GroceryLists { get; set; }
         public DbSet<GroceryItem> GroceryItems { get; set; }
         public DbSet<Pantry> Pantries { get; set; }
