@@ -11,6 +11,16 @@ public static class DbInitializer
     {
         await context.Database.MigrateAsync();
 
+        // Restore existing admin account to original credentials if it exists
+        var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
+        if (existingAdmin != null)
+        {
+            existingAdmin.Email = "admin@smartmeal.com";
+            existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("admin123");
+            context.Accounts.Update(existingAdmin);
+            await context.SaveChangesAsync();
+        }
+
         if (await context.Accounts.AnyAsync()) return;
 
         // Roles

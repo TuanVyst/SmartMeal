@@ -1,4 +1,4 @@
-﻿
+
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Caching.Memory;
@@ -23,6 +23,18 @@ namespace Service.Implements
             var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT") ?? "587");
             var emailUser = Environment.GetEnvironmentVariable("EMAIL_USER");
             var emailPass = Environment.GetEnvironmentVariable("EMAIL_PASS");
+
+            if (string.IsNullOrWhiteSpace(emailUser) || string.IsNullOrWhiteSpace(emailHost) || string.IsNullOrWhiteSpace(emailPass))
+            {
+                // Ghi nhận log OTP ra console ở môi trường Development khi thiếu cấu hình
+                Console.WriteLine("\n==================================================");
+                Console.WriteLine("⚠️ WARNING: Email environment variables (EMAIL_USER, EMAIL_HOST, EMAIL_PASS) are not configured.");
+                Console.WriteLine($"[EMAIL MOCK] To: {toEmail}");
+                Console.WriteLine($"[EMAIL MOCK] Subject: {subject}");
+                Console.WriteLine($"[EMAIL MOCK] Body: {body}");
+                Console.WriteLine("==================================================\n");
+                return;
+            }
 
             // Tạo nội dung bức thư
             var message = new MimeMessage();
