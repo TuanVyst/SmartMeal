@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260604150917_RemoveRoleEntity")]
-    partial class RemoveRoleEntity
+    [Migration("20260617072313_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -202,6 +202,72 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Comment");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.ConditionDietRecommendation", b =>
+                {
+                    b.Property<Guid>("Rec_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Condition_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Diet_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Rec_id");
+
+                    b.HasIndex("Condition_id");
+
+                    b.HasIndex("Diet_id");
+
+                    b.ToTable("ConditionDietRecommendation");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.DietPlan", b =>
+                {
+                    b.Property<Guid>("Diet_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("MaxCarbs")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("MaxFat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("MinProtein")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<double?>("TargetCalories")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Diet_id");
+
+                    b.ToTable("DietPlan");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
                 {
                     b.Property<Guid>("Item_id")
@@ -280,6 +346,49 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("GroceryLists");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.HealthProfile", b =>
+                {
+                    b.Property<Guid>("Profile_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActivityLevel")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Goal")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<double?>("Height")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("Weight")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Profile_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.ToTable("HealthProfile");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.Ingredient", b =>
                 {
                     b.Property<Guid>("Ingredient_id")
@@ -349,6 +458,116 @@ namespace DataAccessLayer.Migrations
                     b.HasKey("It_id");
 
                     b.ToTable("IngredientTags");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.MedicalCondition", b =>
+                {
+                    b.Property<Guid>("Condition_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Condition_id");
+
+                    b.ToTable("MedicalCondition");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.NutritionGoal", b =>
+                {
+                    b.Property<Guid>("Goal_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("TargetCalories")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("TargetCarbs")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("TargetFat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("TargetFiber")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("TargetProtein")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Goal_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.ToTable("NutritionGoal");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.NutritionLog", b =>
+                {
+                    b.Property<Guid>("Log_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("Ingredient_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LogDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MealType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<double?>("Quantity")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid?>("Recipe_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<double?>("TotalCalories")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Log_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.HasIndex("Ingredient_id");
+
+                    b.HasIndex("Recipe_id");
+
+                    b.ToTable("NutritionLog");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.NutritionalValue", b =>
@@ -792,6 +1011,70 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Subscription");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.UserCondition", b =>
+                {
+                    b.Property<Guid>("UC_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Condition_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DiagnosedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.HasKey("UC_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.HasIndex("Condition_id");
+
+                    b.ToTable("UserCondition");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.UserDietPlan", b =>
+                {
+                    b.Property<Guid>("UDP_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Diet_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UDP_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.HasIndex("Diet_id");
+
+                    b.ToTable("UserDietPlan");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Ingredient", "Ingredient")
@@ -868,6 +1151,25 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Post");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.ConditionDietRecommendation", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.MedicalCondition", "MedicalCondition")
+                        .WithMany()
+                        .HasForeignKey("Condition_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Entities.DietPlan", "DietPlan")
+                        .WithMany()
+                        .HasForeignKey("Diet_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DietPlan");
+
+                    b.Navigation("MedicalCondition");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Ingredient", "Ingredient")
@@ -904,6 +1206,17 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Account");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.HealthProfile", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.IngredientLabel", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Ingredient", "Ingredient")
@@ -921,6 +1234,40 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Ingredient");
 
                     b.Navigation("Ingredient_tag");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.NutritionGoal", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.NutritionLog", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Entities.Ingredient", "Ingredient")
+                        .WithMany()
+                        .HasForeignKey("Ingredient_id");
+
+                    b.HasOne("BusinessObject.Entities.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("Recipe_id");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Recipe");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.NutritionalValue", b =>
@@ -1103,6 +1450,44 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.UserCondition", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Entities.MedicalCondition", "MedicalCondition")
+                        .WithMany()
+                        .HasForeignKey("Condition_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("MedicalCondition");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.UserDietPlan", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Entities.DietPlan", "DietPlan")
+                        .WithMany()
+                        .HasForeignKey("Diet_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("DietPlan");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Account", b =>
