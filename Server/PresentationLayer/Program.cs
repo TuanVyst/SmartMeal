@@ -101,6 +101,10 @@ builder.Services.AddScoped<Service.Interfaces.IPantryService, Service.Implements
 // Ingredient (for cross-repo validation in AllergyService/PantryService)
 builder.Services.AddScoped<Repository.Interfaces.IIngredientRepo, Repository.Implements.IngredientRepo>();
 builder.Services.AddScoped<Service.Interfaces.IIngredientService, Service.Implements.IngredientService>();
+builder.Services.AddScoped<Repository.Interfaces.IIngredientTagRepo, Repository.Implements.IngredientTagRepo>();
+builder.Services.AddScoped<Service.Interfaces.IIngredientTagService, Service.Implements.IngredientTagService>();
+builder.Services.AddScoped<Repository.Interfaces.IIngredientLabelRepo, Repository.Implements.IngredientLabelRepo>();
+builder.Services.AddScoped<Repository.Interfaces.INutritionalValueRepo, Repository.Implements.NutritionalValueRepo>();
 
 // Account
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
