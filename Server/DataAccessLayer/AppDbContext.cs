@@ -37,10 +37,7 @@ namespace DataAccessLayer
         public DbSet<Partner> Partners { get; set; }
         public DbSet<Collection> Collections { get; set; }
         public DbSet<SavedRecipe> SavedRecipes { get; set; }
-        public DbSet<Post> Posts { get; set; }
-        public DbSet<Comment> Comments { get; set; }
-        public DbSet<Report> Reports { get; set; }
-        public DbSet<Rating> Ratings { get; set; }
+  
         public DbSet<Allergy> Allergies { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
