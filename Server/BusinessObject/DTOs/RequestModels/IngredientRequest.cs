@@ -8,7 +8,8 @@ namespace BusinessObject.Dtos.RequestModels
         public string Name { get; set; }
         public double AveragePrice { get; set; }
         public string ImageUrl { get; set; }
-        public List<Guid> IngredientTagIds { get; set; } = new List<Guid>();
+        // Provide one or more tag ids as a list (GUID strings)
+        public System.Collections.Generic.List<string> IngredientTagIds { get; set; }
     }
 }
 
