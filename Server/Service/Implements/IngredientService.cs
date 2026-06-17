@@ -14,12 +14,18 @@ namespace Service.Implements
     public class IngredientService : IIngredientService
     {
         private readonly IIngredientRepo _ingredientRepo;
+        private readonly IIngredientLabelRepo _ingredientLabelRepo;
+        private readonly INutritionalValueRepo _nutritionalValueRepo;
+        private readonly IIngredientTagRepo _ingredientTagRepo;
         private readonly ILogger<IngredientService> _logger;
 
-        public IngredientService(IIngredientRepo ingredientRepo, ILogger<IngredientService> logger)
+        public IngredientService(IIngredientRepo ingredientRepo, ILogger<IngredientService> logger, IIngredientLabelRepo ingredientLabelRepo, INutritionalValueRepo nutritionalValueRepo, IIngredientTagRepo ingredientTagRepo)
         {
             _ingredientRepo = ingredientRepo;
             _logger = logger;
+            _ingredientLabelRepo = ingredientLabelRepo;
+            _nutritionalValueRepo = nutritionalValueRepo;
+            _ingredientTagRepo = ingredientTagRepo;
         }
 
         public async Task<List<IngredientResponseDto>> GetAllIngredients()
@@ -45,6 +51,10 @@ namespace Service.Implements
                 if (ingredient.AveragePrice < 0)
                     throw new ArgumentException("AveragePrice cannot be negative", nameof(ingredient.AveragePrice));
 
+                var existingTag = await _ingredientTagRepo.GetIngredientTagById(Guid.Parse(ingredient.IngredientTagId));
+                if (existingTag == null)
+                    throw new ArgumentException("Invalid ingredient tag");
+
                 var newIngredient = new Ingredient
                 {
                     Ingredient_id = Guid.NewGuid(),
@@ -52,6 +62,13 @@ namespace Service.Implements
                     AveragePrice = ingredient.AveragePrice,
                     ImageUrl = ingredient.ImageUrl,
                     IsDeleted = false
+                };
+
+                var newIngredientLabel = new IngredientLabel
+                {
+                    Id = Guid.NewGuid(),
+                    Ingredient_id = newIngredient.Ingredient_id,
+                  
                 };
 
                 var result = await _ingredientRepo.CreateIngredient(newIngredient);
