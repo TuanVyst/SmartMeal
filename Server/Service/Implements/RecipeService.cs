@@ -288,6 +288,28 @@ namespace Service.Implements
                 {
                     Label_id = l.Id,
                     LabelName = l.RecipeTag?.Name
+                }).ToList(),
+                RecipeIngredients = entity.RecipeIngredients?.Where(ri => !ri.IsDeleted).Select(ri => new RecipeIngredientResponseDto
+                {
+                    Ingredient_id = ri.Ingredient_id,
+                    Name = ri.Ingredient?.Name ?? "",
+                    Quantity = ri.Quantity,
+                    UOM = ri.UOM ?? "",
+                    NutritionalValue = ri.Ingredient?.Nutritional_value == null ? null : new NutritionalValueSimpleDto
+                    {
+                        Id = ri.Ingredient.Nutritional_value.Nv_id,
+                        Calories = ri.Ingredient.Nutritional_value.Calories,
+                        Protein = ri.Ingredient.Nutritional_value.Protein,
+                        Carbohydrates = ri.Ingredient.Nutritional_value.Carbs,
+                        Carbs = ri.Ingredient.Nutritional_value.Carbs,
+                        Fat = ri.Ingredient.Nutritional_value.Fat,
+                        Fiber = ri.Ingredient.Nutritional_value.Fiber,
+                        Sugar = ri.Ingredient.Nutritional_value.Sugar,
+                        Sodium = ri.Ingredient.Nutritional_value.Sodium,
+                        Cholesterol = ri.Ingredient.Nutritional_value.Cholesterol,
+                        ServingSize = ri.Ingredient.Nutritional_value.ServingSize,
+                        ServingUnit = ri.Ingredient.Nutritional_value.ServingUnit
+                    }
                 }).ToList()
             };
         }

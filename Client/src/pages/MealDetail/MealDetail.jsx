@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiArrowLeft } from 'react-icons/fi';
+import { FiClock, FiHeart, FiArrowLeft, FiChevronDown } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
 import { mockRecipesData } from '../../utils/mockData';
+import api from '../../services/api';
 import './MealDetail.css';
 
 export default function MealDetail() {
@@ -13,17 +14,135 @@ export default function MealDetail() {
   const { isFavorite, toggleFavorite } = useFavorite();
   const [recipe, setRecipe] = useState(null);
   const [activeTab, setActiveTab] = useState('instructions');
+  const [expandedIngredients, setExpandedIngredients] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const toggleExpand = (idx) => {
+    setExpandedIngredients(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
 
   useEffect(() => {
-    // Find recipe from mock data
-    const found = mockRecipesData.find(r => r.id === id);
-    if (found) {
-      setRecipe(found);
-    }
+    const fetchRecipe = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/recipe/${id}`);
+        if (response.data && response.data.success) {
+          const item = response.data.data;
+          
+          const recipeName = item.recipe_name || item.Recipe_name || "";
+          const recipeId = item.recipe_id || item.Recipe_id || id;
+          const description = item.description || item.Description || "";
+          const instruction = item.instruction || item.Instruction || "";
+          const prepTime = item.prepTime || item.PrepTime || 0;
+          const cookTime = item.cookTime || item.CookTime || 0;
+          const servings = item.servings || item.Servings || 1;
+          const difficulty = item.difficulty || item.Difficulty || "";
+          const recipeIngredients = item.recipeIngredients || item.RecipeIngredients || [];
+
+          // Match with mock data for imageUrl
+          const mockRecipe = mockRecipesData.find(r => r.id === id || r.title.toLowerCase() === recipeName.toLowerCase());
+          const imageUrl = mockRecipe ? mockRecipe.imageUrl : "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop";
+
+          // Parse steps
+          const steps = instruction
+            ? instruction.split('\n')
+                .map(step => step.replace(/^\d+\.\s*/, '').trim())
+                .filter(step => step.length > 0)
+            : [];
+
+          // Map ingredients and calculate their dynamic nutrition
+          const mappedIngredients = recipeIngredients.map(ri => {
+            const quantity = ri.quantity || ri.Quantity || 0;
+            const uom = ri.uom || ri.UOM || "";
+            const amount = `${quantity} ${uom}`.trim();
+            const ingName = ri.name || ri.Name || 'Nguyên liệu';
+            
+            let nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+            const nv = ri.nutritionalValue || ri.NutritionalValue;
+            if (nv) {
+              const servingSize = nv.servingSize || nv.ServingSize || 1;
+              const multiplier = quantity / servingSize;
+              nutrition = {
+                calories: Math.round((nv.calories || nv.Calories || 0) * multiplier * 10) / 10,
+                protein: Math.round((nv.protein || nv.Protein || 0) * multiplier * 10) / 10,
+                carbs: Math.round((nv.carbs || nv.Carbs || nv.carbohydrates || nv.Carbohydrates || 0) * multiplier * 10) / 10,
+                fat: Math.round((nv.fat || nv.Fat || 0) * multiplier * 10) / 10,
+                fiber: Math.round((nv.fiber || nv.Fiber || 0) * multiplier * 10) / 10,
+                sugar: Math.round((nv.sugar || nv.Sugar || 0) * multiplier * 10) / 10,
+                sodium: Math.round((nv.sodium || nv.Sodium || 0) * multiplier * 10) / 10,
+                cholesterol: Math.round((nv.cholesterol || nv.Cholesterol || 0) * multiplier * 10) / 10,
+              };
+            }
+            
+            return {
+              name: ingName,
+              amount,
+              nutrition
+            };
+          });
+
+          // Calculate overall nutrition per serving
+          const totalNutri = mappedIngredients.reduce((acc, curr) => {
+            acc.calories += curr.nutrition.calories;
+            acc.protein += curr.nutrition.protein;
+            acc.carbs += curr.nutrition.carbs;
+            acc.fat += curr.nutrition.fat;
+            acc.fiber += curr.nutrition.fiber;
+            acc.sugar += curr.nutrition.sugar;
+            acc.sodium += curr.nutrition.sodium;
+            acc.cholesterol += curr.nutrition.cholesterol;
+            return acc;
+          }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
+
+          const calculatedNutrition = {
+            calories: Math.round(totalNutri.calories / servings),
+            protein: Math.round(totalNutri.protein / servings),
+            carbs: Math.round(totalNutri.carbs / servings),
+            fat: Math.round(totalNutri.fat / servings),
+            fiber: Math.round(totalNutri.fiber / servings),
+            sugar: Math.round(totalNutri.sugar / servings),
+            sodium: Math.round(totalNutri.sodium / servings),
+            cholesterol: Math.round(totalNutri.cholesterol / servings),
+          };
+
+          // Reconstruct recipe object for the component UI
+          setRecipe({
+            id: recipeId,
+            title: recipeName,
+            description,
+            time: `${prepTime + cookTime} mins`,
+            difficulty,
+            calories: `${calculatedNutrition.calories} kcal`,
+            imageUrl,
+            ingredients: mappedIngredients,
+            steps,
+            nutrition: calculatedNutrition,
+            servings
+          });
+        } else {
+          setError("Failed to load recipe details.");
+        }
+      } catch (err) {
+        console.error("Error fetching recipe:", err);
+        setError("An error occurred while fetching recipe details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipe();
   }, [id]);
 
-  if (!recipe) {
+  if (loading) {
     return <div className="detail-loading">Loading recipe details...</div>;
+  }
+
+  if (error || !recipe) {
+    return <div className="detail-loading">{error || "Recipe not found"}</div>;
   }
 
   const isFav = isFavorite(recipe.id);
@@ -180,30 +299,39 @@ export default function MealDetail() {
                   <div className="ingredient-nutrition-list">
                     {recipe.ingredients && recipe.ingredients.map((ing, idx) => {
                       if (ing.nutrition && (ing.nutrition.calories > 0 || ing.nutrition.protein > 0 || ing.nutrition.carbs > 0 || ing.nutrition.fat > 0)) {
+                        const isExpanded = !!expandedIngredients[idx];
                         return (
-                          <div key={idx} className="ing-nutri-card">
-                            <div className="ing-nutri-header">
+                          <div key={idx} className={`ing-nutri-card ${isExpanded ? 'expanded' : ''}`}>
+                            <div 
+                              className="ing-nutri-header clickable" 
+                              onClick={() => toggleExpand(idx)}
+                            >
                               <span className="ing-nutri-name">{ing.name}</span>
-                              <span className="ing-nutri-amount">{ing.amount}</span>
-                            </div>
-                            <div className="ing-nutri-grid">
-                              <div className="ing-nutri-stat cal">
-                                <span className="stat-value">{ing.nutrition.calories}</span>
-                                <span className="stat-label">Calories</span>
-                              </div>
-                              <div className="ing-nutri-stat pro">
-                                <span className="stat-value">{ing.nutrition.protein}g</span>
-                                <span className="stat-label">Protein</span>
-                              </div>
-                              <div className="ing-nutri-stat carb">
-                                <span className="stat-value">{ing.nutrition.carbs}g</span>
-                                <span className="stat-label">Carbs</span>
-                              </div>
-                              <div className="ing-nutri-stat fat">
-                                <span className="stat-value">{ing.nutrition.fat}g</span>
-                                <span className="stat-label">Fat</span>
+                              <div className="ing-nutri-header-right">
+                                <span className="ing-nutri-amount">{ing.amount}</span>
+                                <FiChevronDown className={`chevron-icon ${isExpanded ? 'rotated' : ''}`} />
                               </div>
                             </div>
+                            {isExpanded && (
+                              <div className="ing-nutri-details">
+                                <div className="ing-nutri-detail-row">
+                                  <span>Calories</span>
+                                  <strong>{ing.nutrition.calories} kcal</strong>
+                                </div>
+                                <div className="ing-nutri-detail-row">
+                                  <span>Protein</span>
+                                  <strong>{ing.nutrition.protein}g</strong>
+                                </div>
+                                <div className="ing-nutri-detail-row">
+                                  <span>Carbs</span>
+                                  <strong>{ing.nutrition.carbs}g</strong>
+                                </div>
+                                <div className="ing-nutri-detail-row">
+                                  <span>Fat</span>
+                                  <strong>{ing.nutrition.fat}g</strong>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       }
