@@ -13,19 +13,19 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="admin-loading">Loading dashboard...</div>;
+  if (loading) return <div className="admin-loading">Đang tải bảng điều khiển...</div>;
 
   const cards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green' },
-    { label: 'Total Meals', value: stats.totalMeals, icon: <FiCoffee />, color: 'blue' },
-    { label: 'Categories', value: stats.totalCategories, icon: <FiTag />, color: 'orange' },
-    { label: 'Feedback', value: stats.totalFeedback, icon: <FiMessageSquare />, color: 'purple' },
+    { label: 'Tổng người dùng', value: stats.totalUsers, icon: <FiUsers />, color: 'green' },
+    { label: 'Tổng món ăn', value: stats.totalMeals, icon: <FiCoffee />, color: 'blue' },
+    { label: 'Danh mục', value: stats.totalCategories, icon: <FiTag />, color: 'orange' },
+    { label: 'Phản hồi', value: stats.totalFeedback, icon: <FiMessageSquare />, color: 'purple' },
   ];
 
   return (
     <div>
       <div className="admin-page-header">
-        <h1>Dashboard</h1>
+        <h1>Bảng điều khiển</h1>
       </div>
       <div className="stats-grid">
         {cards.map((card) => (

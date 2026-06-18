@@ -43,18 +43,15 @@ export default function MealDetail() {
           const difficulty = item.difficulty || item.Difficulty || "";
           const recipeIngredients = item.recipeIngredients || item.RecipeIngredients || [];
 
-          // Match with mock data for imageUrl
           const mockRecipe = mockRecipesData.find(r => r.id === id || r.title.toLowerCase() === recipeName.toLowerCase());
           const imageUrl = mockRecipe ? mockRecipe.imageUrl : "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop";
 
-          // Parse steps
           const steps = instruction
             ? instruction.split('\n')
                 .map(step => step.replace(/^\d+\.\s*/, '').trim())
                 .filter(step => step.length > 0)
             : [];
 
-          // Map ingredients and calculate their dynamic nutrition
           const mappedIngredients = recipeIngredients.map(ri => {
             const quantity = ri.quantity || ri.Quantity || 0;
             const uom = ri.uom || ri.UOM || "";
@@ -85,7 +82,6 @@ export default function MealDetail() {
             };
           });
 
-          // Calculate overall nutrition per serving
           const totalNutri = mappedIngredients.reduce((acc, curr) => {
             acc.calories += curr.nutrition.calories;
             acc.protein += curr.nutrition.protein;
@@ -109,12 +105,11 @@ export default function MealDetail() {
             cholesterol: Math.round(totalNutri.cholesterol / servings),
           };
 
-          // Reconstruct recipe object for the component UI
           setRecipe({
             id: recipeId,
             title: recipeName,
             description,
-            time: `${prepTime + cookTime} mins`,
+            time: `${prepTime + cookTime} phút`,
             difficulty,
             calories: `${calculatedNutrition.calories} kcal`,
             imageUrl,
@@ -124,11 +119,11 @@ export default function MealDetail() {
             servings
           });
         } else {
-          setError("Failed to load recipe details.");
+          setError("Không thể tải chi tiết công thức.");
         }
       } catch (err) {
-        console.error("Error fetching recipe:", err);
-        setError("An error occurred while fetching recipe details.");
+        console.error("Lỗi khi tải công thức:", err);
+        setError("Đã xảy ra lỗi khi tải chi tiết công thức.");
       } finally {
         setLoading(false);
       }
@@ -138,11 +133,11 @@ export default function MealDetail() {
   }, [id]);
 
   if (loading) {
-    return <div className="detail-loading">Loading recipe details...</div>;
+    return <div className="detail-loading">Đang tải chi tiết công thức...</div>;
   }
 
   if (error || !recipe) {
-    return <div className="detail-loading">{error || "Recipe not found"}</div>;
+    return <div className="detail-loading">{error || "Không tìm thấy công thức"}</div>;
   }
 
   const isFav = isFavorite(recipe.id);
@@ -154,7 +149,7 @@ export default function MealDetail() {
   return (
     <div className="meal-detail-container">
       <button className="btn-back" onClick={() => navigate(-1)}>
-        <FiArrowLeft /> Back
+        <FiArrowLeft /> Quay lại
       </button>
 
       <div className="detail-card">
@@ -170,7 +165,7 @@ export default function MealDetail() {
               onClick={handleSave}
             >
               <FiHeart className={isFav ? 'fill-heart' : ''} />
-              <span>{isFav ? 'Saved to Favorites' : 'Save to Favorite'}</span>
+              <span>{isFav ? 'Đã lưu vào Yêu thích' : 'Lưu vào Yêu thích'}</span>
             </button>
           </div>
 
@@ -180,21 +175,21 @@ export default function MealDetail() {
             <div className="meta-box">
               <FiClock className="meta-icon" />
               <div>
-                <span className="meta-label">Cooking Time</span>
+                <span className="meta-label">Thời gian nấu</span>
                 <span className="meta-value">{recipe.time}</span>
               </div>
             </div>
             <div className="meta-box">
               <span className="meta-icon">🔥</span>
               <div>
-                <span className="meta-label">Nutrition</span>
+                <span className="meta-label">Dinh dưỡng</span>
                 <span className="meta-value">{recipe.calories}</span>
               </div>
             </div>
             <div className="meta-box">
               <FaUtensils className="meta-icon" />
               <div>
-                <span className="meta-label">Difficulty</span>
+                <span className="meta-label">Độ khó</span>
                 <span className="meta-value">{recipe.difficulty}</span>
               </div>
             </div>
@@ -202,7 +197,7 @@ export default function MealDetail() {
 
           <div className="detail-body">
             <div className="ingredients-section">
-              <h2>Ingredient</h2>
+              <h2>Nguyên liệu</h2>
               <ul className="ingredients-list-detail">
                 {recipe.ingredients ? (
                   recipe.ingredients.map((ing, idx) => (
@@ -211,7 +206,7 @@ export default function MealDetail() {
                     </li>
                   ))
                 ) : (
-                  recipe.requiredIngredients.map((ing, idx) => (
+                  recipe.requiredIngredients && recipe.requiredIngredients.map((ing, idx) => (
                     <li key={idx}>
                       <BsCheckCircle className="check-icon" /> {ing}
                     </li>
@@ -221,7 +216,7 @@ export default function MealDetail() {
 
               {recipe.nutrition && (
                 <div className="nutrition-section-wrapper" style={{ marginTop: '2.5rem' }}>
-                  <h2>Nutrition Facts</h2>
+                  <h2>Thông tin dinh dưỡng</h2>
                   <div className="nutrition-facts-label">
                     <div className="nutri-row main-cal">
                       <span>Calories</span>
@@ -230,27 +225,27 @@ export default function MealDetail() {
                     <div className="nutri-divider-thick"></div>
                     
                     <div className="nutri-row">
-                      <span>Protein</span>
+                      <span>Đạm</span>
                       <strong>{recipe.nutrition.protein}g</strong>
                     </div>
                     <div className="nutri-row">
-                      <span>Carbs</span>
+                      <span>Carb</span>
                       <strong>{recipe.nutrition.carbs}g</strong>
                     </div>
                     <div className="nutri-row">
-                      <span>Fat</span>
+                      <span>Chất béo</span>
                       <strong>{recipe.nutrition.fat}g</strong>
                     </div>
                     <div className="nutri-row">
-                      <span>Fiber</span>
+                      <span>Chất xơ</span>
                       <strong>{recipe.nutrition.fiber}g</strong>
                     </div>
                     <div className="nutri-row">
-                      <span>Sugar</span>
+                      <span>Đường</span>
                       <strong>{recipe.nutrition.sugar}g</strong>
                     </div>
                     <div className="nutri-row">
-                      <span>Sodium</span>
+                      <span>Natri</span>
                       <strong>{recipe.nutrition.sodium}mg</strong>
                     </div>
                     <div className="nutri-row">
@@ -268,19 +263,19 @@ export default function MealDetail() {
                   className={`tab-btn ${activeTab === 'instructions' ? 'active' : ''}`}
                   onClick={() => setActiveTab('instructions')}
                 >
-                  hướng dẫn
+                  Hướng dẫn
                 </button>
                 <button 
                   className={`tab-btn ${activeTab === 'nutrition' ? 'active' : ''}`}
                   onClick={() => setActiveTab('nutrition')}
                 >
-                  dinh dưỡng
+                  Dinh dưỡng
                 </button>
               </div>
 
               {activeTab === 'instructions' ? (
                 <div className="tab-content instructions-tab">
-                  <h2>Cooking Instructions</h2>
+                  <h2>Hướng dẫn nấu</h2>
                   <ol className="steps-list">
                     {recipe.steps.map((step, idx) => (
                       <li key={idx}>
@@ -292,7 +287,7 @@ export default function MealDetail() {
                 </div>
               ) : (
                 <div className="tab-content nutrition-tab">
-                  <h2>Detailed Nutrition</h2>
+                  <h2>Chi tiết dinh dưỡng</h2>
                   <p className="nutrition-tab-intro">
                     Chi tiết giá trị dinh dưỡng đóng góp từ từng nguyên liệu trong công thức:
                   </p>
@@ -319,15 +314,15 @@ export default function MealDetail() {
                                   <strong>{ing.nutrition.calories} kcal</strong>
                                 </div>
                                 <div className="ing-nutri-detail-row">
-                                  <span>Protein</span>
+                                  <span>Đạm</span>
                                   <strong>{ing.nutrition.protein}g</strong>
                                 </div>
                                 <div className="ing-nutri-detail-row">
-                                  <span>Carbs</span>
+                                  <span>Carb</span>
                                   <strong>{ing.nutrition.carbs}g</strong>
                                 </div>
                                 <div className="ing-nutri-detail-row">
-                                  <span>Fat</span>
+                                  <span>Chất béo</span>
                                   <strong>{ing.nutrition.fat}g</strong>
                                 </div>
                               </div>

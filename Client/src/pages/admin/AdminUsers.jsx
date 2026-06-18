@@ -18,19 +18,19 @@ export default function AdminUsers() {
     (u.email || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <div className="admin-loading">Loading users...</div>;
+  if (loading) return <div className="admin-loading">Đang tải người dùng...</div>;
 
   return (
     <div>
       <div className="admin-page-header">
-        <h1>Manage Users</h1>
+        <h1>Quản lý người dùng</h1>
       </div>
       <div className="admin-table-container">
         <div className="admin-table-toolbar">
-          <h2>All Users</h2>
+          <h2>Tất cả người dùng</h2>
           <input
             className="admin-table-search"
-            placeholder="Search by name or email..."
+            placeholder="Tìm theo tên hoặc email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -39,16 +39,16 @@ export default function AdminUsers() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
+              <th>Tên</th>
               <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Vai trò</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={6} className="empty-state"><p>No users found</p></td></tr>
+              <tr><td colSpan={6} className="empty-state"><p>Không tìm thấy người dùng</p></td></tr>
             )}
             {filtered.map((user) => (
               <tr key={user.account_id || user.id}>
@@ -60,13 +60,13 @@ export default function AdminUsers() {
                 <td><span className="status-badge active">{user.role || 'User'}</span></td>
                 <td>
                   <span className={`status-badge ${user.isActive !== false ? 'active' : 'inactive'}`}>
-                    {user.isActive !== false ? 'Active' : 'Inactive'}
+                    {user.isActive !== false ? 'Hoạt động' : 'Không hoạt động'}
                   </span>
                 </td>
                 <td>
-                  <button className="action-btn edit">Edit</button>
+                  <button className="action-btn edit">Sửa</button>
                   <button className="action-btn delete">
-                    {user.isActive !== false ? 'Disable' : 'Enable'}
+                    {user.isActive !== false ? 'Vô hiệu' : 'Kích hoạt'}
                   </button>
                 </td>
               </tr>

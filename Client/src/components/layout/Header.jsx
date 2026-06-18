@@ -20,7 +20,6 @@ export default function Header() {
     setIsDropdownOpen(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -33,7 +32,6 @@ export default function Header() {
     };
   }, [dropdownRef]);
 
-  // Use a generic avatar or initials
   const initials = user?.username ? user.username.charAt(0).toUpperCase() : 'U';
 
   return (
@@ -44,7 +42,7 @@ export default function Header() {
         <div 
           className="profile-icon" 
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          title="Account"
+          title="Tài khoản"
         >
           {initials}
         </div>
