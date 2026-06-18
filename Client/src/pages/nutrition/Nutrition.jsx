@@ -145,19 +145,47 @@ export default function Nutrition() {
       const rec = recipes.find(r => r.recipe_id === selectedItem);
       if (rec) {
         setUnit('phần');
-        // Back-end automatically calculates recipe nutrition on log submission,
-        // so we can display estimated 0/blank or manual if we want.
-        // We will default to empty values, backend handles it if 0.
+        
+        let totalCalories = 0;
+        let totalProtein = 0;
+        let totalCarbs = 0;
+        let totalFat = 0;
+        let totalFiber = 0;
+        let totalSugar = 0;
+        let totalSodium = 0;
+        let totalCholesterol = 0;
+
+        const recipeIngredients = rec.recipeIngredients || rec.RecipeIngredients || [];
+        recipeIngredients.forEach(ri => {
+          const nv = ri.nutritionalValue || ri.NutritionalValue;
+          if (nv) {
+            const quantityVal = ri.quantity || ri.Quantity || 0;
+            const servingSize = nv.servingSize || nv.ServingSize || 1;
+            const multiplier = quantityVal / servingSize;
+            totalCalories += (nv.calories || nv.Calories || 0) * multiplier;
+            totalProtein += (nv.protein || nv.Protein || 0) * multiplier;
+            totalCarbs += (nv.carbs || nv.Carbs || nv.carbohydrates || nv.Carbohydrates || 0) * multiplier;
+            totalFat += (nv.fat || nv.Fat || 0) * multiplier;
+            totalFiber += (nv.fiber || nv.Fiber || 0) * multiplier;
+            totalSugar += (nv.sugar || nv.Sugar || 0) * multiplier;
+            totalSodium += (nv.sodium || nv.Sodium || 0) * multiplier;
+            totalCholesterol += (nv.cholesterol || nv.Cholesterol || 0) * multiplier;
+          }
+        });
+
+        const servings = rec.servings || rec.Servings || 1;
+        const factor = quantity / servings;
+
         setManualMacros({
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          fiber: 0,
-          sugar: 0,
-          sodium: 0,
-          cholesterol: 0,
-          customName: rec.recipe_name
+          calories: Math.round(totalCalories * factor * 10) / 10,
+          protein: Math.round(totalProtein * factor * 10) / 10,
+          carbs: Math.round(totalCarbs * factor * 10) / 10,
+          fat: Math.round(totalFat * factor * 10) / 10,
+          fiber: Math.round(totalFiber * factor * 10) / 10,
+          sugar: Math.round(totalSugar * factor * 10) / 10,
+          sodium: Math.round(totalSodium * factor * 10) / 10,
+          cholesterol: Math.round(totalCholesterol * factor * 10) / 10,
+          customName: rec.recipe_name || rec.Recipe_name || ""
         });
       }
     } else if (logType === 'custom') {
@@ -190,14 +218,14 @@ export default function Nutrition() {
         ingredient_id: logType === 'ingredient' ? selectedItem : null,
         quantity: parseFloat(quantity),
         unit,
-        totalCalories: logType === 'custom' || manualMacros.calories > 0 ? parseFloat(manualMacros.calories) : null,
-        totalProtein: logType === 'custom' || manualMacros.protein > 0 ? parseFloat(manualMacros.protein) : null,
-        totalCarbs: logType === 'custom' || manualMacros.carbs > 0 ? parseFloat(manualMacros.carbs) : null,
-        totalFat: logType === 'custom' || manualMacros.fat > 0 ? parseFloat(manualMacros.fat) : null,
-        totalFiber: logType === 'custom' || manualMacros.fiber > 0 ? parseFloat(manualMacros.fiber) : null,
-        totalSugar: logType === 'custom' || manualMacros.sugar > 0 ? parseFloat(manualMacros.sugar) : null,
-        totalSodium: logType === 'custom' || manualMacros.sodium > 0 ? parseFloat(manualMacros.sodium) : null,
-        totalCholesterol: logType === 'custom' || manualMacros.cholesterol > 0 ? parseFloat(manualMacros.cholesterol) : null
+        totalCalories: (logType === 'recipe' || logType === 'custom' || manualMacros.calories > 0) ? parseFloat(manualMacros.calories) : null,
+        totalProtein: (logType === 'recipe' || logType === 'custom' || manualMacros.protein > 0) ? parseFloat(manualMacros.protein) : null,
+        totalCarbs: (logType === 'recipe' || logType === 'custom' || manualMacros.carbs > 0) ? parseFloat(manualMacros.carbs) : null,
+        totalFat: (logType === 'recipe' || logType === 'custom' || manualMacros.fat > 0) ? parseFloat(manualMacros.fat) : null,
+        totalFiber: (logType === 'recipe' || logType === 'custom' || manualMacros.fiber > 0) ? parseFloat(manualMacros.fiber) : null,
+        totalSugar: (logType === 'recipe' || logType === 'custom' || manualMacros.sugar > 0) ? parseFloat(manualMacros.sugar) : null,
+        totalSodium: (logType === 'recipe' || logType === 'custom' || manualMacros.sodium > 0) ? parseFloat(manualMacros.sodium) : null,
+        totalCholesterol: (logType === 'recipe' || logType === 'custom' || manualMacros.cholesterol > 0) ? parseFloat(manualMacros.cholesterol) : null
       };
 
       await api.post('/nutritionlog', payload);

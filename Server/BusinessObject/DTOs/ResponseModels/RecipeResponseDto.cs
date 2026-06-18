@@ -19,6 +19,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public bool IsDeleted { get; set; }
 
         public ICollection<RecipeLabelSimpleDto> RecipeLabels { get; set; }
+        public ICollection<RecipeIngredientResponseDto>? RecipeIngredients { get; set; }
     }
 
     public class RecipeLabelSimpleDto

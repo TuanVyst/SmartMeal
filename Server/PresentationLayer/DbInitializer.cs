@@ -50,12 +50,8 @@ public static class DbInitializer
             }
             await context.SaveChangesAsync();
 
-            var mockRecipeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-            var hasCorrectQuantities = await context.RecipeIngredients.AnyAsync(ri => ri.Recipe_id == mockRecipeId && ri.Ingredient.Name == "Onion" && ri.Quantity == 100);
-            if (!hasCorrectQuantities)
-            {
-                await SeedMatchingRecipesAsync(context);
-            }
+            // Force seed recipes to ensure up-to-date recipe ingredient quantities and nutrition facts
+            await SeedMatchingRecipesAsync(context);
 
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
