@@ -25,7 +25,7 @@ namespace Repository.Implements
         {
             return await _ctx.UserConditions
                 .Where(x => x.IsDeleted == false)
-                .FirstOrDefaultAsync(x => x.UserCondition_id == id);
+                .FirstOrDefaultAsync(x => x.UC_id == id);
         }
 
         public async Task<UserCondition> CreateUserCondition(UserCondition userCondition)
@@ -48,7 +48,7 @@ namespace Repository.Implements
         {
             var userCondition = await _ctx.UserConditions
                 .Where(x => x.IsDeleted == false)
-                .FirstOrDefaultAsync(x => x.UserCondition_id == id);
+                .FirstOrDefaultAsync(x => x.UC_id == id);
 
             if (userCondition == null)
                 throw new Exception("UserCondition not found");

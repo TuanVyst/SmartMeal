@@ -55,10 +55,7 @@ namespace Service.Implements
                 var tagIds = new List<Guid>();
                 if (ingredient.IngredientTagIds != null && ingredient.IngredientTagIds.Any())
                 {
-                    foreach (var tid in ingredient.IngredientTagIds)
-                    {
-                        if (Guid.TryParse(tid, out var parsed)) tagIds.Add(parsed);
-                    }
+                    tagIds.AddRange(ingredient.IngredientTagIds);
                 }
 
                 if (!tagIds.Any())

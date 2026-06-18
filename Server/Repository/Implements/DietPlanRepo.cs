@@ -25,7 +25,7 @@ namespace Repository.Implements
         {
             return await _ctx.DietPlans
                 .Where(x => x.IsDeleted == false)
-                .FirstOrDefaultAsync(x => x.DietPlan_id == id);
+                .FirstOrDefaultAsync(x => x.Diet_id == id);
         }
 
         public async Task<DietPlan> CreateDietPlan(DietPlan dietPlan)
@@ -48,7 +48,7 @@ namespace Repository.Implements
         {
             var dietPlan = await _ctx.DietPlans
                 .Where(x => x.IsDeleted == false)
-                .FirstOrDefaultAsync(x => x.DietPlan_id == id);
+                .FirstOrDefaultAsync(x => x.Diet_id == id);
 
             if (dietPlan == null)
                 throw new Exception("DietPlan not found");
