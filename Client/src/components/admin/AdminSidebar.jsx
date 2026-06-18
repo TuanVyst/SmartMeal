@@ -15,11 +15,11 @@ export default function AdminSidebar() {
   };
 
   const navItems = [
-    { to: '/admin', icon: <FiGrid />, label: 'Dashboard', end: true },
-    { to: '/admin/users', icon: <FiUsers />, label: 'Users' },
-    { to: '/admin/meals', icon: <FiCoffee />, label: 'Meals' },
-    { to: '/admin/categories', icon: <FiTag />, label: 'Categories' },
-    { to: '/admin/feedback', icon: <FiMessageSquare />, label: 'Feedback' },
+    { to: '/admin', icon: <FiGrid />, label: 'Bảng điều khiển', end: true },
+    { to: '/admin/users', icon: <FiUsers />, label: 'Người dùng' },
+    { to: '/admin/meals', icon: <FiCoffee />, label: 'Món ăn' },
+    { to: '/admin/categories', icon: <FiTag />, label: 'Danh mục' },
+    { to: '/admin/feedback', icon: <FiMessageSquare />, label: 'Phản hồi' },
   ];
 
   return (
@@ -30,7 +30,7 @@ export default function AdminSidebar() {
       <aside className={`admin-sidebar ${open ? 'open' : ''}`}>
         <div className="admin-sidebar-logo">
           <h2>SmartMeal</h2>
-          <span>Admin</span>
+          <span>Quản trị</span>
         </div>
         <nav className="admin-sidebar-nav">
           {navItems.map((item) => (
@@ -49,7 +49,7 @@ export default function AdminSidebar() {
         <div className="admin-sidebar-footer">
           <button className="admin-nav-item logout-btn" onClick={handleLogout}>
             <span className="admin-nav-icon"><FiLogOut /></span>
-            <span>Logout</span>
+            <span>Đăng xuất</span>
           </button>
         </div>
       </aside>

@@ -6,36 +6,36 @@ import tomatoImg from '../../../assets/Tomato.png';
 
 const meals = [
   {
-    name: 'Garden Fresh Bowl',
+    name: 'Salad Tươi Xanh',
     image: saladImg,
-    cookTime: '25 min',
+    cookTime: '25 phút',
     calories: 450,
-    difficulty: 'Easy',
-    tags: ['Healthy', 'Protein'],
+    difficulty: 'Dễ',
+    tags: ['Lành mạnh', 'Nhiều đạm'],
   },
   {
-    name: 'Avocado Delight',
+    name: 'Bơ Ngon Ngọt',
     image: avocadoImg,
-    cookTime: '15 min',
+    cookTime: '15 phút',
     calories: 320,
-    difficulty: 'Easy',
-    tags: ['Vegan', 'Quick'],
+    difficulty: 'Dễ',
+    tags: ['Thuần chay', 'Nhanh'],
   },
   {
-    name: 'Green Goodness',
+    name: 'Bông Cải Xanh',
     image: broccoliImg,
-    cookTime: '20 min',
+    cookTime: '20 phút',
     calories: 380,
-    difficulty: 'Medium',
-    tags: ['High Protein'],
+    difficulty: 'Trung bình',
+    tags: ['Nhiều đạm'],
   },
   {
-    name: 'Tomato Harvest',
+    name: 'Cà Chua Tươi',
     image: tomatoImg,
-    cookTime: '10 min',
+    cookTime: '10 phút',
     calories: 280,
-    difficulty: 'Easy',
-    tags: ['Vegan', 'Breakfast'],
+    difficulty: 'Dễ',
+    tags: ['Thuần chay', 'Sáng'],
   },
 ];
 
@@ -43,8 +43,8 @@ export default function PopularMeals() {
   return (
     <section id="explore" className="meals-section">
       <div className="meals-container">
-        <h2 className="section-label">Popular Meals</h2>
-        <h3 className="section-title">Most Loved Recipes</h3>
+        <h2 className="section-label">Món ăn phổ biến</h2>
+        <h3 className="section-title">Công thức được yêu thích nhất</h3>
         <div className="meals-grid">
           {meals.map((meal, i) => (
             <div key={i} className="meal-card">
@@ -56,7 +56,7 @@ export default function PopularMeals() {
                 <div className="meal-meta">
                   <span><FiClock size={14} /> {meal.cookTime}</span>
                   <span><FiZap size={14} /> {meal.calories} cal</span>
-                  <span className={`meal-diff diff-${meal.difficulty.toLowerCase()}`}>{meal.difficulty}</span>
+                  <span className={`meal-diff diff-${meal.difficulty === 'Trung bình' ? 'medium' : meal.difficulty === 'Dễ' ? 'easy' : 'hard'}`}>{meal.difficulty}</span>
                 </div>
                 <div className="meal-tags">
                   {meal.tags.map((t, j) => (

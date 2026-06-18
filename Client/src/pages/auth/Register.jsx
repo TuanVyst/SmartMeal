@@ -26,15 +26,15 @@ export default function Register() {
     setError('');
 
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Mật khẩu không khớp');
       return;
     }
     if (form.username.length < 3) {
-      setError('Username must be at least 3 characters');
+      setError('Tên đăng nhập phải có ít nhất 3 ký tự');
       return;
     }
     if (form.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
 
@@ -65,9 +65,9 @@ export default function Register() {
       } else if (err.response?.data?.title) {
         setError(err.response.data.title);
       } else if (err.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Make sure the backend is running.');
+        setError('Không thể kết nối máy chủ. Hãy đảm bảo backend đang chạy.');
       } else {
-        setError('Registration failed');
+        setError('Đăng ký thất bại');
       }
     }
   };
@@ -86,9 +86,9 @@ export default function Register() {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Make sure the backend is running.');
+        setError('Không thể kết nối máy chủ. Hãy đảm bảo backend đang chạy.');
       } else {
-        setError('OTP verification failed');
+        setError('Xác thực OTP thất bại');
       }
     }
   };
@@ -96,15 +96,15 @@ export default function Register() {
   if (otpStep) {
     return (
         <div className="auth-card-modern">
-          <Link to="/" className="back-home">← Back to home</Link>
-          <h1>Verify Email</h1>
-          <p className="auth-subtitle">Enter the code sent to <strong>{pendingEmail}</strong></p>
+          <Link to="/" className="back-home">← Về trang chủ</Link>
+          <h1>Xác thực Email</h1>
+          <p className="auth-subtitle">Nhập mã đã gửi đến <strong>{pendingEmail}</strong></p>
           <form onSubmit={handleOtpSubmit}>
             <div className="form-group">
-              <label>OTP Code</label>
+              <label>Mã OTP</label>
               <input
                 type="text"
-                placeholder="Enter 6-digit code"
+                placeholder="Nhập mã 6 chữ số"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 required
@@ -113,11 +113,11 @@ export default function Register() {
               />
             </div>
             {error && <p className="auth-error">{error}</p>}
-            <button type="submit" className="btn-submit">Verify & Create Account</button>
+            <button type="submit" className="btn-submit">Xác thực & Tạo tài khoản</button>
           </form>
           <p className="auth-footer-text">
             <button className="btn-link" onClick={() => { setOtpStep(false); setOtpCode(''); setError(''); }}>
-              Back to registration
+              Quay lại đăng ký
             </button>
           </p>
         </div>
@@ -126,28 +126,28 @@ export default function Register() {
 
   return (
         <div className="auth-card-modern">
-          <Link to="/" className="back-home">← Back to home</Link>
-          <h1>Create Account</h1>
-        <p className="auth-subtitle">Join SmartMeal and start your cooking journey</p>
+          <Link to="/" className="back-home">← Về trang chủ</Link>
+          <h1>Tạo tài khoản</h1>
+        <p className="auth-subtitle">Tham gia SmartMeal và bắt đầu hành trình nấu ăn của bạn</p>
         <form onSubmit={handleSubmit}>
           <div className="register-row">
             <div className="form-group">
-              <label>Full Name</label>
+              <label>Họ và tên</label>
               <input
                 type="text"
                 name="name"
-                placeholder="John Doe"
+                placeholder="Nguyễn Văn A"
                 value={form.name}
                 onChange={handleChange}
                 required
               />
             </div>
             <div className="form-group">
-              <label>Username</label>
+              <label>Tên đăng nhập</label>
               <input
                 type="text"
                 name="username"
-                placeholder="johndoe (min 3 characters)"
+                placeholder="nguyenvana (tối thiểu 3 ký tự)"
                 value={form.username}
                 onChange={handleChange}
                 required
@@ -161,14 +161,14 @@ export default function Register() {
               <input
                 type="email"
                 name="email"
-                placeholder="john@example.com"
+                placeholder="nguyen@example.com"
                 value={form.email}
                 onChange={handleChange}
                 required
               />
             </div>
             <div className="form-group">
-              <label>Phone (optional)</label>
+              <label>Số điện thoại (không bắt buộc)</label>
               <input
                 type="tel"
                 name="phone"
@@ -179,22 +179,22 @@ export default function Register() {
             </div>
           </div>
           <div className="form-group">
-            <label>Address (optional)</label>
+            <label>Địa chỉ (không bắt buộc)</label>
             <input
               type="text"
               name="address"
-              placeholder="Your address"
+              placeholder="Địa chỉ của bạn"
               value={form.address}
               onChange={handleChange}
             />
           </div>
           <div className="register-row">
             <div className="form-group">
-              <label>Password</label>
+              <label>Mật khẩu</label>
               <input
                 type="password"
                 name="password"
-                placeholder="Min 6 characters"
+                placeholder="Tối thiểu 6 ký tự"
                 value={form.password}
                 onChange={handleChange}
                 required
@@ -202,11 +202,11 @@ export default function Register() {
               />
             </div>
             <div className="form-group">
-              <label>Confirm Password</label>
+              <label>Xác nhận mật khẩu</label>
               <input
                 type="password"
                 name="confirmPassword"
-                placeholder="Re-enter password"
+                placeholder="Nhập lại mật khẩu"
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required
@@ -214,10 +214,10 @@ export default function Register() {
             </div>
           </div>
           {error && <p className="auth-error">{error}</p>}
-          <button type="submit" className="btn-submit">Create Account</button>
+          <button type="submit" className="btn-submit">Tạo tài khoản</button>
         </form>
         <p className="auth-footer-text">
-          Already have an account? <Link to="/login">Sign in</Link>
+          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
         </p>
     </div>
   );

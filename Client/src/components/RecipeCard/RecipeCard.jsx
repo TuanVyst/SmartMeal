@@ -29,8 +29,8 @@ const RecipeCard = ({ recipe }) => {
         <div className="card-header">
           <h3 className="recipe-title">{title}</h3>
           <div className="header-actions">
-            {matchPercentage !== undefined && <span className="match-badge">{matchPercentage}% Match</span>}
-            <button className={`save-btn ${isFav ? 'saved' : ''}`} onClick={handleSave} aria-label="Save Recipe">
+            {matchPercentage !== undefined && <span className="match-badge">{matchPercentage}% Phù hợp</span>}
+            <button className={`save-btn ${isFav ? 'saved' : ''}`} onClick={handleSave} aria-label="Lưu công thức">
               <FiHeart className={isFav ? 'fill-heart' : ''} />
             </button>
           </div>
@@ -46,7 +46,7 @@ const RecipeCard = ({ recipe }) => {
 
         {missingIngredients && missingIngredients.length > 0 && (
           <div className="missing-ingredients-box">
-            <p className="box-title">Missing ingredients:</p>
+            <p className="box-title">Nguyên liệu còn thiếu:</p>
             <div className="missing-pills">
               {missingIngredients.map((item, idx) => (
                 <span key={idx} className="missing-pill">{item}</span>
@@ -57,7 +57,7 @@ const RecipeCard = ({ recipe }) => {
 
         {allIngredients && allIngredients.length > 0 && (
           <div className="all-ingredients-section">
-            <p className="section-title">All ingredients:</p>
+            <p className="section-title">Tất cả nguyên liệu:</p>
             <div className="ingredients-list">
               {allIngredients.map((item, idx) => (
                 <span key={idx} className={`ingredient-item ${item.possessed ? 'possessed' : 'missing'}`}>

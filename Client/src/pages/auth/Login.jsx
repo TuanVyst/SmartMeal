@@ -31,9 +31,9 @@ export default function Login() {
       } else if (err.response?.data?.title) {
         setError(err.response.data.title);
       } else if (err.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Make sure the backend is running.');
+        setError('Không thể kết nối máy chủ. Hãy đảm bảo backend đang chạy.');
       } else {
-        setError('Login failed');
+        setError('Đăng nhập thất bại');
       }
     }
   };
@@ -52,9 +52,9 @@ export default function Login() {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Make sure the backend is running.');
+        setError('Không thể kết nối máy chủ. Hãy đảm bảo backend đang chạy.');
       } else {
-        setError('OTP verification failed');
+        setError('Xác thực OTP thất bại');
       }
     }
   };
@@ -72,9 +72,9 @@ export default function Login() {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Make sure the backend is running.');
+        setError('Không thể kết nối máy chủ. Hãy đảm bảo backend đang chạy.');
       } else {
-        setError('Google login failed');
+        setError('Đăng nhập Google thất bại');
       }
     }
   };
@@ -82,15 +82,15 @@ export default function Login() {
   if (otpStep) {
     return (
         <div className="auth-card-modern">
-          <Link to="/" className="back-home">← Back to home</Link>
-          <h1>Verify OTP</h1>
-          <p className="auth-subtitle">Enter the code sent to <strong>{pendingEmail}</strong></p>
+          <Link to="/" className="back-home">← Về trang chủ</Link>
+          <h1>Xác thực OTP</h1>
+          <p className="auth-subtitle">Nhập mã đã gửi đến <strong>{pendingEmail}</strong></p>
           <form onSubmit={handleOtpSubmit}>
             <div className="form-group">
-              <label>OTP Code</label>
+              <label>Mã OTP</label>
               <input
                 type="text"
-                placeholder="Enter 6-digit code"
+                placeholder="Nhập mã 6 chữ số"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 required
@@ -99,11 +99,11 @@ export default function Login() {
               />
             </div>
             {error && <p className="auth-error">{error}</p>}
-            <button type="submit" className="btn-submit">Verify</button>
+            <button type="submit" className="btn-submit">Xác thực</button>
           </form>
           <p className="auth-footer-text">
             <button className="btn-link" onClick={() => { setOtpStep(false); setOtpCode(''); setError(''); }}>
-              Back to login
+              Quay lại đăng nhập
             </button>
           </p>
         </div>
@@ -112,47 +112,47 @@ export default function Login() {
 
   return (
         <div className="auth-card-modern">
-          <Link to="/" className="back-home">← Back to home</Link>
-          <h1>Welcome Back</h1>
-        <p className="auth-subtitle">Sign in to continue to SmartMeal</p>
+          <Link to="/" className="back-home">← Về trang chủ</Link>
+          <h1>Chào mừng trở lại</h1>
+        <p className="auth-subtitle">Đăng nhập để tiếp tục với SmartMeal</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email or Username</label>
+            <label>Email hoặc tên đăng nhập</label>
             <input
               type="text"
-              placeholder="you@example.com or username"
+              placeholder="you@example.com hoặc tên đăng nhập"
               value={form.emailOrUsername}
               onChange={(e) => setForm({ ...form, emailOrUsername: e.target.value })}
               required
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <label>Mật khẩu</label>
             <input
               type="password"
-              placeholder="Enter your password"
+              placeholder="Nhập mật khẩu"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
             />
           </div>
           <div className="forgot-password">
-            <a href="#forgot">Forgot Password?</a>
+            <a href="#forgot">Quên mật khẩu?</a>
           </div>
           {error && <p className="auth-error">{error}</p>}
-          <button type="submit" className="btn-submit">Sign In</button>
+          <button type="submit" className="btn-submit">Đăng nhập</button>
         </form>
-        <div className="divider">or continue with</div>
+        <div className="divider">hoặc tiếp tục với</div>
         <GoogleLogin
           onSuccess={handleGoogleSuccess}
-          onError={() => setError('Google login failed')}
+          onError={() => setError('Đăng nhập Google thất bại')}
           shape="pill"
           text="signin_with"
           theme="outline"
           size="large"
         />
         <p className="auth-footer-text">
-          Don&apos;t have an account? <Link to="/register">Create one</Link>
+          Chưa có tài khoản? <Link to="/register">Tạo ngay</Link>
         </p>
     </div>
   );

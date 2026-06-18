@@ -133,13 +133,27 @@ export default function MealSuggestion() {
 
   const groupedIngredients = getGroupedIngredients();
 
+  // Normalize Vietnamese text for flexible matching (remove diacritics, lowercase)
+  const normalizeText = (str) => {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .trim();
+  };
+
   // Recipe Suggestion Matching Logic
   const suggestedRecipes = mockRecipesData.map(recipe => {
     // Check if user is allergic to any ingredients in the recipe
     const allergicIngredients = recipe.requiredIngredients.filter(reqIng => {
       // Find system ingredient matching this recipe ingredient
-      const sysIng = ingredients.find(i => i.name.toLowerCase() === reqIng.toLowerCase() || 
-                                           i.name.toLowerCase().includes(reqIng.toLowerCase()));
+      const sysIng = ingredients.find(i => {
+        const dbName = normalizeText(i.name);
+        const recipeName = normalizeText(reqIng);
+        return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
+      });
       return sysIng && allergies.some(a => a.ingredient_id === sysIng.ingredient_id);
     });
 
@@ -147,8 +161,11 @@ export default function MealSuggestion() {
 
     // Check match count
     const allIngredientsMapped = recipe.requiredIngredients.map(reqIng => {
-      const sysIng = ingredients.find(i => i.name.toLowerCase() === reqIng.toLowerCase() || 
-                                           i.name.toLowerCase().includes(reqIng.toLowerCase()));
+      const sysIng = ingredients.find(i => {
+        const dbName = normalizeText(i.name);
+        const recipeName = normalizeText(reqIng);
+        return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
+      });
       
       const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
 

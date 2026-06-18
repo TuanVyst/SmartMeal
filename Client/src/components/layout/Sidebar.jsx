@@ -17,25 +17,25 @@ export default function Sidebar() {
           className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
           end
         >
-          Dashboard
+          Bảng điều khiển
         </NavLink>
         <NavLink 
           to="/meal-suggestions" 
           className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
         >
-          Meal Suggestions
+          Gợi ý món ăn
         </NavLink>
         <NavLink 
           to="/favorites" 
           className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
         >
-          Favorites
+          Yêu thích
         </NavLink>
         <NavLink 
           to="/meal-plans" 
           className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
         >
-          Meal Plans
+          Kế hoạch bữa ăn
         </NavLink>
         <NavLink 
           to="/nutrition" 
@@ -49,7 +49,7 @@ export default function Sidebar() {
             to="/admin" 
             className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
           >
-            Admin Panel
+            Quản trị
           </NavLink>
         )}
       </nav>
