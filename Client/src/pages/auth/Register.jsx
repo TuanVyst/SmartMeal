@@ -51,6 +51,8 @@ export default function Register() {
       if (result.requiresOtp) {
         setPendingEmail(result.email);
         setOtpStep(true);
+      } else if (result.role === 'Admin') {
+        navigate('/admin');
       } else {
         navigate('/dashboard');
       }
@@ -74,8 +76,12 @@ export default function Register() {
     e.preventDefault();
     setError('');
     try {
-      await verifyRegisterOtp(pendingEmail, otpCode);
-      navigate('/dashboard');
+      const result = await verifyRegisterOtp(pendingEmail, otpCode);
+      if (result.role === 'Admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);

@@ -67,22 +67,7 @@ namespace Service.Implements
                 throw new UnauthorizedAccessException("Account is disabled");
             }
 
-            var requireOtp = !account.LastLogin.HasValue || (DateTime.UtcNow - account.LastLogin.Value) > TimeSpan.FromDays(1);
-
-            if (requireOtp)
-            {
-                // 1. Gửi OTP qua email
-                await _emailService.RequestOtpAsync(account.Email);
-
-         
-                return new AuthResponseDto
-                {
-                    RequiresOtp = true,
-                    Email = account.Email 
-                };
-            }
-
-            // Nếu không cần OTP -> Cập nhật LastLogin và tạo Token
+            // Tam tat OTP khi dang nhap - chi dang ky moi can OTP
             account.LastLogin = DateTime.UtcNow;
             await _accountRepo.UpdateAccount(account);
 
@@ -95,35 +80,28 @@ namespace Service.Implements
 
             if (!isExist)
             {
-                // Dùng UnauthorizedAccessException cho lỗi xác thực thay vì Exception chung
-                throw new UnauthorizedAccessException("Mã OTP đã hết hạn hoặc không tồn tại.");
+                throw new UnauthorizedAccessException("Ma OTP da het han hoac khong ton tai.");
             }
             if (savedOtp != request.OtpCode)
             {
-                throw new UnauthorizedAccessException("Mã OTP không chính xác.");
+                throw new UnauthorizedAccessException("Ma OTP khong chinh xac.");
             }
 
-            // Xác thực thành công -> Xóa OTP khỏi cache
             _cache.Remove($"OTP_{request.Email}");
-
-            // Lấy lại thông tin user để sinh token
             var account = await _accountRepo.GetAccountByEmail(request.Email);
             if (account == null)
             {
-                throw new Exception("Tài khoản không tồn tại");
+                throw new Exception("Tai khoan khong ton tai");
             }
 
-            // Cập nhật LastLogin
             account.LastLogin = DateTime.UtcNow;
             await _accountRepo.UpdateAccount(account);
 
-            // Trả về Token để người dùng chính thức đăng nhập
             return GenerateAuthResponse(account);
         }
 
         public async Task<AuthResponseDto> Register(RegisterRequest request)
         {
-            // 1. Kiểm tra trùng lặp Username và Email
             var existingUsername = await _accountRepo.GetAccountByUsername(request.Username);
             if (existingUsername != null)
             {
@@ -136,14 +114,11 @@ namespace Service.Implements
                 throw new InvalidOperationException("Email already exists");
             }
 
-            // 2. Lưu tạm thông tin đăng ký vào Cache (ví dụ: 10 phút)
             var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
             _cache.Set($"RegisterData_{request.Email}", request, cacheOptions);
 
-            // 3. Gửi mã OTP qua email
             await _emailService.RequestOtpAsync(request.Email);
 
-            // 4. Báo cho Frontend biết cần chuyển sang màn hình nhập OTP
             return new AuthResponseDto
             {
                 RequiresOtp = true,
@@ -151,26 +126,22 @@ namespace Service.Implements
             };
         }
 
-
         public async Task<AuthResponseDto> VerifyRegisterOtp(VerifyOtpRequest request)
         {
-            // 1. Kiểm tra mã OTP có hợp lệ không
             if (!_cache.TryGetValue($"OTP_{request.Email}", out string savedOtp))
             {
-                throw new UnauthorizedAccessException("Mã OTP đã hết hạn hoặc không tồn tại.");
+                throw new UnauthorizedAccessException("Ma OTP da het han hoac khong ton tai.");
             }
             if (savedOtp != request.OtpCode)
             {
-                throw new UnauthorizedAccessException("Mã OTP không chính xác.");
+                throw new UnauthorizedAccessException("Ma OTP khong chinh xac.");
             }
 
-            // 2. Lấy lại thông tin đăng ký từ Cache
             if (!_cache.TryGetValue($"RegisterData_{request.Email}", out RegisterRequest registerRequest))
             {
-                throw new InvalidOperationException("Thông tin đăng ký đã quá hạn xác nhận, vui lòng đăng ký lại.");
+                throw new InvalidOperationException("Thong tin dang ky da qua han xac nhan, vui long dang ky lai.");
             }
 
-            // 3. Tạo tài khoản và lưu vào Database
             var account = new Account
             {
                 Account_id = Guid.NewGuid(),
@@ -183,16 +154,14 @@ namespace Service.Implements
                 Role = BusinessObject.Enums.RoleEnum.User,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
-                LastLogin = DateTime.UtcNow // Cập nhật lần đăng nhập đầu tiên
+                LastLogin = DateTime.UtcNow
             };
 
             await _accountRepo.AddAccount(account);
 
-            // 4. Xóa OTP và dữ liệu tạm khỏi Cache để tránh dùng lại
             _cache.Remove($"OTP_{request.Email}");
             _cache.Remove($"RegisterData_{request.Email}");
 
-            // 5. Trả về JWT Token để người dùng đăng nhập ngay lập tức
             return GenerateAuthResponse(account);
         }
 

@@ -1,7 +1,11 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Sidebar.css';
 
 export default function Sidebar() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Admin';
+
   return (
     <aside className="main-sidebar">
       <div className="sidebar-logo">
@@ -9,7 +13,7 @@ export default function Sidebar() {
       </div>
       <nav className="sidebar-nav">
         <NavLink 
-          to="/" 
+          to="/dashboard" 
           className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
           end
         >
@@ -33,6 +37,14 @@ export default function Sidebar() {
         >
           Meal Plans
         </NavLink>
+        {isAdmin && (
+          <NavLink 
+            to="/admin" 
+            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+          >
+            Admin Panel
+          </NavLink>
+        )}
       </nav>
     </aside>
   );

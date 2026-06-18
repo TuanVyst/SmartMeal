@@ -1,11 +1,13 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import logo from '../assets/SmartMealLogo.png';
 
 export default function AuthLayout() {
   return (
     <div className="auth-layout">
       <div className="auth-left-panel">
-        <img src={logo} alt="SmartMeal" className="branding-logo" />
+        <Link to="/" className="branding-logo-link">
+          <img src={logo} alt="SmartMeal" className="branding-logo" />
+        </Link>
         <div className="auth-branding">
           <h2 className="branding-heading">Cook smarter, eat better</h2>
           <p className="branding-desc">

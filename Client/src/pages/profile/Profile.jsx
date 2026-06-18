@@ -53,7 +53,7 @@ export default function Profile() {
 
   return (
     <div className="profile-container">
-      <button className="btn-back" onClick={() => navigate('/')}>
+      <button className="btn-back" onClick={() => navigate('/dashboard')}>
         &larr; Back to Dashboard
       </button>
       <div className="profile-card">
