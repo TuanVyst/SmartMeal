@@ -55,7 +55,7 @@ export default function PopularMeals() {
                 <h4 className="meal-name">{meal.name}</h4>
                 <div className="meal-meta">
                   <span><FiClock size={14} /> {meal.cookTime}</span>
-                  <span><FiZap size={14} /> {meal.calories} cal</span>
+                  <span><FiZap size={14} /> {meal.calories} kcal</span>
                   <span className={`meal-diff diff-${meal.difficulty === 'Trung bình' ? 'medium' : meal.difficulty === 'Dễ' ? 'easy' : 'hard'}`}>{meal.difficulty}</span>
                 </div>
                 <div className="meal-tags">

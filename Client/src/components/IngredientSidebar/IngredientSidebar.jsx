@@ -3,12 +3,12 @@ import { FiX, FiPlus } from 'react-icons/fi';
 import './IngredientSidebar.css';
 
 const COMMON_INGREDIENTS = [
-  'Beef', 'Pork', 'Fish', 'Shrimp',
-  'Rice', 'Pasta', 'Bread',
-  'Potatoes', 'Eggs', 'Tomatoes',
-  'Onions', 'Garlic', 'Bell Peppers',
-  'Carrots', 'Broccoli', 'Spinach',
-  'Lettuce', 'Mushrooms', 'Cheese'
+  'Thịt bò', 'Thịt heo', 'Cá', 'Tôm',
+  'Cơm/Gạo', 'Mì Ý', 'Bánh mì',
+  'Khoai tây', 'Trứng', 'Cà chua',
+  'Hành tây', 'Tỏi', 'Ớt chuông',
+  'Cà rốt', 'Bông cải xanh', 'Rau bina',
+  'Xà lách', 'Nấm', 'Phô mai'
 ];
 
 const IngredientSidebar = ({ pantryItems, addIngredient, removeIngredient }) => {
@@ -29,7 +29,7 @@ const IngredientSidebar = ({ pantryItems, addIngredient, removeIngredient }) => 
 
   return (
     <div className="ingredient-sidebar">
-      <h2 className="sidebar-title">Your Ingredients</h2>
+      <h2 className="sidebar-title">Nguyên liệu của bạn</h2>
       <div className="pantry-items-list">
         {pantryItems.map((item, index) => (
           <div key={index} className="pantry-item-pill">
@@ -41,21 +41,21 @@ const IngredientSidebar = ({ pantryItems, addIngredient, removeIngredient }) => 
         ))}
       </div>
 
-      <h2 className="sidebar-title">Add Custom Ingredient</h2>
+      <h2 className="sidebar-title">Thêm nguyên liệu tùy chọn</h2>
       <div className="custom-input-group">
         <input 
           type="text" 
-          placeholder="Enter ingredient name..." 
+          placeholder="Nhập tên nguyên liệu..." 
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
         />
         <button className="add-btn" onClick={handleAdd}>
-          <FiPlus className="plus-icon" /> Add
+          <FiPlus className="plus-icon" /> Thêm
         </button>
       </div>
 
-      <h2 className="sidebar-title">Common Ingredients</h2>
+      <h2 className="sidebar-title">Nguyên liệu phổ biến</h2>
       <div className="common-ingredients-list">
         {COMMON_INGREDIENTS.map((item, index) => (
           <button 

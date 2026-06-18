@@ -219,7 +219,7 @@ export default function MealDetail() {
                   <h2>Thông tin dinh dưỡng</h2>
                   <div className="nutrition-facts-label">
                     <div className="nutri-row main-cal">
-                      <span>Calories</span>
+                      <span>Năng lượng</span>
                       <strong>{recipe.nutrition.calories} kcal</strong>
                     </div>
                     <div className="nutri-divider-thick"></div>
@@ -310,7 +310,7 @@ export default function MealDetail() {
                             {isExpanded && (
                               <div className="ing-nutri-details">
                                 <div className="ing-nutri-detail-row">
-                                  <span>Calories</span>
+                                  <span>Năng lượng</span>
                                   <strong>{ing.nutrition.calories} kcal</strong>
                                 </div>
                                 <div className="ing-nutri-detail-row">

@@ -53,7 +53,7 @@ export default function IngredientDetail() {
         {ingredient.nutritional_value && (
           <>
             <h3 className="section-title">Thông tin dinh dưỡng</h3>
-            <div className="detail-row"><span className="label">Calories</span><span>{ingredient.nutritional_value.calories}</span></div>
+            <div className="detail-row"><span className="label">Năng lượng</span><span>{ingredient.nutritional_value.calories} kcal</span></div>
             <div className="detail-row"><span className="label">Đạm</span><span>{ingredient.nutritional_value.protein}g</span></div>
             <div className="detail-row"><span className="label">Carb</span><span>{ingredient.nutritional_value.carbohydrates}g</span></div>
             <div className="detail-row"><span className="label">Chất béo</span><span>{ingredient.nutritional_value.fat}g</span></div>

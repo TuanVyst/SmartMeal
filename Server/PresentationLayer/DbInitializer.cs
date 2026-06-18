@@ -15,6 +15,26 @@ public static class DbInitializer
         // Apply any pending migrations safely
         await context.Database.MigrateAsync();
 
+        // Check for English data and clear the database if found to force a Vietnamese re-seed
+        var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
+        var hasEnglishTags = await context.IngredientTags.AnyAsync(t => t.Name == "VEGETABLE" || t.Name == "GRAIN");
+        if (hasEnglishIngredients || hasEnglishTags)
+        {
+            context.Allergies.RemoveRange(await context.Allergies.ToListAsync());
+            context.NutritionLogs.RemoveRange(await context.NutritionLogs.ToListAsync());
+            context.RecipeIngredients.RemoveRange(await context.RecipeIngredients.ToListAsync());
+            context.RecipeLabels.RemoveRange(await context.RecipeLabels.ToListAsync());
+            context.SavedRecipes.RemoveRange(await context.SavedRecipes.ToListAsync());
+            context.Recipes.RemoveRange(await context.Recipes.ToListAsync());
+            context.IngredientLabels.RemoveRange(await context.IngredientLabels.ToListAsync());
+            context.NutritionalValues.RemoveRange(await context.NutritionalValues.ToListAsync());
+            context.Ingredients.RemoveRange(await context.Ingredients.ToListAsync());
+            context.IngredientTags.RemoveRange(await context.IngredientTags.ToListAsync());
+            context.RecipeTags.RemoveRange(await context.RecipeTags.ToListAsync());
+            context.Accounts.RemoveRange(await context.Accounts.ToListAsync());
+            await context.SaveChangesAsync();
+        }
+
         // Restore existing admin account to original credentials if it exists
         var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
         if (existingAdmin != null)
@@ -28,21 +48,21 @@ public static class DbInitializer
         if (await context.Accounts.AnyAsync())
         {
             // Update ingredient serving sizes if they are outdated
-            var dbOliveOil = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Olive Oil");
+            var dbOliveOil = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Dầu ô-liu");
             if (dbOliveOil?.Nutritional_value != null && dbOliveOil.Nutritional_value.ServingSize != 1)
             {
                 dbOliveOil.Nutritional_value.ServingSize = 1;
                 context.NutritionalValues.Update(dbOliveOil.Nutritional_value);
             }
 
-            var dbEgg = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Egg");
+            var dbEgg = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Trứng");
             if (dbEgg?.Nutritional_value != null && dbEgg.Nutritional_value.ServingSize != 1)
             {
                 dbEgg.Nutritional_value.ServingSize = 1;
                 context.NutritionalValues.Update(dbEgg.Nutritional_value);
             }
 
-            var dbLemon = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Lemon");
+            var dbLemon = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Chanh");
             if (dbLemon?.Nutritional_value != null && dbLemon.Nutritional_value.ServingSize != 1)
             {
                 dbLemon.Nutritional_value.ServingSize = 1;
@@ -98,31 +118,31 @@ public static class DbInitializer
         await context.SaveChangesAsync();
 
         // Ingredient Tags
-        var vegTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Vegetable", Category = "Produce" };
-        var fruitTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Fruit", Category = "Produce" };
-        var meatTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Meat", Category = "Protein" };
-        var spiceTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Spice", Category = "Seasoning" };
-        var dairyTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Dairy", Category = "Dairy" };
-        var grainTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Grain", Category = "Staple" };
+        var vegTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Rau củ", Category = "Thực vật" };
+        var fruitTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Trái cây", Category = "Thực vật" };
+        var meatTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Thịt & Hải sản", Category = "Protein" };
+        var spiceTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Gia vị", Category = "NẾm nếm" };
+        var dairyTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Sữa & Trứng", Category = "Dairy" };
+        var grainTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Ngũ cốc", Category = "Lương thực" };
         context.IngredientTags.AddRange(vegTag, fruitTag, meatTag, spiceTag, dairyTag, grainTag);
         await context.SaveChangesAsync();
 
         // Ingredients with NutritionalValues
-        var tomato = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Tomato", AveragePrice = 2.5, ImageUrl = "/images/tomato.jpg" };
-        var chickenBreast = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Chicken Breast", AveragePrice = 8.0, ImageUrl = "/images/chicken.jpg" };
-        var rice = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Rice", AveragePrice = 3.0, ImageUrl = "/images/rice.jpg" };
-        var onion = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Onion", AveragePrice = 1.5, ImageUrl = "/images/onion.jpg" };
-        var garlic = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Garlic", AveragePrice = 1.0, ImageUrl = "/images/garlic.jpg" };
-        var oliveOil = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Olive Oil", AveragePrice = 6.0, ImageUrl = "/images/oliveoil.jpg" };
-        var salt = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Salt", AveragePrice = 0.5, ImageUrl = "/images/salt.jpg" };
-        var pepper = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Black Pepper", AveragePrice = 1.5, ImageUrl = "/images/pepper.jpg" };
-        var egg = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Egg", AveragePrice = 4.0, ImageUrl = "/images/egg.jpg" };
-        var milk = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Milk", AveragePrice = 2.0, ImageUrl = "/images/milk.jpg" };
-        var broccoli = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Broccoli", AveragePrice = 3.0, ImageUrl = "/images/broccoli.jpg" };
-        var carrot = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Carrot", AveragePrice = 1.5, ImageUrl = "/images/carrot.jpg" };
-        var pasta = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Pasta", AveragePrice = 2.0, ImageUrl = "/images/pasta.jpg" };
-        var salmon = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Salmon", AveragePrice = 12.0, ImageUrl = "/images/salmon.jpg" };
-        var lemon = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Lemon", AveragePrice = 1.0, ImageUrl = "/images/lemon.jpg" };
+        var tomato = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Cà chua", AveragePrice = 2.5, ImageUrl = "/images/tomato.jpg" };
+        var chickenBreast = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Thịt gà", AveragePrice = 8.0, ImageUrl = "/images/chicken.jpg" };
+        var rice = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Gạo", AveragePrice = 3.0, ImageUrl = "/images/rice.jpg" };
+        var onion = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Hành tây", AveragePrice = 1.5, ImageUrl = "/images/onion.jpg" };
+        var garlic = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Tỏi", AveragePrice = 1.0, ImageUrl = "/images/garlic.jpg" };
+        var oliveOil = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Dầu ô-liu", AveragePrice = 6.0, ImageUrl = "/images/oliveoil.jpg" };
+        var salt = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Muối", AveragePrice = 0.5, ImageUrl = "/images/salt.jpg" };
+        var pepper = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Tiêu đen", AveragePrice = 1.5, ImageUrl = "/images/pepper.jpg" };
+        var egg = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Trứng", AveragePrice = 4.0, ImageUrl = "/images/egg.jpg" };
+        var milk = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Sữa", AveragePrice = 2.0, ImageUrl = "/images/milk.jpg" };
+        var broccoli = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Bông cải xanh", AveragePrice = 3.0, ImageUrl = "/images/broccoli.jpg" };
+        var carrot = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Cà rốt", AveragePrice = 1.5, ImageUrl = "/images/carrot.jpg" };
+        var pasta = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Mì ý", AveragePrice = 2.0, ImageUrl = "/images/pasta.jpg" };
+        var salmon = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Cá hồi", AveragePrice = 12.0, ImageUrl = "/images/salmon.jpg" };
+        var lemon = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Chanh", AveragePrice = 1.0, ImageUrl = "/images/lemon.jpg" };
         context.Ingredients.AddRange(tomato, chickenBreast, rice, onion, garlic, oliveOil, salt, pepper, egg, milk, broccoli, carrot, pasta, salmon, lemon);
         await context.SaveChangesAsync();
 
@@ -163,13 +183,13 @@ public static class DbInitializer
         await context.SaveChangesAsync();
 
         // Recipe Tags
-        var breakfastTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Breakfast", Type = "meal" };
-        var lunchTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Lunch", Type = "meal" };
-        var dinnerTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Dinner", Type = "meal" };
-        var dessertTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Dessert", Type = "meal" };
-        var snackTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Snack", Type = "meal" };
-        var healthyTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Healthy", Type = "diet" };
-        var quickTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Quick", Type = "prep" };
+        var breakfastTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Bữa sáng", Type = "meal" };
+        var lunchTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Bữa trưa", Type = "meal" };
+        var dinnerTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Bữa tối", Type = "meal" };
+        var dessertTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Tráng miệng", Type = "meal" };
+        var snackTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Nhẹ", Type = "meal" };
+        var healthyTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Lành mạnh", Type = "diet" };
+        var quickTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Nhanh", Type = "prep" };
         context.RecipeTags.AddRange(breakfastTag, lunchTag, dinnerTag, dessertTag, snackTag, healthyTag, quickTag);
         await context.SaveChangesAsync();
 
@@ -207,35 +227,35 @@ public static class DbInitializer
         }
 
         // 3. Fetch tags
-        var lunchTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Lunch");
-        var dinnerTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Dinner");
-        var healthyTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Healthy");
-        var quickTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Quick");
+        var lunchTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Bữa trưa");
+        var dinnerTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Bữa tối");
+        var healthyTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Lành mạnh");
+        var quickTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Nhanh");
 
         // 4. Fetch ingredients
-        var chickenBreast = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Chicken Breast");
-        var garlic = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Garlic");
-        var onion = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Onion");
-        var broccoli = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Broccoli");
-        var carrot = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Carrot");
-        var rice = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Rice");
-        var egg = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Egg");
-        var salmon = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Salmon");
-        var lemon = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Lemon");
-        var oliveOil = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Olive Oil");
-        var pasta = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Pasta");
-        var tomato = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Tomato");
-        var salt = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Salt");
-        var pepper = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Black Pepper");
+        var chickenBreast = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Thịt gà");
+        var garlic = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Tỏi");
+        var onion = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Hành tây");
+        var broccoli = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Bông cải xanh");
+        var carrot = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Cà rốt");
+        var rice = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Gạo");
+        var egg = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Trứng");
+        var salmon = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Cá hồi");
+        var lemon = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Chanh");
+        var oliveOil = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Dầu ô-liu");
+        var pasta = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Mì ý");
+        var tomato = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Cà chua");
+        var salt = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Muối");
+        var pepper = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Tiêu đen");
 
-        // 5. Seed Recipe 1: Classic Chicken Stir Fry
+        // 5. Seed Recipe 1: Gà xào rau củ
         var recipe1 = new Recipe
         {
             Recipe_id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
             Account_id = adminAccount.Account_id,
-            Recipe_name = "Classic Chicken Stir Fry",
-            Description = "A quick and delicious Asian-inspired dish with tender chicken and crisp vegetables.",
-            Instruction = "1. Slice the chicken into thin strips and chop the vegetables.\n2. Heat oil in a wok or large frying pan over medium-high heat.\n3. Cook the chicken until browned, then remove from the pan.\n4. Stir-fry the garlic, onion, broccoli, and carrots until tender-crisp.\n5. Return the chicken to the pan, add soy sauce, and toss everything together.\n6. Serve hot over a bed of steamed rice.",
+            Recipe_name = "Gà Xào Rau Củ",
+            Description = "Món ăn nhanh chóng và bổ dưỡng với thịt gà mềm mại và rau củ tươi giòn, phong cách ẩm thực châu Á.",
+            Instruction = "1. Thái gà thành lát mỏng và sơ chế rau củ.\n2. Đun nóng dầu trong chảo hoặc wok ở lửa vừa-mạnh.\n3. Cho gà vào rán đến khi vàng, sau đó vớt ra.\n4. Phi thơm tỏi, hành, bông cải và cà rốt cho đến khi chín mềm.\n5. Cho gà vào lại, nêm gia vị rồi xào đều.\n6. Dọn nóng kèm cơm trắng.",
             CookTime = 20,
             PrepTime = 5,
             Servings = 2,
@@ -261,14 +281,14 @@ public static class DbInitializer
         if (dinnerTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = dinnerTag.Rt_Id, Recipe_Id = recipe1.Recipe_id });
         if (healthyTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = healthyTag.Rt_Id, Recipe_Id = recipe1.Recipe_id });
 
-        // 6. Seed Recipe 2: Egg Fried Rice
+        // 6. Seed Recipe 2: Cơm chiên trứng
         var recipe2 = new Recipe
         {
             Recipe_id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
             Account_id = adminAccount.Account_id,
-            Recipe_name = "Egg Fried Rice",
-            Description = "Simple yet satisfying fried rice with scrambled eggs and vegetables.",
-            Instruction = "1. Heat a splash of oil in a large pan or wok.\n2. Scramble the eggs and push them to one side of the pan.\n3. Add onions and garlic to the empty side and cook until softened.\n4. Add the cooked rice and soy sauce, stirring constantly to combine.\n5. Toss with the scrambled eggs until everything is heated through.\n6. Garnish with green onions if desired and serve immediately.",
+            Recipe_name = "Cơm Chiên Trứng",
+            Description = "Món cơm chiên đơn giản mà thơm ngon với trứng bác và rau củ.",
+            Instruction = "1. Đun nóng dầu trong chảo hoặc wok.\n2. Đập trứng vào chảo, bác đến khi chín rồi đẩy sang một bên.\n3. Phi thơm hành và tỏi ở bên còn lại cho đến khi mềm.\n4. Cho cơm vào, nước tương và đảo đều.\n5. Trộn đều với trứng và đảo cho nhiệt đều khắp.\n6. Dọn ngay ăn nóng là ngon nhất.",
             CookTime = 10,
             PrepTime = 5,
             Servings = 2,
@@ -290,14 +310,14 @@ public static class DbInitializer
         if (lunchTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = lunchTag.Rt_Id, Recipe_Id = recipe2.Recipe_id });
         if (quickTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = quickTag.Rt_Id, Recipe_Id = recipe2.Recipe_id });
 
-        // 7. Seed Recipe 3: Garlic Butter Salmon
+        // 7. Seed Recipe 3: Cá hồi sốt bơ tỏi
         var recipe3 = new Recipe
         {
             Recipe_id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
             Account_id = adminAccount.Account_id,
-            Recipe_name = "Garlic Butter Salmon",
-            Description = "Pan-seared salmon with garlic butter sauce and lemon.",
-            Instruction = "1. Season salmon with salt and pepper.\n2. Heat olive oil in a pan over medium-high heat.\n3. Cook salmon skin-side down for 4 minutes.\n4. Flip and add butter, garlic, and lemon juice.\n5. Cook for another 3 minutes, basting with the butter sauce.\n6. Serve with steamed vegetables.",
+            Recipe_name = "Cá Hồi Sốt Bơ Tỏi",
+            Description = "Cá hồi chiên ăn với sốt bơ tỏi thơm lừng và chanh tươi mát.",
+            Instruction = "1. Ướp cá hồi với muối và tiêu.\n2. Đun nóng dầu ô-liu trong chảo ở lửa vừa-mạnh.\n3. Chiên cá mặt da trước 4 phút.\n4. Lật mặt, cho bơ, tỏi và nước cốt chanh vào.\n5. Chiên thêm 3 phút, liên tục rưới sốt lên cá.\n6. Dọn kèm rau củ hấp.",
             CookTime = 10,
             PrepTime = 5,
             Servings = 2,
@@ -321,14 +341,14 @@ public static class DbInitializer
         if (healthyTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = healthyTag.Rt_Id, Recipe_Id = recipe3.Recipe_id });
         if (quickTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = quickTag.Rt_Id, Recipe_Id = recipe3.Recipe_id });
 
-        // 8. Seed Recipe 4: Simple Tomato Pasta
+        // 8. Seed Recipe 4: Mì ý sốt cà chua
         var recipe4 = new Recipe
         {
             Recipe_id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
             Account_id = testUser.Account_id,
-            Recipe_name = "Simple Tomato Pasta",
-            Description = "Easy pasta with fresh tomato garlic sauce.",
-            Instruction = "1. Cook pasta in salted boiling water until al dente.\n2. In a pan, sauté garlic and onion in olive oil.\n3. Add diced tomatoes and cook until softened.\n4. Season with salt and pepper.\n5. Toss cooked pasta with the sauce.\n6. Serve hot with grated cheese if desired.",
+            Recipe_name = "Mì Ý Sốt Cà Chua",
+            Description = "Mì ý nấu đơn giản với sốt cà chua tươi và tỏi.",
+            Instruction = "1. Luộc mì trong nước sôi có muối cho đến khi chín vừa.\n2. Phi thơm tỏi và hành trong dầu ô-liu.\n3. Cho cà chua thái hạt lựu vào xào cho đến khi mềm.\n4. Nêm muối tiêu.\n5. Trộn mì với sốt.\n6. Dọn nóng, có thể rắc phô mai nếu thích.",
             CookTime = 15,
             PrepTime = 5,
             Servings = 3,

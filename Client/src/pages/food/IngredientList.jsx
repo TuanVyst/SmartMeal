@@ -57,7 +57,7 @@ export default function IngredientList() {
             <tr>
               <th>Tên</th>
               <th>Giá trung bình</th>
-              <th>Calories</th>
+              <th>Năng lượng</th>
               <th>Thao tác</th>
             </tr>
           </thead>

@@ -411,7 +411,7 @@ export default function Nutrition() {
           onClick={() => setActiveTab('stats')}
         >
           <MdBarChart className="tab-icon" />
-          Thống kê & Insight
+          Thống kê & Phân tích
         </button>
       </div>
 
@@ -560,27 +560,27 @@ export default function Nutrition() {
                 <div className="preview-grid">
                   <div className="preview-item">
                     <span className="macro-dot protein-dot"></span>
-                    <span className="macro-name">Protein:</span>
+                    <span className="macro-name">Đạm:</span>
                     <span className="macro-val">{manualMacros.protein || 0} g</span>
                   </div>
                   <div className="preview-item">
                     <span className="macro-dot carbs-dot"></span>
-                    <span className="macro-name">Carbs:</span>
+                    <span className="macro-name">Carb:</span>
                     <span className="macro-val">{manualMacros.carbs || 0} g</span>
                   </div>
                   <div className="preview-item">
                     <span className="macro-dot fat-dot"></span>
-                    <span className="macro-name">Fat:</span>
+                    <span className="macro-name">Chất béo:</span>
                     <span className="macro-val">{manualMacros.fat || 0} g</span>
                   </div>
                   <div className="preview-item">
                     <span className="macro-dot fiber-dot"></span>
-                    <span className="macro-name">Fiber:</span>
+                    <span className="macro-name">Chất xơ:</span>
                     <span className="macro-val">{manualMacros.fiber || 0} g</span>
                   </div>
                   <div className="preview-item">
                     <span className="macro-dot sodium-dot"></span>
-                    <span className="macro-name">Sodium:</span>
+                    <span className="macro-name">Natri:</span>
                     <span className="macro-val">{manualMacros.sodium || 0} mg</span>
                   </div>
                   <div className="preview-item">
@@ -595,23 +595,23 @@ export default function Nutrition() {
                     <h4>Cấu hình chi tiết (Tùy chỉnh)</h4>
                     <div className="custom-fields-grid">
                       <div className="field">
-                        <label>Calories</label>
+                        <label>Năng lượng (kcal)</label>
                         <input type="number" step="any" value={manualMacros.calories} onChange={e => setManualMacros({...manualMacros, calories: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
-                        <label>Protein (g)</label>
+                        <label>Đạm (g)</label>
                         <input type="number" step="any" value={manualMacros.protein} onChange={e => setManualMacros({...manualMacros, protein: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
-                        <label>Carbs (g)</label>
+                        <label>Carb (g)</label>
                         <input type="number" step="any" value={manualMacros.carbs} onChange={e => setManualMacros({...manualMacros, carbs: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
-                        <label>Fat (g)</label>
+                        <label>Chất béo (g)</label>
                         <input type="number" step="any" value={manualMacros.fat} onChange={e => setManualMacros({...manualMacros, fat: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
-                        <label>Sodium (mg)</label>
+                        <label>Natri (mg)</label>
                         <input type="number" step="any" value={manualMacros.sodium} onChange={e => setManualMacros({...manualMacros, sodium: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
@@ -635,7 +635,7 @@ export default function Nutrition() {
                 <div className="goal-card-header">
                   <h3>So sánh với Mục tiêu Hôm nay</h3>
                   <button className="goal-settings-btn" onClick={() => setIsEditingGoal(!isEditingGoal)}>
-                    <MdSettings /> Thiết lập Goal
+                    <MdSettings /> Thiết lập Mục tiêu
                   </button>
                 </div>
 
@@ -643,19 +643,19 @@ export default function Nutrition() {
                   <form onSubmit={handleSaveGoal} className="goal-editor-form">
                     <div className="goal-form-grid">
                       <div className="group">
-                        <label>Mục tiêu Calories (kcal)</label>
+                        <label>Mục tiêu Năng lượng (kcal)</label>
                         <input type="number" value={goalForm.targetCalories} onChange={e => setGoalForm({...goalForm, targetCalories: e.target.value})} />
                       </div>
                       <div className="group">
-                        <label>Mục tiêu Protein (g)</label>
+                        <label>Mục tiêu Đạm (g)</label>
                         <input type="number" value={goalForm.targetProtein} onChange={e => setGoalForm({...goalForm, targetProtein: e.target.value})} />
                       </div>
                       <div className="group">
-                        <label>Mục tiêu Carbs (g)</label>
+                        <label>Mục tiêu Carb (g)</label>
                         <input type="number" value={goalForm.targetCarbs} onChange={e => setGoalForm({...goalForm, targetCarbs: e.target.value})} />
                       </div>
                       <div className="group">
-                        <label>Mục tiêu Fat (g)</label>
+                        <label>Mục tiêu Chất béo (g)</label>
                         <input type="number" value={goalForm.targetFat} onChange={e => setGoalForm({...goalForm, targetFat: e.target.value})} />
                       </div>
                     </div>
@@ -685,7 +685,7 @@ export default function Nutrition() {
                       {/* Protein */}
                       <div className="macro-bar-item">
                         <div className="label-row">
-                          <span>Protein</span>
+                          <span>Đạm</span>
                           <span>{Math.round(totalsToday.protein)}g / {activeGoal.protein}g</span>
                         </div>
                         <div className="bar-bg">
@@ -697,7 +697,7 @@ export default function Nutrition() {
                       {/* Carbs */}
                       <div className="macro-bar-item">
                         <div className="label-row">
-                          <span>Carbs</span>
+                          <span>Carb</span>
                           <span>{Math.round(totalsToday.carbs)}g / {activeGoal.carbs}g</span>
                         </div>
                         <div className="bar-bg">
@@ -709,7 +709,7 @@ export default function Nutrition() {
                       {/* Fat */}
                       <div className="macro-bar-item">
                         <div className="label-row">
-                          <span>Fat</span>
+                          <span>Chất béo</span>
                           <span>{Math.round(totalsToday.fat)}g / {activeGoal.fat}g</span>
                         </div>
                         <div className="bar-bg">
@@ -779,9 +779,9 @@ export default function Nutrition() {
                             </div>
                           </div>
                           <div className="item-macros">
-                            <span>P: {Math.round(log.totalProtein || 0)}g</span>
-                            <span>C: {Math.round(log.totalCarbs || 0)}g</span>
-                            <span>F: {Math.round(log.totalFat || 0)}g</span>
+                            <span>Đạm: {Math.round(log.totalProtein || 0)}g</span>
+                            <span>Carb: {Math.round(log.totalCarbs || 0)}g</span>
+                            <span>Béo: {Math.round(log.totalFat || 0)}g</span>
                           </div>
                           <button className="btn-delete-log" onClick={() => handleDeleteLog(log.log_id)}>
                             <MdDeleteOutline />
@@ -803,7 +803,7 @@ export default function Nutrition() {
               
               {/* SVG Calorie Trend Chart */}
               <div className="stats-card glass-panel">
-                <h3>Xu hướng Calories 7 ngày qua</h3>
+                <h3>Xu hướng Năng lượng 7 ngày qua</h3>
                 <div className="chart-wrapper">
                   <svg viewBox="0 0 500 240" className="svg-chart">
                     {/* Grid Lines */}
@@ -818,7 +818,7 @@ export default function Nutrition() {
                       return (
                         <>
                           <line x1="40" y1={goalY} x2="480" y2={goalY} stroke="var(--primary-color, #ff6b6b)" strokeWidth="2" strokeDasharray="6 3" />
-                          <text x="440" y={goalY - 5} fill="var(--primary-color, #ff6b6b)" fontSize="10" fontWeight="bold">Goal</text>
+                          <text x="440" y={goalY - 5} fill="var(--primary-color, #ff6b6b)" fontSize="10" fontWeight="bold">Mục tiêu</text>
                         </>
                       );
                     })()}
@@ -876,8 +876,8 @@ export default function Nutrition() {
 
               {/* Average Calories per Meal */}
               <div className="stats-card glass-panel">
-                <h3>Phân bổ Calories theo Bữa ăn</h3>
-                <p className="preview-subtitle">Trung bình Calories nạp vào của từng loại bữa ăn</p>
+                <h3>Phân bổ Năng lượng theo Bữa ăn</h3>
+                <p className="preview-subtitle">Trung bình Năng lượng nạp vào của từng loại bữa ăn</p>
                 <div className="meal-averages-list">
                   {mealTypeAverages.map(m => {
                     const pctOfGoal = Math.min(Math.round((m.avg / activeGoal.calories) * 100), 100);
@@ -902,7 +902,7 @@ export default function Nutrition() {
 
             {/* Insights & Sufficiency */}
             <div className="insights-card glass-panel margin-top-20">
-              <h3>Phân tích & Insights Sức khỏe</h3>
+              <h3>Phân tích & Nhận xét Sức khỏe</h3>
               <div className="insights-grid">
                 <div className="insight-box">
                   <h4>Đánh giá tuần này</h4>
