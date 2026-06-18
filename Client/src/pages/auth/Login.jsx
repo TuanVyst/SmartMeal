@@ -20,6 +20,8 @@ export default function Login() {
       if (result.requiresOtp) {
         setPendingEmail(result.email);
         setOtpStep(true);
+      } else if (result.role === 'Admin') {
+        navigate('/admin');
       } else {
         navigate('/dashboard');
       }
@@ -40,8 +42,12 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      await verifyOtp(pendingEmail, otpCode);
-      navigate('/dashboard');
+      const result = await verifyOtp(pendingEmail, otpCode);
+      if (result.role === 'Admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
@@ -56,8 +62,12 @@ export default function Login() {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     try {
-      await googleLogin(credentialResponse.credential);
-      navigate('/dashboard');
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.role === 'Admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
