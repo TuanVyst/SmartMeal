@@ -182,10 +182,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseRouting();
 app.UseCors("AllowClient");
+app.UseRouting();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
