@@ -16,6 +16,10 @@ import LandingPage from '../pages/landing/LandingPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/AdminUsers';
 import AdminMeals from '../pages/admin/AdminMeals';
+import AdminIngredientTags from '../pages/admin/AdminIngredientTags';
+import AdminIngredients from '../pages/admin/AdminIngredients';
+import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
+import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
 import AdminFeedback from '../pages/admin/AdminFeedback';
 import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
@@ -42,14 +46,6 @@ export default function AppRoutes() {
         <Route path="/recipe/:id" element={<MealDetail />} />
       </Route>
       <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/admin"
         element={
           <AdminGuard>
@@ -60,6 +56,10 @@ export default function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="meals" element={<AdminMeals />} />
+        <Route path="ingredient-tags" element={<AdminIngredientTags />} />
+        <Route path="ingredients" element={<AdminIngredients />} />
+        <Route path="recipe-tags" element={<AdminRecipeTags />} />
+        <Route path="recipes" element={<AdminRecipes />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="feedback" element={<AdminFeedback />} />
         <Route path="feedback/:id" element={<AdminFeedbackDetail />} />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiUsers, FiCoffee, FiTag, FiMessageSquare } from 'react-icons/fi';
+import { FiUsers, FiCoffee, FiTag, FiMessageSquare, FiShoppingBag, FiAward } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 
 export default function AdminDashboard() {
@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     adminService.getDashboardStats()
       .then(setStats)
-      .catch(() => setStats({ totalUsers: 0, totalMeals: 0, totalCategories: 0, totalFeedback: 0 }))
+      .catch(() => setStats({ totalUsers: 0, totalMeals: 0, totalCategories: 0, totalIngredients: 0, totalTags: 0, totalFeedback: 0 }))
       .finally(() => setLoading(false));
   }, []);
 
@@ -19,6 +19,8 @@ export default function AdminDashboard() {
     { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green' },
     { label: 'Total Meals', value: stats.totalMeals, icon: <FiCoffee />, color: 'blue' },
     { label: 'Categories', value: stats.totalCategories, icon: <FiTag />, color: 'orange' },
+    { label: 'Total Ingredients', value: stats.totalIngredients, icon: <FiShoppingBag />, color: 'teal' },
+    { label: 'Total Tags', value: stats.totalTags, icon: <FiAward />, color: 'red' },
     { label: 'Feedback', value: stats.totalFeedback, icon: <FiMessageSquare />, color: 'purple' },
   ];
 
