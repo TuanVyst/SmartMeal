@@ -9,6 +9,10 @@ public static class DbInitializer
 {
     public static async Task Initialize(AppDbContext context)
     {
+        // Ensure migration history records exist for already-created tables.
+        await EnsureMigrationHistoryAsync(context);
+
+        // Apply any pending migrations safely
         await context.Database.MigrateAsync();
 
         // Restore existing admin account to original credentials if it exists
@@ -249,5 +253,48 @@ public static class DbInitializer
             new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = quickTag.Rt_Id, Recipe_Id = recipe3.Recipe_id }
         );
         await context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Ensures the __EFMigrationsHistory table has records matching already-applied migrations.
+    /// Uses PL/pgSQL DO block for atomic idempotent operation.
+    /// </summary>
+    private static async Task EnsureMigrationHistoryAsync(AppDbContext context)
+    {
+        try
+        {
+            var rows = await context.Database.ExecuteSqlRawAsync(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_class c
+                        JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+                        WHERE n.nspname='public' AND c.relname='Account'
+                    ) THEN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260617072313_InitialCreate'
+                        ) THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260617072313_InitialCreate', '8.0.11');
+                        END IF;
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260617162458_AddUniqueTagNameIndexes'
+                        ) THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260617162458_AddUniqueTagNameIndexes', '8.0.11');
+                        END IF;
+                    END IF;
+                END $$;");
+
+            // Check if records were actually inserted
+            var count = await context.Database
+                .SqlQueryRaw<long>(@"SELECT CAST(COUNT(*) AS bigint) AS ""Value"" FROM ""__EFMigrationsHistory""")
+                .FirstOrDefaultAsync();
+            Console.WriteLine($"[DbInitializer] Migration history check: {count} record(s) found.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DbInitializer] Warning: Could not verify migration history: {ex.Message}");
+        }
     }
 }

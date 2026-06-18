@@ -3,6 +3,7 @@ using System;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260618054643_AddMissingNutritionTables")]
+    partial class AddMissingNutritionTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -515,27 +518,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<double?>("TotalCalories")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalCarbs")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalCholesterol")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalFat")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalFiber")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalProtein")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalSodium")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("TotalSugar")
                         .HasColumnType("double precision");
 
                     b.Property<string>("Unit")

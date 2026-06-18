@@ -98,6 +98,22 @@ builder.Services.AddScoped<Service.Interfaces.IAllergyService, Service.Implement
 builder.Services.AddScoped<Repository.Interfaces.IPantryRepo, Repository.Implements.PantryRepo>();
 builder.Services.AddScoped<Service.Interfaces.IPantryService, Service.Implements.PantryService>();
 
+// UserDietPlan
+builder.Services.AddScoped<Repository.Interfaces.IUserDietPlanRepo, Repository.Implements.UserDietPlanRepo>();
+builder.Services.AddScoped<Service.Interfaces.IUserDietPlanService, Service.Implements.UserDietPlanService>();
+
+// ConditionDietRecommendation
+builder.Services.AddScoped<Repository.Interfaces.IConditionDietRecommendationRepo, Repository.Implements.ConditionDietRecommendationRepo>();
+builder.Services.AddScoped<Service.Interfaces.IConditionDietRecommendationService, Service.Implements.ConditionDietRecommendationService>();
+
+// NutritionGoal
+builder.Services.AddScoped<Repository.Interfaces.INutritionGoalRepo, Repository.Implements.NutritionGoalRepo>();
+builder.Services.AddScoped<Service.Interfaces.INutritionGoalService, Service.Implements.NutritionGoalService>();
+
+// NutritionLog
+builder.Services.AddScoped<Repository.Interfaces.INutritionLogRepo, Repository.Implements.NutritionLogRepo>();
+builder.Services.AddScoped<Service.Interfaces.INutritionLogService, Service.Implements.NutritionLogService>();
+
 // Ingredient (for cross-repo validation in AllergyService/PantryService)
 builder.Services.AddScoped<Repository.Interfaces.IIngredientRepo, Repository.Implements.IngredientRepo>();
 builder.Services.AddScoped<Service.Interfaces.IIngredientService, Service.Implements.IngredientService>();
@@ -175,3 +191,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program { }
