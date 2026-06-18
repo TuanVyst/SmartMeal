@@ -12,6 +12,7 @@ export default function MealDetail() {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorite();
   const [recipe, setRecipe] = useState(null);
+  const [activeTab, setActiveTab] = useState('instructions');
 
   useEffect(() => {
     // Find recipe from mock data
@@ -82,26 +83,135 @@ export default function MealDetail() {
 
           <div className="detail-body">
             <div className="ingredients-section">
-              <h2>Ingredients</h2>
+              <h2>Ingredient</h2>
               <ul className="ingredients-list-detail">
-                {recipe.requiredIngredients.map((ing, idx) => (
-                  <li key={idx}>
-                    <BsCheckCircle className="check-icon" /> {ing}
-                  </li>
-                ))}
+                {recipe.ingredients ? (
+                  recipe.ingredients.map((ing, idx) => (
+                    <li key={idx}>
+                      <BsCheckCircle className="check-icon" /> <span><strong>{ing.amount}</strong> {ing.name}</span>
+                    </li>
+                  ))
+                ) : (
+                  recipe.requiredIngredients.map((ing, idx) => (
+                    <li key={idx}>
+                      <BsCheckCircle className="check-icon" /> {ing}
+                    </li>
+                  ))
+                )}
               </ul>
+
+              {recipe.nutrition && (
+                <div className="nutrition-section-wrapper" style={{ marginTop: '2.5rem' }}>
+                  <h2>Nutrition Facts</h2>
+                  <div className="nutrition-facts-label">
+                    <div className="nutri-row main-cal">
+                      <span>Calories</span>
+                      <strong>{recipe.nutrition.calories} kcal</strong>
+                    </div>
+                    <div className="nutri-divider-thick"></div>
+                    
+                    <div className="nutri-row">
+                      <span>Protein</span>
+                      <strong>{recipe.nutrition.protein}g</strong>
+                    </div>
+                    <div className="nutri-row">
+                      <span>Carbs</span>
+                      <strong>{recipe.nutrition.carbs}g</strong>
+                    </div>
+                    <div className="nutri-row">
+                      <span>Fat</span>
+                      <strong>{recipe.nutrition.fat}g</strong>
+                    </div>
+                    <div className="nutri-row">
+                      <span>Fiber</span>
+                      <strong>{recipe.nutrition.fiber}g</strong>
+                    </div>
+                    <div className="nutri-row">
+                      <span>Sugar</span>
+                      <strong>{recipe.nutrition.sugar}g</strong>
+                    </div>
+                    <div className="nutri-row">
+                      <span>Sodium</span>
+                      <strong>{recipe.nutrition.sodium}mg</strong>
+                    </div>
+                    <div className="nutri-row">
+                      <span>Cholesterol</span>
+                      <strong>{recipe.nutrition.cholesterol}mg</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="steps-section">
-              <h2>Cooking Instructions</h2>
-              <ol className="steps-list">
-                {recipe.steps.map((step, idx) => (
-                  <li key={idx}>
-                    <span className="step-number">{idx + 1}</span>
-                    <p>{step}</p>
-                  </li>
-                ))}
-              </ol>
+            <div className="right-column-section">
+              <div className="detail-tabs">
+                <button 
+                  className={`tab-btn ${activeTab === 'instructions' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('instructions')}
+                >
+                  hướng dẫn
+                </button>
+                <button 
+                  className={`tab-btn ${activeTab === 'nutrition' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('nutrition')}
+                >
+                  dinh dưỡng
+                </button>
+              </div>
+
+              {activeTab === 'instructions' ? (
+                <div className="tab-content instructions-tab">
+                  <h2>Cooking Instructions</h2>
+                  <ol className="steps-list">
+                    {recipe.steps.map((step, idx) => (
+                      <li key={idx}>
+                        <span className="step-number">{idx + 1}</span>
+                        <p>{step}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : (
+                <div className="tab-content nutrition-tab">
+                  <h2>Detailed Nutrition</h2>
+                  <p className="nutrition-tab-intro">
+                    Chi tiết giá trị dinh dưỡng đóng góp từ từng nguyên liệu trong công thức:
+                  </p>
+                  <div className="ingredient-nutrition-list">
+                    {recipe.ingredients && recipe.ingredients.map((ing, idx) => {
+                      if (ing.nutrition && (ing.nutrition.calories > 0 || ing.nutrition.protein > 0 || ing.nutrition.carbs > 0 || ing.nutrition.fat > 0)) {
+                        return (
+                          <div key={idx} className="ing-nutri-card">
+                            <div className="ing-nutri-header">
+                              <span className="ing-nutri-name">{ing.name}</span>
+                              <span className="ing-nutri-amount">{ing.amount}</span>
+                            </div>
+                            <div className="ing-nutri-grid">
+                              <div className="ing-nutri-stat cal">
+                                <span className="stat-value">{ing.nutrition.calories}</span>
+                                <span className="stat-label">Calories</span>
+                              </div>
+                              <div className="ing-nutri-stat pro">
+                                <span className="stat-value">{ing.nutrition.protein}g</span>
+                                <span className="stat-label">Protein</span>
+                              </div>
+                              <div className="ing-nutri-stat carb">
+                                <span className="stat-value">{ing.nutrition.carbs}g</span>
+                                <span className="stat-label">Carbs</span>
+                              </div>
+                              <div className="ing-nutri-stat fat">
+                                <span className="stat-value">{ing.nutrition.fat}g</span>
+                                <span className="stat-label">Fat</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
