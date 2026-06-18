@@ -4,6 +4,7 @@ using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace PresentationLayer.Controllers
 {
@@ -21,11 +22,15 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] Guid? accountId = null)
         {
             try
             {
                 var items = await _allergyService.GetAllAllergies();
+                if (accountId.HasValue)
+                {
+                    items = items.Where(x => x.Account_id == accountId.Value).ToList();
+                }
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)

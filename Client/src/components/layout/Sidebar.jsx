@@ -37,6 +37,13 @@ export default function Sidebar() {
         >
           Meal Plans
         </NavLink>
+        <NavLink 
+          to="/nutrition" 
+          className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+        >
+          Nhật ký Dinh dưỡng
+        </NavLink>
+
         {isAdmin && (
           <NavLink 
             to="/admin" 
