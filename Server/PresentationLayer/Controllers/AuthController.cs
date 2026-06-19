@@ -1,4 +1,6 @@
 using BusinessObject.Dtos.RequestModels;
+using BusinessObject.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 
@@ -13,6 +15,62 @@ namespace PresentationLayer.Controllers
         public AuthController(IAccountService service)
         {
             _service = service;
+        }
+
+        [HttpGet("accounts")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllAccounts()
+        {
+            try
+            {
+                var accounts = await _service.GetAllAccounts();
+                var result = accounts.Select(a => new
+                {
+                    accountId = a.Account_id,
+                    username = a.Username,
+                    name = a.Name,
+                    email = a.Email,
+                    phone = a.Phone,
+                    role = a.Role.ToString(),
+                    isActive = a.IsActive,
+                    createdAt = a.CreatedAt,
+                    lastLogin = a.LastLogin,
+                }).ToList();
+
+                return Ok(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPut("accounts/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateAccount(Guid id, [FromBody] UpdateAccountRequest request)
+        {
+            try
+            {
+                var account = await _service.GetAccountById(id);
+                if (account == null)
+                    return NotFound(new { success = false, message = "Account not found" });
+
+                if (request.IsActive.HasValue)
+                    account.IsActive = request.IsActive.Value;
+                if (!string.IsNullOrEmpty(request.Name))
+                    account.Name = request.Name;
+                if (!string.IsNullOrEmpty(request.Email))
+                    account.Email = request.Email;
+                if (!string.IsNullOrEmpty(request.Phone))
+                    account.Phone = request.Phone;
+
+                var updated = await _service.UpdateAccount(account);
+                return Ok(new { success = true, data = updated });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost("login")]
@@ -112,5 +170,13 @@ namespace PresentationLayer.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+    }
+
+    public class UpdateAccountRequest
+    {
+        public bool? IsActive { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
     }
 }

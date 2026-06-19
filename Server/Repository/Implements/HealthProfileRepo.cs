@@ -22,6 +22,14 @@ namespace Repository.Implements
                 .ToListAsync();
         }
 
+        public async Task<HealthProfile?> GetHealthProfileByAccountId(Guid accountId)
+        {
+            return await _ctx.HealthProfiles
+                .Include(h => h.Account)
+                .Where(h => h.IsDeleted == false)
+                .FirstOrDefaultAsync(h => h.Account_id == accountId);
+        }
+
         public async Task<HealthProfile?> GetHealthProfileById(Guid id)
         {
             return await _ctx.HealthProfiles

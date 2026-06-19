@@ -130,6 +130,22 @@ builder.Services.AddScoped<Repository.Interfaces.INutritionalValueRepo, Reposito
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
 builder.Services.AddScoped<Service.Interfaces.IAccountService, Service.Implements.AccountService>();
 
+// HealthProfile
+builder.Services.AddScoped<Repository.Interfaces.IHealthProfileRepo, Repository.Implements.HealthProfileRepo>();
+builder.Services.AddScoped<Service.Interfaces.IHealthProfileService, Service.Implements.HealthProfileService>();
+
+// UserCondition
+builder.Services.AddScoped<Repository.Interfaces.IUserConditionRepo, Repository.Implements.UserConditionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IUserConditionService, Service.Implements.UserConditionService>();
+
+// MedicalCondition
+builder.Services.AddScoped<Repository.Interfaces.IMedicalConditionRepo, Repository.Implements.MedicalConditionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.Implements.MedicalConditionService>();
+
+// Feedback
+builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
+builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
+
 //Email
 builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();
 

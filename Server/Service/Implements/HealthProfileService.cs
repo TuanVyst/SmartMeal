@@ -19,6 +19,11 @@ namespace Service.Implements
             return await _healthProfileRepo.GetAllHealthProfiles();
         }
 
+        public async Task<HealthProfile?> GetHealthProfileByAccountId(Guid accountId)
+        {
+            return await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
+        }
+
         public async Task<HealthProfile> GetHealthProfileById(Guid id)
         {
             return await _healthProfileRepo.GetHealthProfileById(id);

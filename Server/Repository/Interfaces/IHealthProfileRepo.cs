@@ -8,6 +8,8 @@ namespace Repository.Interfaces
 
         Task<HealthProfile?> GetHealthProfileById(Guid id);
 
+        Task<HealthProfile?> GetHealthProfileByAccountId(Guid accountId);
+
         Task<HealthProfile> CreateHealthProfile(HealthProfile healthProfile);
 
         Task<HealthProfile> UpdateHealthProfile(HealthProfile healthProfile);
