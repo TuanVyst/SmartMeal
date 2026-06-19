@@ -18,19 +18,19 @@ export default function AdminMeals() {
     return (m.recipe_name || '').toLowerCase().includes(q);
   });
 
-  if (loading) return <div className="admin-loading">Loading meals...</div>;
+  if (loading) return <div className="admin-loading">Đang tải món ăn...</div>;
 
   return (
     <div>
       <div className="admin-page-header">
-        <h1>Manage Meals</h1>
+        <h1>Quản lý món ăn</h1>
       </div>
       <div className="admin-table-container">
         <div className="admin-table-toolbar">
-          <h2>All Meals</h2>
+          <h2>Tất cả món ăn</h2>
           <input
             className="admin-table-search"
-            placeholder="Search by meal name..."
+            placeholder="Tìm theo tên món ăn..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -38,17 +38,17 @@ export default function AdminMeals() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Meal ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Difficulty</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Mã món</th>
+              <th>Tên</th>
+              <th>Danh mục</th>
+              <th>Độ khó</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={6} className="empty-state"><p>No meals found</p></td></tr>
+              <tr><td colSpan={6} className="empty-state"><p>Không tìm thấy món ăn</p></td></tr>
             )}
             {filtered.map((meal) => (
               <tr key={meal.recipe_id || meal.id}>
@@ -59,17 +59,17 @@ export default function AdminMeals() {
                 <td>{meal.category || '-'}</td>
                 <td>
                   <span className={`status-badge ${(meal.difficulty || 'easy').toLowerCase()}`}>
-                    {meal.difficulty || 'Easy'}
+                    {meal.difficulty || 'Dễ'}
                   </span>
                 </td>
                 <td>
                   <span className={`status-badge ${meal.isActive !== false ? 'active' : 'inactive'}`}>
-                    {meal.isActive !== false ? 'Active' : 'Inactive'}
+                    {meal.isActive !== false ? 'Hoạt động' : 'Không hoạt động'}
                   </span>
                 </td>
                 <td>
-                  <button className="action-btn edit">Edit</button>
-                  <button className="action-btn delete">Delete</button>
+                  <button className="action-btn edit">Sửa</button>
+                  <button className="action-btn delete">Xóa</button>
                 </td>
               </tr>
             ))}

@@ -23,7 +23,7 @@ export default function IngredientForm() {
         const i = res.data.data;
         setForm({ name: i.name, averagePrice: i.averagePrice, imageUrl: i.imageUrl || '' });
       } catch {
-        setError('Failed to load ingredient');
+        setError('Không thể tải nguyên liệu');
       }
     })();
   }, [id, isEdit]);
@@ -49,7 +49,7 @@ export default function IngredientForm() {
       }
       navigate('/ingredients');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.response?.data?.message || 'Đã xảy ra lỗi');
     } finally {
       setLoading(false);
     }
@@ -58,27 +58,27 @@ export default function IngredientForm() {
   return (
     <div className="page">
       <div className="page-header">
-        <h2>{isEdit ? 'Edit Ingredient' : 'Add Ingredient'}</h2>
+        <h2>{isEdit ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu'}</h2>
       </div>
       <form className="form" onSubmit={handleSubmit}>
         {error && <div className="error">{error}</div>}
         <div className="form-group">
-          <label>Name</label>
+          <label>Tên</label>
           <input name="name" value={form.name} onChange={handleChange} required />
         </div>
         <div className="form-group">
-          <label>Average Price</label>
+          <label>Giá trung bình</label>
           <input name="averagePrice" type="number" step="0.01" value={form.averagePrice} onChange={handleChange} required />
         </div>
         <div className="form-group">
-          <label>Image URL</label>
+          <label>URL hình ảnh</label>
           <input name="imageUrl" value={form.imageUrl} onChange={handleChange} />
         </div>
         <div className="form-actions">
           <button className="btn btn-primary" disabled={loading}>
-            {loading ? 'Saving...' : isEdit ? 'Update' : 'Create'}
+            {loading ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo'}
           </button>
-          <button type="button" className="btn btn-secondary" onClick={() => navigate('/ingredients')}>Cancel</button>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate('/ingredients')}>Hủy</button>
         </div>
       </form>
     </div>

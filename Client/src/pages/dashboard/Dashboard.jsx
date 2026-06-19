@@ -11,9 +11,9 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="page-header">
-        <h2>Dashboard</h2>
+        <h2>Bảng điều khiển</h2>
       </div>
-      <p>Welcome to SmartMeal!</p>
+      <p>Chào mừng đến với SmartMeal!</p>
     </div>
   );
 }

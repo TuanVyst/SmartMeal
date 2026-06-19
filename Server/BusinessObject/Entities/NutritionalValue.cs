@@ -17,6 +17,15 @@ namespace BusinessObject.Entities
         public Guid Ingredient_id { get; set; }
 
         public double Calories { get; set; }
+        public double? Protein { get; set; }
+        public double? Carbs { get; set; }
+        public double? Fat { get; set; }
+        public double? Fiber { get; set; }
+        public double? Sugar { get; set; }
+        public double? Sodium { get; set; }
+        public double? Cholesterol { get; set; }
+        public double? ServingSize { get; set; }
+        public string? ServingUnit { get; set; }
 
         public bool IsDeleted { get; set; } = false;
 

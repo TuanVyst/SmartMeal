@@ -203,7 +203,16 @@ namespace Service.Implements
                 {
                     Id = ingredient.Nutritional_value.Nv_id,
                     Calories = ingredient.Nutritional_value.Calories,
-                    
+                    Protein = ingredient.Nutritional_value.Protein,
+                    Carbs = ingredient.Nutritional_value.Carbs,
+                    Carbohydrates = ingredient.Nutritional_value.Carbs,
+                    Fat = ingredient.Nutritional_value.Fat,
+                    Fiber = ingredient.Nutritional_value.Fiber,
+                    Sugar = ingredient.Nutritional_value.Sugar,
+                    Sodium = ingredient.Nutritional_value.Sodium,
+                    Cholesterol = ingredient.Nutritional_value.Cholesterol,
+                    ServingSize = ingredient.Nutritional_value.ServingSize,
+                    ServingUnit = ingredient.Nutritional_value.ServingUnit
                 } : null,
                 IngredientLabels = ingredient.IngredientLabels?.Where(l => !l.IsDeleted).Select(l => new IngredientLabelSimpleDto
                 {

@@ -13,15 +13,15 @@ export default function HeroSection() {
       <div className="hero-container">
         <div className="hero-content">
           <h1 className="hero-slogan">
-            Cook Your Own Meal, <span className="highlight">Your Way</span>
+            Nấu bữa ăn của bạn, <span className="highlight">theo cách của bạn</span>
           </h1>
           <p className="hero-subtitle">
-            Discover personalized meal plans, smart grocery lists, and delicious recipes
-            tailored to your taste and budget. Start your healthy cooking journey today!
+            Khám phá kế hoạch bữa ăn cá nhân hóa, danh sách thực phẩm thông minh và công thức nấu ăn ngon
+            phù hợp với khẩu vị và ngân sách của bạn. Bắt đầu hành trình nấu ăn lành mạnh ngay hôm nay!
           </p>
           <div className="hero-buttons">
-            <Link to="/register" className="btn-hero btn-hero-primary">Get Started</Link>
-            <a href="#explore" className="btn-hero btn-hero-secondary">Explore Meals</a>
+            <Link to="/register" className="btn-hero btn-hero-primary">Bắt đầu ngay</Link>
+            <a href="#explore" className="btn-hero btn-hero-secondary">Khám phá món ăn</a>
           </div>
         </div>
         <div className="hero-illustration">
@@ -31,7 +31,7 @@ export default function HeroSection() {
           <img src={leaf2Img} alt="" className="hero-leaf l-2" />
           <img src={leaf2Img} alt="" className="hero-leaf l-3" />
           <div className="hero-bowl">
-            <img src={saladImg} alt="Healthy meal bowl" className="hero-bowl-img" />
+            <img src={saladImg} alt="Bát salad healthy" className="hero-bowl-img" />
           </div>
           <img src={tomatoImg} alt="" className="floating-food f-tomato" />
           <img src={broccoliImg} alt="" className="floating-food f-broccoli" />

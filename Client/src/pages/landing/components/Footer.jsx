@@ -9,29 +9,29 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <img src={logo} alt="SmartMeal" className="footer-logo-img" />
-            <p>Cook your own meal, your way.</p>
+            <p>Nấu bữa ăn của bạn, theo cách của bạn.</p>
           </div>
           <div className="footer-links">
-            <h4>Quick Links</h4>
-            <a href="#home">Home</a>
-            <a href="#explore">Explore Meals</a>
-            <a href="#about">About</a>
+            <h4>Liên kết nhanh</h4>
+            <a href="#home">Trang chủ</a>
+            <a href="#explore">Khám phá món ăn</a>
+            <a href="#about">Giới thiệu</a>
           </div>
           <div className="footer-links">
-            <h4>Support</h4>
+            <h4>Hỗ trợ</h4>
             <a href="#faq">FAQ</a>
-            <a href="#contact">Contact</a>
-            <a href="#privacy">Privacy Policy</a>
+            <a href="#contact">Liên hệ</a>
+            <a href="#privacy">Chính sách bảo mật</a>
           </div>
           <div className="footer-links">
-            <h4>Follow Us</h4>
+            <h4>Theo dõi</h4>
             <a href="#facebook">Facebook</a>
             <a href="#instagram">Instagram</a>
             <a href="#twitter">Twitter</a>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; {year} SmartMeal. All rights reserved.</p>
+          <p>&copy; {year} SmartMeal. Đã đăng ký bản quyền.</p>
         </div>
       </div>
     </footer>

@@ -23,6 +23,9 @@ import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
 import AdminFeedback from '../pages/admin/AdminFeedback';
 import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
+import Nutrition from '../pages/nutrition/Nutrition';
+import NutritionDiaryPage from '../pages/diary/NutritionDiaryPage';
+import SurveyPage from '../pages/survey/SurveyPage';
 
 export default function AppRoutes() {
   return (
@@ -44,6 +47,10 @@ export default function AppRoutes() {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/meal-plans" element={<MealPlanList />} />
         <Route path="/recipe/:id" element={<MealDetail />} />
+        <Route path="/nutrition" element={<Nutrition />} />
+        <Route path="/nutrition-diary" element={<NutritionDiaryPage />} />
+        <Route path="/nhat-ky" element={<NutritionDiaryPage />} />
+        <Route path="/health-survey" element={<SurveyPage />} />
       </Route>
       <Route
         path="/admin"

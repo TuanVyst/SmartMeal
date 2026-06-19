@@ -13,7 +13,7 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="admin-loading">Loading dashboard...</div>;
+  if (loading) return <div className="admin-loading">Đang tải bảng điều khiển...</div>;
 
   const cards = [
     { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green' },
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="admin-page-header">
-        <h1>Dashboard</h1>
+        <h1>Bảng điều khiển</h1>
       </div>
       <div className="stats-grid">
         {cards.map((card) => (

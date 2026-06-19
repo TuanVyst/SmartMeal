@@ -9,23 +9,22 @@ export default function AuthLayout() {
           <img src={logo} alt="SmartMeal" className="branding-logo" />
         </Link>
         <div className="auth-branding">
-          <h2 className="branding-heading">Cook smarter, eat better</h2>
+          <h2 className="branding-heading">Nấu thông minh hơn, ăn ngon hơn</h2>
           <p className="branding-desc">
-            Get personalized meal recommendations based on your ingredients,
-            budget, and dietary preferences.
+            Nhận gợi ý bữa ăn cá nhân hóa dựa trên nguyên liệu, ngân sách và sở thích ăn uống của bạn.
           </p>
           <div className="branding-features">
             <div className="branding-feature">
-              <strong>Personalized meal ideas</strong>
-              <p>Tailored to your taste and pantry</p>
+              <strong>Gợi ý bữa ăn cá nhân hóa</strong>
+              <p>Phù hợp với khẩu vị và thực phẩm của bạn</p>
             </div>
             <div className="branding-feature">
-              <strong>Budget friendly recipes</strong>
-              <p>Delicious meals for any budget</p>
+              <strong>Công thức thân thiện ngân sách</strong>
+              <p>Bữa ăn ngon cho mọi ngân sách</p>
             </div>
             <div className="branding-feature">
-              <strong>Easy cooking for beginners</strong>
-              <p>Step-by-step guidance included</p>
+              <strong>Nấu ăn dễ dàng cho người mới</strong>
+              <p>Hướng dẫn từng bước chi tiết</p>
             </div>
           </div>
         </div>

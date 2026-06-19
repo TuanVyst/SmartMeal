@@ -24,6 +24,27 @@ namespace Repository.Implements
                 .ToListAsync();
         }
 
+        public async Task<List<NutritionLog>> GetNutritionLogsByAccountAndDate(Guid accountId, DateTime date)
+        {
+            return await _ctx.NutritionLogs
+                .Include(x => x.Recipe)
+                .Where(x => x.IsDeleted == false
+                    && x.Account_id == accountId
+                    && x.LogDate.Date == date.Date)
+                .ToListAsync();
+        }
+
+        public async Task<List<NutritionLog>> GetNutritionLogsByAccountAndDateRange(Guid accountId, DateTime startDate, DateTime endDate)
+        {
+            return await _ctx.NutritionLogs
+                .Include(x => x.Recipe)
+                .Where(x => x.IsDeleted == false
+                    && x.Account_id == accountId
+                    && x.LogDate.Date >= startDate.Date
+                    && x.LogDate.Date <= endDate.Date)
+                .ToListAsync();
+        }
+
         public async Task<NutritionLog?> GetNutritionLogById(Guid id)
         {
             return await _ctx.NutritionLogs

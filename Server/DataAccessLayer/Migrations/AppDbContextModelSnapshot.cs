@@ -562,11 +562,38 @@ namespace DataAccessLayer.Migrations
                     b.Property<double>("Calories")
                         .HasColumnType("double precision");
 
+                    b.Property<double?>("Carbs")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Cholesterol")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Fat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Fiber")
+                        .HasColumnType("double precision");
+
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<double?>("Protein")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("ServingSize")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ServingUnit")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Sodium")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Sugar")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Nv_id");
 

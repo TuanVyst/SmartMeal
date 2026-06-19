@@ -34,7 +34,7 @@ export default function AdminSidebar() {
       <aside className={`admin-sidebar ${open ? 'open' : ''}`}>
         <div className="admin-sidebar-logo">
           <h2>SmartMeal</h2>
-          <span>Admin</span>
+          <span>Quản trị</span>
         </div>
         <nav className="admin-sidebar-nav">
           {navItems.map((item) => (
@@ -53,7 +53,7 @@ export default function AdminSidebar() {
         <div className="admin-sidebar-footer">
           <button className="admin-nav-item logout-btn" onClick={handleLogout}>
             <span className="admin-nav-icon"><FiLogOut /></span>
-            <span>Logout</span>
+            <span>Đăng xuất</span>
           </button>
         </div>
       </aside>

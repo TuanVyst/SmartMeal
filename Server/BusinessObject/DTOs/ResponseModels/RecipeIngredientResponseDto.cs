@@ -10,5 +10,8 @@ namespace BusinessObject.Dtos.ResponseModels
         public int Quantity { get; set; }
         public string UOM { get; set; }
         public bool IsDeleted { get; set; }
+
+        public string Name { get; set; } = "";
+        public NutritionalValueSimpleDto? NutritionalValue { get; set; }
     }
 }

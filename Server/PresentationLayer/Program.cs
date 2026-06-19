@@ -25,7 +25,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
 builder.Services.AddScoped<Repository.Interfaces.IRecipeRepo, Repository.Implements.RecipeRepo>();
 builder.Services.AddScoped<Service.Interfaces.IRecipeService, Service.Implements.RecipeService>();
@@ -126,6 +130,22 @@ builder.Services.AddScoped<Repository.Interfaces.INutritionalValueRepo, Reposito
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
 builder.Services.AddScoped<Service.Interfaces.IAccountService, Service.Implements.AccountService>();
 
+// HealthProfile
+builder.Services.AddScoped<Repository.Interfaces.IHealthProfileRepo, Repository.Implements.HealthProfileRepo>();
+builder.Services.AddScoped<Service.Interfaces.IHealthProfileService, Service.Implements.HealthProfileService>();
+
+// UserCondition
+builder.Services.AddScoped<Repository.Interfaces.IUserConditionRepo, Repository.Implements.UserConditionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IUserConditionService, Service.Implements.UserConditionService>();
+
+// MedicalCondition
+builder.Services.AddScoped<Repository.Interfaces.IMedicalConditionRepo, Repository.Implements.MedicalConditionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.Implements.MedicalConditionService>();
+
+// Feedback
+builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
+builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
+
 //Email
 builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();
 
@@ -178,10 +198,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseRouting();
 app.UseCors("AllowClient");
+app.UseRouting();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
