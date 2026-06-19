@@ -54,8 +54,8 @@ function reducer(state, action) {
   }
 }
 
+// Remove manual obesity checkbox. BMI will be calculated automatically from height/weight.
 const conditionsList = [
-  { value: 'obesity', label: 'Thừa cân / Béo phì' },
   { value: 'diabetes', label: 'Tiểu đường type 2' },
   { value: 'hypertension', label: 'Huyết áp cao' },
   { value: 'cholesterol', label: 'Cholesterol cao' },
@@ -186,9 +186,21 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
     dispatch({ type: 'SET_SUBMITTING', value: true });
     dispatch({ type: 'SET_ERROR', value: '' });
     try {
+      // Auto-add BMI-derived condition (e.g., Thiếu cân / Thừa cân / Béo phì) instead of manual checkbox
+      const inferred = bmiResult ? (
+        bmiResult.level === 'underweight' ? 'Thiếu cân' :
+        bmiResult.level === 'overweight' ? 'Thừa cân' :
+        bmiResult.level === 'obese' ? 'Béo phì' : null
+      ) : null;
+
+      const nextConditions = Array.isArray(conditions) ? [...conditions] : [];
+      // remove 'none' if present
+      const filtered = nextConditions.filter(c => c !== 'none');
+      if (inferred && !filtered.includes(inferred)) filtered.push(inferred);
+
       const payload = {
         height: Number(height), weight: Number(weight), age: Number(age),
-        gender, conditions, allergies, goal,
+        gender, conditions: filtered, allergies, goal,
         bmiLevel: bmiResult?.level || 'normal',
       };
       const result = await completeSurvey(payload);

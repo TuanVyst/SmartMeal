@@ -1,6 +1,9 @@
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNutritionDiary } from '../../hooks/useNutritionDiary';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { getDailyLimits } from '../../utils/healthRules';
+import { calculateBMI } from '../../utils/bmiCalculator';
 
 const mealSections = [
   { key: 'breakfast', label: 'Bữa sáng', icon: '🌅' },
@@ -9,16 +12,190 @@ const mealSections = [
   { key: 'snack', label: 'Bữa phụ', icon: '🍿' },
 ];
 
-function MacroBar({ label, value, max, color }) {
+const conditionLabels = {
+  diabetes: 'Tiểu đường type 2',
+  hypertension: 'Huyết áp cao',
+  cholesterol: 'Cholesterol cao',
+  heartDisease: 'Bệnh tim mạch',
+  gerd: 'Dạ dày / Trào ngược',
+  gout: 'Gout',
+};
+
+const goalLabels = {
+  lose: { icon: '🔥', label: 'Giảm cân' },
+  gain: { icon: '💪', label: 'Tăng cơ' },
+  maintain: { icon: '⚖️', label: 'Duy trì' },
+  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
+  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+};
+
+const bmiColors = {
+  underweight: { bg: '#dbeafe', text: '#2563eb', label: 'Thiếu cân' },
+  normal: { bg: '#dcfce7', text: '#16a34a', label: 'Bình thường' },
+  overweight: { bg: '#ffedd5', text: '#ea580c', label: 'Thừa cân' },
+  obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
+};
+
+function MacroBar({ label, value, max, color, unit = 'g', icon, warning }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
+  const isOver = value > max;
   return (
-    <div style={{ marginBottom: 8 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', marginBottom: 4 }}>
-        <span>{label}</span>
-        <span>{Math.round(value)}g / {max}g</span>
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#64748b', marginBottom: 4 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {icon && <span>{icon}</span>}
+          {label}
+          {warning && (
+            <span style={{
+              fontSize: 10, padding: '1px 6px', borderRadius: 8,
+              background: isOver ? '#fef2f2' : '#fffbeb',
+              color: isOver ? '#dc2626' : '#d97706',
+              fontWeight: 600,
+            }}>
+              {warning}
+            </span>
+          )}
+        </span>
+        <span style={{ fontWeight: isOver ? 700 : 400, color: isOver ? '#dc2626' : '#64748b' }}>
+          {Math.round(value)}{unit} / {max}{unit}
+        </span>
       </div>
       <div style={{ height: 8, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
+        <div style={{
+          width: `${pct}%`, height: '100%',
+          background: isOver ? '#dc2626' : color,
+          borderRadius: 4, transition: 'width 0.5s ease',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function HealthProfileCard({ healthProfile, dailyCalorieBudget, lockedIngredients }) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (!healthProfile) return null;
+
+  const bmiResult = (healthProfile.height && healthProfile.weight)
+    ? calculateBMI(Number(healthProfile.weight), Number(healthProfile.height))
+    : null;
+  const bmiStyle = bmiResult ? bmiColors[bmiResult.level] : null;
+  const conditions = healthProfile.conditions || [];
+  const goal = healthProfile.goal;
+  const goalInfo = goalLabels[goal];
+
+  return (
+    <div style={{
+      background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      marginBottom: 24, overflow: 'hidden',
+      border: '1px solid #e2e8f0',
+    }}>
+      {/* Header — always visible */}
+      <button
+        type="button"
+        onClick={() => setCollapsed(prev => !prev)}
+        style={{
+          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '16px 20px', background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+          border: 'none', cursor: 'pointer', borderBottom: collapsed ? 'none' : '1px solid #e2e8f0',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 20 }}>📋</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#1E293B' }}>Hồ sơ sức khỏe</span>
+          {bmiResult && bmiStyle && (
+            <span style={{
+              padding: '2px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600,
+              background: bmiStyle.bg, color: bmiStyle.text,
+            }}>
+              BMI {bmiResult.bmi} — {bmiStyle.label}
+            </span>
+          )}
+        </div>
+        <span style={{
+          fontSize: 12, color: '#94a3b8', transition: 'transform 0.2s',
+          transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+          display: 'inline-block',
+        }}>
+          ▲
+        </span>
+      </button>
+
+      {/* Body — collapsible */}
+      <div style={{
+        maxHeight: collapsed ? 0 : 500,
+        opacity: collapsed ? 0 : 1,
+        overflow: 'hidden',
+        transition: 'max-height 0.3s ease, opacity 0.3s ease',
+        padding: collapsed ? '0 20px' : '16px 20px',
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          {/* BMI */}
+          {bmiResult && bmiStyle && (
+            <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
+              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Chỉ số BMI</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: bmiStyle.text }}>{bmiResult.bmi}</div>
+              <div style={{ fontSize: 12, color: bmiStyle.text, fontWeight: 500 }}>{bmiResult.classification}</div>
+            </div>
+          )}
+
+          {/* Mục tiêu */}
+          <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Mục tiêu</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1E293B' }}>
+              {goalInfo ? `${goalInfo.icon} ${goalInfo.label}` : 'Chưa chọn'}
+            </div>
+            <div style={{ fontSize: 12, color: '#22C55E', fontWeight: 500 }}>{dailyCalorieBudget} kcal/ngày</div>
+          </div>
+        </div>
+
+        {/* Bệnh lý */}
+        {conditions.length > 0 && (
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Bệnh lý nền</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {conditions.map(c => {
+                // Filter out BMI-derived labels like "Thừa cân", "Béo phì"
+                const label = conditionLabels[c] || c;
+                return (
+                  <span key={c} style={{
+                    padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 500,
+                    background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
+                  }}>
+                    🏥 {label}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Nguyên liệu hạn chế */}
+        {lockedIngredients.length > 0 && (
+          <div>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>
+              Nguyên liệu bị hạn chế ({lockedIngredients.length})
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {lockedIngredients.slice(0, 8).map(ing => (
+                <span key={ing} style={{
+                  padding: '3px 8px', borderRadius: 10, fontSize: 11, fontWeight: 500,
+                  background: '#fef2f2', color: '#dc2626',
+                }}>
+                  🔒 {ing}
+                </span>
+              ))}
+              {lockedIngredients.length > 8 && (
+                <span style={{
+                  padding: '3px 8px', borderRadius: 10, fontSize: 11, fontWeight: 500,
+                  background: '#f1f5f9', color: '#64748b',
+                }}>
+                  +{lockedIngredients.length - 8} khác
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -48,10 +225,18 @@ export default function NutritionDiaryPage() {
     entries, loading, totalMacros, selectedDate,
     setSelectedDate, deleteEntry,
   } = useNutritionDiary();
-  const { dailyCalorieBudget } = useHealthProfile();
+  const { dailyCalorieBudget, healthProfile, lockedIngredients } = useHealthProfile();
 
   const budget = dailyCalorieBudget || 2000;
   const calPct = budget > 0 ? Math.min(100, (totalMacros.calories / budget) * 100) : 0;
+
+  const conditions = healthProfile?.conditions || [];
+  const { sugarLimit, sodiumLimit } = useMemo(() => getDailyLimits(conditions), [conditions]);
+
+  // Determine if user has specific conditions for warning badges
+  const hasDiabetes = conditions.includes('diabetes');
+  const hasHypertension = conditions.includes('hypertension');
+  const hasHeartDisease = conditions.includes('heartDisease');
 
   const remaining = budget - totalMacros.calories;
   const message = remaining > 200
@@ -97,6 +282,14 @@ export default function NutritionDiaryPage() {
 
       {!loading && (
         <>
+          {/* Health Profile Card */}
+          <HealthProfileCard
+            healthProfile={healthProfile}
+            dailyCalorieBudget={budget}
+            lockedIngredients={lockedIngredients}
+          />
+
+          {/* Calorie & Macro Summary */}
           <div style={{
             background: 'white', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             marginBottom: 24,
@@ -121,6 +314,41 @@ export default function NutritionDiaryPage() {
             <MacroBar label="Carbohydrate" value={totalMacros.carbs} max={Math.round(budget * 0.5 / 4)} color="#3b82f6" />
             <MacroBar label="Protein" value={totalMacros.protein} max={Math.round(budget * 0.2 / 4)} color="#ef4444" />
             <MacroBar label="Chất béo" value={totalMacros.fat} max={Math.round(budget * 0.3 / 9)} color="#f59e0b" />
+
+            {/* Divider before dietary restriction bars */}
+            <div style={{
+              height: 1, background: '#e2e8f0', margin: '16px 0',
+            }} />
+
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>⚕️</span> Hạn chế ăn uống
+              {(hasDiabetes || hasHypertension || hasHeartDisease) && (
+                <span style={{
+                  fontSize: 10, padding: '2px 8px', borderRadius: 8,
+                  background: '#fef2f2', color: '#dc2626', fontWeight: 600,
+                }}>
+                  Có bệnh lý nền
+                </span>
+              )}
+            </div>
+
+            <MacroBar
+              label="Đường"
+              value={totalMacros.sugar}
+              max={sugarLimit}
+              color="#a855f7"
+              icon="🍬"
+              warning={hasDiabetes ? 'Tiểu đường' : null}
+            />
+            <MacroBar
+              label="Muối"
+              value={totalMacros.sodium}
+              max={sodiumLimit}
+              color="#06b6d4"
+              unit="mg"
+              icon="🧂"
+              warning={(hasHypertension || hasHeartDisease) ? 'Huyết áp' : null}
+            />
           </div>
 
           {entries.length === 0 ? (

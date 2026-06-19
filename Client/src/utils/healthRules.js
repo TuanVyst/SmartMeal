@@ -137,6 +137,18 @@ export function getLockedIngredientsForProfile(healthConditions) {
   return Array.from(lockedSet);
 }
 
+export function getDailyLimits(conditions = []) {
+  let sugarLimit = 50;    // g/ngày – khuyến nghị WHO
+  let sodiumLimit = 2300;  // mg/ngày – khuyến nghị FDA
+
+  if (conditions.includes('diabetes')) sugarLimit = 25;
+  if (conditions.includes('hypertension')) sodiumLimit = 1500;
+  // Bệnh tim mạch cũng nên hạn chế muối
+  if (conditions.includes('heartDisease') && sodiumLimit > 1500) sodiumLimit = 1500;
+
+  return { sugarLimit, sodiumLimit };
+}
+
 export function getDailyCalorieBudget(bmiLevel, goal) {
   const baseCalories = {
     underweight: 2200,

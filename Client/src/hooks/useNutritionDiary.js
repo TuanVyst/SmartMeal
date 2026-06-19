@@ -30,6 +30,8 @@ export function useNutritionDiary(initialDate = null) {
     carbs: entries.reduce((sum, e) => sum + (e.carbs || 0), 0),
     protein: entries.reduce((sum, e) => sum + (e.protein || 0), 0),
     fat: entries.reduce((sum, e) => sum + (e.fat || 0), 0),
+    sugar: entries.reduce((sum, e) => sum + (e.sugar || 0), 0),
+    sodium: entries.reduce((sum, e) => sum + (e.sodium || 0), 0),
   };
 
   const addEntry = useCallback(async (entry) => {
