@@ -57,7 +57,7 @@ export default function AdminUsers() {
                 </td>
                 <td>{user.name || '-'}</td>
                 <td>{user.email || '-'}</td>
-                <td><span className="status-badge active">{user.role || 'User'}</span></td>
+                <td><span className="status-badge active">{user.role === 'Admin' ? 'Quản trị viên' : 'Người dùng'}</span></td>
                 <td>
                   <span className={`status-badge ${user.isActive !== false ? 'active' : 'inactive'}`}>
                     {user.isActive !== false ? 'Hoạt động' : 'Không hoạt động'}
