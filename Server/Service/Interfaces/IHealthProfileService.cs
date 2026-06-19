@@ -9,6 +9,8 @@ namespace Service.Interfaces
 
         Task<HealthProfile> GetHealthProfileById(Guid id);
 
+        Task<HealthProfile?> GetHealthProfileByAccountId(Guid accountId);
+
         Task<HealthProfile> CreateHealthProfile(HealthProfileRequest request);
 
         Task<HealthProfile> UpdateHealthProfile(Guid id, HealthProfileRequest request);
