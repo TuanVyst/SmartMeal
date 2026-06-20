@@ -170,6 +170,32 @@ namespace PresentationLayer.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+
+        [HttpPut("avatar")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var account = await _service.UpdateAvatarUrl(accountId, request.AvatarUrl);
+                return Ok(new { success = true, avatarUrl = account.AvatarUrl });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        private Guid GetAccountId()
+        {
+            var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return Guid.Parse(claim.Value);
+        }
     }
 
     public class UpdateAccountRequest
@@ -178,5 +204,10 @@ namespace PresentationLayer.Controllers
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
+    }
+
+    public class UpdateAvatarRequest
+    {
+        public string AvatarUrl { get; set; }
     }
 }

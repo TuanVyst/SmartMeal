@@ -25,7 +25,8 @@ namespace DataAccessLayer.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    AvatarUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
