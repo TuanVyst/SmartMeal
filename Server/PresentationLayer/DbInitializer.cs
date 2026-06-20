@@ -42,7 +42,7 @@ public static class DbInitializer
         var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
         if (existingAdmin != null)
         {
-            existingAdmin.Email = "admin@smartmeal.com";
+            existingAdmin.Email = "maituanvyst@gmail.com";
             existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("admin123");
             context.Accounts.Update(existingAdmin);
             await context.SaveChangesAsync();
@@ -115,7 +115,7 @@ public static class DbInitializer
             Username = "admin",
             Password = BCrypt.Net.BCrypt.HashPassword("admin123"),
             Name = "Admin",
-            Email = "admin@smartmeal.com",
+            Email = "maituanvyst@gmail.com",
             Phone = "0123456789",
             Address = "SmartMeal HQ",
             Role = RoleEnum.Admin,
