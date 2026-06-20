@@ -153,6 +153,9 @@ builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implemen
 //Email
 builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();
 
+// Cloudinary
+builder.Services.AddScoped<Service.Interfaces.ICloudinaryService, Service.Implements.CloudinaryService>();
+
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
