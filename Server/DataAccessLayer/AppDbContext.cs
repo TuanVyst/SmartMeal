@@ -39,6 +39,7 @@ namespace DataAccessLayer
         public DbSet<SavedRecipe> SavedRecipes { get; set; }
   
         public DbSet<Allergy> Allergies { get; set; }
+        public DbSet<BmiLog> BmiLogs { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }

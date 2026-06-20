@@ -142,6 +142,10 @@ builder.Services.AddScoped<Service.Interfaces.IUserConditionService, Service.Imp
 builder.Services.AddScoped<Repository.Interfaces.IMedicalConditionRepo, Repository.Implements.MedicalConditionRepo>();
 builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.Implements.MedicalConditionService>();
 
+// BmiLog
+builder.Services.AddScoped<Repository.Interfaces.IBmiLogRepo, Repository.Implements.BmiLogRepo>();
+builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements.BmiLogService>();
+
 // Feedback
 builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
 builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();

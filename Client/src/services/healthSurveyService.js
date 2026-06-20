@@ -22,8 +22,14 @@ export async function updateHealthProfile(profileData) {
   return data;
 }
 
+export async function getBmiHistory() {
+  const { data } = await api.get('/health-survey/bmi-history');
+  return data;
+}
+
 export const healthSurveyService = {
   submitHealthSurvey,
   getHealthProfile,
   updateHealthProfile,
+  getBmiHistory,
 };

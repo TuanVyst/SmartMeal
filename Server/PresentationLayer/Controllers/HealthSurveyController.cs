@@ -1,6 +1,8 @@
 using BusinessObject.Entities;
+using DataAccessLayer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Service.Interfaces;
 using System.Security.Claims;
 
@@ -16,25 +18,55 @@ namespace PresentationLayer.Controllers
         private readonly IMedicalConditionService _medicalConditionService;
         private readonly IAllergyService _allergyService;
         private readonly IAccountService _accountService;
+        private readonly IBmiLogService _bmiLogService;
+        private readonly AppDbContext _ctx;
 
         public HealthSurveyController(
             IHealthProfileService healthProfileService,
             IUserConditionService userConditionService,
             IMedicalConditionService medicalConditionService,
             IAllergyService allergyService,
-            IAccountService accountService)
+            IAccountService accountService,
+            IBmiLogService bmiLogService,
+            AppDbContext ctx)
         {
             _healthProfileService = healthProfileService;
             _userConditionService = userConditionService;
             _medicalConditionService = medicalConditionService;
             _allergyService = allergyService;
             _accountService = accountService;
+            _bmiLogService = bmiLogService;
+            _ctx = ctx;
         }
 
         private Guid GetAccountId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);
             return Guid.Parse(claim.Value);
+        }
+
+        private async Task<List<string>> GetUserConditionNames(Guid accountId)
+        {
+            return await _ctx.UserConditions
+                .Where(uc => uc.Account_id == accountId && !uc.IsDeleted)
+                .Join(_ctx.MedicalConditions,
+                    uc => uc.Condition_id,
+                    mc => mc.Condition_id,
+                    (uc, mc) => mc.Name)
+                .Where(name => name != null)
+                .ToListAsync();
+        }
+
+        private async Task<List<string>> GetUserAllergyNames(Guid accountId)
+        {
+            return await _ctx.Allergies
+                .Where(a => a.Account_id == accountId && !a.IsDeleted)
+                .Join(_ctx.Ingredients,
+                    a => a.Ingredient_id,
+                    i => i.Ingredient_id,
+                    (a, i) => i.Name)
+                .Where(name => name != null)
+                .ToListAsync();
         }
 
         [HttpPost]
@@ -86,7 +118,30 @@ namespace PresentationLayer.Controllers
                     }
                 }
 
-                return Ok(new { success = true, profile = new { profile.Account_id, profile.Height, profile.Weight, profile.Goal, profile.Gender, bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight) } });
+                if (request.Height > 0 && request.Weight > 0)
+                {
+                    await _bmiLogService.CreateBmiLog(accountId, request.Height.Value, request.Weight.Value);
+                }
+
+                var conditionNames = await GetUserConditionNames(accountId);
+                var allergyNames = await GetUserAllergyNames(accountId);
+
+                return Ok(new
+                {
+                    success = true,
+                    profile = new
+                    {
+                        profile.Account_id,
+                        profile.Height,
+                        profile.Weight,
+                        profile.Goal,
+                        profile.Gender,
+                        profile.DateOfBirth,
+                        bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
+                        conditions = conditionNames,
+                        allergies = allergyNames
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -104,7 +159,25 @@ namespace PresentationLayer.Controllers
                 if (profile == null)
                     return NotFound(new { success = false, message = "Chưa có hồ sơ sức khoẻ" });
 
-                return Ok(new { success = true, profile });
+                var conditionNames = await GetUserConditionNames(accountId);
+                var allergyNames = await GetUserAllergyNames(accountId);
+
+                return Ok(new
+                {
+                    success = true,
+                    profile = new
+                    {
+                        profile.Account_id,
+                        profile.Height,
+                        profile.Weight,
+                        profile.Goal,
+                        profile.Gender,
+                        profile.DateOfBirth,
+                        bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
+                        conditions = conditionNames,
+                        allergies = allergyNames
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -125,19 +198,137 @@ namespace PresentationLayer.Controllers
                 var profileRequest = new HealthProfileRequest
                 {
                     Account_id = accountId,
-                    Height = request.Height ?? 0,
-                    Weight = request.Weight ?? 0,
-                    Goal = request.Goal ?? "maintain",
+                    Height = request.Height ?? existing.Height ?? 0,
+                    Weight = request.Weight ?? existing.Weight ?? 0,
+                    Goal = request.Goal ?? existing.Goal ?? "maintain",
                     DateOfBirth = request.Age.HasValue
                         ? DateTime.UtcNow.AddYears(-request.Age.Value)
-                        : DateTime.UtcNow,
-                    Gender = request.Gender ?? "Khác",
+                        : existing.DateOfBirth ?? DateTime.UtcNow,
+                    Gender = request.Gender ?? existing.Gender ?? "Khác",
                     ActivityLevel = "moderate",
                 };
 
                 var profile = await _healthProfileService.UpdateHealthProfile(existing.Profile_id, profileRequest);
 
-                return Ok(new { success = true, profile });
+                var allConditions = await _medicalConditionService.GetAllMedicalConditions();
+                var existingUserConditions = await _ctx.UserConditions
+                    .Where(uc => uc.Account_id == accountId && !uc.IsDeleted)
+                    .ToListAsync();
+                foreach (var uc in existingUserConditions)
+                {
+                    uc.IsDeleted = true;
+                    _ctx.UserConditions.Update(uc);
+                }
+                await _ctx.SaveChangesAsync();
+
+                if (request.Conditions != null && request.Conditions.Count > 0)
+                {
+                    foreach (var conditionName in request.Conditions)
+                    {
+                        var matched = allConditions.FirstOrDefault(c =>
+                            c.Name != null && c.Name.Contains(conditionName, StringComparison.OrdinalIgnoreCase));
+                        if (matched != null)
+                        {
+                            await _userConditionService.CreateUserCondition(new UserConditionRequest
+                            {
+                                Account_id = accountId,
+                                Condition_id = matched.Condition_id,
+                            });
+                        }
+                    }
+                }
+
+                var existingAllergies = await _ctx.Allergies
+                    .Where(a => a.Account_id == accountId && !a.IsDeleted)
+                    .ToListAsync();
+                foreach (var a in existingAllergies)
+                {
+                    a.IsDeleted = true;
+                    _ctx.Allergies.Update(a);
+                }
+                await _ctx.SaveChangesAsync();
+
+                if (request.Allergies != null && request.Allergies.Count > 0)
+                {
+                    var allIngredients = await _ctx.Ingredients.ToListAsync();
+                    foreach (var allergyName in request.Allergies)
+                    {
+                        var matchedIngredient = allIngredients.FirstOrDefault(i =>
+                            i.Name != null && i.Name.Contains(allergyName, StringComparison.OrdinalIgnoreCase));
+                        if (matchedIngredient != null)
+                        {
+                            _ctx.Allergies.Add(new Allergy
+                            {
+                                Allergy_id = Guid.NewGuid(),
+                                Account_id = accountId,
+                                Ingredient_id = matchedIngredient.Ingredient_id,
+                                IsDeleted = false
+                            });
+                        }
+                    }
+                    await _ctx.SaveChangesAsync();
+                }
+
+                if (request.Height > 0 && request.Weight > 0)
+                {
+                    var oldHeight = existing.Height ?? 0;
+                    var oldWeight = existing.Weight ?? 0;
+                    var oldBmi = oldHeight > 0
+                        ? oldWeight / ((oldHeight / 100) * (oldHeight / 100))
+                        : 0;
+                    var newBmi = request.Weight.Value / ((request.Height.Value / 100) * (request.Height.Value / 100));
+                    if (Math.Abs(oldBmi - newBmi) > 0.1 || existing.Height != request.Height || existing.Weight != request.Weight)
+                    {
+                        await _bmiLogService.CreateBmiLog(accountId, request.Height.Value, request.Weight.Value);
+                    }
+                }
+
+                var conditionNames = await GetUserConditionNames(accountId);
+                var allergyNames = await GetUserAllergyNames(accountId);
+
+                return Ok(new
+                {
+                    success = true,
+                    profile = new
+                    {
+                        profile.Account_id,
+                        profile.Height,
+                        profile.Weight,
+                        profile.Goal,
+                        profile.Gender,
+                        profile.DateOfBirth,
+                        bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
+                        conditions = conditionNames,
+                        allergies = allergyNames
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("bmi-history")]
+        public async Task<IActionResult> GetBmiHistory()
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var logs = await _bmiLogService.GetBmiLogsByAccountId(accountId);
+                return Ok(new
+                {
+                    success = true,
+                    data = logs.Select(l => new
+                    {
+                        l.Log_id,
+                        l.Height,
+                        l.Weight,
+                        l.Bmi,
+                        l.BmiLevel,
+                        l.RecordedAt
+                    })
+                });
             }
             catch (Exception ex)
             {

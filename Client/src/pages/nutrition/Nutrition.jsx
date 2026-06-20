@@ -1,15 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useHealthProfile } from '../../hooks/useHealthProfile';
 import api from '../../services/api';
+import HealthProfileEditor from '../../components/HealthProfileEditor';
 import './Nutrition.css';
 import { 
   MdFastfood, MdCalendarToday, MdBarChart, MdAddCircleOutline, 
   MdDeleteOutline, MdWarning, MdDoneAll, MdSettings 
 } from 'react-icons/md';
 
+const conditionLabels = {
+  diabetes: 'Tiểu đường type 2',
+  hypertension: 'Huyết áp cao',
+  cholesterol: 'Cholesterol cao',
+  heartDisease: 'Bệnh tim mạch',
+  gerd: 'Dạ dày / Trào ngược',
+  gout: 'Gout',
+};
+
+const goalLabels = {
+  lose: { icon: '🔥', label: 'Giảm cân' },
+  gain: { icon: '💪', label: 'Tăng cơ' },
+  maintain: { icon: '⚖️', label: 'Duy trì' },
+  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
+  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+};
+
+const bmiColorMap = {
+  underweight: { bg: '#dbeafe', text: '#2563eb', label: 'Thiếu cân' },
+  normal: { bg: '#dcfce7', text: '#16a34a', label: 'Bình thường' },
+  overweight: { bg: '#ffedd5', text: '#ea580c', label: 'Thừa cân' },
+  obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
+};
+
 export default function Nutrition() {
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
+  const { healthProfile, lockedIngredients, dailyCalorieBudget, dailyTargets } = useHealthProfile();
+
+  const conditions = healthProfile?.conditions || [];
+  const hasDiabetes = conditions.includes('diabetes');
+  const hasHypertension = conditions.includes('hypertension');
+  const hasHeartDisease = conditions.includes('heartDisease');
 
   const [activeTab, setActiveTab] = useState('log'); // log | history | stats
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -136,7 +168,7 @@ export default function Nutrition() {
           fat: Math.round((nv.fat || 0) * factor * 10) / 10,
           fiber: Math.round((nv.fiber || 0) * factor * 10) / 10,
           sugar: Math.round((nv.sugar || 0) * factor * 10) / 10,
-          sodium: Math.round((nv.sodium || 0) * factor * 10) / 10,
+          sodium: Math.round((nv.salt || nv.sodium || 0) * factor * 10) / 10,
           cholesterol: Math.round((nv.cholesterol || 0) * factor * 10) / 10,
           customName: ing.name
         });
@@ -168,7 +200,7 @@ export default function Nutrition() {
             totalFat += (nv.fat || nv.Fat || 0) * multiplier;
             totalFiber += (nv.fiber || nv.Fiber || 0) * multiplier;
             totalSugar += (nv.sugar || nv.Sugar || 0) * multiplier;
-            totalSodium += (nv.sodium || nv.Sodium || 0) * multiplier;
+            totalSodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * multiplier;
             totalCholesterol += (nv.cholesterol || nv.Cholesterol || 0) * multiplier;
           }
         });
@@ -313,19 +345,21 @@ export default function Nutrition() {
     acc.carbs += curr.totalCarbs || 0;
     acc.fat += curr.totalFat || 0;
     acc.fiber += curr.totalFiber || 0;
+    acc.sugar += curr.totalSugar || 0;
     acc.sodium += curr.totalSodium || 0;
     acc.cholesterol += curr.totalCholesterol || 0;
     return acc;
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sodium: 0, cholesterol: 0 });
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
   const activeGoal = {
-    calories: currentGoal?.targetCalories || 2000,
-    protein: currentGoal?.targetProtein || 75,
-    carbs: currentGoal?.targetCarbs || 250,
-    fat: currentGoal?.targetFat || 65,
-    fiber: currentGoal?.targetFiber || 25,
-    sodium: 2300, // standard healthy limit
-    cholesterol: 300 // standard healthy limit
+    calories: currentGoal?.targetCalories || dailyTargets?.calories || 2000,
+    protein: currentGoal?.targetProtein || dailyTargets?.protein || 75,
+    carbs: currentGoal?.targetCarbs || dailyTargets?.carbs || 250,
+    fat: currentGoal?.targetFat || dailyTargets?.fat || 65,
+    fiber: currentGoal?.targetFiber || dailyTargets?.fiber || 25,
+    sugar: dailyTargets?.sugarLimit || 50,
+    sodium: dailyTargets?.saltLimit || 5,
+    cholesterol: 300
   };
 
   const calProgress = Math.min(Math.round((totalsToday.calories / activeGoal.calories) * 100), 200);
@@ -389,6 +423,9 @@ export default function Nutrition() {
           />
         </div>
       </div>
+
+      {/* Health Profile Card */}
+      {healthProfile && <HealthProfileEditor />}
 
       {/* Tabs Switcher */}
       <div className="tabs-nav">
@@ -580,8 +617,13 @@ export default function Nutrition() {
                   </div>
                   <div className="preview-item">
                     <span className="macro-dot sodium-dot"></span>
-                    <span className="macro-name">Natri:</span>
-                    <span className="macro-val">{manualMacros.sodium || 0} mg</span>
+                    <span className="macro-name">Muối:</span>
+                    <span className="macro-val">{manualMacros.sodium || 0} g</span>
+                  </div>
+                  <div className="preview-item">
+                    <span className="macro-dot" style={{ background: '#a855f7' }}></span>
+                    <span className="macro-name">Đường:</span>
+                    <span className="macro-val">{manualMacros.sugar || 0} g</span>
                   </div>
                   <div className="preview-item">
                     <span className="macro-dot cholesterol-dot"></span>
@@ -611,7 +653,7 @@ export default function Nutrition() {
                         <input type="number" step="any" value={manualMacros.fat} onChange={e => setManualMacros({...manualMacros, fat: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
-                        <label>Natri (mg)</label>
+                        <label>Muối (g)</label>
                         <input type="number" step="any" value={manualMacros.sodium} onChange={e => setManualMacros({...manualMacros, sodium: parseFloat(e.target.value) || 0})}/>
                       </div>
                       <div className="field">
@@ -719,13 +761,91 @@ export default function Nutrition() {
                       </div>
                     </div>
 
+                    {/* Sugar & Sodium dietary restriction bars */}
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>⚕️</span> Hạn chế ăn uống
+                        {(hasDiabetes || hasHypertension || hasHeartDisease) && (
+                          <span style={{
+                            fontSize: 10, padding: '2px 8px', borderRadius: 8,
+                            background: '#fef2f2', color: '#dc2626', fontWeight: 600,
+                          }}>
+                            Có bệnh lý nền
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Sugar bar */}
+                      <div className="macro-bar-item">
+                        <div className="label-row">
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            🍬 Đường
+                            {hasDiabetes && (
+                              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sugar > activeGoal.sugar ? '#fef2f2' : '#fffbeb', color: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#d97706', fontWeight: 600 }}>
+                                Tiểu đường
+                              </span>
+                            )}
+                          </span>
+                          <span style={{ fontWeight: totalsToday.sugar > activeGoal.sugar ? 700 : 400, color: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : undefined }}>
+                            {Math.round(totalsToday.sugar)}g / {activeGoal.sugar}g
+                          </span>
+                        </div>
+                        <div className="bar-bg">
+                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sugar / activeGoal.sugar) * 100, 100)}%`, background: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#a855f7' }}></div>
+                        </div>
+                        {totalsToday.sugar > activeGoal.sugar && <span className="warning-badge">Vượt giới hạn</span>}
+                      </div>
+
+                      {/* Sodium bar */}
+                      <div className="macro-bar-item">
+                        <div className="label-row">
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            🧂 Muối
+                            {(hasHypertension || hasHeartDisease) && (
+                              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sodium > activeGoal.sodium ? '#fef2f2' : '#fffbeb', color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#d97706', fontWeight: 600 }}>
+                                Huyết áp
+                              </span>
+                            )}
+                          </span>
+                          <span style={{ fontWeight: totalsToday.sodium > activeGoal.sodium ? 700 : 400, color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : undefined }}>
+                            {Math.round(totalsToday.sodium * 10) / 10}g / {activeGoal.sodium}g
+                          </span>
+                        </div>
+                        <div className="bar-bg">
+                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sodium / activeGoal.sodium) * 100, 100)}%`, background: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#06b6d4' }}></div>
+                        </div>
+                        {totalsToday.sodium > activeGoal.sodium && <span className="warning-badge">Vượt giới hạn</span>}
+                      </div>
+
+                      {/* Cholesterol bar */}
+                      <div className="macro-bar-item">
+                        <div className="label-row">
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            💗 Cholesterol
+                            {hasHeartDisease && (
+                              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#fef2f2' : '#fffbeb', color: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#d97706', fontWeight: 600 }}>
+                                Tim mạch
+                              </span>
+                            )}
+                          </span>
+                          <span style={{ fontWeight: totalsToday.cholesterol > activeGoal.cholesterol ? 700 : 400, color: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : undefined }}>
+                            {Math.round(totalsToday.cholesterol)}mg / {activeGoal.cholesterol}mg
+                          </span>
+                        </div>
+                        <div className="bar-bg">
+                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.cholesterol / activeGoal.cholesterol) * 100, 100)}%`, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#8b5cf6' }}></div>
+                        </div>
+                        {totalsToday.cholesterol > activeGoal.cholesterol && <span className="warning-badge">Vượt giới hạn</span>}
+                      </div>
+                    </div>
+
                     {/* Health Limits warnings (Sodium, Cholesterol) */}
                     <div className="health-warnings-section">
                       {totalsToday.sodium > activeGoal.sodium && (
                         <div className="health-alert-box alert-danger">
                           <MdWarning className="warn-icon" />
                           <div>
-                            <strong>Cảnh báo huyết áp (Sodium vượt ngưỡng):</strong> Bạn đã nạp {Math.round(totalsToday.sodium)}mg Sodium (Ngưỡng khuyên dùng: {activeGoal.sodium}mg). Hạn chế ăn mặn!
+                            <strong>Cảnh báo huyết áp (Muối vượt ngưỡng):</strong> Bạn đã nạp {Math.round(totalsToday.sodium * 10) / 10}g Muối (Ngưỡng khuyên dùng: {activeGoal.sodium}g). Hạn chế ăn mặn!
                           </div>
                         </div>
                       )}
@@ -935,12 +1055,12 @@ export default function Nutrition() {
                     if (highSodiumDays > 0) {
                       return (
                         <p className="warn-text">
-                          Cảnh báo! Có <strong>{highSodiumDays} ngày</strong> trong tuần qua lượng nạp <strong>Sodium của bạn vượt mức khuyên dùng</strong>. 
+                          Cảnh báo! Có <strong>{highSodiumDays} ngày</strong> trong tuần qua lượng nạp <strong>Muối của bạn vượt mức khuyên dùng</strong>. 
                           Hãy giảm thiểu các thức ăn nhanh, nước chấm, muối gia vị để bảo vệ thành mạch huyết áp.
                         </p>
                       );
                     }
-                    return <p className="good-text">Tốt! Chỉ số Sodium (Natri) nạp vào của bạn nằm trong phạm vi lý tưởng. Hãy tiếp tục duy trì thực đơn lành mạnh!</p>;
+                    return <p className="good-text">Tốt! Chỉ số Muối nạp vào của bạn nằm trong phạm vi lý tưởng. Hãy tiếp tục duy trì thực đơn lành mạnh!</p>;
                   })()}
                 </div>
               </div>

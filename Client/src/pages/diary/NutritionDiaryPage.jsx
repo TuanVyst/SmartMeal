@@ -2,8 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNutritionDiary } from '../../hooks/useNutritionDiary';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
-import { getDailyLimits } from '../../utils/healthRules';
-import { calculateBMI } from '../../utils/bmiCalculator';
+import HealthProfileEditor from '../../components/HealthProfileEditor';
 
 const mealSections = [
   { key: 'breakfast', label: 'Bữa sáng', icon: '🌅' },
@@ -225,15 +224,12 @@ export default function NutritionDiaryPage() {
     entries, loading, totalMacros, selectedDate,
     setSelectedDate, deleteEntry,
   } = useNutritionDiary();
-  const { dailyCalorieBudget, healthProfile, lockedIngredients } = useHealthProfile();
+  const { dailyCalorieBudget, dailyTargets, healthProfile, lockedIngredients } = useHealthProfile();
 
-  const budget = dailyCalorieBudget || 2000;
+  const budget = dailyTargets?.calories || dailyCalorieBudget || 2000;
   const calPct = budget > 0 ? Math.min(100, (totalMacros.calories / budget) * 100) : 0;
 
   const conditions = healthProfile?.conditions || [];
-  const { sugarLimit, sodiumLimit } = useMemo(() => getDailyLimits(conditions), [conditions]);
-
-  // Determine if user has specific conditions for warning badges
   const hasDiabetes = conditions.includes('diabetes');
   const hasHypertension = conditions.includes('hypertension');
   const hasHeartDisease = conditions.includes('heartDisease');
@@ -283,11 +279,7 @@ export default function NutritionDiaryPage() {
       {!loading && (
         <>
           {/* Health Profile Card */}
-          <HealthProfileCard
-            healthProfile={healthProfile}
-            dailyCalorieBudget={budget}
-            lockedIngredients={lockedIngredients}
-          />
+          <HealthProfileEditor />
 
           {/* Calorie & Macro Summary */}
           <div style={{
@@ -311,9 +303,9 @@ export default function NutritionDiaryPage() {
               {message.text}
             </p>
 
-            <MacroBar label="Carbohydrate" value={totalMacros.carbs} max={Math.round(budget * 0.5 / 4)} color="#3b82f6" />
-            <MacroBar label="Protein" value={totalMacros.protein} max={Math.round(budget * 0.2 / 4)} color="#ef4444" />
-            <MacroBar label="Chất béo" value={totalMacros.fat} max={Math.round(budget * 0.3 / 9)} color="#f59e0b" />
+            <MacroBar label="Carbohydrate" value={totalMacros.carbs} max={dailyTargets?.carbs || Math.round(budget * 0.5 / 4)} color="#3b82f6" />
+            <MacroBar label="Protein" value={totalMacros.protein} max={dailyTargets?.protein || Math.round(budget * 0.2 / 4)} color="#ef4444" />
+            <MacroBar label="Chất béo" value={totalMacros.fat} max={dailyTargets?.fat || Math.round(budget * 0.3 / 9)} color="#f59e0b" />
 
             {/* Divider before dietary restriction bars */}
             <div style={{
@@ -335,7 +327,7 @@ export default function NutritionDiaryPage() {
             <MacroBar
               label="Đường"
               value={totalMacros.sugar}
-              max={sugarLimit}
+              max={dailyTargets?.sugarLimit || 50}
               color="#a855f7"
               icon="🍬"
               warning={hasDiabetes ? 'Tiểu đường' : null}
@@ -343,11 +335,20 @@ export default function NutritionDiaryPage() {
             <MacroBar
               label="Muối"
               value={totalMacros.sodium}
-              max={sodiumLimit}
+              max={dailyTargets?.saltLimit || 5}
               color="#06b6d4"
-              unit="mg"
+              unit="g"
               icon="🧂"
               warning={(hasHypertension || hasHeartDisease) ? 'Huyết áp' : null}
+            />
+            <MacroBar
+              label="Cholesterol"
+              value={totalMacros.cholesterol || 0}
+              max={300}
+              color="#8b5cf6"
+              unit="mg"
+              icon="💗"
+              warning={hasHeartDisease ? 'Tim mạch' : null}
             />
           </div>
 

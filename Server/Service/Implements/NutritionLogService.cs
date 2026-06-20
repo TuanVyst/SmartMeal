@@ -66,7 +66,7 @@ namespace Service.Implements
                 TotalFat = request.TotalFat,
                 TotalFiber = request.TotalFiber,
                 TotalSugar = request.TotalSugar,
-                TotalSodium = request.TotalSodium,
+                TotalSalt = request.TotalSalt,
                 TotalCholesterol = request.TotalCholesterol,
                 IsDeleted = false
             };
@@ -96,7 +96,7 @@ namespace Service.Implements
             entity.TotalFat = request.TotalFat;
             entity.TotalFiber = request.TotalFiber;
             entity.TotalSugar = request.TotalSugar;
-            entity.TotalSodium = request.TotalSodium;
+            entity.TotalSalt = request.TotalSalt;
             entity.TotalCholesterol = request.TotalCholesterol;
 
             await CalculateNutritionTotals(entity);
@@ -128,7 +128,7 @@ namespace Service.Implements
                         entity.TotalFat = (ingredient.Nutritional_value.Fat ?? 0) * multiplier;
                         entity.TotalFiber = (ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
                         entity.TotalSugar = (ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
-                        entity.TotalSodium = (ingredient.Nutritional_value.Sodium ?? 0) * multiplier;
+                        entity.TotalSalt = (ingredient.Nutritional_value.Salt ?? 0) * multiplier;
                         entity.TotalCholesterol = (ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
                     }
                 }
@@ -161,7 +161,7 @@ namespace Service.Implements
                             totalFat += (ri.Ingredient.Nutritional_value.Fat ?? 0) * multiplier;
                             totalFib += (ri.Ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
                             totalSug += (ri.Ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
-                            totalSod += (ri.Ingredient.Nutritional_value.Sodium ?? 0) * multiplier;
+                            totalSod += (ri.Ingredient.Nutritional_value.Salt ?? 0) * multiplier;
                             totalChol += (ri.Ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
                         }
                     }
@@ -183,7 +183,7 @@ namespace Service.Implements
                     entity.TotalFat = totalFat * portion;
                     entity.TotalFiber = totalFib * portion;
                     entity.TotalSugar = totalSug * portion;
-                    entity.TotalSodium = totalSod * portion;
+                    entity.TotalSalt = totalSod * portion;
                     entity.TotalCholesterol = totalChol * portion;
                 }
             }

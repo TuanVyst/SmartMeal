@@ -209,7 +209,7 @@ namespace Service.Implements
                     Fat = ingredient.Nutritional_value.Fat,
                     Fiber = ingredient.Nutritional_value.Fiber,
                     Sugar = ingredient.Nutritional_value.Sugar,
-                    Sodium = ingredient.Nutritional_value.Sodium,
+                    Salt = ingredient.Nutritional_value.Salt,
                     Cholesterol = ingredient.Nutritional_value.Cholesterol,
                     ServingSize = ingredient.Nutritional_value.ServingSize,
                     ServingUnit = ingredient.Nutritional_value.ServingUnit

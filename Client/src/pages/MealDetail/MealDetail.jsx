@@ -70,7 +70,7 @@ export default function MealDetail() {
                 fat: Math.round((nv.fat || nv.Fat || 0) * multiplier * 10) / 10,
                 fiber: Math.round((nv.fiber || nv.Fiber || 0) * multiplier * 10) / 10,
                 sugar: Math.round((nv.sugar || nv.Sugar || 0) * multiplier * 10) / 10,
-                sodium: Math.round((nv.sodium || nv.Sodium || 0) * multiplier * 10) / 10,
+                sodium: Math.round((nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * multiplier * 10) / 10,
                 cholesterol: Math.round((nv.cholesterol || nv.Cholesterol || 0) * multiplier * 10) / 10,
               };
             }
@@ -95,14 +95,14 @@ export default function MealDetail() {
           }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
           const calculatedNutrition = {
-            calories: Math.round(totalNutri.calories / servings),
-            protein: Math.round(totalNutri.protein / servings),
-            carbs: Math.round(totalNutri.carbs / servings),
-            fat: Math.round(totalNutri.fat / servings),
-            fiber: Math.round(totalNutri.fiber / servings),
-            sugar: Math.round(totalNutri.sugar / servings),
-            sodium: Math.round(totalNutri.sodium / servings),
-            cholesterol: Math.round(totalNutri.cholesterol / servings),
+            calories: Math.round(totalNutri.calories),
+            protein: Math.round(totalNutri.protein),
+            carbs: Math.round(totalNutri.carbs),
+            fat: Math.round(totalNutri.fat),
+            fiber: Math.round(totalNutri.fiber),
+            sugar: Math.round(totalNutri.sugar),
+            sodium: Math.round(totalNutri.sodium * 10) / 10,
+            cholesterol: Math.round(totalNutri.cholesterol),
           };
 
           setRecipe({
@@ -245,8 +245,8 @@ export default function MealDetail() {
                       <strong>{recipe.nutrition.sugar}g</strong>
                     </div>
                     <div className="nutri-row">
-                      <span>Natri</span>
-                      <strong>{recipe.nutrition.sodium}mg</strong>
+                      <span>Muối</span>
+                      <strong>{recipe.nutrition.sodium}g</strong>
                     </div>
                     <div className="nutri-row">
                       <span>Cholesterol</span>

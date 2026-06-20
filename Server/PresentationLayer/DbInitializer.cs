@@ -15,6 +15,9 @@ public static class DbInitializer
         // Apply any pending migrations safely
         await context.Database.MigrateAsync();
 
+        // After migrations, ensure Sodium→Salt column renames are applied
+        await EnsureSaltColumnsAsync(context);
+
         // Check for English data and clear the database if found to force a Vietnamese re-seed
         var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
         var hasEnglishTags = await context.IngredientTags.AnyAsync(t => t.Name == "VEGETABLE" || t.Name == "GRAIN");
@@ -67,6 +70,28 @@ public static class DbInitializer
             {
                 dbLemon.Nutritional_value.ServingSize = 1;
                 context.NutritionalValues.Update(dbLemon.Nutritional_value);
+            }
+
+            var dbSalt = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Muối");
+            if (dbSalt?.Nutritional_value != null)
+            {
+                dbSalt.Nutritional_value.ServingSize = 5;
+                dbSalt.Nutritional_value.ServingUnit = "g";
+                dbSalt.Nutritional_value.Salt = 5;
+                context.NutritionalValues.Update(dbSalt.Nutritional_value);
+                await context.SaveChangesAsync();
+            }
+
+            // Fix all NutritionalValues: old Sodium(mg) values stored as Salt, convert to Salt(g)
+            var saltNvId = dbSalt?.Nutritional_value?.Nv_id;
+            var allNvs = await context.NutritionalValues.Where(nv => nv.Nv_id != saltNvId).ToListAsync();
+            foreach (var nv in allNvs)
+            {
+                if (nv.Salt.HasValue && nv.Salt.Value >= 0.3)
+                {
+                    nv.Salt = Math.Round(nv.Salt.Value * 0.00254, 3);
+                    context.NutritionalValues.Update(nv);
+                }
             }
             await context.SaveChangesAsync();
 
@@ -146,21 +171,22 @@ public static class DbInitializer
         context.Ingredients.AddRange(tomato, chickenBreast, rice, onion, garlic, oliveOil, salt, pepper, egg, milk, broccoli, carrot, pasta, salmon, lemon);
         await context.SaveChangesAsync();
 
-        // NutritionalValues
+        // NutritionalValues (Salt values in grams: Salt(g) ≈ Sodium(mg) × 0.00254)
         context.NutritionalValues.AddRange(
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = tomato.Ingredient_id, Calories = 18, Protein = 0.9, Carbs = 3.9, Fat = 0.2, Fiber = 1.2, Sugar = 2.6, Sodium = 5, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = chickenBreast.Ingredient_id, Calories = 165, Protein = 31, Carbs = 0, Fat = 3.6, Fiber = 0, Sugar = 0, Sodium = 74, Cholesterol = 85, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = rice.Ingredient_id, Calories = 130, Protein = 2.7, Carbs = 28, Fat = 0.3, Fiber = 0.4, Sugar = 0.1, Sodium = 1, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = onion.Ingredient_id, Calories = 40, Protein = 1.1, Carbs = 9.3, Fat = 0.1, Fiber = 1.7, Sugar = 4.2, Sodium = 4, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = garlic.Ingredient_id, Calories = 4, Protein = 0.2, Carbs = 1.0, Fat = 0.02, Fiber = 0.1, Sugar = 0.03, Sodium = 0.5, Cholesterol = 0, ServingSize = 3, ServingUnit = "clove" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = oliveOil.Ingredient_id, Calories = 119, Protein = 0, Carbs = 0, Fat = 13.5, Fiber = 0, Sugar = 0, Sodium = 0.3, Cholesterol = 0, ServingSize = 1, ServingUnit = "tbsp" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = egg.Ingredient_id, Calories = 78, Protein = 6.3, Carbs = 0.6, Fat = 5.3, Fiber = 0, Sugar = 0.6, Sodium = 62, Cholesterol = 186, ServingSize = 1, ServingUnit = "piece" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = milk.Ingredient_id, Calories = 42, Protein = 3.4, Carbs = 5, Fat = 1, Fiber = 0, Sugar = 5, Sodium = 44, Cholesterol = 5, ServingSize = 100, ServingUnit = "ml" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = broccoli.Ingredient_id, Calories = 34, Protein = 2.8, Carbs = 6.6, Fat = 0.4, Fiber = 2.6, Sugar = 1.7, Sodium = 33, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = carrot.Ingredient_id, Calories = 41, Protein = 0.9, Carbs = 9.6, Fat = 0.2, Fiber = 2.8, Sugar = 4.7, Sodium = 69, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = pasta.Ingredient_id, Calories = 131, Protein = 5, Carbs = 25, Fat = 1.1, Fiber = 1.8, Sugar = 0.8, Sodium = 6, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = salmon.Ingredient_id, Calories = 208, Protein = 20, Carbs = 0, Fat = 13, Fiber = 0, Sugar = 0, Sodium = 59, Cholesterol = 55, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = lemon.Ingredient_id, Calories = 17, Protein = 0.6, Carbs = 5.4, Fat = 0.2, Fiber = 1.6, Sugar = 1.5, Sodium = 1, Cholesterol = 0, ServingSize = 1, ServingUnit = "piece" }
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = tomato.Ingredient_id, Calories = 18, Protein = 0.9, Carbs = 3.9, Fat = 0.2, Fiber = 1.2, Sugar = 2.6, Salt = 0.01, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = chickenBreast.Ingredient_id, Calories = 165, Protein = 31, Carbs = 0, Fat = 3.6, Fiber = 0, Sugar = 0, Salt = 0.19, Cholesterol = 85, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = rice.Ingredient_id, Calories = 130, Protein = 2.7, Carbs = 28, Fat = 0.3, Fiber = 0.4, Sugar = 0.1, Salt = 0.003, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = onion.Ingredient_id, Calories = 40, Protein = 1.1, Carbs = 9.3, Fat = 0.1, Fiber = 1.7, Sugar = 4.2, Salt = 0.01, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = garlic.Ingredient_id, Calories = 4, Protein = 0.2, Carbs = 1.0, Fat = 0.02, Fiber = 0.1, Sugar = 0.03, Salt = 0.001, Cholesterol = 0, ServingSize = 3, ServingUnit = "clove" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = oliveOil.Ingredient_id, Calories = 119, Protein = 0, Carbs = 0, Fat = 13.5, Fiber = 0, Sugar = 0, Salt = 0.001, Cholesterol = 0, ServingSize = 1, ServingUnit = "tbsp" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = egg.Ingredient_id, Calories = 78, Protein = 6.3, Carbs = 0.6, Fat = 5.3, Fiber = 0, Sugar = 0.6, Salt = 0.16, Cholesterol = 186, ServingSize = 1, ServingUnit = "piece" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = milk.Ingredient_id, Calories = 42, Protein = 3.4, Carbs = 5, Fat = 1, Fiber = 0, Sugar = 5, Salt = 0.11, Cholesterol = 5, ServingSize = 100, ServingUnit = "ml" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = broccoli.Ingredient_id, Calories = 34, Protein = 2.8, Carbs = 6.6, Fat = 0.4, Fiber = 2.6, Sugar = 1.7, Salt = 0.08, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = carrot.Ingredient_id, Calories = 41, Protein = 0.9, Carbs = 9.6, Fat = 0.2, Fiber = 2.8, Sugar = 4.7, Salt = 0.17, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = pasta.Ingredient_id, Calories = 131, Protein = 5, Carbs = 25, Fat = 1.1, Fiber = 1.8, Sugar = 0.8, Salt = 0.02, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = salmon.Ingredient_id, Calories = 208, Protein = 20, Carbs = 0, Fat = 13, Fiber = 0, Sugar = 0, Salt = 0.15, Cholesterol = 55, ServingSize = 100, ServingUnit = "g" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = lemon.Ingredient_id, Calories = 17, Protein = 0.6, Carbs = 5.4, Fat = 0.2, Fiber = 1.6, Sugar = 1.5, Salt = 0.003, Cholesterol = 0, ServingSize = 1, ServingUnit = "piece" },
+            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = salt.Ingredient_id, Calories = 0, Protein = 0, Carbs = 0, Fat = 0, Fiber = 0, Sugar = 0, Salt = 5, Cholesterol = 0, ServingSize = 5, ServingUnit = "g" }
         );
         await context.SaveChangesAsync();
 
@@ -273,7 +299,7 @@ public static class DbInitializer
         if (carrot != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = carrot.Ingredient_id, Quantity = 100, UOM = "g" });
         if (rice != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = rice.Ingredient_id, Quantity = 200, UOM = "g" });
         if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 1, UOM = "tbsp" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 1, UOM = "tsp" });
+        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
         if (pepper != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = pepper.Ingredient_id, Quantity = 1, UOM = "tsp" });
 
         // Recipe 1 Labels
@@ -304,7 +330,7 @@ public static class DbInitializer
         if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
         if (garlic != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = garlic.Ingredient_id, Quantity = 2, UOM = "clove" });
         if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 1, UOM = "tbsp" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 1, UOM = "tsp" });
+        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
 
         // Recipe 2 Labels
         if (lunchTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = lunchTag.Rt_Id, Recipe_Id = recipe2.Recipe_id });
@@ -333,7 +359,7 @@ public static class DbInitializer
         if (lemon != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = lemon.Ingredient_id, Quantity = 1, UOM = "piece" });
         if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 2, UOM = "tbsp" });
         if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 1, UOM = "tsp" });
+        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
         if (pepper != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = pepper.Ingredient_id, Quantity = 1, UOM = "tsp" });
 
         // Recipe 3 Labels
@@ -364,7 +390,7 @@ public static class DbInitializer
         if (garlic != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = garlic.Ingredient_id, Quantity = 2, UOM = "clove" });
         if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 2, UOM = "tbsp" });
         if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 1, UOM = "tsp" });
+        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
         if (pepper != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = pepper.Ingredient_id, Quantity = 1, UOM = "tsp" });
 
         // Recipe 4 Labels
@@ -465,21 +491,36 @@ public static class DbInitializer
                         ) THEN
                             ALTER TABLE ""NutritionLog"" ADD COLUMN ""TotalSugar"" double precision;
                         END IF;
-                        IF NOT EXISTS (
+                        -- If TotalSalt column already exists (renamed by old raw SQL), fake the RenameSodiumToSalt migration
+                        -- so MigrateAsync() won't try to rename again
+                        IF EXISTS (
+                            SELECT 1 FROM pg_catalog.pg_attribute a
+                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                            WHERE n.nspname = 'public' AND c.relname = 'NutritionLog' AND a.attname = 'TotalSalt'
+                        ) AND EXISTS (
+                            SELECT 1 FROM pg_catalog.pg_attribute a
+                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                            WHERE n.nspname = 'public' AND c.relname = 'NutritionalValues' AND a.attname = 'Salt'
+                        ) AND NOT EXISTS (
                             SELECT 1 FROM pg_catalog.pg_attribute a
                             JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
                             JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
                             WHERE n.nspname = 'public' AND c.relname = 'NutritionLog' AND a.attname = 'TotalSodium'
                         ) THEN
-                            ALTER TABLE ""NutritionLog"" ADD COLUMN ""TotalSodium"" double precision;
-                        END IF;
-                        IF NOT EXISTS (
-                            SELECT 1 FROM pg_catalog.pg_attribute a
-                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
-                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-                            WHERE n.nspname = 'public' AND c.relname = 'NutritionLog' AND a.attname = 'TotalCholesterol'
-                        ) THEN
-                            ALTER TABLE ""NutritionLog"" ADD COLUMN ""TotalCholesterol"" double precision;
+                            IF NOT EXISTS (
+                                SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260619164255_RenameSodiumToSalt'
+                            ) THEN
+                                INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                                VALUES ('20260619164255_RenameSodiumToSalt', '8.0.11');
+                            END IF;
+                            IF NOT EXISTS (
+                                SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260618120526_AddDetailedNutritionalValues'
+                            ) THEN
+                                INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                                VALUES ('20260618120526_AddDetailedNutritionalValues', '8.0.11');
+                            END IF;
                         END IF;
                     END IF;
                 END $$;");
@@ -493,6 +534,50 @@ public static class DbInitializer
         catch (Exception ex)
         {
             Console.WriteLine($"[DbInitializer] Warning: Could not verify migration history: {ex.Message}");
+        }
+    }
+
+    private static async Task EnsureSaltColumnsAsync(AppDbContext context)
+    {
+        try
+        {
+            await context.Database.ExecuteSqlRawAsync(@"
+                DO $$
+                BEGIN
+                    -- Rename NutritionLog.TotalSodium → TotalSalt (if needed)
+                    IF EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_attribute a
+                        JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = 'public' AND c.relname = 'NutritionLog' AND a.attname = 'TotalSodium'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_attribute a
+                        JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = 'public' AND c.relname = 'NutritionLog' AND a.attname = 'TotalSalt'
+                    ) THEN
+                        ALTER TABLE ""NutritionLog"" RENAME COLUMN ""TotalSodium"" TO ""TotalSalt"";
+                    END IF;
+
+                    -- Rename NutritionalValues.Sodium → Salt (if needed)
+                    IF EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_attribute a
+                        JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = 'public' AND c.relname = 'NutritionalValues' AND a.attname = 'Sodium'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_attribute a
+                        JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = 'public' AND c.relname = 'NutritionalValues' AND a.attname = 'Salt'
+                    ) THEN
+                        ALTER TABLE ""NutritionalValues"" RENAME COLUMN ""Sodium"" TO ""Salt"";
+                    END IF;
+                END $$;");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DbInitializer] Warning: Could not rename salt columns: {ex.Message}");
         }
     }
 
@@ -521,7 +606,7 @@ public static class DbInitializer
                         log.TotalFat = (ingredient.Nutritional_value.Fat ?? 0) * multiplier;
                         log.TotalFiber = (ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
                         log.TotalSugar = (ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
-                        log.TotalSodium = (ingredient.Nutritional_value.Sodium ?? 0) * multiplier;
+                        log.TotalSalt = (ingredient.Nutritional_value.Salt ?? 0) * multiplier;
                         log.TotalCholesterol = (ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
                     }
                 }
@@ -559,7 +644,7 @@ public static class DbInitializer
                             totalFat += (ri.Ingredient.Nutritional_value.Fat ?? 0) * multiplier;
                             totalFib += (ri.Ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
                             totalSug += (ri.Ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
-                            totalSod += (ri.Ingredient.Nutritional_value.Sodium ?? 0) * multiplier;
+                            totalSod += (ri.Ingredient.Nutritional_value.Salt ?? 0) * multiplier;
                             totalChol += (ri.Ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
                         }
                     }
@@ -580,7 +665,7 @@ public static class DbInitializer
                     log.TotalFat = totalFat * portion;
                     log.TotalFiber = totalFib * portion;
                     log.TotalSugar = totalSug * portion;
-                    log.TotalSodium = totalSod * portion;
+                    log.TotalSalt = totalSod * portion;
                     log.TotalCholesterol = totalChol * portion;
                 }
             }

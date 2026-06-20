@@ -139,14 +139,14 @@ export function getLockedIngredientsForProfile(healthConditions) {
 
 export function getDailyLimits(conditions = []) {
   let sugarLimit = 50;    // g/ngày – khuyến nghị WHO
-  let sodiumLimit = 2300;  // mg/ngày – khuyến nghị FDA
+  let saltLimit = 5;      // g/ngày – khuyến nghị FDA (2300mg ≈ 5g)
 
   if (conditions.includes('diabetes')) sugarLimit = 25;
-  if (conditions.includes('hypertension')) sodiumLimit = 1500;
+  if (conditions.includes('hypertension')) saltLimit = 1.5;
   // Bệnh tim mạch cũng nên hạn chế muối
-  if (conditions.includes('heartDisease') && sodiumLimit > 1500) sodiumLimit = 1500;
+  if (conditions.includes('heartDisease') && saltLimit > 1.5) saltLimit = 1.5;
 
-  return { sugarLimit, sodiumLimit };
+  return { sugarLimit, saltLimit };
 }
 
 export function getDailyCalorieBudget(bmiLevel, goal) {
@@ -167,4 +167,46 @@ export function getDailyCalorieBudget(bmiLevel, goal) {
   const adjustment = goalAdjustment[goal] || goalAdjustment.maintain;
 
   return base + adjustment;
+}
+
+export function calculateDailyTargets(bmiLevel, goal, conditions = []) {
+  let kcal = getDailyCalorieBudget(bmiLevel, goal);
+
+  if (conditions.includes('gout')) {
+    kcal -= 100;
+  }
+
+  let proteinPct = 0.20;
+  let carbsPct = 0.50;
+  let fatPct = 0.30;
+
+  if (conditions.includes('diabetes')) {
+    carbsPct = 0.40;
+    proteinPct = 0.25;
+    fatPct = 0.35;
+  }
+
+  if (conditions.includes('gout')) {
+    proteinPct = 0.15;
+    carbsPct = 0.55;
+    fatPct = 0.30;
+  }
+
+  if (conditions.includes('hypertension')) {
+    proteinPct = 0.18;
+    carbsPct = 0.52;
+    fatPct = 0.30;
+  }
+
+  const { sugarLimit, saltLimit } = getDailyLimits(conditions);
+
+  return {
+    calories: Math.round(kcal),
+    protein: Math.round(kcal * proteinPct / 4),
+    carbs: Math.round(kcal * carbsPct / 4),
+    fat: Math.round(kcal * fatPct / 9),
+    fiber: 25,
+    sugarLimit,
+    saltLimit,
+  };
 }

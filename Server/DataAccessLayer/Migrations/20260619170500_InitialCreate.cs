@@ -143,6 +143,30 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BmiLog",
+                columns: table => new
+                {
+                    Log_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Height = table.Column<double>(type: "double precision", nullable: true),
+                    Weight = table.Column<double>(type: "double precision", nullable: true),
+                    Bmi = table.Column<double>(type: "double precision", nullable: true),
+                    BmiLevel = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    RecordedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BmiLog", x => x.Log_id);
+                    table.ForeignKey(
+                        name: "FK_BmiLog_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Collection",
                 columns: table => new
                 {
@@ -158,6 +182,29 @@ namespace DataAccessLayer.Migrations
                     table.PrimaryKey("PK_Collection", x => x.Collection_id);
                     table.ForeignKey(
                         name: "FK_Collection_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Feedback",
+                columns: table => new
+                {
+                    Feedback_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    Rating = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Feedback", x => x.Feedback_id);
+                    table.ForeignKey(
+                        name: "FK_Feedback_Account_Account_id",
                         column: x => x.Account_id,
                         principalTable: "Account",
                         principalColumn: "Account_id",
@@ -327,6 +374,15 @@ namespace DataAccessLayer.Migrations
                     Nv_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Calories = table.Column<double>(type: "double precision", nullable: false),
+                    Protein = table.Column<double>(type: "double precision", nullable: true),
+                    Carbs = table.Column<double>(type: "double precision", nullable: true),
+                    Fat = table.Column<double>(type: "double precision", nullable: true),
+                    Fiber = table.Column<double>(type: "double precision", nullable: true),
+                    Sugar = table.Column<double>(type: "double precision", nullable: true),
+                    Salt = table.Column<double>(type: "double precision", nullable: true),
+                    Cholesterol = table.Column<double>(type: "double precision", nullable: true),
+                    ServingSize = table.Column<double>(type: "double precision", nullable: true),
+                    ServingUnit = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -529,7 +585,7 @@ namespace DataAccessLayer.Migrations
                     TotalFat = table.Column<double>(type: "double precision", nullable: true),
                     TotalFiber = table.Column<double>(type: "double precision", nullable: true),
                     TotalSugar = table.Column<double>(type: "double precision", nullable: true),
-                    TotalSodium = table.Column<double>(type: "double precision", nullable: true),
+                    TotalSalt = table.Column<double>(type: "double precision", nullable: true),
                     TotalCholesterol = table.Column<double>(type: "double precision", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -699,6 +755,11 @@ namespace DataAccessLayer.Migrations
                 column: "Ingredient_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BmiLog_Account_id",
+                table: "BmiLog",
+                column: "Account_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Collection_Account_id",
                 table: "Collection",
                 column: "Account_id");
@@ -712,6 +773,11 @@ namespace DataAccessLayer.Migrations
                 name: "IX_ConditionDietRecommendation_Diet_id",
                 table: "ConditionDietRecommendation",
                 column: "Diet_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Feedback_Account_id",
+                table: "Feedback",
+                column: "Account_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroceryItems_Ingredient_id",
@@ -874,7 +940,13 @@ namespace DataAccessLayer.Migrations
                 name: "Allergies");
 
             migrationBuilder.DropTable(
+                name: "BmiLog");
+
+            migrationBuilder.DropTable(
                 name: "ConditionDietRecommendation");
+
+            migrationBuilder.DropTable(
+                name: "Feedback");
 
             migrationBuilder.DropTable(
                 name: "GroceryItems");

@@ -305,7 +305,7 @@ namespace Service.Implements
                         Fat = ri.Ingredient.Nutritional_value.Fat,
                         Fiber = ri.Ingredient.Nutritional_value.Fiber,
                         Sugar = ri.Ingredient.Nutritional_value.Sugar,
-                        Sodium = ri.Ingredient.Nutritional_value.Sodium,
+                        Salt = ri.Ingredient.Nutritional_value.Salt,
                         Cholesterol = ri.Ingredient.Nutritional_value.Cholesterol,
                         ServingSize = ri.Ingredient.Nutritional_value.ServingSize,
                         ServingUnit = ri.Ingredient.Nutritional_value.ServingUnit

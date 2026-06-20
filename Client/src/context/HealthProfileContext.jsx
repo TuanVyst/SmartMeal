@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
-import { getLockedIngredientsForProfile, getDailyCalorieBudget, HEALTH_CONDITION_RULES } from '../utils/healthRules';
+import { getLockedIngredientsForProfile, calculateDailyTargets, HEALTH_CONDITION_RULES } from '../utils/healthRules';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { useAuth } from './AuthContext';
 
@@ -12,6 +12,10 @@ export function HealthProfileProvider({ children }) {
   const [lockedIngredients, setLockedIngredients] = useState([]);
   const [reducedIngredients, setReducedIngredients] = useState([]);
   const [dailyCalorieBudget, setDailyCalorieBudget] = useState(2000);
+  const [dailyTargets, setDailyTargets] = useState({
+    calories: 2000, protein: 75, carbs: 250, fat: 65,
+    fiber: 25, sugarLimit: 50, saltLimit: 5,
+  });
   const [loading, setLoading] = useState(true);
 
   const computeDerivedState = useCallback((profile) => {
@@ -19,6 +23,10 @@ export function HealthProfileProvider({ children }) {
       setLockedIngredients([]);
       setReducedIngredients([]);
       setDailyCalorieBudget(2000);
+      setDailyTargets({
+        calories: 2000, protein: 75, carbs: 250, fat: 65,
+        fiber: 25, sugarLimit: 50, saltLimit: 5,
+      });
       return;
     }
 
@@ -37,8 +45,9 @@ export function HealthProfileProvider({ children }) {
 
     const bmiLevel = profile.bmiLevel || 'normal';
     const goal = profile.goal || 'maintain';
-    const budget = getDailyCalorieBudget(bmiLevel, goal);
-    setDailyCalorieBudget(budget);
+    const budget = calculateDailyTargets(bmiLevel, goal, conditions);
+    setDailyCalorieBudget(budget.calories);
+    setDailyTargets(budget);
   }, []);
 
   useEffect(() => {
@@ -146,6 +155,7 @@ export function HealthProfileProvider({ children }) {
       lockedIngredients,
       reducedIngredients,
       dailyCalorieBudget,
+      dailyTargets,
       loading,
       completeSurvey,
       updateProfile,
