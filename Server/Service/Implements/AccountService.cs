@@ -52,6 +52,16 @@ namespace Service.Implements
             return await _accountRepo.UpdateAccount(account);
         }
 
+        public async Task<Account> UpdateAvatarUrl(Guid accountId, string avatarUrl)
+        {
+            var account = await _accountRepo.GetAccountById(accountId);
+            if (account == null)
+                throw new InvalidOperationException("Account not found");
+
+            account.AvatarUrl = avatarUrl;
+            return await _accountRepo.UpdateAccount(account);
+        }
+
         public async Task<AuthResponseDto> Login(LoginRequest request)
         {
             var account = await _accountRepo.GetAccountByUsername(request.EmailOrUsername)
