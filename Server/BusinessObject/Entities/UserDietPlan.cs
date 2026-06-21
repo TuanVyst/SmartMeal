@@ -20,6 +20,8 @@ namespace BusinessObject.Entities
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; } = true;
 
+        [NotMapped]
+
         public bool IsDeleted { get; set; } = false;
 
         public virtual Account Account { get; set; }

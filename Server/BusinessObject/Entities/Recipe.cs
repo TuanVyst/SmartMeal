@@ -42,6 +42,8 @@ namespace BusinessObject.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [NotMapped]
+
         public bool IsDeleted { get; set; } = false;
 
         // Navigation properties

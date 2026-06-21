@@ -96,8 +96,29 @@ namespace Service.Implements
                     createdLabels.Add(created);
                 }
 
+                // Create NutritionalValue if provided
+                if (ingredient.NutritionalValue != null)
+                {
+                    var nv = new NutritionalValue
+                    {
+                        Nv_id = Guid.NewGuid(),
+                        Ingredient_id = newIngredient.Ingredient_id,
+                        Calories = ingredient.NutritionalValue.Calories,
+                        Protein = ingredient.NutritionalValue.Protein,
+                        Carbohydrates = ingredient.NutritionalValue.Carbohydrates,
+                        Fat = ingredient.NutritionalValue.Fat,
+                        Fiber = ingredient.NutritionalValue.Fiber,
+                        Sugar = ingredient.NutritionalValue.Sugar,
+                        Sodium = ingredient.NutritionalValue.Sodium,
+                        Cholesterol = ingredient.NutritionalValue.Cholesterol,
+                        IsDeleted = false
+                    };
+                    await _nutritionalValueRepo.CreateNutritionalValue(nv);
+                }
+
                 _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) with {LabelCount} labels created successfully", newIngredient.Ingredient_id, newIngredient.Name, createdLabels.Count);
-                return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient to database"));
+                var createdIngredient = await _ingredientRepo.GetIngredientById(newIngredient.Ingredient_id);
+                return MapToDto(createdIngredient ?? throw new InvalidOperationException("Failed to add ingredient to database"));
             }
             catch (Exception ex)
             {
@@ -172,6 +193,42 @@ namespace Service.Implements
                     }
                 }
 
+                // Update NutritionalValue if provided
+                if (ingredient.NutritionalValue != null)
+                {
+                    var existingNv = existingIngredient.Nutritional_value;
+                    if (existingNv != null)
+                    {
+                        existingNv.Calories = ingredient.NutritionalValue.Calories;
+                        existingNv.Protein = ingredient.NutritionalValue.Protein;
+                        existingNv.Carbohydrates = ingredient.NutritionalValue.Carbohydrates;
+                        existingNv.Fat = ingredient.NutritionalValue.Fat;
+                        existingNv.Fiber = ingredient.NutritionalValue.Fiber;
+                        existingNv.Sugar = ingredient.NutritionalValue.Sugar;
+                        existingNv.Sodium = ingredient.NutritionalValue.Sodium;
+                        existingNv.Cholesterol = ingredient.NutritionalValue.Cholesterol;
+                        await _nutritionalValueRepo.UpdateNutritionalValue(existingNv);
+                    }
+                    else
+                    {
+                        var nv = new NutritionalValue
+                        {
+                            Nv_id = Guid.NewGuid(),
+                            Ingredient_id = id,
+                            Calories = ingredient.NutritionalValue.Calories,
+                            Protein = ingredient.NutritionalValue.Protein,
+                            Carbohydrates = ingredient.NutritionalValue.Carbohydrates,
+                            Fat = ingredient.NutritionalValue.Fat,
+                            Fiber = ingredient.NutritionalValue.Fiber,
+                            Sugar = ingredient.NutritionalValue.Sugar,
+                            Sodium = ingredient.NutritionalValue.Sodium,
+                            Cholesterol = ingredient.NutritionalValue.Cholesterol,
+                            IsDeleted = false
+                        };
+                        await _nutritionalValueRepo.CreateNutritionalValue(nv);
+                    }
+                }
+
                 var updatedIngredient = await _ingredientRepo.GetIngredientById(id);
                 _logger.LogInformation("Ingredient '{Ingredient_id}' updated successfully", id);
                 return MapToDto(updatedIngredient);
@@ -203,7 +260,13 @@ namespace Service.Implements
                 {
                     Id = ingredient.Nutritional_value.Nv_id,
                     Calories = ingredient.Nutritional_value.Calories,
-                    
+                    Protein = ingredient.Nutritional_value.Protein,
+                    Carbohydrates = ingredient.Nutritional_value.Carbohydrates,
+                    Fat = ingredient.Nutritional_value.Fat,
+                    Fiber = ingredient.Nutritional_value.Fiber,
+                    Sugar = ingredient.Nutritional_value.Sugar,
+                    Sodium = ingredient.Nutritional_value.Sodium,
+                    Cholesterol = ingredient.Nutritional_value.Cholesterol,
                 } : null,
                 IngredientLabels = ingredient.IngredientLabels?.Where(l => !l.IsDeleted).Select(l => new IngredientLabelSimpleDto
                 {

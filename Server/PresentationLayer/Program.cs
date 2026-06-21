@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PresentationLayer;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 
@@ -25,7 +27,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 builder.Services.AddScoped<Repository.Interfaces.IRecipeRepo, Repository.Implements.RecipeRepo>();
 builder.Services.AddScoped<Service.Interfaces.IRecipeService, Service.Implements.RecipeService>();
@@ -151,7 +158,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7272")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

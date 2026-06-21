@@ -33,6 +33,12 @@ export default function Sidebar() {
         >
           Meal Plans
         </NavLink>
+        <NavLink 
+          to="/ingredients" 
+          className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+        >
+          Ingredients
+        </NavLink>
       </nav>
     </aside>
   );

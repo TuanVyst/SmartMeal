@@ -1,4 +1,4 @@
-﻿
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,7 +19,7 @@ namespace BusinessObject.Entities
 
         public bool IsDeleted { get; set; } = false;
 
-        // Navigation property: 1 Tag có thể nằm trong nhiều IngredientLabel
+        // Navigation property: 1 Tag c� th? n?m trong nhi?u IngredientLabel
         public ICollection<IngredientLabel> IngredientLabels { get; set; }
     }
 }

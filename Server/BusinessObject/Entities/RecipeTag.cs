@@ -21,6 +21,8 @@ namespace BusinessObject.Entities
         [MaxLength(50)]
         public string Type { get; set; }
 
+        [NotMapped]
+
         public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
