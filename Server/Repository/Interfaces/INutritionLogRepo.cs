@@ -8,6 +8,10 @@ namespace Repository.Interfaces
 
         Task<NutritionLog?> GetNutritionLogById(Guid id);
 
+        Task<List<NutritionLog>> GetNutritionLogsByAccountAndDate(Guid accountId, DateTime date);
+
+        Task<List<NutritionLog>> GetNutritionLogsByAccountAndDateRange(Guid accountId, DateTime startDate, DateTime endDate);
+
         Task<NutritionLog> CreateNutritionLog(NutritionLog nutritionLog);
 
         Task<NutritionLog> UpdateNutritionLog(NutritionLog nutritionLog);

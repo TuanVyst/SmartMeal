@@ -29,6 +29,14 @@ namespace Repository.Implements
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.RI_id == id);
 
+        public async Task<List<RecipeIngredient>> GetRecipeIngredientsByRecipeId(Guid recipeId)
+        {
+            return await _ctx.RecipeIngredients
+                .Include(ri => ri.Ingredient).ThenInclude(i => i.Nutritional_value)
+                .Where(ri => ri.Recipe_id == recipeId && !ri.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<RecipeIngredient> CreateRecipeIngredient(RecipeIngredient recipeIngredient)
         {
             _ctx.RecipeIngredients.Add(recipeIngredient);

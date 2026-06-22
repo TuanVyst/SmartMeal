@@ -25,7 +25,8 @@ namespace DataAccessLayer.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    AvatarUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,7 +71,7 @@ namespace DataAccessLayer.Migrations
                 columns: table => new
                 {
                     It_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Category = table.Column<string>(type: "text", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -143,6 +144,30 @@ namespace DataAccessLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BmiLog",
+                columns: table => new
+                {
+                    Log_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Height = table.Column<double>(type: "double precision", nullable: true),
+                    Weight = table.Column<double>(type: "double precision", nullable: true),
+                    Bmi = table.Column<double>(type: "double precision", nullable: true),
+                    BmiLevel = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    RecordedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BmiLog", x => x.Log_id);
+                    table.ForeignKey(
+                        name: "FK_BmiLog_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Collection",
                 columns: table => new
                 {
@@ -158,6 +183,29 @@ namespace DataAccessLayer.Migrations
                     table.PrimaryKey("PK_Collection", x => x.Collection_id);
                     table.ForeignKey(
                         name: "FK_Collection_Account_Account_id",
+                        column: x => x.Account_id,
+                        principalTable: "Account",
+                        principalColumn: "Account_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Feedback",
+                columns: table => new
+                {
+                    Feedback_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    Rating = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Feedback", x => x.Feedback_id);
+                    table.ForeignKey(
+                        name: "FK_Feedback_Account_Account_id",
                         column: x => x.Account_id,
                         principalTable: "Account",
                         principalColumn: "Account_id",
@@ -327,6 +375,15 @@ namespace DataAccessLayer.Migrations
                     Nv_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Calories = table.Column<double>(type: "double precision", nullable: false),
+                    Protein = table.Column<double>(type: "double precision", nullable: true),
+                    Carbs = table.Column<double>(type: "double precision", nullable: true),
+                    Fat = table.Column<double>(type: "double precision", nullable: true),
+                    Fiber = table.Column<double>(type: "double precision", nullable: true),
+                    Sugar = table.Column<double>(type: "double precision", nullable: true),
+                    Salt = table.Column<double>(type: "double precision", nullable: true),
+                    Cholesterol = table.Column<double>(type: "double precision", nullable: true),
+                    ServingSize = table.Column<double>(type: "double precision", nullable: true),
+                    ServingUnit = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -524,6 +581,13 @@ namespace DataAccessLayer.Migrations
                     Quantity = table.Column<double>(type: "double precision", nullable: true),
                     Unit = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     TotalCalories = table.Column<double>(type: "double precision", nullable: true),
+                    TotalProtein = table.Column<double>(type: "double precision", nullable: true),
+                    TotalCarbs = table.Column<double>(type: "double precision", nullable: true),
+                    TotalFat = table.Column<double>(type: "double precision", nullable: true),
+                    TotalFiber = table.Column<double>(type: "double precision", nullable: true),
+                    TotalSugar = table.Column<double>(type: "double precision", nullable: true),
+                    TotalSalt = table.Column<double>(type: "double precision", nullable: true),
+                    TotalCholesterol = table.Column<double>(type: "double precision", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -545,65 +609,6 @@ namespace DataAccessLayer.Migrations
                         column: x => x.Recipe_id,
                         principalTable: "Recipe",
                         principalColumn: "Recipe_id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Post",
-                columns: table => new
-                {
-                    Post_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
-                    Image = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    Recipe_id = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Post", x => x.Post_id);
-                    table.ForeignKey(
-                        name: "FK_Post_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Post_Recipe_Recipe_id",
-                        column: x => x.Recipe_id,
-                        principalTable: "Recipe",
-                        principalColumn: "Recipe_id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Ratings",
-                columns: table => new
-                {
-                    Rating_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Recipe_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Rating = table.Column<decimal>(type: "numeric", nullable: false),
-                    Review = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ratings", x => x.Rating_id);
-                    table.ForeignKey(
-                        name: "FK_Ratings_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Ratings_Recipe_Recipe_id",
-                        column: x => x.Recipe_id,
-                        principalTable: "Recipe",
-                        principalColumn: "Recipe_id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -730,76 +735,6 @@ namespace DataAccessLayer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Comment",
-                columns: table => new
-                {
-                    Comment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Post_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsEdited = table.Column<bool>(type: "boolean", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    ParentCommentComment_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Comment", x => x.Comment_id);
-                    table.ForeignKey(
-                        name: "FK_Comment_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Comment_Comment_ParentCommentComment_id",
-                        column: x => x.ParentCommentComment_id,
-                        principalTable: "Comment",
-                        principalColumn: "Comment_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Comment_Post_Post_id",
-                        column: x => x.Post_id,
-                        principalTable: "Post",
-                        principalColumn: "Post_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Report",
-                columns: table => new
-                {
-                    Report_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Account_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Comment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Post_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Report", x => x.Report_id);
-                    table.ForeignKey(
-                        name: "FK_Report_Account_Account_id",
-                        column: x => x.Account_id,
-                        principalTable: "Account",
-                        principalColumn: "Account_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Report_Comment_Comment_id",
-                        column: x => x.Comment_id,
-                        principalTable: "Comment",
-                        principalColumn: "Comment_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Report_Post_Post_id",
-                        column: x => x.Post_id,
-                        principalTable: "Post",
-                        principalColumn: "Post_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AffiliateProducts_Ingredient_id",
                 table: "AffiliateProducts",
@@ -821,24 +756,14 @@ namespace DataAccessLayer.Migrations
                 column: "Ingredient_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BmiLog_Account_id",
+                table: "BmiLog",
+                column: "Account_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Collection_Account_id",
                 table: "Collection",
                 column: "Account_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Comment_Account_id",
-                table: "Comment",
-                column: "Account_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Comment_ParentCommentComment_id",
-                table: "Comment",
-                column: "ParentCommentComment_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Comment_Post_id",
-                table: "Comment",
-                column: "Post_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ConditionDietRecommendation_Condition_id",
@@ -849,6 +774,11 @@ namespace DataAccessLayer.Migrations
                 name: "IX_ConditionDietRecommendation_Diet_id",
                 table: "ConditionDietRecommendation",
                 column: "Diet_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Feedback_Account_id",
+                table: "Feedback",
+                column: "Account_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroceryItems_Ingredient_id",
@@ -884,6 +814,12 @@ namespace DataAccessLayer.Migrations
                 name: "IX_IngredientLabels_It_id",
                 table: "IngredientLabels",
                 column: "It_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IngredientTags_Name",
+                table: "IngredientTags",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_NutritionalValues_Ingredient_id",
@@ -922,29 +858,15 @@ namespace DataAccessLayer.Migrations
                 column: "Ingredient_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_Account_id",
-                table: "Post",
-                column: "Account_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Post_Recipe_id",
-                table: "Post",
-                column: "Recipe_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ratings_Account_id",
-                table: "Ratings",
-                column: "Account_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ratings_Recipe_id",
-                table: "Ratings",
-                column: "Recipe_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Recipe_Account_id",
                 table: "Recipe",
                 column: "Account_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Recipe_tag_Name",
+                table: "Recipe_tag",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RecipeIngredients_Ingredient_id",
@@ -965,21 +887,6 @@ namespace DataAccessLayer.Migrations
                 name: "IX_RecipeLabel_Rt_Id",
                 table: "RecipeLabel",
                 column: "Rt_Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Report_Account_id",
-                table: "Report",
-                column: "Account_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Report_Comment_id",
-                table: "Report",
-                column: "Comment_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Report_Post_id",
-                table: "Report",
-                column: "Post_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SavedRecipe_Account_id",
@@ -1034,7 +941,13 @@ namespace DataAccessLayer.Migrations
                 name: "Allergies");
 
             migrationBuilder.DropTable(
+                name: "BmiLog");
+
+            migrationBuilder.DropTable(
                 name: "ConditionDietRecommendation");
+
+            migrationBuilder.DropTable(
+                name: "Feedback");
 
             migrationBuilder.DropTable(
                 name: "GroceryItems");
@@ -1058,16 +971,10 @@ namespace DataAccessLayer.Migrations
                 name: "Pantries");
 
             migrationBuilder.DropTable(
-                name: "Ratings");
-
-            migrationBuilder.DropTable(
                 name: "RecipeIngredients");
 
             migrationBuilder.DropTable(
                 name: "RecipeLabel");
-
-            migrationBuilder.DropTable(
-                name: "Report");
 
             migrationBuilder.DropTable(
                 name: "SavedRecipe");
@@ -1094,10 +1001,10 @@ namespace DataAccessLayer.Migrations
                 name: "Recipe_tag");
 
             migrationBuilder.DropTable(
-                name: "Comment");
+                name: "Collection");
 
             migrationBuilder.DropTable(
-                name: "Collection");
+                name: "Recipe");
 
             migrationBuilder.DropTable(
                 name: "Plan");
@@ -1113,12 +1020,6 @@ namespace DataAccessLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Partners");
-
-            migrationBuilder.DropTable(
-                name: "Post");
-
-            migrationBuilder.DropTable(
-                name: "Recipe");
 
             migrationBuilder.DropTable(
                 name: "Account");

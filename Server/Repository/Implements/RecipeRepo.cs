@@ -22,6 +22,7 @@ namespace Repository.Implements
         {
             return await _ctx.Recipes
                 .Include(r => r.RecipeLabels).ThenInclude(rl => rl.RecipeTag)
+                .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient).ThenInclude(i => i.Nutritional_value)
                 .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
@@ -29,6 +30,7 @@ namespace Repository.Implements
         public async Task<Recipe?> GetRecipeById(Guid id)
             => await _ctx.Recipes
                 .Include(r => r.RecipeLabels).ThenInclude(rl => rl.RecipeTag)
+                .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient).ThenInclude(i => i.Nutritional_value)
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.Recipe_id == id);
 

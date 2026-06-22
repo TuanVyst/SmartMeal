@@ -16,5 +16,6 @@ namespace Service.Interfaces
         Task<AuthResponseDto> VerifyRegisterOtp(VerifyOtpRequest request);
         Task<AuthResponseDto> Register(RegisterRequest request);
         Task<AuthResponseDto> GoogleLogin(GoogleLoginRequest request);
+        Task<Account> UpdateAvatarUrl(Guid accountId, string avatarUrl);
     }
 }

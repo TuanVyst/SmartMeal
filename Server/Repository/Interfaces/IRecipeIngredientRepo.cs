@@ -9,6 +9,7 @@ namespace Repository.Interfaces
     {
         Task<List<RecipeIngredient>> GetAllRecipeIngredients();
         Task<RecipeIngredient?> GetRecipeIngredientById(Guid id);
+        Task<List<RecipeIngredient>> GetRecipeIngredientsByRecipeId(Guid recipeId);
         Task<RecipeIngredient> CreateRecipeIngredient(RecipeIngredient recipeIngredient);
         Task<RecipeIngredient> UpdateRecipeIngredient(RecipeIngredient recipeIngredient);
         Task<RecipeIngredient> SoftDeleteRecipeIngredient(Guid id);

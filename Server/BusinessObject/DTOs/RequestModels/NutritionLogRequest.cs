@@ -17,7 +17,7 @@ namespace BusinessObject.Dtos.RequestModels
         public double? TotalFat { get; set; }
         public double? TotalFiber { get; set; }
         public double? TotalSugar { get; set; }
-        public double? TotalSodium { get; set; }
+        public double? TotalSalt { get; set; }
         public double? TotalCholesterol { get; set; }
     }
 }

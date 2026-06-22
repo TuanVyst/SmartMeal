@@ -9,7 +9,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   
-  // This state will eventually be populated via GET /api/UserInformation/account/{accountId}
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -17,17 +16,12 @@ export default function Profile() {
     address: ''
   });
 
-  // Mocking the fetch on mount
   useEffect(() => {
-    // If we had the real API integrated:
-    // axios.get(`/api/UserInformation/account/${user.account_id}`).then(...)
-    
-    // For now, we'll just set some mock data or leave it empty to simulate a new profile
     setFormData({
-      name: 'John Doe',
+      name: 'Nguyễn Văn A',
       phone: '0123456789',
-      email: 'john.doe@example.com',
-      address: '123 Main Street, Cityville'
+      email: 'nguyenvana@example.com',
+      address: '123 Đường Chính, Quận 1, TP.HCM'
     });
   }, [user]);
 
@@ -41,42 +35,40 @@ export default function Profile() {
     setLoading(true);
     setSuccessMsg('');
     
-    // Mocking the save process (PUT/POST to API)
     setTimeout(() => {
       setLoading(false);
-      setSuccessMsg('Profile updated successfully!');
+      setSuccessMsg('Cập nhật hồ sơ thành công!');
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMsg(''), 3000);
     }, 800);
   };
 
   return (
     <div className="profile-container">
-      <button className="btn-back" onClick={() => navigate('/')}>
-        &larr; Back to Dashboard
+      <button className="btn-back" onClick={() => navigate('/dashboard')}>
+        &larr; Quay lại Bảng điều khiển
       </button>
       <div className="profile-card">
-        <h2 className="profile-title">Account Profile</h2>
-        <p className="profile-subtitle">Manage your personal information</p>
+        <h2 className="profile-title">Hồ sơ tài khoản</h2>
+        <p className="profile-subtitle">Quản lý thông tin cá nhân của bạn</p>
 
         {successMsg && <div className="alert-success">{successMsg}</div>}
 
         <form onSubmit={handleSubmit} className="profile-form">
           <div className="form-group readonly-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">Tên đăng nhập</label>
             <input 
               type="text" 
               id="username" 
-              value={user?.username || 'GuestUser'} 
+              value={user?.username || 'Khách'} 
               readOnly 
               className="form-input readonly-input"
             />
-            <span className="help-text">Username cannot be changed at this time.</span>
+            <span className="help-text">Tên đăng nhập không thể thay đổi.</span>
           </div>
 
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+            <label htmlFor="name">Họ và tên</label>
             <input 
               type="text" 
               id="name" 
@@ -84,12 +76,12 @@ export default function Profile() {
               value={formData.name} 
               onChange={handleChange}
               className="form-input"
-              placeholder="Enter your full name"
+              placeholder="Nhập họ và tên"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">Email</label>
             <input 
               type="email" 
               id="email" 
@@ -97,12 +89,12 @@ export default function Profile() {
               value={formData.email} 
               onChange={handleChange}
               className="form-input"
-              placeholder="Enter your email"
+              placeholder="Nhập email"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="phone">Phone Number</label>
+            <label htmlFor="phone">Số điện thoại</label>
             <input 
               type="tel" 
               id="phone" 
@@ -110,26 +102,26 @@ export default function Profile() {
               value={formData.phone} 
               onChange={handleChange}
               className="form-input"
-              placeholder="Enter your phone number"
+              placeholder="Nhập số điện thoại"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="address">Address</label>
+            <label htmlFor="address">Địa chỉ</label>
             <textarea 
               id="address" 
               name="address"
               value={formData.address} 
               onChange={handleChange}
               className="form-input textarea-input"
-              placeholder="Enter your full address"
+              placeholder="Nhập địa chỉ đầy đủ"
               rows="3"
             />
           </div>
 
           <div className="form-actions">
             <button type="submit" className="btn-save" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>
           </div>
         </form>

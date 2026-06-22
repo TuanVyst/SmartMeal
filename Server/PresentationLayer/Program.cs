@@ -32,6 +32,7 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 builder.Services.AddScoped<Repository.Interfaces.IRecipeRepo, Repository.Implements.RecipeRepo>();
@@ -133,8 +134,31 @@ builder.Services.AddScoped<Repository.Interfaces.INutritionalValueRepo, Reposito
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
 builder.Services.AddScoped<Service.Interfaces.IAccountService, Service.Implements.AccountService>();
 
+// HealthProfile
+builder.Services.AddScoped<Repository.Interfaces.IHealthProfileRepo, Repository.Implements.HealthProfileRepo>();
+builder.Services.AddScoped<Service.Interfaces.IHealthProfileService, Service.Implements.HealthProfileService>();
+
+// UserCondition
+builder.Services.AddScoped<Repository.Interfaces.IUserConditionRepo, Repository.Implements.UserConditionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IUserConditionService, Service.Implements.UserConditionService>();
+
+// MedicalCondition
+builder.Services.AddScoped<Repository.Interfaces.IMedicalConditionRepo, Repository.Implements.MedicalConditionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.Implements.MedicalConditionService>();
+
+// BmiLog
+builder.Services.AddScoped<Repository.Interfaces.IBmiLogRepo, Repository.Implements.BmiLogRepo>();
+builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements.BmiLogService>();
+
+// Feedback
+builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
+builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
+
 //Email
 builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();
+
+// Cloudinary
+builder.Services.AddScoped<Service.Interfaces.ICloudinaryService, Service.Implements.CloudinaryService>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not configured");
@@ -185,10 +209,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseRouting();
 app.UseCors("AllowClient");
+app.UseRouting();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

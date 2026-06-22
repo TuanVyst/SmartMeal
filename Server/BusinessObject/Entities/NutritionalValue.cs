@@ -16,16 +16,17 @@ namespace BusinessObject.Entities
         [ForeignKey("Ingredient")]
         public Guid Ingredient_id { get; set; }
 
-        public double Calories { get; set; } = 0;
-        public double Protein { get; set; } = 0;
-        public double Carbohydrates { get; set; } = 0;
-        public double Fat { get; set; } = 0;
-        public double Fiber { get; set; } = 0;
-        public double Sugar { get; set; } = 0;
-        public double Sodium { get; set; } = 0;
-        public double Cholesterol { get; set; } = 0;
+        public double Calories { get; set; }
+        public double? Protein { get; set; }
+        public double? Carbs { get; set; }
+        public double? Fat { get; set; }
+        public double? Fiber { get; set; }
+        public double? Sugar { get; set; }
+        public double? Salt { get; set; }
+        public double? Cholesterol { get; set; }
+        public double? ServingSize { get; set; }
+        public string? ServingUnit { get; set; }
 
-        [NotMapped]
         public bool IsDeleted { get; set; } = false;
 
         // Navigation property (Quan hệ 1-1 với Ingredient)

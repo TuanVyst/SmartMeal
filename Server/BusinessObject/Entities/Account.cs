@@ -41,6 +41,9 @@ namespace BusinessObject.Entities
         [MaxLength(255)]
         public string? Address { get; set; }
 
+        [MaxLength(500)]
+        public string? AvatarUrl { get; set; }
+
         // Navigation properties
         public virtual ICollection<Subscription> Subscriptions { get; set; }
         public virtual ICollection<Recipe> Recipes { get; set; }

@@ -1,28 +1,382 @@
 .meal-suggestion-container {
   display: flex;
   gap: 2rem;
-  padding: 2rem;
+  padding: 1rem 0;
   max-width: 1400px;
   margin: 0 auto;
-  font-family: 'Inter', 'Roboto', sans-serif;
-  background-color: #f8fafc; /* light bluish grey background for contrast */
-  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  align-items: flex-start;
 }
 
-.sidebar-section {
-  flex: 0 0 350px;
+/* Left Sidebar Configuration */
+.pantry-config-sidebar {
+  flex: 0 0 340px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  position: sticky;
+  top: 88px; /* Offset for main navigation header */
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.main-section {
+/* Custom Scrollbar for Sidebar */
+.pantry-config-sidebar ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pantry-config-sidebar ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.pantry-config-sidebar ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.pantry-config-sidebar ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tab Navigation inside Sidebar */
+.sidebar-tabs-nav {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.sidebar-tab-btn {
   flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
+.sidebar-tab-btn:hover {
+  color: #1e293b;
+}
+
+.sidebar-tab-btn.active {
+  background-color: #ffffff;
+  color: #16a34a;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-tab-btn .tab-icon {
+  font-size: 1.15rem;
+}
+
+.tab-info-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+}
+
+.tab-info-text p {
+  margin: 0;
+}
+
+/* Category Scrolling and Groups */
+.category-scroll-container {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-right: 4px;
+}
+
+.category-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.category-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  padding-bottom: 2px;
+}
+
+.ingredients-pills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Ingredient Pills */
+.ing-pill {
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.ing-pill:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.pill-check-icon {
+  font-size: 0.95rem;
+}
+
+/* Pantry Selected State */
+.ing-pill.pantry-pill.selected {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+  font-weight: 600;
+}
+
+.ing-pill.pantry-pill.selected:hover {
+  background-color: #bbf7d0;
+  border-color: #4ade80;
+}
+
+/* Allergy Selected State */
+.ing-pill.allergy-pill.selected {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.ing-pill.allergy-pill.selected:hover {
+  background-color: #fecaca;
+  border-color: #f87171;
+}
+
+/* Disabled State (Allergic Ingredient inside Pantry Tab) */
+.ing-pill.disabled-allergic {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ing-pill.disabled-allergic:hover {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.disabled-pill-text {
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin-left: 2px;
+  font-weight: 400;
+}
+
+/* Right Main Section */
+.suggestions-main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.suggestions-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.suggestions-header-bar h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.results-count-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+  display: block;
+  margin-top: 4px;
+}
+
+.allergy-toggle-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.allergy-toggle-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #16a34a;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Suggested Recipes Grid */
+.recipes-grid-suggestions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Wrapper with overlay potential */
+.recipe-suggestion-card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.recipe-suggestion-card-wrapper.allergic-warning-card {
+  border: 2px solid #fca5a5;
+  border-radius: 14px;
+  padding: 2px;
+  background-color: #fff8f8;
+}
+
+/* Allergy conflict overlay */
+.allergy-card-overlay {
+  background-color: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 10px 10px 0 0;
+  z-index: 5;
+}
+
+.allergy-card-overlay .warn-badge-icon {
+  font-size: 1.1rem;
+  color: #ef4444;
+}
+
+/* Empty State Suggestions */
+.empty-suggestions-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  color: #64748b;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.empty-suggestions-card .empty-warn-icon {
+  font-size: 3.5rem;
+  color: #eab308;
+}
+
+.empty-suggestions-card p {
+  font-size: 1.05rem;
+  font-weight: 500;
+  max-width: 480px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Suggestion Alert Banner */
+.suggestion-alert {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  font-size: 0.9rem;
+  z-index: 999;
+  animation: slideIn 0.3s ease forwards;
+}
+
+.suggestion-alert.banner-success {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.suggestion-alert.banner-error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.suggestion-alert.banner-info {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjust */
+@media (max-width: 992px) {
   .meal-suggestion-container {
     flex-direction: column;
+    align-items: stretch;
   }
-  .sidebar-section {
+
+  .pantry-config-sidebar {
     flex: auto;
+    position: static;
+    max-height: none;
   }
 }
