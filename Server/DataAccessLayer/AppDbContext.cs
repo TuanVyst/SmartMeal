@@ -58,6 +58,41 @@ namespace DataAccessLayer
             modelBuilder.Entity<BusinessObject.Entities.RecipeTag>()
                 .HasIndex(t => t.Name)
                 .IsUnique();
+
+            // Global soft-delete query filters
+            ApplySoftDeleteFilter<AffiliateProduct>(modelBuilder);
+            ApplySoftDeleteFilter<Allergy>(modelBuilder);
+            ApplySoftDeleteFilter<BmiLog>(modelBuilder);
+            ApplySoftDeleteFilter<Collection>(modelBuilder);
+            ApplySoftDeleteFilter<ConditionDietRecommendation>(modelBuilder);
+            ApplySoftDeleteFilter<DietPlan>(modelBuilder);
+            ApplySoftDeleteFilter<Feedback>(modelBuilder);
+            ApplySoftDeleteFilter<GroceryItem>(modelBuilder);
+            ApplySoftDeleteFilter<GroceryList>(modelBuilder);
+            ApplySoftDeleteFilter<HealthProfile>(modelBuilder);
+            ApplySoftDeleteFilter<Ingredient>(modelBuilder);
+            ApplySoftDeleteFilter<IngredientLabel>(modelBuilder);
+            ApplySoftDeleteFilter<IngredientTag>(modelBuilder);
+            ApplySoftDeleteFilter<MedicalCondition>(modelBuilder);
+            ApplySoftDeleteFilter<NutritionGoal>(modelBuilder);
+            ApplySoftDeleteFilter<NutritionLog>(modelBuilder);
+            ApplySoftDeleteFilter<NutritionalValue>(modelBuilder);
+            ApplySoftDeleteFilter<Partner>(modelBuilder);
+            ApplySoftDeleteFilter<Plan>(modelBuilder);
+            ApplySoftDeleteFilter<Recipe>(modelBuilder);
+            ApplySoftDeleteFilter<RecipeIngredient>(modelBuilder);
+            ApplySoftDeleteFilter<RecipeLabel>(modelBuilder);
+            ApplySoftDeleteFilter<RecipeTag>(modelBuilder);
+            ApplySoftDeleteFilter<SavedRecipe>(modelBuilder);
+            ApplySoftDeleteFilter<Subscription>(modelBuilder);
+            ApplySoftDeleteFilter<UserCondition>(modelBuilder);
+            ApplySoftDeleteFilter<UserDietPlan>(modelBuilder);
+        }
+
+        private static void ApplySoftDeleteFilter<TEntity>(ModelBuilder modelBuilder)
+            where TEntity : class
+        {
+            modelBuilder.Entity<TEntity>().HasQueryFilter(e => EF.Property<bool>(e, "IsDeleted") == false);
         }
     }
 }

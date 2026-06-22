@@ -20,8 +20,6 @@ namespace BusinessObject.Entities
         [MaxLength(100)]
         public string? Category { get; set; }
 
-        [NotMapped]
-
         public bool IsDeleted { get; set; } = false;
     }
 }

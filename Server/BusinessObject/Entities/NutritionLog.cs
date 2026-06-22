@@ -38,8 +38,6 @@ namespace BusinessObject.Entities
         public double? TotalSalt { get; set; }
         public double? TotalCholesterol { get; set; }
 
-        [NotMapped]
-
         public bool IsDeleted { get; set; } = false;
 
         public virtual Account Account { get; set; }

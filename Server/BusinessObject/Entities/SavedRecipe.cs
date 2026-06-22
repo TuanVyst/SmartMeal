@@ -21,8 +21,6 @@ namespace BusinessObject.Entities
             [ForeignKey("Recipe")]
             public Guid Recipe_Id { get; set; }
 
-            [NotMapped]
-
             public bool IsDeleted { get; set; } = false;
 
         // Navigation properties

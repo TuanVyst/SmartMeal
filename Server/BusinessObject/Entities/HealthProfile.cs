@@ -29,8 +29,6 @@ namespace BusinessObject.Entities
 
         public DateTime? UpdatedAt { get; set; }
 
-        [NotMapped]
-
         public bool IsDeleted { get; set; } = false;
 
         // Navigation
