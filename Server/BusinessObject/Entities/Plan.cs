@@ -35,6 +35,8 @@ namespace BusinessObject.Entities
         /// </summary>
         public string Features { get; set; }
 
+        [NotMapped]
+
         public bool IsDeleted { get; set; } = false;
 
         // Navigation properties

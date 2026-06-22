@@ -42,8 +42,8 @@ public static class DbInitializer
         var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
         if (existingAdmin != null)
         {
-            existingAdmin.Email = "maituanvyst@gmail.com";
-            existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("admin123");
+            existingAdmin.Email = "qdam100@gmail.com";
+            existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("Admin@123");
             context.Accounts.Update(existingAdmin);
             await context.SaveChangesAsync();
         }
@@ -113,9 +113,9 @@ public static class DbInitializer
         {
             Account_id = Guid.NewGuid(),
             Username = "admin",
-            Password = BCrypt.Net.BCrypt.HashPassword("admin123"),
+            Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
             Name = "Admin",
-            Email = "maituanvyst@gmail.com",
+            Email = "qdam100@gmail.com",
             Phone = "0123456789",
             Address = "SmartMeal HQ",
             Role = RoleEnum.Admin,
@@ -434,6 +434,18 @@ public static class DbInitializer
                         ) THEN
                             INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
                             VALUES ('20260617162458_AddUniqueTagNameIndexes', '8.0.11');
+                        END IF;
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260620140009_InitialCreate'
+                        ) THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260620140009_InitialCreate', '8.0.11');
+                        END IF;
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260621120113_AddNutritionalValueFields'
+                        ) THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260621120113_AddNutritionalValueFields', '8.0.11');
                         END IF;
                     END IF;
 

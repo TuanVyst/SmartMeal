@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace BusinessObject.Entities
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-        // Navigation property: 1 Partner có nhiều AffiliateProduct
+        // Navigation property: 1 Partner c� nhi?u AffiliateProduct
         public ICollection<AffiliateProduct> AffiliateProducts { get; set; }
     }
 }

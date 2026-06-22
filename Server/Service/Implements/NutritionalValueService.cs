@@ -43,6 +43,15 @@ namespace Service.Implements
                     Nv_id = Guid.NewGuid(),
                     Ingredient_id = request.Ingredient_id,
                     Calories = request.Calories,
+                    Protein = request.Protein,
+                    Carbs = request.Carbohydrates,
+                    Fat = request.Fat,
+                    Fiber = request.Fiber,
+                    Sugar = request.Sugar,
+                    Salt = request.Sodium,
+                    Cholesterol = request.Cholesterol,
+                    ServingSize = 0,
+                    ServingUnit = "",
                     IsDeleted = false
                 };
 
@@ -67,6 +76,15 @@ namespace Service.Implements
 
                 existingItem.Ingredient_id = request.Ingredient_id;
                 existingItem.Calories = request.Calories;
+                existingItem.Protein = request.Protein;
+                existingItem.Carbs = request.Carbohydrates;
+                existingItem.Fat = request.Fat;
+                existingItem.Fiber = request.Fiber;
+                existingItem.Sugar = request.Sugar;
+                existingItem.Salt = request.Sodium;
+                existingItem.Cholesterol = request.Cholesterol;
+                existingItem.ServingSize = existingItem.ServingSize ?? 0;
+                existingItem.ServingUnit = existingItem.ServingUnit ?? "";
 
                 var result = await _nutritionalValueRepo.UpdateNutritionalValue(existingItem);
                 _logger.LogInformation("NutritionalValue '{Nv_id}' updated successfully", existingItem.Nv_id);

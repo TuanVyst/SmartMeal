@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PresentationLayer;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 
@@ -28,6 +30,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
@@ -124,7 +128,9 @@ builder.Services.AddScoped<Service.Interfaces.IIngredientService, Service.Implem
 builder.Services.AddScoped<Repository.Interfaces.IIngredientTagRepo, Repository.Implements.IngredientTagRepo>();
 builder.Services.AddScoped<Service.Interfaces.IIngredientTagService, Service.Implements.IngredientTagService>();
 builder.Services.AddScoped<Repository.Interfaces.IIngredientLabelRepo, Repository.Implements.IngredientLabelRepo>();
+builder.Services.AddScoped<Service.Interfaces.IIngredientLabelService, Service.Implements.IngredientLabelService>();
 builder.Services.AddScoped<Repository.Interfaces.INutritionalValueRepo, Repository.Implements.NutritionalValueRepo>();
+builder.Services.AddScoped<Service.Interfaces.INutritionalValueService, Service.Implements.NutritionalValueService>();
 
 // Account
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
@@ -178,7 +184,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7272")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

@@ -45,24 +45,27 @@ export default function AdminIngredients() {
         await adminService.updateIngredient(editingIngredient.ingredient_id, ingredientFormData);
         
         // Update Nutritional Value (If it exists, otherwise create it)
-        const nvFormData = {
-          ingredient_id: editingIngredient.ingredient_id,
-          calories: ingredientFormData.calories
-        };
-        
         if (editingIngredient.nutritional_value && editingIngredient.nutritional_value.id) {
-          await adminService.updateNutritionalValue(editingIngredient.nutritional_value.id, nvFormData);
+          await adminService.updateNutritionalValue(editingIngredient.nutritional_value.id, {
+            Ingredient_id: editingIngredient.ingredient_id,
+            Calories: ingredientFormData.calories
+          });
         } else {
-          await adminService.createNutritionalValue(nvFormData);
+          await adminService.createNutritionalValue({
+            Ingredient_id: editingIngredient.ingredient_id,
+            Calories: ingredientFormData.calories
+          });
         }
       } else {
         // Create Ingredient
         const newIngredient = await adminService.createIngredient(ingredientFormData);
-        if (newIngredient && newIngredient.ingredient_id) {
+        // API returns { success: true, data: { ingredient_id: "..." } }
+        const createdIngredient = newIngredient?.data || newIngredient;
+        if (createdIngredient && createdIngredient.ingredient_id) {
           // Immediately create Nutritional Value
           await adminService.createNutritionalValue({
-            ingredient_id: newIngredient.ingredient_id,
-            calories: ingredientFormData.calories
+            Ingredient_id: createdIngredient.ingredient_id,
+            Calories: ingredientFormData.calories
           });
         }
       }
@@ -80,7 +83,7 @@ export default function AdminIngredients() {
     // Reverse lookup Tag IDs from Label Names since DTO only returns LabelName
     const tagIds = (ingredient.ingredientLabels || []).map(label => {
       const tag = availableIngredientTags.find(t => t.name === label.labelName);
-      return tag ? tag.id : null;
+      return tag ? tag.tag_id : null;
     }).filter(id => id !== null);
 
     setIngredientFormData({
@@ -279,7 +282,7 @@ export default function AdminIngredients() {
                   required
                 >
                   {availableIngredientTags.map((tag) => (
-                    <option key={tag.id} value={tag.id}>{tag.name}</option>
+                    <option key={tag.tag_id} value={tag.tag_id}>{tag.name}</option>
                   ))}
                 </select>
                 <small className="form-hint">Hold Ctrl (Windows) or Command (Mac) to select multiple tags.</small>

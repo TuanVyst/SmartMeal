@@ -9,3 +9,5 @@ export const createIngredient = (data) => api.post('/ingredient', data);
 export const updateIngredient = (id, data) => api.put(`/ingredient/${id}`, data);
 
 export const deleteIngredient = (id) => api.delete(`/ingredient/${id}`);
+
+export const getIngredientTags = () => api.get('/ingredientTag');

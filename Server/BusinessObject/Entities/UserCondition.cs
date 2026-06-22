@@ -21,6 +21,8 @@ namespace BusinessObject.Entities
         [MaxLength(1000)]
         public string? Notes { get; set; }
 
+        [NotMapped]
+
         public bool IsDeleted { get; set; } = false;
 
         public virtual Account Account { get; set; }

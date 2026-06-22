@@ -24,6 +24,8 @@ namespace BusinessObject.Entities
 
         public bool IsPublic { get; set; } = false;
 
+        [NotMapped]
+
         public bool IsDeleted { get; set; } = false;
 
         // Navigation properties

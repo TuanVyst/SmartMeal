@@ -12,6 +12,9 @@ import MealSuggestions from '../pages/MealSuggestion/MealSuggestion';
 import Favorites from '../pages/food/Favorites';
 import MealPlanList from '../pages/mealplan/MealPlanList';
 import MealDetail from '../pages/MealDetail/MealDetail';
+import IngredientList from '../pages/food/IngredientList';
+import IngredientForm from '../pages/food/IngredientForm';
+import IngredientDetail from '../pages/food/IngredientDetail';
 import LandingPage from '../pages/landing/LandingPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/AdminUsers';
@@ -47,6 +50,10 @@ export default function AppRoutes() {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/meal-plans" element={<MealPlanList />} />
         <Route path="/recipe/:id" element={<MealDetail />} />
+        <Route path="/ingredients" element={<IngredientList />} />
+        <Route path="/ingredients/new" element={<IngredientForm />} />
+        <Route path="/ingredients/:id" element={<IngredientDetail />} />
+        <Route path="/ingredients/:id/edit" element={<IngredientForm />} />
         <Route path="/nutrition" element={<Nutrition />} />
         <Route path="/nutrition-diary" element={<NutritionDiaryPage />} />
         <Route path="/nhat-ky" element={<NutritionDiaryPage />} />
