@@ -435,6 +435,18 @@ public static class DbInitializer
                             INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
                             VALUES ('20260617162458_AddUniqueTagNameIndexes', '8.0.11');
                         END IF;
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260620140009_InitialCreate'
+                        ) THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260620140009_InitialCreate', '8.0.11');
+                        END IF;
+                        IF NOT EXISTS (
+                            SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260621120113_AddNutritionalValueFields'
+                        ) THEN
+                            INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
+                            VALUES ('20260621120113_AddNutritionalValueFields', '8.0.11');
+                        END IF;
                     END IF;
 
                     -- Đồng bộ các cột dinh dưỡng cho NutritionLog nếu thiếu

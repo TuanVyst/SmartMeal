@@ -128,7 +128,9 @@ builder.Services.AddScoped<Service.Interfaces.IIngredientService, Service.Implem
 builder.Services.AddScoped<Repository.Interfaces.IIngredientTagRepo, Repository.Implements.IngredientTagRepo>();
 builder.Services.AddScoped<Service.Interfaces.IIngredientTagService, Service.Implements.IngredientTagService>();
 builder.Services.AddScoped<Repository.Interfaces.IIngredientLabelRepo, Repository.Implements.IngredientLabelRepo>();
+builder.Services.AddScoped<Service.Interfaces.IIngredientLabelService, Service.Implements.IngredientLabelService>();
 builder.Services.AddScoped<Repository.Interfaces.INutritionalValueRepo, Repository.Implements.NutritionalValueRepo>();
+builder.Services.AddScoped<Service.Interfaces.INutritionalValueService, Service.Implements.NutritionalValueService>();
 
 // Account
 builder.Services.AddScoped<Repository.Interfaces.IAccountRepo, Repository.Implements.AccountRepo>();
