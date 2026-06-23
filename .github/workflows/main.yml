@@ -2,6 +2,10 @@ on:
   push:
     branches: ["master"]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   api-build:
     name: Build source code to Docker image
