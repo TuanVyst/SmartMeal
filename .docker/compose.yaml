@@ -1,0 +1,51 @@
+services:
+  smartmeal-server:
+    hostname: smartmeal-server
+    container_name: smartmeal-server
+    image: ${REGISTRY}/smartmeal-server:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Host=smartmeal-postgres;Port=${DB_PORT:-5432};Database=${DB_NAME};Username=${DB_USERNAME};Password=${DB_PASSWORD};TrustServerCertificate=True
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpiryMinutes=256
+      - Google__ClientId=${GOOGLE_CLIENTID}
+    depends_on:
+      - smartmeal-postgres
+      - cloudflared
+    networks:
+      - smartmeal-networks
+
+  smartmeal-postgres:
+    hostname: smartmeal-postgres
+    container_name: smartmeal-postgres
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - smartmeal-networks
+
+  cloudflared:
+    hostname: smartmeal-cloudflared
+    container_name: smartmeal-cloudflared
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - smartmeal-networks
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  smartmeal-networks:
+    name: smartmeal_networks
+    external: true
