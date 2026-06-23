@@ -11,6 +11,13 @@ services:
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__ExpiryMinutes=256
       - Google__ClientId=${GOOGLE_CLIENTID}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     depends_on:
       - smartmeal-postgres
       - cloudflared
