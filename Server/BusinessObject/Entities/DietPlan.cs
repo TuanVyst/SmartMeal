@@ -22,8 +22,6 @@ namespace BusinessObject.Entities
         public double? MaxFat { get; set; }
         public double? MinProtein { get; set; }
 
-        [NotMapped]
-
-        public bool IsDeleted { get; set; } = false;
+                public bool IsDeleted { get; set; } = false;
     }
 }

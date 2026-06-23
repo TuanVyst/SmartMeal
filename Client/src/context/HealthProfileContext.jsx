@@ -11,6 +11,7 @@ export function HealthProfileProvider({ children }) {
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [lockedIngredients, setLockedIngredients] = useState([]);
   const [reducedIngredients, setReducedIngredients] = useState([]);
+  const [preferredIngredients, setPreferredIngredients] = useState([]);
   const [dailyCalorieBudget, setDailyCalorieBudget] = useState(2000);
   const [dailyTargets, setDailyTargets] = useState({
     calories: 2000, protein: 75, carbs: 250, fat: 65,
@@ -22,6 +23,7 @@ export function HealthProfileProvider({ children }) {
     if (!profile) {
       setLockedIngredients([]);
       setReducedIngredients([]);
+      setPreferredIngredients([]);
       setDailyCalorieBudget(2000);
       setDailyTargets({
         calories: 2000, protein: 75, carbs: 250, fat: 65,
@@ -42,6 +44,15 @@ export function HealthProfileProvider({ children }) {
       }
     });
     setReducedIngredients(Array.from(reducedSet));
+
+    const preferredSet = new Set();
+    conditions.forEach(condition => {
+      const rules = HEALTH_CONDITION_RULES[condition];
+      if (rules && rules.preferredIngredients) {
+        rules.preferredIngredients.forEach(ing => preferredSet.add(ing));
+      }
+    });
+    setPreferredIngredients(Array.from(preferredSet));
 
     const bmiLevel = profile.bmiLevel || 'normal';
     const goal = profile.goal || 'maintain';
@@ -154,6 +165,7 @@ export function HealthProfileProvider({ children }) {
       surveyCompleted,
       lockedIngredients,
       reducedIngredients,
+      preferredIngredients,
       dailyCalorieBudget,
       dailyTargets,
       loading,

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260621120113_AddNutritionalValueFields")]
-    partial class AddNutritionalValueFields
+    [Migration("20260623153431_AddIsDeletedColumns")]
+    partial class AddIsDeletedColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,10 @@ namespace DataAccessLayer.Migrations
                     b.Property<string>("Address")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -133,6 +137,41 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Allergies");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.BmiLog", b =>
+                {
+                    b.Property<Guid>("Log_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<double?>("Bmi")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("BmiLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<double?>("Height")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("Weight")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Log_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.ToTable("BmiLog");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.Collection", b =>
                 {
                     b.Property<Guid>("Collection_id")
@@ -227,6 +266,38 @@ namespace DataAccessLayer.Migrations
                     b.HasKey("Diet_id");
 
                     b.ToTable("DietPlan");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Feedback", b =>
+                {
+                    b.Property<Guid>("Feedback_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Feedback_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.ToTable("Feedback");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
@@ -535,7 +606,7 @@ namespace DataAccessLayer.Migrations
                     b.Property<double?>("TotalProtein")
                         .HasColumnType("double precision");
 
-                    b.Property<double?>("TotalSodium")
+                    b.Property<double?>("TotalSalt")
                         .HasColumnType("double precision");
 
                     b.Property<double?>("TotalSugar")
@@ -565,16 +636,16 @@ namespace DataAccessLayer.Migrations
                     b.Property<double>("Calories")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Carbohydrates")
+                    b.Property<double?>("Carbs")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Cholesterol")
+                    b.Property<double?>("Cholesterol")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Fat")
+                    b.Property<double?>("Fat")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Fiber")
+                    b.Property<double?>("Fiber")
                         .HasColumnType("double precision");
 
                     b.Property<Guid>("Ingredient_id")
@@ -583,13 +654,19 @@ namespace DataAccessLayer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<double>("Protein")
+                    b.Property<double?>("Protein")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Sodium")
+                    b.Property<double?>("Salt")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("Sugar")
+                    b.Property<double?>("ServingSize")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ServingUnit")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Sugar")
                         .HasColumnType("double precision");
 
                     b.HasKey("Nv_id");
@@ -1010,6 +1087,17 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Ingredient");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.BmiLog", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.Collection", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Account", "Account")
@@ -1038,6 +1126,17 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("DietPlan");
 
                     b.Navigation("MedicalCondition");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Feedback", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>

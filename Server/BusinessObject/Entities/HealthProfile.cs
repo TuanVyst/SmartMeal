@@ -29,9 +29,7 @@ namespace BusinessObject.Entities
 
         public DateTime? UpdatedAt { get; set; }
 
-        [NotMapped]
-
-        public bool IsDeleted { get; set; } = false;
+                public bool IsDeleted { get; set; } = false;
 
         // Navigation
         public virtual Account Account { get; set; }

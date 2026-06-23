@@ -19,7 +19,7 @@ namespace BusinessObject.Entities
 
         public bool IsDeleted { get; set; } = false;
 
-        // Navigation property: 1 Tag có th? n?m trong nhi?u IngredientLabel
+        // Navigation property: 1 Tag cï¿½ th? n?m trong nhi?u IngredientLabel
         public ICollection<IngredientLabel> IngredientLabels { get; set; }
     }
 }

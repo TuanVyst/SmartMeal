@@ -66,9 +66,5 @@ namespace Service.Implements
             return await _healthProfileRepo.UpdateHealthProfile(healthProfile);
         }
 
-        public async Task<HealthProfile> SoftDeleteHealthProfile(Guid id)
-        {
-            return await _healthProfileRepo.SoftDeleteHealthProfile(id);
-        }
     }
 }

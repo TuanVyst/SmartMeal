@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260620140009_InitialCreate")]
+    [Migration("20260623123713_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -184,9 +184,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
@@ -214,9 +211,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Diet_id")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -242,9 +236,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<double?>("MaxCarbs")
                         .HasColumnType("double precision");
@@ -405,9 +396,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<double?>("Height")
                         .HasColumnType("double precision");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -510,9 +498,6 @@ namespace DataAccessLayer.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -571,9 +556,6 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<Guid?>("Ingredient_id")
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("LogDate")
                         .HasColumnType("timestamp with time zone");
@@ -765,9 +747,6 @@ namespace DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -810,9 +789,6 @@ namespace DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
 
@@ -843,9 +819,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Ingredient_id")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -871,9 +844,6 @@ namespace DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("Recipe_Id")
                         .HasColumnType("uuid");
 
@@ -894,9 +864,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Rt_Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -928,9 +895,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Collection_Id")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("Recipe_Id")
                         .HasColumnType("uuid");
 
@@ -956,9 +920,6 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("PaymentRef")
                         .IsRequired()
@@ -1000,9 +961,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime?>("DiagnosedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -1032,9 +990,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("StartDate")

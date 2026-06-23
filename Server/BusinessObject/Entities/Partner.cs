@@ -19,7 +19,7 @@ namespace BusinessObject.Entities
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-        // Navigation property: 1 Partner có nhi?u AffiliateProduct
+        // Navigation property: 1 Partner cï¿½ nhi?u AffiliateProduct
         public ICollection<AffiliateProduct> AffiliateProducts { get; set; }
     }
 }

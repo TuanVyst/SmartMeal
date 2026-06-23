@@ -92,20 +92,5 @@ namespace PresentationLayer.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            try
-            {
-                var item = await _healthProfileService.SoftDeleteHealthProfile(id);
-
-                return Ok(new { success = true, message = "HealthProfile deleted successfully", data = item });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting healthProfile");
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-        }
     }
 }

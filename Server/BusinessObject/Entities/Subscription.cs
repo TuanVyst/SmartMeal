@@ -34,9 +34,7 @@ namespace BusinessObject.Entities
         [MaxLength(255)]
         public string PaymentRef { get; set; }
 
-        [NotMapped]
-
-        public bool IsDeleted { get; set; } = false;
+                public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual Account Account { get; set; }

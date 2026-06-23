@@ -24,9 +24,7 @@ namespace BusinessObject.Entities
 
         public bool IsPublic { get; set; } = false;
 
-        [NotMapped]
-
-        public bool IsDeleted { get; set; } = false;
+                public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual Account Account { get; set; }

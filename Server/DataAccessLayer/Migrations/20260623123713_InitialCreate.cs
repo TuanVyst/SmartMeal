@@ -43,8 +43,7 @@ namespace DataAccessLayer.Migrations
                     TargetCalories = table.Column<double>(type: "double precision", nullable: true),
                     MaxCarbs = table.Column<double>(type: "double precision", nullable: true),
                     MaxFat = table.Column<double>(type: "double precision", nullable: true),
-                    MinProtein = table.Column<double>(type: "double precision", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    MinProtein = table.Column<double>(type: "double precision", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,8 +86,7 @@ namespace DataAccessLayer.Migrations
                     Condition_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    Category = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Category = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -121,8 +119,7 @@ namespace DataAccessLayer.Migrations
                     Price = table.Column<double>(type: "numeric(18,2)", nullable: false),
                     Duration = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    Features = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Features = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -135,8 +132,7 @@ namespace DataAccessLayer.Migrations
                 {
                     Rt_Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -175,8 +171,7 @@ namespace DataAccessLayer.Migrations
                     Account_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsPublic = table.Column<bool>(type: "boolean", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsPublic = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -246,8 +241,7 @@ namespace DataAccessLayer.Migrations
                     Weight = table.Column<double>(type: "double precision", nullable: true),
                     ActivityLevel = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     Goal = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -299,8 +293,7 @@ namespace DataAccessLayer.Migrations
                     Servings = table.Column<int>(type: "integer", nullable: false),
                     Difficulty = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     IsPublic = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -322,8 +315,7 @@ namespace DataAccessLayer.Migrations
                     Diet_id = table.Column<Guid>(type: "uuid", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -461,8 +453,7 @@ namespace DataAccessLayer.Migrations
                     Condition_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Diet_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Priority = table.Column<int>(type: "integer", nullable: false),
-                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -489,8 +480,7 @@ namespace DataAccessLayer.Migrations
                     Account_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Condition_id = table.Column<Guid>(type: "uuid", nullable: false),
                     DiagnosedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -548,8 +538,7 @@ namespace DataAccessLayer.Migrations
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    PaymentRef = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    PaymentRef = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -587,8 +576,7 @@ namespace DataAccessLayer.Migrations
                     TotalFiber = table.Column<double>(type: "double precision", nullable: true),
                     TotalSugar = table.Column<double>(type: "double precision", nullable: true),
                     TotalSalt = table.Column<double>(type: "double precision", nullable: true),
-                    TotalCholesterol = table.Column<double>(type: "double precision", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    TotalCholesterol = table.Column<double>(type: "double precision", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -619,8 +607,7 @@ namespace DataAccessLayer.Migrations
                     Recipe_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Ingredient_id = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    UOM = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    UOM = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -645,8 +632,7 @@ namespace DataAccessLayer.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Rt_Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Recipe_Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Recipe_Id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -672,7 +658,6 @@ namespace DataAccessLayer.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Collection_Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Recipe_Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     Account_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>

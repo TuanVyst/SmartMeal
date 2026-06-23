@@ -18,7 +18,6 @@ namespace Repository.Implements
         {
             return await _ctx.HealthProfiles
                 .Include(h => h.Account)
-                .Where(h => h.IsDeleted == false)
                 .ToListAsync();
         }
 
@@ -26,7 +25,6 @@ namespace Repository.Implements
         {
             return await _ctx.HealthProfiles
                 .Include(h => h.Account)
-                .Where(h => h.IsDeleted == false)
                 .FirstOrDefaultAsync(h => h.Account_id == accountId);
         }
 
@@ -34,7 +32,6 @@ namespace Repository.Implements
         {
             return await _ctx.HealthProfiles
                 .Include(h => h.Account)
-                .Where(h => h.IsDeleted == false)
                 .FirstOrDefaultAsync(h => h.Profile_id == id);
         }
 
@@ -48,24 +45,6 @@ namespace Repository.Implements
 
         public async Task<HealthProfile> UpdateHealthProfile(HealthProfile healthProfile)
         {
-            _ctx.HealthProfiles.Update(healthProfile);
-            await _ctx.SaveChangesAsync();
-
-            return healthProfile;
-        }
-
-        public async Task<HealthProfile> SoftDeleteHealthProfile(Guid id)
-        {
-            var healthProfile = await _ctx.HealthProfiles
-                .Where(h => h.IsDeleted == false)
-                .FirstOrDefaultAsync(h => h.Profile_id == id);
-
-            if (healthProfile == null)
-                throw new Exception("HealthProfile not found");
-
-            healthProfile.IsDeleted = true;
-            healthProfile.UpdatedAt = DateTime.UtcNow;
-
             _ctx.HealthProfiles.Update(healthProfile);
             await _ctx.SaveChangesAsync();
 

@@ -13,7 +13,5 @@ namespace Repository.Interfaces
         Task<HealthProfile> CreateHealthProfile(HealthProfile healthProfile);
 
         Task<HealthProfile> UpdateHealthProfile(HealthProfile healthProfile);
-
-        Task<HealthProfile> SoftDeleteHealthProfile(Guid id);
     }
 }
