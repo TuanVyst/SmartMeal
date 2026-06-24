@@ -412,6 +412,18 @@ public static class DbInitializer
             var rows = await context.Database.ExecuteSqlRawAsync(@"
                 DO $$
                 BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_class c
+                        JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+                        WHERE n.nspname='public' AND c.relname='__EFMigrationsHistory'
+                    ) THEN
+                        CREATE TABLE ""__EFMigrationsHistory"" (
+                            ""MigrationId"" character varying(150) NOT NULL,
+                            ""ProductVersion"" character varying(32) NOT NULL,
+                            CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
+                        );
+                    END IF;
+
                     IF EXISTS (
                         SELECT 1 FROM pg_catalog.pg_class c
                         JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
