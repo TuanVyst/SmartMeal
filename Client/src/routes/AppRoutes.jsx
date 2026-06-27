@@ -46,6 +46,7 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/meal-plans" element={<MealPlanList />} />
