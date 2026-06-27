@@ -92,14 +92,15 @@ export default function AdminRecipes() {
         // Note: Make sure Account_id is set appropriately in your backend or by passing a default here
         baseRecipeData.Account_id = '00000000-0000-0000-0000-000000000000'; // Default or get from auth context
         
-        const newRecipe = await adminService.createRecipe(baseRecipeData);
+        const newRecipeResponse = await adminService.createRecipe(baseRecipeData);
+        const createdRecipe = newRecipeResponse?.data || newRecipeResponse;
         
-        if (newRecipe && newRecipe.recipe_id) {
+        if (createdRecipe && createdRecipe.recipe_id) {
           // Immediately create RecipeIngredients
           for (const ing of recipeFormData.ingredients) {
             if (ing.ingredient_id && ing.quantity > 0) {
               await adminService.createRecipeIngredient({
-                recipe_id: newRecipe.recipe_id,
+                recipe_id: createdRecipe.recipe_id,
                 ingredient_id: ing.ingredient_id,
                 quantity: ing.quantity,
                 uom: ing.uom
