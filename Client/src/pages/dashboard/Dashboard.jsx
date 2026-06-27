@@ -2,20 +2,13 @@ import { useContext, useState, useEffect, useRef } from 'react';
 import { Navigate, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
+import api from '../../services/api';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import avocadoMascot   from '../../assets/avocado_mascot.png';
 import chickenSalad    from '../../assets/meal_chicken_salad.png';
 import salmonImg       from '../../assets/meal_salmon.png';
 import smoothieImg     from '../../assets/meal_avocado_smoothie.png';
 import './Dashboard.css';
-
-/* ── Static demo data (swap with API calls when ready) ── */
-const NUTRITION_DATA = [
-  { key: 'calories',  icon: '🔥', label: 'Calorie nạp vào', value: 850,  unit: 'kcal', target: 2050, pct: 41 },
-  { key: 'protein',   icon: '💪', label: 'Protein',          value: 45,   unit: 'g',    target: 120,  pct: 38 },
-  { key: 'carbs',     icon: '🌾', label: 'Carbs',            value: 120,  unit: 'g',    target: 250,  pct: 48 },
-  { key: 'fat',       icon: '💧', label: 'Chất béo',         value: 28,   unit: 'g',    target: 65,   pct: 43 },
-];
 
 const MEAL_SUGGESTIONS = [
   { id: 1, name: 'Salad ức gà rau củ',      calories: 350, img: chickenSalad, tag: '🥗 Lành mạnh' },
@@ -63,11 +56,64 @@ export default function Dashboard() {
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();
   const [favs, setFavs]  = useState(new Set([2]));
+  const [nutritionLogs, setNutritionLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const accountId = user?.accountId || user?.account_id;
+
+  useEffect(() => {
+    if (accountId) {
+      const fetchTodayLogs = async () => {
+        try {
+          setLoading(true);
+          const res = await api.get(`/nutritionlog?accountId=${accountId}`);
+          setNutritionLogs(res.data.data || []);
+        } catch (err) {
+          console.error("Lỗi khi tải nhật ký dinh dưỡng:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchTodayLogs();
+    }
+  }, [accountId]);
 
   if (user?.role === 'Admin') return <Navigate to="/admin" replace />;
 
   const displayName = user?.username || 'Bạn';
-  const caloriesLeft = (healthCtx?.dailyTargets?.calories ?? 2050) - 850;
+
+  // Calculate today's totals
+  const todayStr = new Date().toISOString().split('T')[0];
+  const logsToday = nutritionLogs.filter(log => {
+    const logDateStr = log.logDate?.split('T')[0];
+    return logDateStr === todayStr;
+  });
+
+  const totalsToday = logsToday.reduce((acc, curr) => {
+    acc.calories += curr.totalCalories || 0;
+    acc.protein += curr.totalProtein || 0;
+    acc.carbs += curr.totalCarbs || 0;
+    acc.fat += curr.totalFat || 0;
+    return acc;
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+  const dailyTargets = healthCtx?.dailyTargets || {
+    calories: 2000, protein: 75, carbs: 250, fat: 65
+  };
+
+  const caloriesTarget = dailyTargets.calories || 2000;
+  const proteinTarget = dailyTargets.protein || 75;
+  const carbsTarget = dailyTargets.carbs || 250;
+  const fatTarget = dailyTargets.fat || 65;
+
+  const caloriesLeft = Math.max(0, Math.round(caloriesTarget - totalsToday.calories));
+
+  const nutritionData = [
+    { key: 'calories',  icon: '🔥', label: 'Calorie nạp vào', value: Math.round(totalsToday.calories),  unit: 'kcal', target: caloriesTarget, pct: Math.min(Math.round((totalsToday.calories / caloriesTarget) * 100), 100) },
+    { key: 'protein',   icon: '💪', label: 'Protein',          value: Math.round(totalsToday.protein),   unit: 'g',    target: proteinTarget,  pct: Math.min(Math.round((totalsToday.protein / proteinTarget) * 100), 100) },
+    { key: 'carbs',     icon: '🌾', label: 'Carbs',            value: Math.round(totalsToday.carbs),     unit: 'g',    target: carbsTarget,    pct: Math.min(Math.round((totalsToday.carbs / carbsTarget) * 100), 100) },
+    { key: 'fat',       icon: '💧', label: 'Chất béo',         value: Math.round(totalsToday.fat),       unit: 'g',    target: fatTarget,      pct: Math.min(Math.round((totalsToday.fat / fatTarget) * 100), 100) },
+  ];
 
   const toggleFav = (id, e) => {
     e.stopPropagation();
@@ -148,7 +194,7 @@ export default function Dashboard() {
         </div>
 
         <div className="nutrition-overview-grid">
-          {NUTRITION_DATA.map(n => (
+          {nutritionData.map(n => (
             <div className="nutrition-card" key={n.key}>
               <div className="nutrition-card-top">
                 <div className={`nutrition-card-icon ${n.key}`}>{n.icon}</div>

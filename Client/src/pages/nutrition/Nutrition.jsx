@@ -256,7 +256,7 @@ export default function Nutrition() {
         totalFat: (logType === 'recipe' || logType === 'custom' || manualMacros.fat > 0) ? parseFloat(manualMacros.fat) : null,
         totalFiber: (logType === 'recipe' || logType === 'custom' || manualMacros.fiber > 0) ? parseFloat(manualMacros.fiber) : null,
         totalSugar: (logType === 'recipe' || logType === 'custom' || manualMacros.sugar > 0) ? parseFloat(manualMacros.sugar) : null,
-        totalSodium: (logType === 'recipe' || logType === 'custom' || manualMacros.sodium > 0) ? parseFloat(manualMacros.sodium) : null,
+        totalSalt: (logType === 'recipe' || logType === 'custom' || manualMacros.sodium > 0) ? parseFloat(manualMacros.sodium) : null,
         totalCholesterol: (logType === 'recipe' || logType === 'custom' || manualMacros.cholesterol > 0) ? parseFloat(manualMacros.cholesterol) : null
       };
 
@@ -346,7 +346,7 @@ export default function Nutrition() {
     acc.fat += curr.totalFat || 0;
     acc.fiber += curr.totalFiber || 0;
     acc.sugar += curr.totalSugar || 0;
-    acc.sodium += curr.totalSodium || 0;
+    acc.sodium += curr.totalSalt || curr.totalSodium || 0;
     acc.cholesterol += curr.totalCholesterol || 0;
     return acc;
   }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
@@ -1048,7 +1048,7 @@ export default function Nutrition() {
                   {(() => {
                     const highSodiumDays = dailyCaloriesData.filter(d => {
                       const dayLogs = nutritionLogs.filter(l => l.logDate?.split('T')[0] === d.date);
-                      const sodium = dayLogs.reduce((sum, l) => sum + (l.totalSodium || 0), 0);
+                      const sodium = dayLogs.reduce((sum, l) => sum + (l.totalSalt || l.totalSodium || 0), 0);
                       return sodium > activeGoal.sodium;
                     }).length;
 
