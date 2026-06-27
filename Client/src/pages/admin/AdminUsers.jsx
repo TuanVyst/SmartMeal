@@ -7,11 +7,28 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = () => {
+    setLoading(true);
     adminService.getAllUsers()
       .then(setUsers)
       .catch(() => setUsers([]))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  const handleToggleStatus = async (id, isActive) => {
+    if (window.confirm(`Bạn có chắc chắn muốn ${isActive ? 'vô hiệu hóa' : 'kích hoạt'} người dùng này không?`)) {
+      try {
+        await adminService.toggleUserStatus(id, !isActive);
+        fetchUsers();
+      } catch (error) {
+        console.error(error);
+        alert('Có lỗi xảy ra');
+      }
+    }
+  };
 
   const filtered = users.filter((u) =>
     (u.name || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -65,7 +82,10 @@ export default function AdminUsers() {
                 </td>
                 <td>
                   <button className="action-btn edit">Sửa</button>
-                  <button className="action-btn delete">
+                  <button
+                    className="action-btn delete"
+                    onClick={() => handleToggleStatus(user.account_id || user.id, user.isActive !== false)}
+                  >
                     {user.isActive !== false ? 'Vô hiệu' : 'Kích hoạt'}
                   </button>
                 </td>

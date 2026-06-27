@@ -1,56 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiEye } from 'react-icons/fi';
+import { adminService } from '../../services/adminService';
 
 export default function AdminFeedback() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [feedbacks] = useState([
-    { id: 1, name: 'Nguyễn Văn An', email: 'an@example.com', subject: 'Ứng dụng tuyệt vời!', message: 'Tôi yêu thích các gợi ý món ăn. Công thức dễ làm và rất ngon.', date: '2026-06-15' },
-    { id: 2, name: 'Trần Thị Bích', email: 'bich@example.com', subject: 'Yêu cầu tính năng', message: 'Sẽ rất tuyệt nếu có tính năng xuất danh sách mua sắm.', date: '2026-06-14' },
-    { id: 3, name: 'Lê Văn Cường', email: 'cuong@example.com', subject: 'Báo lỗi', message: 'Chức năng tìm kiếm không hoạt động đúng trên thiết bị di động.', date: '2026-06-13' },
-    { id: 4, name: 'Phạm Thị Dung', email: 'dung@example.com', subject: 'Trải nghiệm tuyệt vời', message: 'Tôi đã sử dụng SmartMeal được một tháng và rất yêu thích!', date: '2026-06-12' },
-  ]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    adminService.getFeedbackList()
+      .then(data => setFeedbacks(data || []))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = feedbacks.filter((f) =>
-    f.name.toLowerCase().includes(search.toLowerCase()) ||
-    f.subject.toLowerCase().includes(search.toLowerCase())
+    (f.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (f.subject || '').toLowerCase().includes(search.toLowerCase()) ||
+    (f.email || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) return <div className="admin-loading">Đang tải phản hồi...</div>;
 
   return (
     <div>
       <div className="admin-page-header">
-        <h1>Quản lý phản hồi</h1>
+        <h1>Feedback Management</h1>
       </div>
       <div className="admin-table-container">
         <div className="admin-table-toolbar">
-          <h2>Tất cả phản hồi</h2>
+          <h2>All Feedback</h2>
           <input
             className="admin-table-search"
-            placeholder="Tìm kiếm phản hồi..."
+            placeholder="Search feedback..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         {filtered.length === 0 ? (
-          <div className="empty-state"><p>Không tìm thấy phản hồi</p></div>
+          <div className="empty-state"><p>No feedback found</p></div>
         ) : (
           <div className="feedback-list" style={{ padding: 16 }}>
             {filtered.map((f) => (
               <div
-                key={f.id}
+                key={f.feedback_id || f.id}
                 className="feedback-card"
-                onClick={() => navigate(`/admin/feedback/${f.id}`)}
+                onClick={() => navigate(`/admin/feedback/${f.feedback_id || f.id}`)}
               >
                 <div className="feedback-card-body">
-                  <h3>{f.subject}</h3>
+                  <h3>{f.subject || 'No Subject'}</h3>
                   <p className="feedback-email">{f.name} &lt;{f.email}&gt;</p>
                   <p className="feedback-preview">{f.message}</p>
                 </div>
-                <div className="feedback-card-date">{f.date}</div>
+                <div className="feedback-card-date">{new Date(f.date || f.created_at || Date.now()).toLocaleDateString()}</div>
                 <button
                   className="action-btn view"
-                  onClick={(e) => { e.stopPropagation(); navigate(`/admin/feedback/${f.id}`); }}
+                  onClick={(e) => { e.stopPropagation(); navigate(`/admin/feedback/${f.feedback_id || f.id}`); }}
                 >
                   <FiEye size={14} />
                 </button>

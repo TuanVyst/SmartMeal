@@ -7,11 +7,28 @@ export default function AdminMeals() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchMeals();
+  }, []);
+
+  const fetchMeals = () => {
+    setLoading(true);
     adminService.getAllMeals()
       .then(setMeals)
       .catch(() => setMeals([]))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này không?')) {
+      try {
+        await adminService.deleteMeal(id);
+        fetchMeals();
+      } catch (error) {
+        console.error(error);
+        alert('Có lỗi xảy ra khi xóa');
+      }
+    }
+  };
 
   const filtered = meals.filter((m) => {
     const q = search.toLowerCase();
@@ -68,8 +85,8 @@ export default function AdminMeals() {
                   </span>
                 </td>
                 <td>
-                  <button className="action-btn edit">Sửa</button>
-                  <button className="action-btn delete">Xóa</button>
+                  <button className="action-btn edit" onClick={() => alert('Vui lòng qua trang Manage Recipes (AdminRecipes) để chỉnh sửa đầy đủ chi tiết.')}>Sửa</button>
+                  <button className="action-btn delete" onClick={() => handleDelete(meal.recipe_id || meal.id)}>Xóa</button>
                 </td>
               </tr>
             ))}
