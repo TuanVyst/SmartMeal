@@ -228,7 +228,7 @@ export default function MealSuggestion() {
       };
     });
 
-    const calculatedCalories = Math.round(totalCalories);
+    const calculatedCalories = Math.round(totalCalories / servings);
     const requiredIngredients = mappedIngredients.map(i => i.name);
     const missingIngredients = mappedIngredients.filter(i => !i.possessed).map(i => i.name);
 
@@ -263,13 +263,13 @@ export default function MealSuggestion() {
       servings,
       nutrition: {
         calories: calculatedCalories,
-        protein: Math.round(totalProtein),
-        carbs: Math.round(totalCarbs),
-        fat: Math.round(totalFat),
-        fiber: Math.round(totalFiber),
-        sugar: Math.round(totalSugar),
-        sodium: Math.round(totalSodium),
-        cholesterol: Math.round(totalCholesterol)
+        protein: Math.round(totalProtein / servings),
+        carbs: Math.round(totalCarbs / servings),
+        fat: Math.round(totalFat / servings),
+        fiber: Math.round(totalFiber / servings),
+        sugar: Math.round(totalSugar / servings),
+        sodium: Math.round(totalSodium / servings),
+        cholesterol: Math.round(totalCholesterol / servings)
       }
     };
   })

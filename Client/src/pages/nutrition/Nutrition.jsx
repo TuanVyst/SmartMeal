@@ -525,7 +525,7 @@ export default function Nutrition() {
                         <option value="">-- Chọn công thức --</option>
                         {recipes.map(r => (
                           <option key={r.recipe_id} value={r.recipe_id}>
-                            {r.recipe_name} ({r.cookTime + r.prepTime} phút)
+                            {r.recipe_name} ({r.cookTime + r.prepTime} phút - {r.servings || r.Servings || 1} khẩu phần)
                           </option>
                         ))}
                       </select>
