@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
@@ -14,6 +15,7 @@ import {
 
 export default function MealSuggestion() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const accountId = user?.accountId || user?.account_id;
   const { 
     lockedIngredients = [], 
@@ -421,6 +423,13 @@ export default function MealSuggestion() {
             <h2>Gợi ý Thực đơn Thông minh</h2>
             <span className="results-count-text">Tìm thấy {suggestedRecipes.length} công thức món ăn</span>
           </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/recipes/new')}
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            + Tạo công thức
+          </button>
           <div className="allergy-toggle-checkbox">
             <label>
               <input

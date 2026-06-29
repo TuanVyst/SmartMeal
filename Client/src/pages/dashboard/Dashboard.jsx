@@ -224,6 +224,13 @@ export default function Dashboard() {
           <NavLink to="/meal-suggestions" className="section-see-all">
             Xem tất cả →
           </NavLink>
+          <button
+            className="hero-cta-btn"
+            style={{ fontSize: 13, padding: '6px 14px', marginLeft: 8 }}
+            onClick={() => navigate('/recipes/new')}
+          >
+            + Tạo công thức
+          </button>
         </div>
 
         <div className="meal-cards-scroll">
