@@ -272,20 +272,33 @@ export default function AdminIngredients() {
 
               <div className="form-group">
                 <label className="form-label">Thẻ (Tags) <span className="required">*</span></label>
-                <select
-                  className="form-control multi-select"
-                  multiple
-                  value={ingredientFormData.ingredientTagIds || []}
-                  onChange={(e) => {
-                    const selected = Array.from(e.target.selectedOptions, option => option.value);
-                    setIngredientFormData({ ...ingredientFormData, ingredientTagIds: selected });
-                  }}
-                >
-                  {availableIngredientTags.map((tag) => (
-                    <option key={tag.it_id || tag.tag_id || tag.id} value={tag.it_id || tag.tag_id || tag.id}>{tag.name}</option>
-                  ))}
-                </select>
-                <small className="form-hint">Giữ Ctrl / Command để chọn nhiều tags.</small>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto', background: '#f8fafc' }}>
+                  {availableIngredientTags.map((tag) => {
+                    const tagId = tag.it_id || tag.tag_id || tag.id;
+                    const isSelected = (ingredientFormData.ingredientTagIds || []).includes(tagId);
+                    return (
+                      <div 
+                        key={tagId} 
+                        onClick={() => {
+                          if (isSelected) {
+                            setIngredientFormData({ ...ingredientFormData, ingredientTagIds: ingredientFormData.ingredientTagIds.filter(t => t !== tagId) });
+                          } else {
+                            setIngredientFormData({ ...ingredientFormData, ingredientTagIds: [...(ingredientFormData.ingredientTagIds || []), tagId] });
+                          }
+                        }}
+                        style={{
+                          padding: '6px 12px', borderRadius: '20px', fontSize: '13px', cursor: 'pointer',
+                          backgroundColor: isSelected ? '#22c55e' : 'white',
+                          color: isSelected ? 'white' : '#475569',
+                          border: `1px solid ${isSelected ? '#22c55e' : '#cbd5e1'}`,
+                          transition: 'all 0.2s', userSelect: 'none'
+                        }}
+                      >
+                        {tag.name}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <hr />
