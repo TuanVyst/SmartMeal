@@ -47,7 +47,7 @@ export default function RecipeForm() {
           isPublic: r.isPublic ?? true,
         });
         if (r.recipeTags) {
-          setSelectedTagIds(r.recipeTags.map(t => t.tag_id || t.Tag_id).filter(Boolean));
+          setSelectedTagIds(r.recipeTags.map(t => t.tag_id || t.Tag_id || t.rt_Id).filter(Boolean));
         }
       })
       .catch(() => setError('Không thể tải recipe'));
@@ -178,7 +178,7 @@ export default function RecipeForm() {
             <h3>Recipe Tags</h3>
             <div className="tags-wrap">
               {tags.map(tag => {
-                const tagId = tag.tag_id || tag.Tag_id;
+                const tagId = tag.tag_id || tag.Tag_id || tag.rt_Id;
                 const isActive = selectedTagIds.includes(tagId);
                 return (
                   <label key={tagId} className={`tag-chip${isActive ? ' active' : ''}`}>
