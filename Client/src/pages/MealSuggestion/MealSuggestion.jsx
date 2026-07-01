@@ -11,6 +11,7 @@ import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
 } from 'react-icons/md';
+import AffiliateBanner from '../../components/PromoBanner/AffiliateBanner';
 
 export default function MealSuggestion() {
   const { user } = useAuth();
@@ -432,6 +433,9 @@ export default function MealSuggestion() {
             </label>
           </div>
         </div>
+
+        {/* Affiliate Banner */}
+        <AffiliateBanner />
 
         {suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">
