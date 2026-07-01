@@ -159,3 +159,23 @@
   font-size: 13px;
   font-style: italic;
 }
+
+.recipe-form-card .btn-danger {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+}
+
+.recipe-form-card .btn-danger:hover {
+  background: #b91c1c;
+}
+
+.recipe-form-card .btn-danger-outline {
+  background: transparent;
+  color: #dc2626;
+  border: 1.5px solid #dc2626;
+}
+
+.recipe-form-card .btn-danger-outline:hover {
+  background: #fef2f2;
+}

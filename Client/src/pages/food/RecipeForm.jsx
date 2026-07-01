@@ -24,6 +24,7 @@ export default function RecipeForm() {
   const [selectedTagIds, setSelectedTagIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     recipeService.getTags()
@@ -88,7 +89,21 @@ export default function RecipeForm() {
       }
       navigate('/meal-suggestions');
     } catch (err) {
-      setError(err.response?.data?.message || 'Đã xảy ra lỗi');
+      setError(err.response?.data?.message || err.message || 'Đã xảy ra lỗi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await recipeService.delete(id);
+      navigate('/meal-suggestions');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Không thể xóa recipe');
+      setConfirmDelete(false);
     } finally {
       setLoading(false);
     }
@@ -200,8 +215,19 @@ export default function RecipeForm() {
               {loading ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo công thức'}
             </button>
             <button type="button" className="btn btn-secondary" onClick={() => navigate('/meal-suggestions')}>
-              Hủy
+              {confirmDelete ? 'Không' : 'Hủy'}
             </button>
+            {isEdit && (
+              confirmDelete ? (
+                <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={loading}>
+                  {loading ? 'Đang xóa...' : 'Xác nhận xóa'}
+                </button>
+              ) : (
+                <button type="button" className="btn btn-danger-outline" onClick={() => setConfirmDelete(true)}>
+                  Xóa công thức
+                </button>
+              )
+            )}
           </div>
         </form>
       </div>
