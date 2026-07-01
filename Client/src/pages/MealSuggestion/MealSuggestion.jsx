@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import { getIngredients } from '../../services/foodService';
+import { recipeService } from '../../services/recipeService';
+import { allergyService } from '../../services/allergyService';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
@@ -38,7 +40,7 @@ export default function MealSuggestion() {
 
   const fetchIngredients = async () => {
     try {
-      const res = await api.get('/ingredient');
+      const res = await getIngredients();
       setIngredients(res.data.data || []);
     } catch (err) {
       console.error('Không thể tải nguyên liệu:', err);
@@ -47,7 +49,7 @@ export default function MealSuggestion() {
 
   const fetchRecipes = async () => {
     try {
-      const res = await api.get('/recipe');
+      const res = await recipeService.getAll();
       setRecipes(res.data.data || []);
     } catch (err) {
       console.error('Không thể tải công thức:', err);
@@ -56,7 +58,7 @@ export default function MealSuggestion() {
 
   const fetchUserAllergies = async () => {
     try {
-      const res = await api.get(`/allergy?accountId=${accountId}`);
+      const res = await allergyService.getAll(accountId);
       setAllergies(res.data.data || []);
     } catch (err) {
       console.error('Không thể tải danh sách dị ứng:', err);
@@ -95,10 +97,10 @@ export default function MealSuggestion() {
     const existingAllergy = allergies.find(a => a.ingredient_id === ingId);
     try {
       if (existingAllergy) {
-        await api.delete(`/allergy/${existingAllergy.allergy_id}`);
+        await allergyService.delete(existingAllergy.allergy_id);
         triggerAlert('Đã xóa khỏi danh sách dị ứng.', 'success');
       } else {
-        await api.post('/allergy', {
+        await allergyService.create({
           account_id: accountId,
           ingredient_id: ingId
         });

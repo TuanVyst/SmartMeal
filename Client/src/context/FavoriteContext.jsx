@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { savedRecipeService } from '../services/savedRecipeService';
-import api from '../services/api';
+import { recipeService } from '../services/recipeService';
 
 const FavoriteContext = createContext();
 
@@ -41,7 +41,7 @@ export function FavoriteProvider({ children }) {
       const recipeIds = savedItems.map(item => item.recipe_id || item.recipeId || item.id).filter(Boolean);
       const recipeData = await Promise.all(
         recipeIds.map(id =>
-          api.get(`/recipe/${id}`)
+          recipeService.getById(id)
             .then(r => r.data?.data)
             .catch(() => null)
         )

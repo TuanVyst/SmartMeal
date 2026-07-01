@@ -2,7 +2,7 @@ import { useContext, useState, useEffect, useRef } from 'react';
 import { Navigate, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
-import api from '../../services/api';
+import { nutritionLogService } from '../../services/nutritionLogService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import avocadoMascot   from '../../assets/avocado_mascot.png';
 import chickenSalad    from '../../assets/meal_chicken_salad.png';
@@ -66,7 +66,7 @@ export default function Dashboard() {
       const fetchTodayLogs = async () => {
         try {
           setLoading(true);
-          const res = await api.get(`/nutritionlog?accountId=${accountId}`);
+          const res = await nutritionLogService.getAll(accountId);
           setNutritionLogs(res.data.data || []);
         } catch (err) {
           console.error("Lỗi khi tải nhật ký dinh dưỡng:", err);
