@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { savedRecipeService } from '../services/savedRecipeService';
+import { resolveRecipeImageUrl } from '../utils/recipeImages';
 import { recipeService } from '../services/recipeService';
 
 const FavoriteContext = createContext();
@@ -9,13 +10,14 @@ function mapRecipe(raw) {
   const pid = raw.recipe_id || raw.Recipe_id || raw.id;
   const cook = raw.cookTime || raw.CookTime || 0;
   const prep = raw.prepTime || raw.PrepTime || 0;
+  const title = raw.recipe_name || raw.Recipe_name || '';
   return {
     id: pid,
-    title: raw.recipe_name || raw.Recipe_name || '',
+    title,
     description: raw.description || raw.Description || '',
     time: `${prep + cook} phút`,
     difficulty: raw.difficulty || raw.Difficulty || '',
-    imageUrl: raw.imageUrl || raw.ImageUrl || '',
+    imageUrl: raw.imageUrl || raw.ImageUrl || resolveRecipeImageUrl(title),
     ...raw,
   };
 }

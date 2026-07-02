@@ -8,10 +8,10 @@ export default function RecipeHealthScore({ recipe }) {
   const score = getHealthScoreForRecipe(recipe);
 
   const config = score >= 80
-    ? { icon: '🟢', text: 'Rất phù hợp', color: '#16a34a' }
+    ? { icon: <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#16a34a', display: 'inline-block' }} />, text: 'Rất phù hợp', color: '#16a34a' }
     : score >= 50
-      ? { icon: '🟡', text: 'Phù hợp vừa', color: '#ca8a04' }
-      : { icon: '🔴', text: 'Ít phù hợp', color: '#dc2626' };
+      ? { icon: <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ca8a04', display: 'inline-block' }} />, text: 'Phù hợp vừa', color: '#ca8a04' }
+      : { icon: <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#dc2626', display: 'inline-block' }} />, text: 'Ít phù hợp', color: '#dc2626' };
 
   return (
     <span

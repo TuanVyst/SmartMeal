@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart } from 'react-icons/fi';
+import { FiClock, FiHeart, FiZap } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
@@ -41,7 +41,7 @@ const RecipeCard = ({ recipe }) => {
         <div className="recipe-meta">
           <span className="meta-item"><FiClock /> {time}</span>
           <span className="meta-item"><FaUtensils /> {difficulty}</span>
-          {calories && <span className="meta-item" style={{fontWeight: 600}}>🔥 {calories}</span>}
+          {calories && <span className="meta-item" style={{fontWeight: 600}}><FiZap size={14} /> {calories}</span>}
         </div>
 
         {missingIngredients && missingIngredients.length > 0 && (

@@ -197,15 +197,15 @@ body {
 
 .header-right button {
   padding: 8px 16px;
-  background: #e74c3c;
-  color: white;
+  background: transparent;
+  color: #374151;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .header-right button:hover {
-  background: #c0392b;
+  background: rgba(0,0,0,0.05);
 }
 
 .dashboard h2 {

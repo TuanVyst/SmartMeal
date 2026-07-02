@@ -4,20 +4,15 @@ import { useAuth } from '../../context/AuthContext';
 import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
+import { getRecipes } from '../../services/foodService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import { mockRecipesData } from '../../utils/mockData';
+import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart } from 'react-icons/fi';
 import './Dashboard.css';
 
-const FALLBACK_MEAL_IMAGE = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop';
-const SUGGESTION_TAGS = ['🥗 Lành mạnh', '🐟 Giàu protein', '🥑 Tốt cho tim', '🍌 Nhiều năng lượng', '🍽️ Gợi ý hôm nay'];
-
-function resolveRecipeImage(recipeId, recipeName) {
-  const mockRecipe = mockRecipesData.find(
-    (recipe) => recipe.id === recipeId || recipe.title.toLowerCase() === recipeName.toLowerCase()
-  );
-  return mockRecipe?.imageUrl || FALLBACK_MEAL_IMAGE;
-}
+const SUGGESTION_TAGS = ['Lành mạnh', 'Giàu protein', 'Tốt cho tim', 'Nhiều năng lượng', 'Gợi ý hôm nay'];
 
 function mapRecipeToSuggestion(recipe, index) {
   const id = recipe.recipe_id || recipe.Recipe_id || recipe.id || `recipe-${index}`;
@@ -40,7 +35,7 @@ function mapRecipeToSuggestion(recipe, index) {
 
   const fallbackCalories = Number(recipe.nutrition?.calories) || Number(String(recipe.calories || '').replace(/[^\d.]/g, '')) || 0;
   const calories = Math.round((servings > 0 ? totalCalories / servings : totalCalories) || fallbackCalories);
-  const imageUrl = resolveRecipeImage(id, name);
+  const imageUrl = resolveRecipeImageUrl(name);
 
   return {
     id,
@@ -148,10 +143,10 @@ export default function Dashboard() {
   const fatTarget = dailyTargets.fat || 65;
 
   const nutritionData = [
-    { key: 'calories',  icon: '🔥', label: 'Calorie nạp vào', value: Math.round(totalsToday.calories),  unit: 'kcal', target: caloriesTarget, pct: Math.min(Math.round((totalsToday.calories / caloriesTarget) * 100), 100) },
-    { key: 'protein',   icon: '💪', label: 'Protein',          value: Math.round(totalsToday.protein),   unit: 'g',    target: proteinTarget,  pct: Math.min(Math.round((totalsToday.protein / proteinTarget) * 100), 100) },
-    { key: 'carbs',     icon: '🌾', label: 'Carbs',            value: Math.round(totalsToday.carbs),     unit: 'g',    target: carbsTarget,    pct: Math.min(Math.round((totalsToday.carbs / carbsTarget) * 100), 100) },
-    { key: 'fat',       icon: '💧', label: 'Chất béo',         value: Math.round(totalsToday.fat),       unit: 'g',    target: fatTarget,      pct: Math.min(Math.round((totalsToday.fat / fatTarget) * 100), 100) },
+    { key: 'calories',  icon: <FiZap size={20} />, label: 'Calorie nạp vào', value: Math.round(totalsToday.calories),  unit: 'kcal', target: caloriesTarget, pct: Math.min(Math.round((totalsToday.calories / caloriesTarget) * 100), 100) },
+    { key: 'protein',   icon: <FiActivity size={20} />, label: 'Protein',          value: Math.round(totalsToday.protein),   unit: 'g',    target: proteinTarget,  pct: Math.min(Math.round((totalsToday.protein / proteinTarget) * 100), 100) },
+    { key: 'carbs',     icon: <FiBarChart2 size={20} />, label: 'Carbs',            value: Math.round(totalsToday.carbs),     unit: 'g',    target: carbsTarget,    pct: Math.min(Math.round((totalsToday.carbs / carbsTarget) * 100), 100) },
+    { key: 'fat',       icon: <FiDroplet size={20} />, label: 'Chất béo',         value: Math.round(totalsToday.fat),       unit: 'g',    target: fatTarget,      pct: Math.min(Math.round((totalsToday.fat / fatTarget) * 100), 100) },
   ];
 
   return (
@@ -168,10 +163,10 @@ export default function Dashboard() {
         <div className="hero-particle" />
 
         <div className="hero-left">
-          <div className="hero-tag">🌿 Chào mừng trở lại 🌿</div>
+          <div className="hero-tag">Chào mừng trở lại</div>
 
           <h1 className="hero-title">
-            Xin chào, {displayName}! 👋
+            Xin chào, {displayName}!
           </h1>
           <p className="hero-subtitle">
             Hôm nay là một ngày tuyệt vời để<br />
@@ -180,9 +175,9 @@ export default function Dashboard() {
 
           <button
             className="hero-cta-btn"
-            onClick={() => navigate('/meal-plans')}
+            onClick={() => navigate('/meal-suggestions')}
           >
-            + Lên kế hoạch bữa ăn
+            Khám phá món ăn
           </button>
         </div>
 
@@ -200,9 +195,9 @@ export default function Dashboard() {
          ══════════════════════════════════════════ */}
       <section>
         <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">📊 Tổng quan hôm nay</h2>
+          <h2 className="dashboard-section-title">Tổng quan hôm nay</h2>
           <div style={{ display:'flex', alignItems:'center', gap: 8 }}>
-            <span style={{ fontSize: 13, color: '#9ca3af', fontFamily: 'Inter, sans-serif' }}>🗓 Hôm nay</span>
+            <span style={{ fontSize: 13, color: '#9ca3af', fontFamily: 'Inter, sans-serif' }}>Hôm nay</span>
           </div>
         </div>
 
@@ -233,17 +228,10 @@ export default function Dashboard() {
          ══════════════════════════════════════════ */}
       <section className="meal-carousel-wrap">
         <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">✨ Gợi ý cho bạn</h2>
+          <h2 className="dashboard-section-title">Gợi ý cho bạn</h2>
           <NavLink to="/meal-suggestions" className="section-see-all">
             Xem tất cả →
           </NavLink>
-          <button
-            className="hero-cta-btn"
-            style={{ fontSize: 13, padding: '6px 14px', marginLeft: 8 }}
-            onClick={() => navigate('/recipes/new')}
-          >
-            + Tạo công thức
-          </button>
         </div>
 
         <div className="meal-cards-scroll">
@@ -263,13 +251,13 @@ export default function Dashboard() {
                   }}
                   aria-label="Lưu vào bộ sưu tập"
                 >
-                  {isFavorite(meal.id) ? '❤️' : '🤍'}
+                  <FiHeart size={18} color={isFavorite(meal.id) ? '#ef4444' : '#94a3b8'} fill={isFavorite(meal.id) ? '#ef4444' : 'none'} />
                 </button>
               </div>
               <div className="meal-card-body">
                 <p className="meal-card-name">{meal.name}</p>
                 <div className="meal-card-meta">
-                  <span className="meal-card-calories">🔥 {meal.calories} kcal</span>
+                  <span className="meal-card-calories"><FiZap size={14} /> {meal.calories} kcal</span>
                 </div>
                 <div style={{ marginTop: 8 }}>
                   <span className="meal-card-tag">{meal.tag}</span>

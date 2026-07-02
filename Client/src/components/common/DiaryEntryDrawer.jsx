@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { addDiaryEntry } from '../../services/nutritionDiaryService';
 import { getTodayDateKey } from '../../utils/dateTime';
+import { FiSunrise, FiSun, FiMoon, FiCoffee } from 'react-icons/fi';
 
 const mealTypes = [
-  { key: 'breakfast', label: 'Sáng', icon: '🌅' },
-  { key: 'lunch', label: 'Trưa', icon: '☀️' },
-  { key: 'dinner', label: 'Tối', icon: '🌙' },
-  { key: 'snack', label: 'Phụ', icon: '🍿' },
+  { key: 'breakfast', label: 'Sáng', icon: <FiSunrise size={18} /> },
+  { key: 'lunch', label: 'Trưa', icon: <FiSun size={18} /> },
+  { key: 'dinner', label: 'Tối', icon: <FiMoon size={18} /> },
+  { key: 'snack', label: 'Phụ', icon: <FiCoffee size={18} /> },
 ];
 
 export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
