@@ -871,7 +871,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "Cá",
+        "Name": "Cá basa",
         "Quantity": 400,
         "UOM": "g"
       },
