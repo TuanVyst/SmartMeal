@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
+import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import './SubscriptionPlans.css';
 
 export default function SubscriptionPlans() {
@@ -66,7 +67,7 @@ export default function SubscriptionPlans() {
   if (error) {
     return (
       <div className="plans-error-container">
-        <div className="error-icon">⚠️</div>
+        <div className="error-icon"><FiAlertTriangle size={32} /></div>
         <p className="error-msg">{error}</p>
         <button onClick={() => window.location.reload()} className="btn-retry">Tải lại</button>
       </div>
@@ -85,7 +86,7 @@ export default function SubscriptionPlans() {
 
       {isPremium && subscription && (
         <div className="active-sub-banner">
-          <div className="sub-banner-icon">🎉</div>
+          <div className="sub-banner-icon"><FiCheckCircle size={24} /></div>
           <div className="sub-banner-text">
             <h3>Bạn đang sử dụng gói Premium: <strong>{plans.find(p => p.plan_id === subscription.plan_id)?.name || 'Pro'}</strong></h3>
             <p>

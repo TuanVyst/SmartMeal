@@ -9,13 +9,6 @@ import avocadoMascot from '../../assets/avocado_mascot.png';
 import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward } from 'react-icons/fi';
 import './Sidebar.css';
 
-const NAV_ITEMS = [
-  { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',           end: true  },
-  { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn'               },
-  { to: '/nutrition',         icon: <FiClipboard size={20} />, label: 'Nhật ký sức khoẻ'          },
-  { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
-];
-
 function getPreviousDateKey(dateKey) {
   if (!dateKey) {
     return '';
@@ -87,9 +80,7 @@ export default function Sidebar() {
   const navItems = [
     { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',        end: true  },
     { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn'              },
-    { to: '/meal-plans',        icon: <FiClipboard size={20} />, label: 'Kế hoạch bữa ăn'              },
-    { to: '/nutrition-diary',   icon: <FiClipboard size={20} />, label: 'Nhật ký sức khỏe'             },
-    { to: '/nutrition',         icon: <FiTrendingUp size={20} />, label: 'Thành tích'                   },
+    { to: '/nutrition',         icon: <FiClipboard size={20} />, label: 'Nhật ký ăn uống'            },
     { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
     { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
   ];
@@ -181,13 +172,13 @@ export default function Sidebar() {
             </div>
           )}
           <div className="sidebar-streak-badge">
-            {isPremium ? '👑' : <FiTrendingUp size={14} />}
+            <FiTrendingUp size={14} />
           </div>
         </div>
 
         <div className="sidebar-user-greeting">
           <h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>
-            Xin chào, {displayName} {isPremium && <span className="premium-label-badge">PRO</span>} 👋
+            Xin chào, {displayName} {isPremium && <span className="premium-label-badge">PRO</span>}
           </h4>
           <p>Cùng xây dựng lối sống lành mạnh mỗi ngày nhé!</p>
         </div>

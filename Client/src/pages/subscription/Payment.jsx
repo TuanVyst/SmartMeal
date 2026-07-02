@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
 import { IoCopyOutline, IoChevronBackOutline, IoWalletOutline, IoSwapHorizontalOutline } from 'react-icons/io5';
+import { FiCreditCard, FiSmartphone } from 'react-icons/fi';
 import './SubscriptionPlans.css';
 
 export default function Payment() {
@@ -192,7 +193,7 @@ export default function Payment() {
                 className={`method-btn ${paymentMethod === 'bank' ? 'selected' : ''}`}
                 onClick={() => setPaymentMethod('bank')}
               >
-                <span className="btn-icon">🏦</span>
+                <span className="btn-icon"><FiCreditCard size={18} /></span>
                 <span>Chuyển khoản VietQR</span>
               </button>
               <button
@@ -200,7 +201,7 @@ export default function Payment() {
                 className={`method-btn ${paymentMethod === 'momo' ? 'selected' : ''}`}
                 onClick={() => setPaymentMethod('momo')}
               >
-                <span className="btn-icon">📱</span>
+                <span className="btn-icon"><FiSmartphone size={18} /></span>
                 <span>Ví điện tử MoMo</span>
               </button>
             </div>
