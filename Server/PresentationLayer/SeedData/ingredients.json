@@ -1863,26 +1863,7 @@
       "Rau củ"
     ]
   },
-  {
-    "Name": "Bắp",
-    "AveragePrice": 2.0,
-    "ImageUrl": "/images/bắp-tươi.jpg",
-    "NutritionalValues": {
-      "Calories": 96,
-      "Protein": 3.4,
-      "Carbs": 21,
-      "Fat": 1.5,
-      "Fiber": 2.4,
-      "Sugar": 4.5,
-      "Salt": 0.01,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Ngũ cốc"
-    ]
-  },
+  
   {
     "Name": "Thạch jelly",
     "AveragePrice": 2.0,
