@@ -260,6 +260,7 @@ button.sidebar-stat-card {
   align-items: center;
   justify-content: center;
   transition: transform 0.25s ease;
+  color: #111827;
 }
 
 .nav-item:hover .nav-item-icon {
@@ -268,7 +269,7 @@ button.sidebar-stat-card {
 
 .nav-item.active .nav-item-icon {
   transform: scale(1.1);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  filter: none;
 }
 
 .nav-item-text {

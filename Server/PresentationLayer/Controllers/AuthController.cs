@@ -2,6 +2,7 @@ using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 using Service.Interfaces;
 
 namespace PresentationLayer.Controllers
@@ -11,10 +12,12 @@ namespace PresentationLayer.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAccountService _service;
+        private readonly IWebHostEnvironment _environment;
 
-        public AuthController(IAccountService service)
+        public AuthController(IAccountService service, IWebHostEnvironment environment)
         {
             _service = service;
+            _environment = environment;
         }
 
         [HttpGet("accounts")]
@@ -173,12 +176,41 @@ namespace PresentationLayer.Controllers
 
         [HttpPut("avatar")]
         [Authorize]
-        public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
+        public async Task<IActionResult> UpdateAvatar([FromForm] UpdateAvatarRequest request)
         {
             try
             {
                 var accountId = GetAccountId();
-                var account = await _service.UpdateAvatarUrl(accountId, request.AvatarUrl);
+                string avatarUrl = request.AvatarUrl?.Trim() ?? string.Empty;
+
+                if (request.AvatarFile != null && request.AvatarFile.Length > 0)
+                {
+                    var uploadsRoot = Path.Combine(_environment.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot"), "uploads", "avatars");
+                    Directory.CreateDirectory(uploadsRoot);
+
+                    var extension = Path.GetExtension(request.AvatarFile.FileName);
+                    if (string.IsNullOrWhiteSpace(extension))
+                    {
+                        extension = ".jpg";
+                    }
+
+                    var fileName = $"{accountId}_{Guid.NewGuid():N}{extension}";
+                    var filePath = Path.Combine(uploadsRoot, fileName);
+
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await request.AvatarFile.CopyToAsync(stream);
+                    }
+
+                    avatarUrl = $"{Request.Scheme}://{Request.Host}/uploads/avatars/{fileName}";
+                }
+
+                if (string.IsNullOrWhiteSpace(avatarUrl))
+                {
+                    return BadRequest(new { success = false, message = "Avatar file is required" });
+                }
+
+                var account = await _service.UpdateAvatarUrl(accountId, avatarUrl);
                 return Ok(new { success = true, avatarUrl = account.AvatarUrl });
             }
             catch (InvalidOperationException ex)
@@ -208,6 +240,7 @@ namespace PresentationLayer.Controllers
 
     public class UpdateAvatarRequest
     {
-        public string AvatarUrl { get; set; }
+        public IFormFile? AvatarFile { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }

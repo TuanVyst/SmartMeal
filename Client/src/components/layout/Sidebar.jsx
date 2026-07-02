@@ -5,14 +5,14 @@ import { useFavorite } from '../../context/FavoriteContext';
 import api from '../../services/api';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import avocadoMascot from '../../assets/avocado_mascot.png';
+import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward } from 'react-icons/fi';
 import './Sidebar.css';
 
-
 const MASCOT_TIPS = [
-  { title: '🥑 Uống đủ nước nhé!',   msg: 'Bạn mới uống 1/8 ly nước hôm nay.' },
-  { title: '🌿 Đừng bỏ bữa!',        msg: 'Ăn sáng giúp bạn tập trung hơn 30%.' },
-  { title: '🏃 Vận động nào!',        msg: 'Chỉ 10 phút đi bộ là đủ khởi đầu.' },
-  { title: '🥗 Thêm rau xanh!',       msg: 'Mục tiêu hôm nay: 2 phần rau củ.' },
+  { title: 'Uống đủ nước nhé!',   msg: 'Bạn mới uống 1/8 ly nước hôm nay.' },
+  { title: 'Đừng bỏ bữa!',        msg: 'Ăn sáng giúp bạn tập trung hơn 30%.' },
+  { title: 'Vận động nào!',        msg: 'Chỉ 10 phút đi bộ là đủ khởi đầu.' },
+  { title: 'Thêm rau xanh!',       msg: 'Mục tiêu hôm nay: 2 phần rau củ.' },
 ];
 
 function getPreviousDateKey(dateKey) {
@@ -67,13 +67,13 @@ export default function Sidebar() {
   const accountId = user?.accountId || user?.account_id;
 
   const navItems = [
-    { to: '/dashboard',         icon: '🏠', label: 'Trang chủ',        end: true  },
-    { to: '/meal-suggestions',  icon: '🍽️', label: 'Khám phá món ăn'              },
-    { to: '/meal-plans',        icon: '📋', label: 'Kế hoạch bữa ăn'              },
-    { to: '/nutrition-diary',   icon: '📖', label: 'Nhật ký sức khỏe'             },
-    { to: '/nutrition',         icon: '🏆', label: 'Thành tích'                   },
-    { to: '/subscription',      icon: '👑', label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
-    { to: '/profile',           icon: '⚙️', label: 'Cài đặt'                      },
+    { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',        end: true  },
+    { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn'              },
+    { to: '/meal-plans',        icon: <FiClipboard size={20} />, label: 'Kế hoạch bữa ăn'              },
+    { to: '/nutrition-diary',   icon: <FiClipboard size={20} />, label: 'Nhật ký sức khỏe'             },
+    { to: '/nutrition',         icon: <FiTrendingUp size={20} />, label: 'Thành tích'                   },
+    { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
+    { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
   ];
 
   // Rotate mascot tips every 8 seconds
@@ -118,6 +118,7 @@ export default function Sidebar() {
   const displayName  = user?.username || 'Bạn';
   const initials     = displayName.charAt(0).toUpperCase();
   const isAdmin      = user?.role === 'Admin';
+  const avatarSrc    = user?.avatar || '';
 
   // Progress ring SVG (percentage = 70% filled)
   const RADIUS       = 30;
@@ -129,7 +130,7 @@ export default function Sidebar() {
     <aside className="main-sidebar">
       {/* ── Logo ── */}
       <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">🥗</div>
+        <div className="sidebar-logo-icon"><FiHome size={24} /></div>
         <h2>SmartMeal</h2>
       </div>
 
@@ -147,8 +148,24 @@ export default function Sidebar() {
               style={{ transition: 'stroke-dasharray 1s ease' }}
             />
           </svg>
-          <div className="sidebar-avatar" style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}>{initials}</div>
-          <div className="sidebar-streak-badge">{isPremium ? '👑' : '🔥'}</div>
+          {avatarSrc ? (
+            <img 
+              className="sidebar-avatar sidebar-avatar-image" 
+              src={avatarSrc} 
+              alt="Avatar" 
+              style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}
+            />
+          ) : (
+            <div 
+              className="sidebar-avatar" 
+              style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}
+            >
+              {initials}
+            </div>
+          )}
+          <div className="sidebar-streak-badge">
+            {isPremium ? '👑' : <FiTrendingUp size={14} />}
+          </div>
         </div>
 
         <div className="sidebar-user-greeting">
@@ -160,7 +177,7 @@ export default function Sidebar() {
 
         <div className="sidebar-stats-row">
           <div className="sidebar-stat-card">
-            <div className="stat-icon">🔥</div>
+            <div className="stat-icon"><FiTrendingUp size={18} /></div>
             <div className="stat-value">{streakDays}</div>
             <div className="stat-label">ngày liên tiếp</div>
           </div>
@@ -170,7 +187,7 @@ export default function Sidebar() {
             onClick={() => navigate('/favorites')}
             title="Mở bộ sưu tập"
           >
-            <div className="stat-icon">❤️</div>
+            <div className="stat-icon"><FiHeart size={18} /></div>
             <div className="stat-value">{favorites.length}</div>
             <div className="stat-label">bộ sưu tập</div>
           </button>
@@ -204,7 +221,7 @@ export default function Sidebar() {
                 isActive ? 'nav-item active' : 'nav-item'
               }
             >
-              <span className="nav-item-icon">🛡️</span>
+              <span className="nav-item-icon"><FiShield size={20} /></span>
               <span className="nav-item-text">Quản trị hệ thống</span>
             </NavLink>
           </>

@@ -66,11 +66,11 @@
 
 /* Notification Bell */
 .header-notif-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   border: none;
-  background: #f4f8f4;
+  background: transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -78,10 +78,11 @@
   font-size: 18px;
   transition: all 0.25s ease;
   position: relative;
+  color: #374151;
 }
 
 .header-notif-btn:hover {
-  background: #e8f7e8;
+  background: rgba(0,0,0,0.05);
   transform: scale(1.05);
 }
 
@@ -91,10 +92,10 @@
   right: 6px;
   width: 9px;
   height: 9px;
-  background: linear-gradient(135deg, #ff6b35, #ff9a3c);
+  background: transparent;
   border-radius: 50%;
-  border: 2px solid white;
-  animation: notif-pulse 2s ease infinite;
+  border: 2px solid transparent;
+  animation: none;
 }
 
 @keyframes notif-pulse {
@@ -113,23 +114,23 @@
   gap: 8px;
   padding: 6px 12px 6px 6px;
   border-radius: 50px;
-  border: 1.5px solid rgba(108, 203, 99, 0.25);
-  background: #f4f8f4;
+  border: 1.5px solid rgba(0,0,0,0.08);
+  background: transparent;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
 .header-profile-btn:hover {
-  background: #e8f7e8;
-  border-color: rgba(108, 203, 99, 0.5);
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.15);
 }
 
 .profile-icon {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6CCB63, #3db435);
-  color: white;
+  background: #d1fae5;
+  color: #111827;
   font-size: 13px;
   font-weight: 700;
   display: flex;
@@ -137,6 +138,10 @@
   justify-content: center;
   box-shadow: 0 2px 8px rgba(108, 203, 99, 0.4);
   font-family: 'Inter', sans-serif;
+}
+
+.profile-image {
+  object-fit: cover;
 }
 
 .header-profile-name {
@@ -200,8 +205,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6CCB63, #3db435);
-  color: white;
+  background: #d1fae5;
+  color: #111827;
   font-size: 16px;
   font-weight: 700;
   display: flex;

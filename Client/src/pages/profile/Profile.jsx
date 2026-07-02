@@ -11,7 +11,8 @@ export default function Profile() {
   const [successMsg, setSuccessMsg] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarMsg, setAvatarMsg] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState('');
+  const [avatarFile, setAvatarFile] = useState(null);
 
   const [activeTab, setActiveTab] = useState('profile'); // profile | subscription
   const [history, setHistory] = useState([]);
@@ -26,7 +27,8 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    setAvatarUrl(user?.avatar || '');
+    setAvatarPreview(user?.avatar || '');
+    setAvatarFile(null);
     setFormData({
       name: user?.name || '',
       phone: user?.phone || '',
@@ -67,13 +69,31 @@ export default function Profile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (avatarPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setAvatarFile(file);
+    setAvatarMsg('');
+  };
+
   const handleAvatarSave = async () => {
-    const url = avatarUrl.trim();
-    if (!url) return;
+    if (!avatarFile) return;
     setAvatarMsg('');
     setAvatarUploading(true);
     try {
-      await updateAvatar(url);
+      const result = await updateAvatar(avatarFile);
+      const savedAvatarUrl = result?.avatarUrl || '';
+      if (savedAvatarUrl) {
+        setAvatarPreview(savedAvatarUrl);
+      }
+      setAvatarFile(null);
       setAvatarMsg('Đã cập nhật ảnh đại diện!');
       setTimeout(() => setAvatarMsg(''), 3000);
     } catch (err) {
@@ -83,6 +103,14 @@ export default function Profile() {
       setAvatarUploading(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,7 +123,7 @@ export default function Profile() {
     }, 800);
   };
 
-  const currentAvatar = avatarUrl.trim() || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username||'U')}&background=38bdf8&color=fff&size=96`;
+  const currentAvatar = avatarPreview.trim() || user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username||'U')}&background=38bdf8&color=fff&size=96`;
 
   return (
     <div className="profile-container">
@@ -130,24 +158,23 @@ export default function Profile() {
               <img
                 src={currentAvatar}
                 alt="Avatar"
-                style={{width:96,height:96,borderRadius:'50%',objectFit:'cover',border:'3px solid #38bdf8'}}
+                style={{width:96,height:96,borderRadius:'50%',objectFit:'cover',border: isPremium ? '3px solid #D4AF37' : '3px solid #cbd5e1'}}
               />
               <div style={{marginTop:'.75rem'}}>
-                <label htmlFor="avatar-url" style={{display:'block',fontSize:'.85rem',color:'#94a3b8',marginBottom:'.35rem'}}>URL ảnh đại diện</label>
+                <label htmlFor="avatar-file" style={{display:'block',fontSize:'.85rem',color:'#94a3b8',marginBottom:'.35rem'}}>Chọn ảnh từ thiết bị</label>
                 <div style={{display:'flex',gap:'.5rem',maxWidth:360,margin:'0 auto'}}>
                   <input
-                    id="avatar-url"
-                    type="url"
-                    value={avatarUrl}
-                    onChange={e => setAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/avatar.jpg"
+                    id="avatar-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
                     className="form-input"
-                    style={{flex:1}}
+                    style={{flex:1, padding:'.45rem .5rem'}}
                   />
                   <button
                     type="button"
                     onClick={handleAvatarSave}
-                    disabled={avatarUploading || !avatarUrl.trim()}
+                    disabled={avatarUploading || !avatarFile}
                     className="btn-save"
                     style={{padding:'.5rem 1rem',fontSize:'.85rem',whiteSpace:'nowrap'}}
                   >

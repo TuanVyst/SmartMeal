@@ -10,7 +10,6 @@ import Dashboard from '../pages/dashboard/Dashboard';
 import Profile from '../pages/profile/Profile';
 import MealSuggestions from '../pages/MealSuggestion/MealSuggestion';
 import Favorites from '../pages/food/Favorites';
-import MealPlanList from '../pages/mealplan/MealPlanList';
 import MealDetail from '../pages/MealDetail/MealDetail';
 import IngredientList from '../pages/food/IngredientList';
 import IngredientForm from '../pages/food/IngredientForm';
@@ -54,7 +53,6 @@ export default function AppRoutes() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/meal-plans" element={<MealPlanList />} />
         <Route path="/recipes/new" element={<RecipeForm />} />
         <Route path="/recipes/:id/edit" element={<RecipeForm />} />
         <Route path="/recipe/:id" element={<MealDetail />} />
