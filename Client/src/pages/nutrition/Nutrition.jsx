@@ -90,6 +90,10 @@ export default function Nutrition() {
   const [loading, setLoading] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
 
+  // Log detail
+  const [selectedLogDetail, setSelectedLogDetail] = useState(null);
+  const [showLogDetail, setShowLogDetail] = useState(false);
+
   // Fetch initial data
   useEffect(() => {
     fetchBaseData();
@@ -227,6 +231,17 @@ export default function Nutrition() {
       setSelectedItem('');
     }
   }, [logType, selectedItem, quantity]);
+
+  const handleViewLogDetail = async (logId) => {
+    if (!logId) return;
+    try {
+      const res = await nutritionLogService.getById(logId);
+      setSelectedLogDetail(res.data.data || res.data);
+      setShowLogDetail(true);
+    } catch (err) {
+      console.error('Lỗi tải chi tiết nutrition log:', err);
+    }
+  };
 
   const handleAddLog = async (e) => {
     e.preventDefault();
@@ -402,6 +417,7 @@ export default function Nutrition() {
   });
 
   return (
+    <>
     <div className="nutrition-container">
       {alertMsg && (
         <div className={`alert-banner alert-${alertMsg.type}`}>
@@ -893,7 +909,7 @@ export default function Nutrition() {
                       const name = log.recipe?.recipe_name || log.ingredient?.name || 'Món ăn tùy chỉnh';
                       return (
                         <div key={log.log_id} className="log-list-item">
-                          <div className="item-main">
+                          <div className="item-main" style={{ cursor: 'pointer' }} onClick={() => handleViewLogDetail(log.log_id)}>
                             <span className="meal-badge">{log.mealType}</span>
                             <div className="item-details">
                               <span className="item-name">{name}</span>
@@ -1072,5 +1088,86 @@ export default function Nutrition() {
 
       </div>
     </div>
+
+    {/* NutritionLog Detail Modal */}
+    {showLogDetail && selectedLogDetail && (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 10000,
+        visibility: showLogDetail ? 'visible' : 'hidden',
+      }}>
+        <div onClick={() => setShowLogDetail(false)} style={{
+          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)',
+          opacity: showLogDetail ? 1 : 0, transition: 'opacity 0.3s ease',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          background: 'white', borderRadius: '20px 20px 0 0', padding: 24,
+          transform: showLogDetail ? 'translateY(0)' : 'translateY(100%)',
+          transition: 'transform 0.3s ease-out',
+          maxHeight: '90vh', overflowY: 'auto',
+        }}>
+          <div style={{ width: 40, height: 4, background: '#e2e8f0', borderRadius: 2, margin: '0 auto 20px' }} />
+          <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1E293B', marginBottom: 4 }}>
+            Chi tiết Nutrition Log
+          </h3>
+          <div style={{ fontSize: 14, color: '#64748b', marginBottom: 20 }}>
+            {selectedLogDetail.logDate && `Ngày: ${new Date(selectedLogDetail.logDate?.split('T')[0]).toLocaleDateString('vi-VN')}`}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, padding: 16, background: '#f8fafc', borderRadius: 12 }}>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Loại bữa</span>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#1E293B' }}>{selectedLogDetail.mealType || '—'}</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Năng lượng</span>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#22C55E' }}>{selectedLogDetail.totalCalories || 0} kcal</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Đạm</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#3b82f6' }}>{selectedLogDetail.totalProtein || 0} g</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Carb</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#f59e0b' }}>{selectedLogDetail.totalCarbs || 0} g</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Chất béo</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#ef4444' }}>{selectedLogDetail.totalFat || 0} g</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Chất xơ</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#22C55E' }}>{selectedLogDetail.totalFiber || 0} g</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Đường</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#a855f7' }}>{selectedLogDetail.totalSugar || 0} g</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Muối</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#dc2626' }}>{selectedLogDetail.totalSalt || selectedLogDetail.totalSodium || 0} g</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Cholesterol</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#8b5cf6' }}>{selectedLogDetail.totalCholesterol || 0} mg</div>
+            </div>
+            <div className="detail-item">
+              <span style={{ fontSize: 12, color: '#64748b' }}>Khẩu phần</span>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>{selectedLogDetail.quantity || 0} {selectedLogDetail.unit || 'g'}</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            <button onClick={() => setShowLogDetail(false)} style={{
+              flex: 1, padding: '12px', border: '2px solid #e2e8f0', borderRadius: 10,
+              background: 'white', color: '#475569', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+            }}>
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
