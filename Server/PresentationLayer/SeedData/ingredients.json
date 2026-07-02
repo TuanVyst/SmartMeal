@@ -791,24 +791,7 @@
     },
     "TagNames": [ "Nước chấm & Gia vị lỏng" ]
   },
-  {
-    "Name": "Bún",
-    "AveragePrice": 1.5,
-    "ImageUrl": "/images/bun.jpg",
-    "NutritionalValues": {
-      "Calories": 109,
-      "Protein": 0.9,
-      "Carbs": 25.7,
-      "Fat": 0.2,
-      "Fiber": 1,
-      "Sugar": 0,
-      "Salt": 0.012,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [ "Ngũ cốc" ]
-  },
+  
   {
     "Name": "Phở",
     "AveragePrice": 2.0,
@@ -899,24 +882,7 @@
     },
     "TagNames": [ "Ngũ cốc" ]
   },
-  {
-    "Name": "Đường",
-    "AveragePrice": 1.0,
-    "ImageUrl": "/images/duong.jpg",
-    "NutritionalValues": {
-      "Calories": 387,
-      "Protein": 0,
-      "Carbs": 100,
-      "Fat": 0,
-      "Fiber": 0,
-      "Sugar": 100,
-      "Salt": 0.001,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [ "Gia vị" ]
-  },
+ 
   {
     "Name": "Giấm",
     "AveragePrice": 1.5,
@@ -989,42 +955,8 @@
     },
     "TagNames": [ "Đồ khô" ]
   },
-  {
-    "Name": "Đậu phộng",
-    "AveragePrice": 2.5,
-    "ImageUrl": "/images/dau-phong.jpg",
-    "NutritionalValues": {
-      "Calories": 567,
-      "Protein": 25.8,
-      "Carbs": 16.1,
-      "Fat": 49.2,
-      "Fiber": 8.5,
-      "Sugar": 4,
-      "Salt": 0.018,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [ "Đồ khô" ]
-  },
-  {
-    "Name": "Bắp",
-    "AveragePrice": 1.5,
-    "ImageUrl": "/images/bap.jpg",
-    "NutritionalValues": {
-      "Calories": 86,
-      "Protein": 3.3,
-      "Carbs": 19,
-      "Fat": 1.2,
-      "Fiber": 2,
-      "Sugar": 3.2,
-      "Salt": 0.015,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [ "Rau củ" ]
-  },
+
+
   {
     "Name": "Bông atisô",
     "AveragePrice": 3.5,
@@ -1466,24 +1398,6 @@
     "TagNames": [
       "Rau củ"
     ]
-  },
-  {
-    "Name": "Giấm",
-    "AveragePrice": 2.0,
-    "ImageUrl": "/images/giấm.jpg",
-    "NutritionalValues": {
-      "Calories": 21,
-      "Protein": 0,
-      "Carbs": 0.9,
-      "Fat": 0,
-      "Fiber": 0,
-      "Sugar": 0.4,
-      "Salt": 0.005,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [ "Gia vị" ]
   },
   {
     "Name": "Đường",
