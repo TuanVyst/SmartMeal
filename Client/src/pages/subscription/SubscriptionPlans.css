@@ -376,3 +376,497 @@
     margin-right: auto;
   }
 }
+
+/* ============================================
+   SMARTMEAL CHECKOUT PAYMENT - Styling
+   ============================================ */
+
+.payment-page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-back-plans {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.btn-back-plans:hover {
+  color: #0f172a;
+}
+
+.payment-wrapper {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.payment-left-card, .payment-right-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.payment-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.selected-plan-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.selected-plan-summary h3 {
+  font-size: 1.05rem;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.selected-plan-summary p {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.checkout-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #22c55e;
+}
+
+.payment-method-selector {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.method-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.method-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.method-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.method-btn.selected {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
+}
+
+.btn-icon {
+  font-size: 24px;
+}
+
+.method-btn span:last-child {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.instructions-card {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+}
+
+.instructions-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.detail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.item-value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+
+.item-value {
+  font-size: 0.95rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.font-mono {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.font-bold {
+  font-weight: 800;
+}
+
+.text-green {
+  color: #16a34a;
+}
+
+.text-red {
+  color: #dc2626;
+}
+
+.text-bold {
+  font-weight: 700;
+}
+
+.btn-copy {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.highlighted-item .item-value-row {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+}
+
+.btn-copy-highlight {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-copy-highlight:hover {
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+/* ── Checkout Sidebar (Right) ── */
+.countdown-timer {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.countdown-timer p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.timer-clock {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1e293b;
+  font-family: monospace;
+}
+
+.timer-danger {
+  color: #ef4444;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+.qr-code-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.qr-image {
+  width: 220px;
+  height: 220px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.momo-qr-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.momo-logo-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #a50064;
+  color: white;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.qr-caption {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 12px;
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.confirmation-form {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ref-input {
+  padding: 12px 16px;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 1rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.ref-input:focus {
+  border-color: #22c55e;
+}
+
+.helper-text {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.payment-error-alert {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.btn-confirm-payment {
+  width: 100%;
+  padding: 15px;
+  background: #22c55e;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+  font-family: inherit;
+}
+
+.btn-confirm-payment:hover:not(:disabled) {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.btn-confirm-payment:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ── Success Screen ── */
+.payment-success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 550px;
+  padding: 24px;
+}
+
+.success-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 45px 35px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.success-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  background: #dcfce7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.success-checkmark {
+  color: #22c55e;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.success-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.success-desc {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.receipt-details {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.receipt-label {
+  color: #64748b;
+}
+
+.receipt-value {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.btn-dashboard {
+  width: 100%;
+  padding: 14px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-dashboard:hover {
+  background: #16a34a;
+}
+
+/* ── Checkout Responsive ── */
+@media (max-width: 850px) {
+  .payment-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
