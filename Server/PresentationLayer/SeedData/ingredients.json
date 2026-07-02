@@ -15,7 +15,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Thịt gà",
@@ -33,7 +33,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Thịt & Hải sản"]
+    "TagNames": [ "Thịt" ]
   },
   {
     "Name": "Gạo",
@@ -51,7 +51,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Ngũ cốc"]
+    "TagNames": [ "Ngũ cốc" ]
   },
   {
     "Name": "Hành tây",
@@ -69,7 +69,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Tỏi",
@@ -87,7 +87,7 @@
       "ServingSize": 3,
       "ServingUnit": "clove"
     },
-    "TagNames": ["Rau củ", "Gia vị"]
+    "TagNames": [ "Rau củ", "Gia vị" ]
   },
   {
     "Name": "Dầu ô-liu",
@@ -105,7 +105,7 @@
       "ServingSize": 1,
       "ServingUnit": "tbsp"
     },
-    "TagNames": ["Bơ & Dầu"]
+    "TagNames": [ "Bơ & Dầu" ]
   },
   {
     "Name": "Muối",
@@ -123,7 +123,7 @@
       "ServingSize": 5,
       "ServingUnit": "g"
     },
-    "TagNames": ["Gia vị"]
+    "TagNames": [ "Gia vị" ]
   },
   {
     "Name": "Tiêu đen",
@@ -141,7 +141,7 @@
       "ServingSize": 1,
       "ServingUnit": "tsp"
     },
-    "TagNames": ["Gia vị"]
+    "TagNames": [ "Gia vị" ]
   },
   {
     "Name": "Trứng",
@@ -159,7 +159,7 @@
       "ServingSize": 1,
       "ServingUnit": "piece"
     },
-    "TagNames": ["Sữa & Trứng"]
+    "TagNames": [ "Sữa & Trứng" ]
   },
   {
     "Name": "Sữa",
@@ -177,7 +177,7 @@
       "ServingSize": 100,
       "ServingUnit": "ml"
     },
-    "TagNames": ["Sữa & Trứng"]
+    "TagNames": [ "Sữa & Trứng" ]
   },
   {
     "Name": "Bông cải xanh",
@@ -195,7 +195,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Cà rốt",
@@ -213,7 +213,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Mì ý",
@@ -231,7 +231,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Ngũ cốc"]
+    "TagNames": [ "Ngũ cốc" ]
   },
   {
     "Name": "Cá hồi",
@@ -249,7 +249,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Thịt & Hải sản"]
+    "TagNames": [ "Hải sản" ]
   },
   {
     "Name": "Chanh",
@@ -267,7 +267,7 @@
       "ServingSize": 1,
       "ServingUnit": "piece"
     },
-    "TagNames": ["Trái cây"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Thịt bò",
@@ -285,7 +285,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Thịt & Hải sản"]
+    "TagNames": [ "Thịt" ]
   },
   {
     "Name": "Thịt heo",
@@ -303,7 +303,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Thịt & Hải sản"]
+    "TagNames": [ "Thịt" ]
   },
   {
     "Name": "Tôm",
@@ -321,7 +321,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Thịt & Hải sản"]
+    "TagNames": [ "Hải sản" ]
   },
   {
     "Name": "Mực",
@@ -339,7 +339,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Thịt & Hải sản"]
+    "TagNames": [ "Hải sản" ]
   },
   {
     "Name": "Đậu hủ",
@@ -357,7 +357,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Đậu & Đậu phụ"]
+    "TagNames": [ "Đậu & Đậu phụ" ]
   },
   {
     "Name": "Nấm",
@@ -375,7 +375,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Khoai tây",
@@ -393,7 +393,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Khoai lang",
@@ -411,7 +411,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Bắp cải",
@@ -429,7 +429,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Ớt chuông",
@@ -447,7 +447,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Dưa chuột",
@@ -465,7 +465,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Bơ",
@@ -483,7 +483,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Trái cây"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Chuối",
@@ -501,7 +501,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Trái cây"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Xoài",
@@ -519,7 +519,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Trái cây"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Táo",
@@ -537,7 +537,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Trái cây"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Dứa",
@@ -555,7 +555,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Trái cây"]
+    "TagNames": [ "Trái cây" ]
   },
   {
     "Name": "Nước cốt dừa",
@@ -573,7 +573,7 @@
       "ServingSize": 100,
       "ServingUnit": "ml"
     },
-    "TagNames": ["Đồ khô"]
+    "TagNames": [ "Đồ khô" ]
   },
   {
     "Name": "Gừng",
@@ -591,7 +591,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Gia vị", "Rau thơm"]
+    "TagNames": [ "Gia vị", "Rau thơm" ]
   },
   {
     "Name": "Sả",
@@ -609,7 +609,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau thơm", "Gia vị"]
+    "TagNames": [ "Rau thơm", "Gia vị" ]
   },
   {
     "Name": "Rau mùi",
@@ -627,7 +627,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau thơm"]
+    "TagNames": [ "Rau thơm" ]
   },
   {
     "Name": "Hành lá",
@@ -645,7 +645,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau thơm"]
+    "TagNames": [ "Rau thơm" ]
   },
   {
     "Name": "Rau răm",
@@ -663,7 +663,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau thơm"]
+    "TagNames": [ "Rau thơm" ]
   },
   {
     "Name": "Ớt tươi",
@@ -681,7 +681,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Gia vị"]
+    "TagNames": [ "Gia vị" ]
   },
   {
     "Name": "Nước mắm",
@@ -699,7 +699,7 @@
       "ServingSize": 1,
       "ServingUnit": "tbsp"
     },
-    "TagNames": ["Nước chấm & Gia vị lỏng"]
+    "TagNames": [ "Nước chấm & Gia vị lỏng" ]
   },
   {
     "Name": "Nước tương",
@@ -717,7 +717,7 @@
       "ServingSize": 1,
       "ServingUnit": "tbsp"
     },
-    "TagNames": ["Nước chấm & Gia vị lỏng"]
+    "TagNames": [ "Nước chấm & Gia vị lỏng" ]
   },
   {
     "Name": "Dầu mè",
@@ -735,7 +735,7 @@
       "ServingSize": 1,
       "ServingUnit": "tbsp"
     },
-    "TagNames": ["Bơ & Dầu"]
+    "TagNames": [ "Bơ & Dầu" ]
   },
   {
     "Name": "Tương ớt",
@@ -753,7 +753,7 @@
       "ServingSize": 1,
       "ServingUnit": "tbsp"
     },
-    "TagNames": ["Nước chấm & Gia vị lỏng"]
+    "TagNames": [ "Nước chấm & Gia vị lỏng" ]
   },
   {
     "Name": "Bún",
@@ -771,7 +771,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Ngũ cốc"]
+    "TagNames": [ "Ngũ cốc" ]
   },
   {
     "Name": "Phở",
@@ -789,7 +789,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Ngũ cốc"]
+    "TagNames": [ "Ngũ cốc" ]
   },
   {
     "Name": "Miến",
@@ -807,7 +807,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Ngũ cốc"]
+    "TagNames": [ "Ngũ cốc" ]
   },
   {
     "Name": "Đậu xanh",
@@ -825,7 +825,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Đậu & Đậu phụ"]
+    "TagNames": [ "Đậu & Đậu phụ" ]
   },
   {
     "Name": "Đậu đỏ",
@@ -843,7 +843,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Đậu & Đậu phụ"]
+    "TagNames": [ "Đậu & Đậu phụ" ]
   },
   {
     "Name": "Bột mì",
@@ -861,7 +861,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Ngũ cốc"]
+    "TagNames": [ "Ngũ cốc" ]
   },
   {
     "Name": "Đường",
@@ -879,7 +879,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Gia vị"]
+    "TagNames": [ "Gia vị" ]
   },
   {
     "Name": "Giấm",
@@ -897,7 +897,7 @@
       "ServingSize": 1,
       "ServingUnit": "tbsp"
     },
-    "TagNames": ["Nước chấm & Gia vị lỏng"]
+    "TagNames": [ "Nước chấm & Gia vị lỏng" ]
   },
   {
     "Name": "Giá đỗ",
@@ -915,7 +915,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Rau muống",
@@ -933,7 +933,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Mè",
@@ -951,7 +951,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Đồ khô"]
+    "TagNames": [ "Đồ khô" ]
   },
   {
     "Name": "Đậu phộng",
@@ -969,7 +969,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Đồ khô"]
+    "TagNames": [ "Đồ khô" ]
   },
   {
     "Name": "Bắp",
@@ -987,7 +987,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Bông atisô",
@@ -1005,7 +1005,7 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
   },
   {
     "Name": "Cà tím",
@@ -1023,6 +1023,96 @@
       "ServingSize": 100,
       "ServingUnit": "g"
     },
-    "TagNames": ["Rau củ"]
+    "TagNames": [ "Rau củ" ]
+  },
+  {
+    "Name": "Cải bó xôi",
+    "AveragePrice": 2.0,
+    "ImageUrl": "/images/cai-bo-xoi.jpg",
+    "NutritionalValues": {
+      "Calories": 23,
+      "Protein": 2.9,
+      "Carbs": 3.6,
+      "Fat": 0.4,
+      "Fiber": 2.2,
+      "Sugar": 0.4,
+      "Salt": 0.079,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Rau củ" ]
+  },
+  {
+    "Name": "Cá basa",
+    "AveragePrice": 4.5,
+    "ImageUrl": "/images/ca-basa.jpg",
+    "NutritionalValues": {
+      "Calories": 120,
+      "Protein": 20.0,
+      "Carbs": 0,
+      "Fat": 4.0,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.07,
+      "Cholesterol": 55,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Hải sản" ]
+  },
+  {
+    "Name": "Cá lóc",
+    "AveragePrice": 5.5,
+    "ImageUrl": "/images/ca-loc.jpg",
+    "NutritionalValues": {
+      "Calories": 97,
+      "Protein": 20.7,
+      "Carbs": 0,
+      "Fat": 1.7,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.08,
+      "Cholesterol": 60,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Hải sản" ]
+  },
+  {
+    "Name": "Cá chép",
+    "AveragePrice": 4.8,
+    "ImageUrl": "/images/ca-chep.jpg",
+    "NutritionalValues": {
+      "Calories": 127,
+      "Protein": 17.8,
+      "Carbs": 0,
+      "Fat": 5.6,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.09,
+      "Cholesterol": 66,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Hải sản" ]
+  },
+  {
+    "Name": "Cá điêu hồng",
+    "AveragePrice": 5.0,
+    "ImageUrl": "/images/ca-dieu-hong.jpg",
+    "NutritionalValues": {
+      "Calories": 128,
+      "Protein": 20.1,
+      "Carbs": 0,
+      "Fat": 4.2,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.08,
+      "Cholesterol": 57,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Hải sản" ]
   }
 ]
