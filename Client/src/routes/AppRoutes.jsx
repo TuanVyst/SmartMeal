@@ -61,6 +61,7 @@ export default function AppRoutes() {
         <Route path="/nutrition" element={<Nutrition />} />
         <Route path="/nutrition-diary" element={<NutritionDiaryPage />} />
         <Route path="/nhat-ky" element={<NutritionDiaryPage />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/health-survey" element={<SurveyPage />} />
       </Route>
       <Route

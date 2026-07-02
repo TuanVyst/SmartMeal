@@ -10,6 +10,7 @@ export default function AdminRecipes() {
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
   const [recipeFormData, setRecipeFormData] = useState({
     recipe_name: '',
+    imageUrl: '',
     description: '',
     instruction: '',
     cookTime: 0,
@@ -53,6 +54,7 @@ export default function AdminRecipes() {
     try {
       const baseRecipeData = {
         recipe_name: recipeFormData.recipe_name,
+        imageUrl: recipeFormData.imageUrl,
         description: recipeFormData.description,
         instruction: recipeFormData.instruction,
         cookTime: recipeFormData.cookTime,
@@ -138,6 +140,7 @@ export default function AdminRecipes() {
 
     setRecipeFormData({
       recipe_name: recipe.recipe_name || '',
+      imageUrl: recipe.imageUrl || '',
       description: recipe.description || '',
       instruction: recipe.instruction || '',
       cookTime: recipe.cookTime || 0,
@@ -167,6 +170,7 @@ export default function AdminRecipes() {
     setEditingRecipe(null);
     setRecipeFormData({
       recipe_name: '',
+      imageUrl: '',
       description: '',
       instruction: '',
       cookTime: 0,
@@ -320,6 +324,17 @@ export default function AdminRecipes() {
                   </div>
                   
                   <div className="form-group">
+                    <label className="form-label">Image URL</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      value={recipeFormData.imageUrl}
+                      onChange={(e) => setRecipeFormData({ ...recipeFormData, imageUrl: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  
+                  <div className="form-group">
                     <label className="form-label">Description</label>
                     <textarea
                       className="form-control"
@@ -403,21 +418,33 @@ export default function AdminRecipes() {
 
                   <div className="form-group">
                     <label className="form-label">Recipe Tags <span className="required">*</span></label>
-                    <select
-                      className="form-control multi-select"
-                      multiple
-                      value={recipeFormData.recipeTagIds || []}
-                      onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions, option => option.value);
-                        setRecipeFormData({ ...recipeFormData, recipeTagIds: selected });
-                      }}
-                      required
-                    >
-                      {availableRecipeTags.map((tag) => (
-                        <option key={tag.id || tag.rt_Id} value={tag.id || tag.rt_Id}>{tag.name}</option>
-                      ))}
-                    </select>
-                    <small className="form-hint">Hold Ctrl/Command to select multiple tags.</small>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto', background: '#f8fafc' }}>
+                      {availableRecipeTags.map((tag) => {
+                        const tagId = tag.id || tag.rt_Id;
+                        const isSelected = (recipeFormData.recipeTagIds || []).includes(tagId);
+                        return (
+                          <div 
+                            key={tagId} 
+                            onClick={() => {
+                              if (isSelected) {
+                                setRecipeFormData({ ...recipeFormData, recipeTagIds: recipeFormData.recipeTagIds.filter(t => t !== tagId) });
+                              } else {
+                                setRecipeFormData({ ...recipeFormData, recipeTagIds: [...(recipeFormData.recipeTagIds || []), tagId] });
+                              }
+                            }}
+                            style={{
+                              padding: '6px 12px', borderRadius: '20px', fontSize: '13px', cursor: 'pointer',
+                              backgroundColor: isSelected ? '#22c55e' : 'white',
+                              color: isSelected ? 'white' : '#475569',
+                              border: `1px solid ${isSelected ? '#22c55e' : '#cbd5e1'}`,
+                              transition: 'all 0.2s', userSelect: 'none'
+                            }}
+                          >
+                            {tag.name}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { nutritionDiaryService } from '../services/nutritionDiaryService';
+import { getTodayDateKey } from '../utils/dateTime';
 
 export function useNutritionDiary(initialDate = null) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(initialDate || new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(initialDate || getTodayDateKey());
 
   const fetchEntries = useCallback(async (date) => {
     setLoading(true);

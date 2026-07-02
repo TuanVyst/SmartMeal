@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiEye } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
+import { formatDateVi } from '../../utils/dateTime';
 
 export default function AdminFeedback() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function AdminFeedback() {
                   <p className="feedback-email">{f.name} &lt;{f.email}&gt;</p>
                   <p className="feedback-preview">{f.message}</p>
                 </div>
-                <div className="feedback-card-date">{new Date(f.date || f.created_at || Date.now()).toLocaleDateString()}</div>
+                <div className="feedback-card-date">{formatDateVi(f.date || f.created_at || Date.now())}</div>
                 <button
                   className="action-btn view"
                   onClick={(e) => { e.stopPropagation(); navigate(`/admin/feedback/${f.feedback_id || f.id}`); }}

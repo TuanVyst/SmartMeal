@@ -1,28 +1,57 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Navigate, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
-import avocadoMascot   from '../../assets/avocado_mascot.png';
-import chickenSalad    from '../../assets/meal_chicken_salad.png';
-import salmonImg       from '../../assets/meal_salmon.png';
-import smoothieImg     from '../../assets/meal_avocado_smoothie.png';
+import { mockRecipesData } from '../../utils/mockData';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './Dashboard.css';
 
-const MEAL_SUGGESTIONS = [
-  { id: 1, name: 'Salad ức gà rau củ',      calories: 350, img: chickenSalad, tag: '🥗 Lành mạnh' },
-  { id: 2, name: 'Cá hồi áp chảo măng tây', calories: 450, img: salmonImg,    tag: '🐟 Giàu protein' },
-  { id: 3, name: 'Sinh tố bơ chuối',         calories: 280, img: smoothieImg,  tag: '🥑 Tốt cho tim' },
-  { id: 4, name: 'Salad ức gà rau củ',      calories: 350, img: chickenSalad, tag: '🥗 Lành mạnh' },
-  { id: 5, name: 'Sinh tố bơ chuối',         calories: 280, img: smoothieImg,  tag: '🍌 Nhiều năng lượng' },
-];
+const FALLBACK_MEAL_IMAGE = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop';
+const SUGGESTION_TAGS = ['🥗 Lành mạnh', '🐟 Giàu protein', '🥑 Tốt cho tim', '🍌 Nhiều năng lượng', '🍽️ Gợi ý hôm nay'];
 
-const HABITS = [
-  { key: 'water',    icon: '💧', iconClass: 'water',    label: 'Uống đủ nước', current: 6,  target: 8,  unit: 'ly',    pct: 75  },
-  { key: 'exercise', icon: '🏃', iconClass: 'exercise', label: 'Tập luyện',    current: 30, target: 60, unit: 'phút',  pct: 50  },
-  { key: 'sleep',    icon: '🌙', iconClass: 'sleep',    label: 'Ngủ đủ giấc', current: 7,  target: 8,  unit: 'giờ',   pct: 88 },
-];
+function resolveRecipeImage(recipeId, recipeName) {
+  const mockRecipe = mockRecipesData.find(
+    (recipe) => recipe.id === recipeId || recipe.title.toLowerCase() === recipeName.toLowerCase()
+  );
+  return mockRecipe?.imageUrl || FALLBACK_MEAL_IMAGE;
+}
+
+function mapRecipeToSuggestion(recipe, index) {
+  const id = recipe.recipe_id || recipe.Recipe_id || recipe.id || `recipe-${index}`;
+  const name = recipe.recipe_name || recipe.Recipe_name || recipe.title || 'Món ăn';
+  const servings = recipe.servings || recipe.Servings || 1;
+  const recipeIngredients = recipe.recipeIngredients || recipe.RecipeIngredients || [];
+
+  let totalCalories = 0;
+  recipeIngredients.forEach((ingredient) => {
+    const nutritionalValue = ingredient.nutritionalValue || ingredient.NutritionalValue;
+    if (!nutritionalValue) {
+      return;
+    }
+
+    const quantity = ingredient.quantity || ingredient.Quantity || 0;
+    const servingSize = nutritionalValue.servingSize || nutritionalValue.ServingSize || 1;
+    const multiplier = quantity / servingSize;
+    totalCalories += (nutritionalValue.calories || nutritionalValue.Calories || 0) * multiplier;
+  });
+
+  const fallbackCalories = Number(recipe.nutrition?.calories) || Number(String(recipe.calories || '').replace(/[^\d.]/g, '')) || 0;
+  const calories = Math.round((servings > 0 ? totalCalories / servings : totalCalories) || fallbackCalories);
+  const imageUrl = resolveRecipeImage(id, name);
+
+  return {
+    id,
+    title: name,
+    name,
+    calories,
+    imageUrl,
+    img: imageUrl,
+    tag: SUGGESTION_TAGS[index % SUGGESTION_TAGS.length],
+  };
+}
 
 /* ── Animated progress bar that fires after mount ── */
 function AnimatedBar({ pct, className }) {
@@ -38,26 +67,13 @@ function AnimatedBar({ pct, className }) {
   );
 }
 
-function AnimatedHabitBar({ pct, className }) {
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setWidth(pct), 400);
-    return () => clearTimeout(t);
-  }, [pct]);
-  return (
-    <div className="habit-progress-bar-wrap">
-      <div className={`habit-progress-bar ${className}`} style={{ width: `${width}%` }} />
-    </div>
-  );
-}
-
 export default function Dashboard() {
   const { user }         = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorite();
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();
-  const [favs, setFavs]  = useState(new Set([2]));
   const [nutritionLogs, setNutritionLogs] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [mealSuggestions, setMealSuggestions] = useState([]);
 
   const accountId = user?.accountId || user?.account_id;
 
@@ -70,22 +86,47 @@ export default function Dashboard() {
           setNutritionLogs(res.data.data || []);
         } catch (err) {
           console.error("Lỗi khi tải nhật ký dinh dưỡng:", err);
-        } finally {
-          setLoading(false);
         }
       };
       fetchTodayLogs();
     }
   }, [accountId]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchMealSuggestions = async () => {
+      try {
+        const res = await getRecipes();
+        const recipes = res.data.data || [];
+
+        if (!isMounted) {
+          return;
+        }
+
+        setMealSuggestions(recipes.slice(0, 5).map(mapRecipeToSuggestion));
+      } catch (err) {
+        console.error('Lỗi khi tải danh sách món ăn:', err);
+        if (!isMounted) {
+          return;
+        }
+        setMealSuggestions(mockRecipesData.slice(0, 5).map(mapRecipeToSuggestion));
+      }
+    };
+
+    fetchMealSuggestions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   if (user?.role === 'Admin') return <Navigate to="/admin" replace />;
 
   const displayName = user?.username || 'Bạn';
-
-  // Calculate today's totals
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getTodayDateKey();
   const logsToday = nutritionLogs.filter(log => {
-    const logDateStr = log.logDate?.split('T')[0];
+    const logDateStr = toDateKey(log.logDate);
     return logDateStr === todayStr;
   });
 
@@ -106,23 +147,12 @@ export default function Dashboard() {
   const carbsTarget = dailyTargets.carbs || 250;
   const fatTarget = dailyTargets.fat || 65;
 
-  const caloriesLeft = Math.max(0, Math.round(caloriesTarget - totalsToday.calories));
-
   const nutritionData = [
     { key: 'calories',  icon: '🔥', label: 'Calorie nạp vào', value: Math.round(totalsToday.calories),  unit: 'kcal', target: caloriesTarget, pct: Math.min(Math.round((totalsToday.calories / caloriesTarget) * 100), 100) },
     { key: 'protein',   icon: '💪', label: 'Protein',          value: Math.round(totalsToday.protein),   unit: 'g',    target: proteinTarget,  pct: Math.min(Math.round((totalsToday.protein / proteinTarget) * 100), 100) },
     { key: 'carbs',     icon: '🌾', label: 'Carbs',            value: Math.round(totalsToday.carbs),     unit: 'g',    target: carbsTarget,    pct: Math.min(Math.round((totalsToday.carbs / carbsTarget) * 100), 100) },
     { key: 'fat',       icon: '💧', label: 'Chất béo',         value: Math.round(totalsToday.fat),       unit: 'g',    target: fatTarget,      pct: Math.min(Math.round((totalsToday.fat / fatTarget) * 100), 100) },
   ];
-
-  const toggleFav = (id, e) => {
-    e.stopPropagation();
-    setFavs(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
 
   return (
     <div className="dashboard-page">
@@ -147,23 +177,6 @@ export default function Dashboard() {
             Hôm nay là một ngày tuyệt vời để<br />
             chăm sóc bản thân và ăn uống lành mạnh.
           </p>
-
-          <div className="hero-stats-row">
-            <div className="hero-stat-chip">
-              <span className="hero-stat-chip-icon">🔥</span>
-              <div>
-                <div className="hero-stat-chip-value">{caloriesLeft} kcal</div>
-                <div className="hero-stat-chip-label">Calorie còn lại</div>
-              </div>
-            </div>
-            <div className="hero-stat-chip">
-              <span className="hero-stat-chip-icon">🎯</span>
-              <div>
-                <div className="hero-stat-chip-value">2/3</div>
-                <div className="hero-stat-chip-label">Mục tiêu hôm nay</div>
-              </div>
-            </div>
-          </div>
 
           <button
             className="hero-cta-btn"
@@ -234,7 +247,7 @@ export default function Dashboard() {
         </div>
 
         <div className="meal-cards-scroll">
-          {MEAL_SUGGESTIONS.map(meal => (
+          {mealSuggestions.map(meal => (
             <div
               key={meal.id}
               className="meal-card"
@@ -243,10 +256,14 @@ export default function Dashboard() {
               <div className="meal-card-img-wrap">
                 <img src={meal.img} alt={meal.name} className="meal-card-img" />
                 <button
-                  className={`meal-card-fav-btn${favs.has(meal.id) ? ' active' : ''}`}
-                  onClick={e => toggleFav(meal.id, e)}
+                  className={`meal-card-fav-btn${isFavorite(meal.id) ? ' active' : ''}`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    toggleFavorite(meal);
+                  }}
+                  aria-label="Lưu vào bộ sưu tập"
                 >
-                  {favs.has(meal.id) ? '❤️' : '🤍'}
+                  {isFavorite(meal.id) ? '❤️' : '🤍'}
                 </button>
               </div>
               <div className="meal-card-body">
@@ -260,44 +277,6 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          HABIT TRACKING
-         ══════════════════════════════════════════ */}
-      <section>
-        <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">🌟 Thói quen của bạn</h2>
-        </div>
-
-        <div className="habits-grid">
-          {HABITS.map(h => (
-            <div className="habit-card" key={h.key}>
-              <div className="habit-card-header">
-                <div className="habit-card-left">
-                  <div className={`habit-card-icon ${h.iconClass}`}>{h.icon}</div>
-                  <span className="habit-card-name">{h.label}</span>
-                </div>
-                <span className="habit-card-progress-text">
-                  {h.current}/{h.target} {h.unit}
-                </span>
-              </div>
-              <div className="habit-value-row">
-                <span className="habit-value">{h.current}</span>
-                <span className="habit-unit">/{h.target} {h.unit}</span>
-              </div>
-              <AnimatedHabitBar pct={h.pct} className={h.iconClass} />
-            </div>
-          ))}
-
-          {/* Streak Card */}
-          <div className="habit-card streak-card">
-            <div className="streak-card-title">🔥 Chuỗi ngày hiện tại</div>
-            <div className="streak-card-value">12</div>
-            <div className="streak-card-unit">ngày liên tiếp</div>
-            <img src={avocadoMascot} alt="mascot" className="streak-mascot" />
-          </div>
         </div>
       </section>
 

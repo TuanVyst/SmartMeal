@@ -6,6 +6,7 @@ import { recipeService } from '../../services/recipeService';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { nutritionGoalService } from '../../services/nutritionGoalService';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
+import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './Nutrition.css';
 import { 
   MdFastfood, MdCalendarToday, MdBarChart, MdAddCircleOutline, 
@@ -47,7 +48,7 @@ export default function Nutrition() {
   const hasHeartDisease = conditions.includes('heartDisease');
 
   const [activeTab, setActiveTab] = useState('log'); // log | history | stats
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getTodayDateKey());
 
   // Data from backend
   const [ingredients, setIngredients] = useState([]);
@@ -337,7 +338,7 @@ export default function Nutrition() {
 
   // Helper calculations for current date
   const logsToday = nutritionLogs.filter(log => {
-    const logDateStr = log.logDate?.split('T')[0];
+    const logDateStr = toDateKey(log.logDate);
     return logDateStr === selectedDate;
   });
 
@@ -368,22 +369,24 @@ export default function Nutrition() {
 
   // SVG Chart data preparations (Last 7 days)
   const getLast7Days = () => {
+    const today = new Date();
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(d.getDate() - i);
-      days.push(d.toISOString().split('T')[0]);
+      days.push(toDateKey(d));
     }
     return days;
   };
 
   const last7Days = getLast7Days();
   const dailyCaloriesData = last7Days.map(dateStr => {
-    const dayLogs = nutritionLogs.filter(l => l.logDate?.split('T')[0] === dateStr);
+    const dayLogs = nutritionLogs.filter(l => toDateKey(l.logDate) === dateStr);
     const cal = dayLogs.reduce((sum, l) => sum + (l.totalCalories || 0), 0);
     return {
       date: dateStr,
-      displayDate: new Date(dateStr).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric' }),
+      displayWeekday: formatDateVi(dateStr, { weekday: 'short' }),
+      displayDayMonth: formatDateVi(dateStr, { day: '2-digit', month: '2-digit' }),
       calories: cal
     };
   });
@@ -882,7 +885,7 @@ export default function Nutrition() {
 
               {/* Logs history list */}
               <div className="logs-list-card">
-                <h3>Các bữa ăn đã nạp ngày {new Date(selectedDate).toLocaleDateString('vi-VN')}</h3>
+                <h3>Các bữa ăn đã nạp ngày {formatDateVi(selectedDate)}</h3>
                 <div className="logs-list-container">
                   {logsToday.length === 0 ? (
                     <div className="empty-logs-placeholder">
@@ -972,10 +975,10 @@ export default function Nutrition() {
                           />
                           {/* X label */}
                           <text x={x + colWidth / 2} y="215" textAnchor="middle" fill="#666" fontSize="10">
-                            {d.displayDate.split(',')[0]}
+                            {d.displayWeekday}
                           </text>
                           <text x={x + colWidth / 2} y="228" textAnchor="middle" fill="#999" fontSize="9">
-                            {d.displayDate.split(' ')[1]}
+                            {d.displayDayMonth}
                           </text>
                         </g>
                       );
