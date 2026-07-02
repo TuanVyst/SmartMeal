@@ -486,6 +486,24 @@
     "TagNames": [ "Trái cây" ]
   },
   {
+    "Name": "Bơ thực vật",
+    "AveragePrice": 4.0,
+    "ImageUrl": "/images/bo-thuc-vat.jpg",
+    "NutritionalValues": {
+      "Calories": 717,
+      "Protein": 0.2,
+      "Carbs": 0.7,
+      "Fat": 81.1,
+      "Fiber": 0,
+      "Sugar": 0.7,
+      "Salt": 0.64,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Gia vị", "Bơ & Dầu" ]
+  },
+  {
     "Name": "Bơ",
     "AveragePrice": 3.5,
     "ImageUrl": "/images/bo.jpg",
@@ -1132,5 +1150,23 @@
       "ServingUnit": "g"
     },
     "TagNames": [ "Hải sản" ]
+  },
+  {
+    "Name": "Bí đỏ",
+    "AveragePrice": 1.8,
+    "ImageUrl": "/images/bi-do.jpg",
+    "NutritionalValues": {
+      "Calories": 26,
+      "Protein": 1.0,
+      "Carbs": 6.5,
+      "Fat": 0.1,
+      "Fiber": 0.5,
+      "Sugar": 2.8,
+      "Salt": 0.001,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Rau củ" ]
   }
 ]

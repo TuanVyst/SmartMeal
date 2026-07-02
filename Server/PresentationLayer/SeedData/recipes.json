@@ -26,7 +26,7 @@
         "UOM": "tbsp"
       },
       {
-        "Name": "Bơ",
+        "Name": "Bơ thực vật",
         "Quantity": 10,
         "UOM": "g"
       },
@@ -828,7 +828,7 @@
         "UOM": "g"
       },
       {
-        "Name": "Bơ",
+        "Name": "Bơ thực vật",
         "Quantity": 30,
         "UOM": "g"
       },
@@ -1315,7 +1315,7 @@
         "UOM": "g"
       },
       {
-        "Name": "Bơ",
+        "Name": "Bơ thực vật",
         "Quantity": 30,
         "UOM": "g"
       },
@@ -1734,7 +1734,7 @@
         "UOM": "g"
       },
       {
-        "Name": "Thịt heo băm",
+        "Name": "Thịt heo",
         "Quantity": 100,
         "UOM": "g"
       },
@@ -1792,7 +1792,7 @@
         "UOM": "clove"
       },
       {
-        "Name": "Bơ",
+        "Name": "Bơ thực vật",
         "Quantity": 30,
         "UOM": "g"
       },
