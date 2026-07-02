@@ -1830,7 +1830,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "Cơm",
+        "Name": "Gạo",
         "Quantity": 18,
         "UOM": "g"
       },
