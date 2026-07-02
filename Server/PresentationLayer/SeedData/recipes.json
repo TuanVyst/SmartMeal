@@ -2154,16 +2154,16 @@
     "Ingredients": [
       {
         "Name": "Bơ",
-        "Quantity": 1,
-        "UOM": "piece"
+        "Quantity": 100,
+        "UOM": "g"
       },
       {
         "Name": "Chuối",
-        "Quantity": 2,
-        "UOM": "piece"
+        "Quantity": 200,
+        "UOM": "g"
       },
       {
-        "Name": "Sữa tươi",
+        "Name": "Sữa",
         "Quantity": 200,
         "UOM": "ml"
       },

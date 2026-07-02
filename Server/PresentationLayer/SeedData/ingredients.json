@@ -180,6 +180,24 @@
     "TagNames": [ "Sữa & Trứng" ]
   },
   {
+    "Name": "Sữa đặc có đường",
+    "AveragePrice": 3.2,
+    "ImageUrl": "/images/sua-dac-co-duong.jpg",
+    "NutritionalValues": {
+      "Calories": 321,
+      "Protein": 7.9,
+      "Carbs": 54.4,
+      "Fat": 8.7,
+      "Fiber": 0,
+      "Sugar": 54.4,
+      "Salt": 0.13,
+      "Cholesterol": 34,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [ "Sữa & Trứng" ]
+  },
+  {
     "Name": "Bông cải xanh",
     "AveragePrice": 2.5,
     "ImageUrl": "/images/bong-cai-xanh.jpg",
