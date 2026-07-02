@@ -7,14 +7,6 @@ import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import avocadoMascot from '../../assets/avocado_mascot.png';
 import './Sidebar.css';
 
-const NAV_ITEMS = [
-  { to: '/dashboard',         icon: '🏠', label: 'Trang chủ',        end: true  },
-  { to: '/meal-suggestions',  icon: '🍽️', label: 'Khám phá món ăn'              },
-  { to: '/meal-plans',        icon: '📋', label: 'Kế hoạch bữa ăn'              },
-  { to: '/nutrition-diary',   icon: '📖', label: 'Nhật ký sức khỏe'             },
-  { to: '/nutrition',         icon: '🏆', label: 'Thành tích'                   },
-  { to: '/profile',           icon: '⚙️', label: 'Cài đặt'                      },
-];
 
 const MASCOT_TIPS = [
   { title: '🥑 Uống đủ nước nhé!',   msg: 'Bạn mới uống 1/8 ly nước hôm nay.' },
@@ -66,13 +58,23 @@ function calculateCurrentStreak(logs) {
 }
 
 export default function Sidebar() {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const { favorites } = useFavorite();
   const navigate = useNavigate();
   const [tipIndex, setTipIndex] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
 
   const accountId = user?.accountId || user?.account_id;
+
+  const navItems = [
+    { to: '/dashboard',         icon: '🏠', label: 'Trang chủ',        end: true  },
+    { to: '/meal-suggestions',  icon: '🍽️', label: 'Khám phá món ăn'              },
+    { to: '/meal-plans',        icon: '📋', label: 'Kế hoạch bữa ăn'              },
+    { to: '/nutrition-diary',   icon: '📖', label: 'Nhật ký sức khỏe'             },
+    { to: '/nutrition',         icon: '🏆', label: 'Thành tích'                   },
+    { to: '/subscription',      icon: '👑', label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
+    { to: '/profile',           icon: '⚙️', label: 'Cài đặt'                      },
+  ];
 
   // Rotate mascot tips every 8 seconds
   useEffect(() => {
@@ -135,22 +137,24 @@ export default function Sidebar() {
       <div className="sidebar-profile-card">
         <div className="sidebar-avatar-wrapper">
           <svg className="sidebar-avatar-ring" viewBox="0 0 72 72" fill="none">
-            <circle cx="36" cy="36" r={RADIUS} stroke="#e8f7e8" strokeWidth="4" />
+            <circle cx="36" cy="36" r={RADIUS} stroke={isPremium ? "#fdf6e2" : "#e8f7e8"} strokeWidth="4" />
             <circle
               cx="36" cy="36" r={RADIUS}
-              stroke="#6CCB63" strokeWidth="4"
+              stroke={isPremium ? "#D4AF37" : "#6CCB63"} strokeWidth="4"
               strokeLinecap="round"
               strokeDasharray={strokeDash}
               strokeDashoffset={CIRCUMFERENCE * 0.25}
               style={{ transition: 'stroke-dasharray 1s ease' }}
             />
           </svg>
-          <div className="sidebar-avatar">{initials}</div>
-          <div className="sidebar-streak-badge">🔥</div>
+          <div className="sidebar-avatar" style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}>{initials}</div>
+          <div className="sidebar-streak-badge">{isPremium ? '👑' : '🔥'}</div>
         </div>
 
         <div className="sidebar-user-greeting">
-          <h4>Xin chào, {displayName} 👋</h4>
+          <h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>
+            Xin chào, {displayName} {isPremium && <span className="premium-label-badge">PRO</span>} 👋
+          </h4>
           <p>Cùng xây dựng lối sống lành mạnh mỗi ngày nhé!</p>
         </div>
 
@@ -177,7 +181,7 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         <span className="sidebar-nav-label">Menu chính</span>
 
-        {NAV_ITEMS.map(item => (
+        {navItems.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
