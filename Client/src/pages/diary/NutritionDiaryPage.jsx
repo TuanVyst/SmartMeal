@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNutritionDiary } from '../../hooks/useNutritionDiary';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { useDialog } from '../../context/DialogContext';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
 import { FiSunrise, FiSun, FiMoon, FiCoffee, FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiFileText, FiLock, FiAlertCircle, FiZap, FiTrash2 } from 'react-icons/fi';
 
@@ -143,7 +144,7 @@ function HealthProfileCard({ healthProfile, dailyCalorieBudget, lockedIngredient
           <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
             <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Mục tiêu</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#1E293B' }}>
-              {goalInfo ? `${goalInfo.icon} ${goalInfo.label}` : 'Chưa chọn'}
+              {goalInfo ? <>{goalInfo.icon} {goalInfo.label}</> : 'Chưa chọn'}
             </div>
             <div style={{ fontSize: 12, color: '#22C55E', fontWeight: 500 }}>{dailyCalorieBudget} kcal/ngày</div>
           </div>
@@ -220,6 +221,7 @@ function SkeletonLoader() {
 }
 
 export default function NutritionDiaryPage() {
+  const dialog = useDialog();
   const navigate = useNavigate();
   const {
     entries, loading, totalMacros, selectedDate,
@@ -256,7 +258,8 @@ export default function NutritionDiaryPage() {
   });
 
   const handleDelete = async (entryId) => {
-    if (!confirm('Xóa mục này?')) return;
+    const ok = await dialog.confirm({ title: 'Xóa mục?', message: 'Xóa mục này?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
     await deleteEntry(entryId);
   };
 

@@ -1,17 +1,13 @@
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import HealthSurveyModal from '../../components/forms/HealthSurveyModal';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
-import { useEffect } from 'react';
 
 export default function SurveyPage() {
   const navigate = useNavigate();
-  const { surveyCompleted } = useHealthProfile();
+  const { surveyCompleted, loading } = useHealthProfile();
 
-  useEffect(() => {
-    if (surveyCompleted) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [surveyCompleted, navigate]);
+  if (loading) return <div className="loading">Loading...</div>;
+  if (surveyCompleted) return <Navigate to="/dashboard" replace />;
 
   const handleComplete = () => {
     navigate('/dashboard', { replace: true });

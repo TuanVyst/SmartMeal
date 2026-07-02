@@ -10,12 +10,14 @@
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   position: sticky;
   top: 0;
   z-index: 50;
   border-bottom: 1px solid rgba(108, 203, 99, 0.12);
   box-shadow: 0 1px 20px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Search Bar ── */
@@ -62,6 +64,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 
 /* Notification Bell */

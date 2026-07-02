@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function AdminUsers() {
+  const dialog = useDialog();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -19,14 +21,15 @@ export default function AdminUsers() {
   };
 
   const handleToggleStatus = async (id, isActive) => {
-    if (window.confirm(`Bạn có chắc chắn muốn ${isActive ? 'vô hiệu hóa' : 'kích hoạt'} người dùng này không?`)) {
-      try {
-        await adminService.toggleUserStatus(id, !isActive);
-        fetchUsers();
-      } catch (error) {
-        console.error(error);
-        alert('Có lỗi xảy ra');
-      }
+    const action = isActive ? 'vô hiệu hóa' : 'kích hoạt';
+    const ok = await dialog.confirm({ title: `${action} người dùng?`, message: `Bạn có chắc chắn muốn ${action} người dùng này không?`, confirmLabel: action === 'vô hiệu hóa' ? 'Vô hiệu' : 'Kích hoạt', danger: isActive });
+    if (!ok) return;
+    try {
+      await adminService.toggleUserStatus(id, !isActive);
+      fetchUsers();
+    } catch (error) {
+      console.error(error);
+      dialog.error('Lỗi', 'Có lỗi xảy ra');
     }
   };
 
