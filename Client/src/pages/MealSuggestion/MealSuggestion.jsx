@@ -8,12 +8,13 @@ import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
 import IngredientLockBadge from '../../components/common/IngredientLockBadge';
 import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
-import { mockRecipesData } from '../../utils/mockData';
+import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
 } from 'react-icons/md';
+import { FiHeart } from 'react-icons/fi';
 
 export default function MealSuggestion() {
   const { user } = useAuth();
@@ -178,8 +179,7 @@ export default function MealSuggestion() {
     const recipeIngredients = rec.recipeIngredients || rec.RecipeIngredients || [];
 
     // --- Image ---
-    const mockRecipe = mockRecipesData.find(r => r.id === recipeId || r.title.toLowerCase() === recipeName.toLowerCase());
-    const imageUrl = mockRecipe ? mockRecipe.imageUrl : "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop";
+    const imageUrl = resolveRecipeImageUrl(recipeName);
 
     // --- Handle suggestFromPantry response (pre-computed matchPercentage, missingIngredients, allIngredients) ---
     const fromPantry = rec.matchPercentage !== undefined;
@@ -319,7 +319,7 @@ export default function MealSuggestion() {
             className={`sidebar-tab-btn ${leftTab === 'health' ? 'active' : ''}`}
             onClick={() => setLeftTab('health')}
           >
-            ❤️ Sức khoẻ
+            <FiHeart size={16} /> Sức khoẻ
           </button>
         </div>
 
@@ -395,7 +395,7 @@ export default function MealSuggestion() {
                 <>
                   {lockedIngredients.length > 0 && (
                     <div className="category-group" style={{ marginBottom: 20 }}>
-                      <h4 className="category-header" style={{ color: '#dc2626' }}>🔒 Nguyên liệu bị khoá</h4>
+                      <h4 className="category-header" style={{ color: '#dc2626' }}>Nguyên liệu bị khoá</h4>
                       <div className="ingredients-pills-list">
                         {lockedIngredients.map(ing => (
                           <IngredientLockBadge key={ing} ingredient={ing} type="locked" />
@@ -405,7 +405,7 @@ export default function MealSuggestion() {
                   )}
                   {reducedIngredients.length > 0 && (
                     <div className="category-group" style={{ marginBottom: 20 }}>
-                      <h4 className="category-header" style={{ color: '#ea580c' }}>↓ Nguyên liệu giảm lượng</h4>
+                      <h4 className="category-header" style={{ color: '#ea580c' }}>Nguyên liệu giảm lượng</h4>
                       <div className="ingredients-pills-list">
                         {reducedIngredients.map(ing => (
                           <IngredientLockBadge key={ing} ingredient={ing} type="reduced" />
@@ -415,7 +415,7 @@ export default function MealSuggestion() {
                   )}
                   {preferredIngredients.length > 0 && (
                     <div className="category-group" style={{ marginBottom: 20 }}>
-                      <h4 className="category-header" style={{ color: '#16a34a' }}>✓ Nguyên liệu ưu tiên</h4>
+                      <h4 className="category-header" style={{ color: '#16a34a' }}>Nguyên liệu ưu tiên</h4>
                       <div className="ingredients-pills-list">
                         {preferredIngredients.map(ing => (
                           <IngredientLockBadge key={ing} ingredient={ing} type="preferred" />
@@ -436,13 +436,6 @@ export default function MealSuggestion() {
             <h2>Gợi ý Thực đơn Thông minh</h2>
             <span className="results-count-text">Tìm thấy {suggestedRecipes.length} công thức món ăn</span>
           </div>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate('/recipes/new')}
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            + Tạo công thức
-          </button>
           <div className="allergy-toggle-checkbox">
             <label>
               <input
@@ -521,7 +514,7 @@ export default function MealSuggestion() {
                             background: '#fff7ed', color: '#ea580c',
                             fontSize: 11, fontWeight: 500,
                           }}>
-                            ⚡ Đã điều chỉnh cho bạn
+                            Đã điều chỉnh cho bạn
                           </span>
                         </div>
                       )}

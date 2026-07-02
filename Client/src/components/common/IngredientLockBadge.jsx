@@ -1,12 +1,14 @@
+import { FiLock, FiCheck } from 'react-icons/fi';
+
 export default function IngredientLockBadge({ ingredient, type }) {
   if (!type) {
     return <span>{ingredient}</span>;
   }
 
   const badgeConfig = {
-    locked: { icon: '🔒', className: 'badge-locked', tooltip: 'Không phù hợp với sức khoẻ của bạn' },
+    locked: { icon: <FiLock size={12} />, className: 'badge-locked', tooltip: 'Không phù hợp với sức khoẻ của bạn' },
     reduced: { icon: '↓', className: 'badge-reduced', tooltip: 'Đã giảm 50% so với công thức gốc' },
-    preferred: { icon: '✓', className: 'badge-preferred', tooltip: 'Nguyên liệu được khuyến nghị' },
+    preferred: { icon: <FiCheck size={12} />, className: 'badge-preferred', tooltip: 'Nguyên liệu được khuyến nghị' },
   };
 
   const badge = badgeConfig[type];

@@ -12,6 +12,7 @@ import {
   MdFastfood, MdCalendarToday, MdBarChart, MdAddCircleOutline, 
   MdDeleteOutline, MdWarning, MdDoneAll, MdSettings 
 } from 'react-icons/md';
+import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiAlertCircle, FiZap } from 'react-icons/fi';
 
 const conditionLabels = {
   diabetes: 'Tiểu đường type 2',
@@ -23,11 +24,11 @@ const conditionLabels = {
 };
 
 const goalLabels = {
-  lose: { icon: '🔥', label: 'Giảm cân' },
-  gain: { icon: '💪', label: 'Tăng cơ' },
-  maintain: { icon: '⚖️', label: 'Duy trì' },
-  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
-  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+  lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
+  gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
+  maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
+  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
+  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColorMap = {
@@ -769,7 +770,7 @@ export default function Nutrition() {
                     {/* Sugar & Sodium dietary restriction bars */}
                     <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span>⚕️</span> Hạn chế ăn uống
+                        <FiAlertCircle size={14} /> Hạn chế ăn uống
                         {(hasDiabetes || hasHypertension || hasHeartDisease) && (
                           <span style={{
                             fontSize: 10, padding: '2px 8px', borderRadius: 8,
@@ -784,7 +785,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🍬 Đường
+                            <FiZap size={14} /> Đường
                             {hasDiabetes && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sugar > activeGoal.sugar ? '#fef2f2' : '#fffbeb', color: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Tiểu đường
@@ -805,7 +806,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🧂 Muối
+                            <FiDroplet size={14} /> Muối
                             {(hasHypertension || hasHeartDisease) && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sodium > activeGoal.sodium ? '#fef2f2' : '#fffbeb', color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Huyết áp
@@ -826,7 +827,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            💗 Cholesterol
+                            <FiHeart size={14} /> Cholesterol
                             {hasHeartDisease && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#fef2f2' : '#fffbeb', color: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Tim mạch

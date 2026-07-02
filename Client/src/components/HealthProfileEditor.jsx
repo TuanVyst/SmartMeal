@@ -4,6 +4,7 @@ import { getLockedIngredientsForProfile } from '../utils/healthRules';
 import { useHealthProfile } from '../hooks/useHealthProfile';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { formatDateVi } from '../utils/dateTime';
+import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiFileText, FiLock, FiEdit2, FiSave } from 'react-icons/fi';
 
 const conditionsList = [
   { value: 'diabetes', label: 'Tiểu đường type 2' },
@@ -15,11 +16,11 @@ const conditionsList = [
 ];
 
 const goalLabels = {
-  lose: { icon: '🔥', label: 'Giảm cân' },
-  gain: { icon: '💪', label: 'Tăng cơ' },
-  maintain: { icon: '⚖️', label: 'Duy trì' },
-  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
-  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+  lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
+  gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
+  maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
+  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
+  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColors = {
@@ -152,7 +153,7 @@ export default function HealthProfileEditor() {
         borderBottom: isEditing ? '1px solid #e2e8f0' : 'none',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 20 }}>📋</span>
+          <FiFileText size={20} />
           <span style={{ fontSize: 15, fontWeight: 600, color: '#1E293B' }}>Hồ sơ sức khỏe</span>
           {currentBmi && bmiStyle && (
             <span style={{
@@ -173,7 +174,7 @@ export default function HealthProfileEditor() {
               cursor: 'pointer', transition: 'all 0.2s',
             }}
           >
-            📊 Lịch sử BMI
+            Lịch sử BMI
           </button>
           {!isEditing && (
             <button
@@ -185,7 +186,7 @@ export default function HealthProfileEditor() {
                 cursor: 'pointer', transition: 'all 0.2s',
               }}
             >
-              ✏️ Chỉnh sửa
+              <FiEdit2 size={14} /> Chỉnh sửa
             </button>
           )}
         </div>
@@ -453,7 +454,7 @@ export default function HealthProfileEditor() {
                   fontSize: 13, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer',
                 }}
               >
-                {saving ? 'Đang lưu...' : '💾 Lưu'}
+                {saving ? 'Đang lưu...' : <><FiSave size={14} /> Lưu</>}
               </button>
             </div>
           </div>
@@ -486,7 +487,7 @@ export default function HealthProfileEditor() {
                       padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 500,
                       background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
                     }}>
-                      🏥 {conditionsList.find(cl => cl.value === c)?.label || c}
+                      {conditionsList.find(cl => cl.value === c)?.label || c}
                     </span>
                   ))}
                 </div>
@@ -504,7 +505,7 @@ export default function HealthProfileEditor() {
                       padding: '3px 8px', borderRadius: 10, fontSize: 11, fontWeight: 500,
                       background: '#fef2f2', color: '#dc2626',
                     }}>
-                      🔒 {ing}
+                      <FiLock size={12} /> {ing}
                     </span>
                   ))}
                   {lockedIngredients.length > 8 && (

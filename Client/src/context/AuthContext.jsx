@@ -64,9 +64,9 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const updateAvatar = async (avatarUrl) => {
-    const { data } = await authService.updateAvatar(avatarUrl);
-    const updatedUser = { ...user, avatar: data.avatarUrl ?? avatarUrl };
+  const updateAvatar = async (avatarFile) => {
+    const { data } = await authService.updateAvatar(avatarFile);
+    const updatedUser = { ...user, avatar: data.avatarUrl ?? user?.avatar };
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
     return data;
