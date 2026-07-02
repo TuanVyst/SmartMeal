@@ -308,6 +308,7 @@ public static class DbInitializer
 
         // Load recipe tags + ingredients
         var rtagDict = await context.RecipeTags.ToDictionaryAsync(t => t.Name, t => t);
+        
         var ingDict = await context.Ingredients.ToDictionaryAsync(i => i.Name, i => i);
 
         var recipes = await LoadJson<RecipeDto>("recipes.json");
