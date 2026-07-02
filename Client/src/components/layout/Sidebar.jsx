@@ -6,7 +6,7 @@ import api from '../../services/api';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { getRecommendation } from '../../utils/recommendationEngine';
 import avocadoMascot from '../../assets/avocado_mascot.png';
-import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield } from 'react-icons/fi';
+import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward } from 'react-icons/fi';
 import './Sidebar.css';
 
 const NAV_ITEMS = [
@@ -59,7 +59,7 @@ function calculateCurrentStreak(logs) {
 }
 
 export default function Sidebar() {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const { favorites } = useFavorite();
   const navigate = useNavigate();
   const [streakDays, setStreakDays] = useState(0);
@@ -83,6 +83,24 @@ export default function Sidebar() {
   }, [nextTip]);
 
   const accountId = user?.accountId || user?.account_id;
+
+  const navItems = [
+    { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',        end: true  },
+    { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn'              },
+    { to: '/meal-plans',        icon: <FiClipboard size={20} />, label: 'Kế hoạch bữa ăn'              },
+    { to: '/nutrition-diary',   icon: <FiClipboard size={20} />, label: 'Nhật ký sức khỏe'             },
+    { to: '/nutrition',         icon: <FiTrendingUp size={20} />, label: 'Thành tích'                   },
+    { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
+    { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
+  ];
+
+  // Rotate mascot tips every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTipIndex(i => (i + 1) % MASCOT_TIPS.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!accountId) {
@@ -137,10 +155,10 @@ export default function Sidebar() {
       <div className="sidebar-profile-card">
         <div className="sidebar-avatar-wrapper">
           <svg className="sidebar-avatar-ring" viewBox="0 0 72 72" fill="none">
-            <circle cx="36" cy="36" r={RADIUS} stroke="#e8f7e8" strokeWidth="4" />
+            <circle cx="36" cy="36" r={RADIUS} stroke={isPremium ? "#fdf6e2" : "#e8f7e8"} strokeWidth="4" />
             <circle
               cx="36" cy="36" r={RADIUS}
-              stroke="transparent" strokeWidth="4"
+              stroke={isPremium ? "#D4AF37" : "#6CCB63"} strokeWidth="4"
               strokeLinecap="round"
               strokeDasharray={strokeDash}
               strokeDashoffset={CIRCUMFERENCE * 0.25}
@@ -148,15 +166,29 @@ export default function Sidebar() {
             />
           </svg>
           {avatarSrc ? (
-            <img className="sidebar-avatar sidebar-avatar-image" src={avatarSrc} alt="Avatar" />
+            <img 
+              className="sidebar-avatar sidebar-avatar-image" 
+              src={avatarSrc} 
+              alt="Avatar" 
+              style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}
+            />
           ) : (
-            <div className="sidebar-avatar">{initials}</div>
+            <div 
+              className="sidebar-avatar" 
+              style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}
+            >
+              {initials}
+            </div>
           )}
-          <div className="sidebar-streak-badge"><FiTrendingUp size={14} /></div>
+          <div className="sidebar-streak-badge">
+            {isPremium ? '👑' : <FiTrendingUp size={14} />}
+          </div>
         </div>
 
         <div className="sidebar-user-greeting">
-          <h4>Xin chào, {displayName}</h4>
+          <h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>
+            Xin chào, {displayName} {isPremium && <span className="premium-label-badge">PRO</span>} 👋
+          </h4>
           <p>Cùng xây dựng lối sống lành mạnh mỗi ngày nhé!</p>
         </div>
 
@@ -183,7 +215,7 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         <span className="sidebar-nav-label">Menu chính</span>
 
-        {NAV_ITEMS.map(item => (
+        {navItems.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
