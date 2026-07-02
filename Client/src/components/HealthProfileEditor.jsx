@@ -3,6 +3,7 @@ import { calculateBMI } from '../utils/bmiCalculator';
 import { getLockedIngredientsForProfile } from '../utils/healthRules';
 import { useHealthProfile } from '../hooks/useHealthProfile';
 import { healthSurveyService } from '../services/healthSurveyService';
+import { formatDateVi } from '../utils/dateTime';
 
 const conditionsList = [
   { value: 'diabetes', label: 'Tiểu đường type 2' },
@@ -212,8 +213,8 @@ export default function HealthProfileEditor() {
                     border: '1px solid #e2e8f0', fontSize: 12,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ color: '#64748b' }}>
-                        {new Date(log.recordedAt).toLocaleDateString('vi-VN')}
+                        <span style={{ color: '#64748b' }}>
+                          {formatDateVi(log.recordedAt)}
                       </span>
                       <span style={{ color: '#1E293B', fontWeight: 500 }}>
                         {log.weight}kg / {log.height}cm

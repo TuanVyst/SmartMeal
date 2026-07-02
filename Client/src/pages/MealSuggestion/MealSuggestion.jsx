@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { getRecipes } from '../../services/foodService';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
@@ -45,7 +46,7 @@ export default function MealSuggestion() {
 
   const fetchRecipes = async () => {
     try {
-      const res = await api.get('/recipe');
+      const res = await getRecipes();
       setRecipes(res.data.data || []);
     } catch (err) {
       console.error('Không thể tải công thức:', err);

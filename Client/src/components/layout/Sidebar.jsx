@@ -1,7 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useContext, useState, useEffect } from 'react';
-import { HealthProfileContext } from '../../context/HealthProfileContext';
+import { useState, useEffect } from 'react';
+import { useFavorite } from '../../context/FavoriteContext';
+import api from '../../services/api';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import avocadoMascot from '../../assets/avocado_mascot.png';
 import './Sidebar.css';
 
@@ -9,7 +11,6 @@ const NAV_ITEMS = [
   { to: '/dashboard',         icon: '🏠', label: 'Trang chủ',        end: true  },
   { to: '/meal-suggestions',  icon: '🍽️', label: 'Khám phá món ăn'              },
   { to: '/meal-plans',        icon: '📋', label: 'Kế hoạch bữa ăn'              },
-  { to: '/favorites',         icon: '❤️', label: 'Bộ sưu tập'                   },
   { to: '/nutrition-diary',   icon: '📖', label: 'Nhật ký sức khỏe'             },
   { to: '/nutrition',         icon: '🏆', label: 'Thành tích'                   },
   { to: '/profile',           icon: '⚙️', label: 'Cài đặt'                      },
@@ -22,11 +23,56 @@ const MASCOT_TIPS = [
   { title: '🥗 Thêm rau xanh!',       msg: 'Mục tiêu hôm nay: 2 phần rau củ.' },
 ];
 
+function getPreviousDateKey(dateKey) {
+  if (!dateKey) {
+    return '';
+  }
+
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const date = new Date(year, month - 1, day, 12, 0, 0, 0);
+  date.setDate(date.getDate() - 1);
+  return toDateKey(date);
+}
+
+function calculateCurrentStreak(logs) {
+  const uniqueDates = new Set(
+    (logs || [])
+      .map((log) => toDateKey(log.logDate))
+      .filter(Boolean)
+  );
+
+  if (uniqueDates.size === 0) {
+    return 0;
+  }
+
+  const todayKey = getTodayDateKey();
+  const yesterdayKey = getPreviousDateKey(todayKey);
+  const startDate = uniqueDates.has(todayKey)
+    ? todayKey
+    : (uniqueDates.has(yesterdayKey) ? yesterdayKey : '');
+
+  if (!startDate) {
+    return 0;
+  }
+
+  let streak = 0;
+  let cursor = startDate;
+  while (cursor && uniqueDates.has(cursor)) {
+    streak += 1;
+    cursor = getPreviousDateKey(cursor);
+  }
+
+  return streak;
+}
+
 export default function Sidebar() {
   const { user } = useAuth();
+  const { favorites } = useFavorite();
   const navigate = useNavigate();
-  const healthCtx = useContext(HealthProfileContext);
   const [tipIndex, setTipIndex] = useState(0);
+  const [streakDays, setStreakDays] = useState(0);
+
+  const accountId = user?.accountId || user?.account_id;
 
   // Rotate mascot tips every 8 seconds
   useEffect(() => {
@@ -36,14 +82,40 @@ export default function Sidebar() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (!accountId) {
+      setStreakDays(0);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchStreak = async () => {
+      try {
+        const res = await api.get(`/nutritionlog?accountId=${accountId}`);
+        if (!isMounted) {
+          return;
+        }
+        setStreakDays(calculateCurrentStreak(res.data.data || []));
+      } catch (error) {
+        console.error('Không thể tải chuỗi ngày liên tiếp:', error);
+        if (isMounted) {
+          setStreakDays(0);
+        }
+      }
+    };
+
+    fetchStreak();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [accountId]);
+
   const currentTip   = MASCOT_TIPS[tipIndex];
   const displayName  = user?.username || 'Bạn';
   const initials     = displayName.charAt(0).toUpperCase();
   const isAdmin      = user?.role === 'Admin';
-
-  // Streak & goal mock (replace with real data when API ready)
-  const streakDays   = 7;
-  const weekGoal     = '4/7';
 
   // Progress ring SVG (percentage = 70% filled)
   const RADIUS       = 30;
@@ -88,11 +160,16 @@ export default function Sidebar() {
             <div className="stat-value">{streakDays}</div>
             <div className="stat-label">ngày liên tiếp</div>
           </div>
-          <div className="sidebar-stat-card">
-            <div className="stat-icon">🎯</div>
-            <div className="stat-value">{weekGoal}</div>
-            <div className="stat-label">mục tiêu tuần</div>
-          </div>
+          <button
+            type="button"
+            className="sidebar-stat-card sidebar-stat-card-clickable"
+            onClick={() => navigate('/favorites')}
+            title="Mở bộ sưu tập"
+          >
+            <div className="stat-icon">❤️</div>
+            <div className="stat-value">{favorites.length}</div>
+            <div className="stat-label">bộ sưu tập</div>
+          </button>
         </div>
       </div>
 

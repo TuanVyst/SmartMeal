@@ -364,7 +364,7 @@ export default function NutritionDiaryPage() {
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/goi-y')}
+                onClick={() => navigate('/meal-suggestions')}
                 style={{
                   padding: '12px 28px', border: 'none', borderRadius: 10,
                   background: '#22C55E', color: 'white', fontSize: 15, fontWeight: 600,
