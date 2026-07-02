@@ -17,7 +17,7 @@
       },
       {
         "Name": "Trứng gà",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -42,7 +42,7 @@
       },
       {
         "Name": "Rau mùi",
-        "Quantity": 20,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
@@ -70,32 +70,32 @@
     "Ingredients": [
       {
         "Name": "Thịt gà",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bánh phở",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Gừng",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Hành lá",
-        "Quantity": 50,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -128,27 +128,27 @@
     "Ingredients": [
       {
         "Name": "Thịt gà",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Gạo",
-        "Quantity": 150,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Gừng",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Hành lá",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
@@ -181,17 +181,17 @@
     "Ingredients": [
       {
         "Name": "Bột gạo",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bột năng",
-        "Quantity": 30,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 150,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
@@ -201,22 +201,22 @@
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Hành lá",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       }
     ],
@@ -232,34 +232,34 @@
     "Instruction": "1. Gạo nếp vo sạch, ngâm nước nghệ tươi qua đêm hoặc ít nhất 4 giờ.\n2. Đậu xanh cà vỏ ngâm nước 2 giờ,hấp chín.\n3. Vo gạo lại, trộn với đậu xanh,hấp trong 30 phút.\n4. Trong lúchấp, phi thơm hành tỏi với dầu ăn.\n5. Khi xôi chín dẻo, trộn hành phi, nêm muối.\n6. Múc xôi ra đĩa, rắc đậu xanh lên trên.\n7. Ăn kèm hành phi, giò lụa hoặc chả lụa.",
     "CookTime": 10,
     "PrepTime": 5,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "easy",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
       {
         "Name": "Gạo nếp",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Đậu xanh",
-        "Quantity": 100,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Nghệ",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -280,24 +280,24 @@
     "Instruction": "1. Sườn heo ướp với tỏi băm, nước mắm, mật ong, dầu hào, tiêu 15 phút.\n2. Nướng sườn trên bếp than hoặc lò nướng 200°C khoảng 10 phút mỗi mặt.\n3. Cơm tấm trụng nước sôi, để ráo.\n4. Chảo nóng, chiên cơm tấm với dầu ăn cho giòn.\n5. Pha mỡ hành: hành lá băm, dầu nóng đổ lên.\n6. Xếp cơm ra đĩa, đặt sườn nướng lên.\n7. Rưới mỡ hành, thêm dưa chua và nước mắm chua ngọt.",
     "CookTime": 20,
     "PrepTime": 5,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "easy",
     "IsPublic": true,
     "AccountUsername": "testuser",
     "Ingredients": [
       {
         "Name": "thịt heo",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Gạo",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Mật ong",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -307,7 +307,7 @@
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -317,12 +317,12 @@
       },
       {
         "Name": "Hành lá",
-        "Quantity": 50,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       }
     ],
@@ -338,49 +338,49 @@
     "Instruction": "1. Xương heo và giò heo luộc sơ, rửa sạch.\n2. Nướng sả, gừng, hành tím cho thơm.\n3. Đun nước dùng với xương heo, giò heo, sả nướng, mắm ruốc.\n4. Nêm nước mắm, đường phèn, ớt bột, muối.\n5. Bún trụng sôi, bày ra tô.\n6. Thịt bò tháimỏng, nhúng nước dùng nóng.\n7. Múc nước dùng lên tô bún, thêm giò heo.\n8. Ăn kèm rau sống, chanh, ớt.",
     "CookTime": 30,
     "PrepTime": 10,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "hard",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
       {
         "Name": "Thịt bò",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bún",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Sả",
-        "Quantity": 4,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Mắm ruốc",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Gừng",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -401,29 +401,29 @@
     "Instruction": "1. Gà luộc với gừng, hành tím, lấy thịt xé sợi.\n2. Nước dùng gà nêm với nước mắm, đường, bột ngọt.\n3. Sợi mì Quảng trụng sơ, để ráo.\n4. Tỏi phi thơm, xào nui với dầu ăn.\n5. Bắp chuối và rau sống rửa sạch, thái sợi.\n6. Xếp mì ra tô, xếp thịt gà lên trên.\n7. Chan nước dùng đậm đà, thêm đậu phộng rang, bánh đa, chanh.",
     "CookTime": 25,
     "PrepTime": 10,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "medium",
     "IsPublic": true,
     "AccountUsername": "testuser",
     "Ingredients": [
       {
         "Name": "Thịt gà",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Mì Quảng",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Gừng",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -433,17 +433,17 @@
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Đậu phộng",
-        "Quantity": 50,
+        "Quantity": 15,
         "UOM": "g"
       },
       {
         "Name": "Bắp chuối",
-        "Quantity": 100,
+        "Quantity": 30,
         "UOM": "g"
       }
     ],
@@ -459,49 +459,49 @@
     "Instruction": "1. Gà luộc với gừng, hành tím, lá dứa cho thơm.\n2. Cơm vo sạch, rang với dầu ăn và nước luộc gà.\n3. Nước luộc gà nêm đường phèn, nước mắm, giấm.\n4. Thịt gà xé sợi, trộn nước sốt.\n5. Rau răm băm nhỏ, hành phi.\n6. Múc cơm vàng ra đĩa, xếp thịt gà lên.\n7. Pha nước tương chua ngọt, chan lên gà.\n8. Ăn kèm rau sống và hành phi.",
     "CookTime": 20,
     "PrepTime": 10,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "medium",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
       {
         "Name": "Thịt gà",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Gạo",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Nghệ",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Gừng",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Rau răm",
-        "Quantity": 20,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       }
     ],
@@ -517,24 +517,24 @@
     "Instruction": "1. Thịt heo tháimỏng, ướp hành tím băm, nước mắm, đường, tiêu 20 phút.\n2. Vo thành từng viên chả nhỏ, nướng trên bếp than.\n3. Thịt ba chỉ nướng vàng giòn.\n4. Pha nước chấm: nước mắm, giấm, đường, tỏi, ớt, carrots bào sợi.\n5. Bún tươi trụng nước sôi.\n6. Bày bún ra đĩa, xếp chả và thịt nướng.\n7. Chan nước chấm, thêm rau sống và dưa chua.",
     "CookTime": 25,
     "PrepTime": 5,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "medium",
     "IsPublic": true,
     "AccountUsername": "testuser",
     "Ingredients": [
       {
         "Name": "Thịt heo",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bún",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 4,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -544,12 +544,12 @@
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       },
       {
         "Name": "Giấm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -559,7 +559,7 @@
       },
       {
         "Name": "Cà rốt",
-        "Quantity": 50,
+        "Quantity": 30,
         "UOM": "g"
       }
     ],
@@ -575,44 +575,44 @@
     "Instruction": "1. Sườn heo ướt tỏi, nước mắm, mật ong, tiêu.\n2. Bì heo luộc chín, thái sợi nhỏ.\n3. Chả trứng hấp chín.\n4. Sườn nướng vàng giòn trên bếp.\n5. Cơm tấm chiên giòn với dầu.\n6. Pha mỡ hành, nước mắm chua ngọt.\n7. Xếp cơm, sườn, bì, chả lên đĩa.\n8. Rưới mỡ hành, thêm dưa chua.",
     "CookTime": 30,
     "PrepTime": 5,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "hard",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
       {
         "Name": "thịt heo",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Da heo",
-        "Quantity": 100,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Trứng gà",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Gạo",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Mật ong",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Hành lá",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
@@ -633,29 +633,29 @@
     "Instruction": "1. Xương heo hầm nước dùng 20 phút, lọc bỏ bọt.\n2. Tôm cắt bỏ râu, thịt heo tháimỏng.\n3. Hủ tiếu trụng nước sôi, xếp ra tô.\n4. Xào thịt heo và tôm với tỏi.\n5. Thêm quẩy cắt nhỏ vào nước dùng.\n6. Múc nước dùng nóng lên tô.\n7. Ăn kèm rau mùi, hành lá, chanh, ớt.",
     "CookTime": 25,
     "PrepTime": 5,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "medium",
     "IsPublic": true,
     "AccountUsername": "testuser",
     "Ingredients": [
       {
         "Name": "Hủ tiếu",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Tôm",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Xương heo",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
@@ -665,17 +665,17 @@
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Hành lá",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Rau mùi",
-        "Quantity": 20,
+        "Quantity": 30,
         "UOM": "g"
       }
     ],
@@ -691,29 +691,29 @@
     "Instruction": "1. Cua đồng giã nát, lọc lấy nước cua và gạch.\n2. Cà chua phi thơm, nấu cùng nước cua.\n3. Thêm mắm tôm, đường, nêm vừa miệng.\n4. Bún tươi trụng sôi, bày ra tô.\n5. Chan nước riêu cua nóng lên bún.\n6. Thêm đậu hủ chiên, rau sống, mắm tôm.\n7. Ăn kèm chanh và ớt tươi.",
     "CookTime": 35,
     "PrepTime": 10,
-    "Servings": 1 ,
+    "Servings": 1,
     "Difficulty": "hard",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
       {
         "Name": "Cua đồng",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bún",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Cà chua",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Đậu hủ",
-        "Quantity": 100,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
@@ -723,17 +723,17 @@
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       }
     ],
@@ -756,17 +756,17 @@
     "Ingredients": [
       {
         "Name": "Gạo",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt bò",
-        "Quantity": 150,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Dưa chua",
-        "Quantity": 100,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
@@ -781,7 +781,7 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -814,22 +814,22 @@
     "Ingredients": [
       {
         "Name": "Mì ý",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Tôm",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Mực",
-        "Quantity": 150,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bơ thực vật",
-        "Quantity": 30,
+        "Quantity": 11,
         "UOM": "g"
       },
       {
@@ -844,12 +844,12 @@
       },
       {
         "Name": "Dầu ô liu",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Phô mai",
-        "Quantity": 30,
+        "Quantity": 11,
         "UOM": "g"
       }
     ],
@@ -872,17 +872,17 @@
     "Ingredients": [
       {
         "Name": "Cá basa",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       },
       {
         "Name": "Đường",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -892,7 +892,7 @@
       },
       {
         "Name": "Ớt tươi",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -925,32 +925,32 @@
     "Ingredients": [
       {
         "Name": "Cá lóc",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Me",
-        "Quantity": 50,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Cà chua",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Đậu bắp",
-        "Quantity": 100,
+        "Quantity": 15,
         "UOM": "g"
       },
       {
         "Name": "Nghệ",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -960,7 +960,7 @@
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       }
     ],
@@ -983,27 +983,27 @@
     "Ingredients": [
       {
         "Name": "Thịt heo",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Trứng gà",
-        "Quantity": 4,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Đường",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -1013,7 +1013,7 @@
       },
       {
         "Name": "Nước dừa",
-        "Quantity": 200,
+        "Quantity": 11,
         "UOM": "ml"
       }
     ],
@@ -1036,12 +1036,12 @@
     "Ingredients": [
       {
         "Name": "Thịt gà",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Muối",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1051,7 +1051,7 @@
       },
       {
         "Name": "Ớt tươi",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -1066,7 +1066,7 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       }
     ],
@@ -1089,7 +1089,7 @@
     "Ingredients": [
       {
         "Name": "Thịt bò",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
@@ -1104,7 +1104,7 @@
       },
       {
         "Name": "Nước tương",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1142,17 +1142,17 @@
     "Ingredients": [
       {
         "Name": "Tôm",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 150,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1162,7 +1162,7 @@
       },
       {
         "Name": "Hành lá",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
@@ -1172,7 +1172,7 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       }
     ],
@@ -1195,12 +1195,12 @@
     "Ingredients": [
       {
         "Name": "Đậu hủ",
-        "Quantity": 300,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Cà chua",
-        "Quantity": 4,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -1210,7 +1210,7 @@
       },
       {
         "Name": "Hành tím",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -1225,12 +1225,12 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Hành lá",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       }
     ],
@@ -1253,17 +1253,17 @@
     "Ingredients": [
       {
         "Name": "Mì Ý",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thịt bò",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Cà chua",
-        "Quantity": 200,
+        "Quantity": 30,
         "UOM": "ml"
       },
       {
@@ -1278,12 +1278,12 @@
       },
       {
         "Name": "Phô mai",
-        "Quantity": 30,
+        "Quantity": 11,
         "UOM": "g"
       },
       {
         "Name": "Dầu ô liu",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1311,12 +1311,12 @@
     "Ingredients": [
       {
         "Name": "Cá hồi",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bơ thực vật",
-        "Quantity": 30,
+        "Quantity": 11,
         "UOM": "g"
       },
       {
@@ -1364,12 +1364,12 @@
     "Ingredients": [
       {
         "Name": "Thịt bò",
-        "Quantity": 250,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bông cải xanh",
-        "Quantity": 200,
+        "Quantity": 11,
         "UOM": "g"
       },
       {
@@ -1417,17 +1417,17 @@
     "Ingredients": [
       {
         "Name": "thịt heo",
-        "Quantity": 800,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Tương cà",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       },
       {
         "Name": "Mật ong",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1470,17 +1470,17 @@
     "Ingredients": [
       {
         "Name": "Thịt gà",
-        "Quantity": 500,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bột chiên giòn",
-        "Quantity": 100,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1490,7 +1490,7 @@
       },
       {
         "Name": "Ớt tươi",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -1500,7 +1500,7 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       },
       {
@@ -1528,12 +1528,12 @@
     "Ingredients": [
       {
         "Name": "Tôm",
-        "Quantity": 300,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bột mì",
-        "Quantity": 50,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
@@ -1543,12 +1543,12 @@
       },
       {
         "Name": "Vụn bánh mì",
-        "Quantity": 100,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       },
       {
@@ -1576,12 +1576,12 @@
     "Ingredients": [
       {
         "Name": "Thịt heo",
-        "Quantity": 200,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Bánh tráng",
-        "Quantity": 10,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -1591,27 +1591,27 @@
       },
       {
         "Name": "Miến",
-        "Quantity": 50,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Cà rốt",
-        "Quantity": 50,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       }
     ],
@@ -1634,17 +1634,17 @@
     "Ingredients": [
       {
         "Name": "Cá diêu hồng",
-        "Quantity": 400,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Sả",
-        "Quantity": 30,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Ớt tươi",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
@@ -1659,7 +1659,7 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 3,
+        "Quantity": 2,
         "UOM": "tbsp"
       }
     ],
@@ -1682,12 +1682,12 @@
     "Ingredients": [
       {
         "Name": "Rau ngót",
-        "Quantity": 200,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 150,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
@@ -1707,7 +1707,7 @@
       },
       {
         "Name": "Hành lá",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       }
     ],
@@ -1730,12 +1730,12 @@
     "Ingredients": [
       {
         "Name": "Bí đỏ",
-        "Quantity": 300,
+        "Quantity": 18,
         "UOM": "g"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 100,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
@@ -1755,7 +1755,7 @@
       },
       {
         "Name": "Hành lá",
-        "Quantity": 20,
+        "Quantity": 10,
         "UOM": "g"
       }
     ],
@@ -1778,7 +1778,7 @@
     "Ingredients": [
       {
         "Name": "Bí đỏ",
-        "Quantity": 500,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
@@ -1793,12 +1793,12 @@
       },
       {
         "Name": "Bơ thực vật",
-        "Quantity": 30,
+        "Quantity": 11,
         "UOM": "g"
       },
       {
         "Name": "Kem sữa",
-        "Quantity": 100,
+        "Quantity": 10,
         "UOM": "ml"
       },
       {
@@ -1818,7 +1818,6 @@
       "Bữa tối"
     ]
   },
-  
   {
     "Recipe_name": "Cơm chiên dương châu chay",
     "Description": "Cơm chiên dương châu chay vàng ươm với đậu hủ và rau củ tươi màu sắc. Món cơm chiên lạ miệng cho người ăn chay.",
@@ -1832,22 +1831,22 @@
     "Ingredients": [
       {
         "Name": "Cơm",
-        "Quantity": 300,
+        "Quantity": 18,
         "UOM": "g"
       },
       {
         "Name": "Đậu hủ",
-        "Quantity": 100,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Cà rốt",
-        "Quantity": 50,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Đậu que",
-        "Quantity": 50,
+        "Quantity": 15,
         "UOM": "g"
       },
       {
@@ -1857,12 +1856,12 @@
       },
       {
         "Name": "Nước tương",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1890,22 +1889,22 @@
     "Ingredients": [
       {
         "Name": "Đậu hủ",
-        "Quantity": 300,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Nấm đông cô",
-        "Quantity": 100,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1915,7 +1914,7 @@
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       },
       {
@@ -1943,27 +1942,27 @@
     "Ingredients": [
       {
         "Name": "Me",
-        "Quantity": 50,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Cà chua",
-        "Quantity": 3,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
         "Name": "Đậu bắp",
-        "Quantity": 100,
+        "Quantity": 15,
         "UOM": "g"
       },
       {
         "Name": "Bắp chuối",
-        "Quantity": 100,
+        "Quantity": 30,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "piece"
       },
       {
@@ -2001,27 +2000,27 @@
     "Ingredients": [
       {
         "Name": "Bắp",
-        "Quantity": 300,
+        "Quantity": 18,
         "UOM": "g"
       },
       {
         "Name": "Nước cốt dừa",
-        "Quantity": 200,
+        "Quantity": 11,
         "UOM": "ml"
       },
       {
         "Name": "Đường phèn",
-        "Quantity": 100,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Bột năng",
-        "Quantity": 30,
+        "Quantity": 120,
         "UOM": "g"
       },
       {
         "Name": "Thạch jelly",
-        "Quantity": 100,
+        "Quantity": 10,
         "UOM": "g"
       }
     ],
@@ -2044,22 +2043,22 @@
     "Ingredients": [
       {
         "Name": "Bơ",
-        "Quantity": 100,
+        "Quantity": 10,
         "UOM": "g"
       },
       {
         "Name": "Chuối",
-        "Quantity": 200,
+        "Quantity": 11,
         "UOM": "g"
       },
       {
         "Name": "Sữa",
-        "Quantity": 200,
+        "Quantity": 11,
         "UOM": "ml"
       },
       {
         "Name": "Sữa đặc có đường",
-        "Quantity": 100,
+        "Quantity": 10,
         "UOM": "g"
       }
     ],
