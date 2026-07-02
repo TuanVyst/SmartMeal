@@ -1,0 +1,378 @@
+/* ============================================
+   SMARTMEAL SUBSCRIPTION PLANS - Styling
+   ============================================ */
+
+.plans-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.badge-premium {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 50px;
+  letter-spacing: 1.5px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.plans-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.plans-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── Active Subscription Banner ── */
+.active-sub-banner {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.05);
+}
+
+.sub-banner-icon {
+  font-size: 32px;
+}
+
+.sub-banner-text h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #14532d;
+  margin-bottom: 4px;
+}
+
+.sub-banner-text p {
+  font-size: 0.95rem;
+  color: #166534;
+}
+
+/* ── Plans Grid ── */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  align-items: stretch;
+  margin-bottom: 60px;
+}
+
+.plan-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 35px 30px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.plan-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Highlight featured card */
+.featured-plan {
+  border: 2px solid #22c55e;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdfa 100%);
+  box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.1), 0 4px 6px -2px rgba(34, 197, 94, 0.05);
+}
+
+.featured-plan:hover {
+  box-shadow: 0 25px 30px -5px rgba(34, 197, 94, 0.15), 0 12px 12px -5px rgba(34, 197, 94, 0.08);
+}
+
+.featured-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 50px;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+}
+
+.active-plan {
+  border-color: #d4af37;
+  box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.1);
+}
+
+/* Card Elements */
+.plan-card-header {
+  margin-bottom: 24px;
+}
+
+.plan-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.plan-desc {
+  font-size: 0.9rem;
+  color: #64748b;
+  min-height: 40px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.plan-price-container {
+  display: flex;
+  align-items: baseline;
+}
+
+.plan-price {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.plan-duration {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-left: 4px;
+}
+
+/* Features list */
+.plan-card-body {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 24px;
+  margin-bottom: 30px;
+  flex: 1;
+}
+
+.features-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.check-icon {
+  color: #22c55e;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.feature-text {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+/* Buttons */
+.plan-card-footer {
+  margin-top: auto;
+}
+
+.btn-plan {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-regular {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-regular:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-featured {
+  background: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+}
+
+.btn-featured:hover {
+  background: #16a34a;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-active-sub {
+  background: #fffdf5;
+  color: #b8860b;
+  border: 1px dashed #d4af37;
+  cursor: not-allowed;
+}
+
+.btn-free-tier {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ── FAQ ── */
+.plans-faq {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 50px;
+}
+
+.faq-main-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 40px;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 30px;
+}
+
+.faq-item h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.faq-item p {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* Loading & Error States */
+.plans-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-family: 'Inter', sans-serif;
+  color: #64748b;
+  gap: 16px;
+}
+
+.spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #22c55e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.plans-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 24px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-msg {
+  font-size: 1.05rem;
+  color: #ef4444;
+  margin-bottom: 24px;
+}
+
+.btn-retry {
+  padding: 12px 28px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-retry:hover {
+  background: #16a34a;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .plans-title {
+    font-size: 2rem;
+  }
+  .plans-grid {
+    grid-template-columns: 1fr;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
