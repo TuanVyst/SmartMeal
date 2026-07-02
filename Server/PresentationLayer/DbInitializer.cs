@@ -50,6 +50,9 @@ public static class DbInitializer
         // After migrations, ensure Sodium→Salt column renames are applied
         await EnsureSaltColumnsAsync(context);
 
+        // Seed subscription plans
+        await SeedPlansAsync(context);
+
         // Check for English data and clear the database if found to force a Vietnamese re-seed
         var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
         var hasEnglishTags = await context.IngredientTags.AnyAsync(t => t.Name == "VEGETABLE" || t.Name == "GRAIN");
@@ -663,5 +666,58 @@ public static class DbInitializer
         {
             Console.WriteLine($"[DbInitializer] Error recalculating nutrition logs: {ex.Message}");
         }
+    }
+
+    private static async Task SeedPlansAsync(AppDbContext context)
+    {
+        if (await context.Plans.AnyAsync()) return;
+
+        var plans = new List<Plan>
+        {
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                Name = "Gói Cơ Bản (Free)",
+                Price = 0,
+                Duration = 0,
+                Description = "Gói miễn phí cơ bản để theo dõi dinh dưỡng hàng ngày.",
+                Features = "[\"ai_basic\"]",
+                IsDeleted = false
+            },
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                Name = "Gói Pro Tuần",
+                Price = 19000,
+                Duration = 7,
+                Description = "Trải nghiệm đầy đủ tính năng cao cấp trong 1 tuần.",
+                Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\"]",
+                IsDeleted = false
+            },
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
+                Name = "Gói Pro Tháng",
+                Price = 59000,
+                Duration = 30,
+                Description = "Lựa chọn phổ biến nhất để duy trì thói quen ăn uống lành mạnh.",
+                Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\"]",
+                IsDeleted = false
+            },
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                Name = "Gói Pro Năm",
+                Price = 499000,
+                Duration = 365,
+                Description = "Gói tiết kiệm nhất dành cho người cam kết dài hạn.",
+                Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\", \"family_sharing\"]",
+                IsDeleted = false
+            }
+        };
+
+        context.Plans.AddRange(plans);
+        await context.SaveChangesAsync();
+        Console.WriteLine("[DbInitializer] Successfully seeded 4 subscription plans.");
     }
 }
