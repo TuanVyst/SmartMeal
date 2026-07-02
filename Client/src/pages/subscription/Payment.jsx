@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
-import { IoCopyOutline, IoChevronBackOutline, IoWalletOutline, IoSwapHorizontalOutline } from 'react-icons/io5';
+import { IoCopyOutline, IoChevronBackOutline } from 'react-icons/io5';
 import './SubscriptionPlans.css';
 
 export default function Payment() {
@@ -11,7 +11,6 @@ export default function Payment() {
   const { user, checkPremiumStatus } = useAuth();
   const plan = location.state?.plan;
 
-  const [paymentMethod, setPaymentMethod] = useState('bank'); // bank | momo
   const [transactionCode, setTransactionCode] = useState('');
   const [copiedField, setCopiedField] = useState('');
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes countdown
@@ -100,22 +99,13 @@ export default function Payment() {
   };
 
   // Dynamic VietQR generator link
-  // Bank ID: MB (Military Bank), Account No: 0383120286, Account Name: NGUYEN TRUNG MINH
+  // Bank ID: BIDV, Account No: 7621983180, Account Name: MAI TUAN VY
   const bankDetails = {
-    bankName: 'MB Bank (Ngân hàng TMCP Quân đội)',
-    accountNo: '0383120286',
-    accountName: 'NGUYEN TRUNG MINH',
+    bankName: 'BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)',
+    accountNo: '7621983180',
+    accountName: 'MAI TUAN VY',
     amount: plan.price,
-    qrUrl: `https://img.vietqr.io/image/MB-0383120286-compact.png?amount=${plan.price}&addInfo=${encodeURIComponent(transferMessage)}&accountName=NGUYEN%20TRUNG%20MINH`,
-  };
-
-  const momoDetails = {
-    phone: '0383120286',
-    accountName: 'Nguyễn Trung Minh',
-    amount: plan.price,
-    qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-      `2|99|0383120286|Nguyễn Trung Minh|qdam100@gmail.com|0|0|${plan.price}|${transferMessage}|transfer_my_key`
-    )}`,
+    qrUrl: `https://img.vietqr.io/image/BIDV-7621983180-compact.png?amount=${plan.price}&addInfo=${encodeURIComponent(transferMessage)}&accountName=MAI%20TUAN%20VY`,
   };
 
   if (paymentSuccess) {
@@ -184,30 +174,7 @@ export default function Payment() {
             </div>
           </div>
 
-          <div className="payment-method-selector">
-            <h3 className="section-title">Chọn phương thức thanh toán:</h3>
-            <div className="method-buttons">
-              <button
-                type="button"
-                className={`method-btn ${paymentMethod === 'bank' ? 'selected' : ''}`}
-                onClick={() => setPaymentMethod('bank')}
-              >
-                <span className="btn-icon">🏦</span>
-                <span>Chuyển khoản VietQR</span>
-              </button>
-              <button
-                type="button"
-                className={`method-btn ${paymentMethod === 'momo' ? 'selected' : ''}`}
-                onClick={() => setPaymentMethod('momo')}
-              >
-                <span className="btn-icon">📱</span>
-                <span>Ví điện tử MoMo</span>
-              </button>
-            </div>
-          </div>
-
-          {paymentMethod === 'bank' ? (
-            <div className="instructions-card">
+          <div className="instructions-card">
               <h3>Thông tin chuyển khoản ngân hàng:</h3>
               <div className="detail-rows">
                 <div className="detail-item">
@@ -265,53 +232,6 @@ export default function Payment() {
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="instructions-card">
-              <h3>Thông tin ví MoMo:</h3>
-              <div className="detail-rows">
-                <div className="detail-item">
-                  <span className="item-label">Số điện thoại MoMo:</span>
-                  <div className="item-value-row">
-                    <span className="item-value font-mono">{momoDetails.phone}</span>
-                    <button
-                      onClick={() => handleCopy(momoDetails.phone, 'momoPhone')}
-                      className="btn-copy"
-                      type="button"
-                    >
-                      <IoCopyOutline /> {copiedField === 'momoPhone' ? 'Đã chép' : 'Sao chép'}
-                    </button>
-                  </div>
-                </div>
-                <div className="detail-item">
-                  <span className="item-label">Tên người nhận:</span>
-                  <div className="item-value-row">
-                    <span className="item-value">{momoDetails.accountName}</span>
-                  </div>
-                </div>
-                <div className="detail-item">
-                  <span className="item-label">Số tiền:</span>
-                  <div className="item-value-row">
-                    <span className="item-value font-bold text-green">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(momoDetails.amount)}
-                    </span>
-                  </div>
-                </div>
-                <div className="detail-item highlighted-item">
-                  <span className="item-label text-bold">Lời nhắn chuyển khoản (bắt buộc):</span>
-                  <div className="item-value-row">
-                    <span className="item-value font-mono text-bold text-red">{transferMessage}</span>
-                    <button
-                      onClick={() => handleCopy(transferMessage, 'momoMsg')}
-                      className="btn-copy btn-copy-highlight"
-                      type="button"
-                    >
-                      <IoCopyOutline /> {copiedField === 'momoMsg' ? 'Đã chép' : 'Sao chép'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="payment-right-card">
@@ -323,14 +243,7 @@ export default function Payment() {
           </div>
 
           <div className="qr-code-wrapper">
-            {paymentMethod === 'bank' ? (
-              <img src={bankDetails.qrUrl} alt="VietQR bank transfer code" className="qr-image" />
-            ) : (
-              <div className="momo-qr-container">
-                <img src={momoDetails.qrUrl} alt="MoMo payment code" className="qr-image" />
-                <div className="momo-logo-overlay">MoMo</div>
-              </div>
-            )}
+            <img src={bankDetails.qrUrl} alt="VietQR bank transfer code" className="qr-image" />
             <p className="qr-caption">Sử dụng ứng dụng ngân hàng hoặc MoMo để quét mã QR</p>
           </div>
 
