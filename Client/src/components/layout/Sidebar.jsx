@@ -1,19 +1,13 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useFavorite } from '../../context/FavoriteContext';
 import api from '../../services/api';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { getRecommendation } from '../../utils/recommendationEngine';
 import avocadoMascot from '../../assets/avocado_mascot.png';
 import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward } from 'react-icons/fi';
 import './Sidebar.css';
-
-const MASCOT_TIPS = [
-  { title: 'Uống đủ nước nhé!',   msg: 'Bạn mới uống 1/8 ly nước hôm nay.' },
-  { title: 'Đừng bỏ bữa!',        msg: 'Ăn sáng giúp bạn tập trung hơn 30%.' },
-  { title: 'Vận động nào!',        msg: 'Chỉ 10 phút đi bộ là đủ khởi đầu.' },
-  { title: 'Thêm rau xanh!',       msg: 'Mục tiêu hôm nay: 2 phần rau củ.' },
-];
 
 function getPreviousDateKey(dateKey) {
   if (!dateKey) {
@@ -61,17 +55,32 @@ export default function Sidebar() {
   const { user, isPremium } = useAuth();
   const { favorites } = useFavorite();
   const navigate = useNavigate();
-  const [tipIndex, setTipIndex] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
+  const [tip, setTip] = useState(() => getRecommendation({}));
+  const [fading, setFading] = useState(false);
+  const pausedRef = useRef(false);
+
+  const nextTip = useCallback(() => {
+    setFading(true);
+    setTimeout(() => {
+      setTip(getRecommendation({}));
+      setFading(false);
+    }, 400);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!pausedRef.current) nextTip();
+    }, 12000);
+    return () => clearInterval(id);
+  }, [nextTip]);
 
   const accountId = user?.accountId || user?.account_id;
 
   const navItems = [
     { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',        end: true  },
     { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn'              },
-    { to: '/meal-plans',        icon: <FiClipboard size={20} />, label: 'Kế hoạch bữa ăn'              },
-    { to: '/nutrition-diary',   icon: <FiClipboard size={20} />, label: 'Nhật ký sức khỏe'             },
-    { to: '/nutrition',         icon: <FiTrendingUp size={20} />, label: 'Thành tích'                   },
+    { to: '/nutrition',         icon: <FiClipboard size={20} />, label: 'Nhật ký ăn uống'            },
     { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
     { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
   ];
@@ -114,7 +123,6 @@ export default function Sidebar() {
     };
   }, [accountId]);
 
-  const currentTip   = MASCOT_TIPS[tipIndex];
   const displayName  = user?.username || 'Bạn';
   const initials     = displayName.charAt(0).toUpperCase();
   const isAdmin      = user?.role === 'Admin';
@@ -164,13 +172,13 @@ export default function Sidebar() {
             </div>
           )}
           <div className="sidebar-streak-badge">
-            {isPremium ? '👑' : <FiTrendingUp size={14} />}
+            <FiTrendingUp size={14} />
           </div>
         </div>
 
         <div className="sidebar-user-greeting">
           <h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>
-            Xin chào, {displayName} {isPremium && <span className="premium-label-badge">PRO</span>} 👋
+            Xin chào, {displayName} {isPremium && <span className="premium-label-badge">PRO</span>}
           </h4>
           <p>Cùng xây dựng lối sống lành mạnh mỗi ngày nhé!</p>
         </div>
@@ -228,23 +236,20 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* ── Mascot Widget ── */}
-      <div className="sidebar-mascot-widget">
+      <div
+        className={`sidebar-mascot-widget${fading ? ' mascot--fading' : ''}`}
+        onMouseEnter={() => { pausedRef.current = true; }}
+        onMouseLeave={() => { pausedRef.current = false; }}
+      >
         <div className="mascot-top">
-          <div className="sidebar-mascot-image mascot-image-wrap">
+          <div className="mascot-image-wrap">
             <img src={avocadoMascot} alt="SmartMeal Mascot" />
           </div>
           <div className="mascot-text">
-            <div className="mascot-title">{currentTip.title}</div>
-            <div className="mascot-message">{currentTip.msg}</div>
+            <div className="mascot-title">{tip.label}</div>
+            <div className="mascot-message">{tip.text}</div>
           </div>
         </div>
-        <button
-          className="mascot-cta-btn"
-          onClick={() => navigate('/nutrition-diary')}
-        >
-          + Ghi nhận ngay
-        </button>
       </div>
     </aside>
   );

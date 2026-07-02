@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function AdminIngredients() {
+  const dialog = useDialog();
   const [ingredients, setIngredients] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,7 @@ export default function AdminIngredients() {
       closeIngredientModal();
     } catch (error) {
       console.error('Error saving ingredient:', error);
-      alert('Lỗi khi lưu nguyên liệu. Xem console để biết thêm chi tiết.');
+      dialog.error('Lỗi', 'Lỗi khi lưu nguyên liệu. Xem console để biết thêm chi tiết.');
     }
   };
 
@@ -104,13 +106,13 @@ export default function AdminIngredients() {
   };
 
   const handleDeleteIngredient = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa nguyên liệu này?')) {
-      try {
-        await adminService.deleteIngredient(id);
-        fetchAllData();
-      } catch (error) {
-        console.error('Error deleting ingredient:', error);
-      }
+    const ok = await dialog.confirm({ title: 'Xóa nguyên liệu?', message: 'Bạn có chắc chắn muốn xóa nguyên liệu này?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
+    try {
+      await adminService.deleteIngredient(id);
+      fetchAllData();
+    } catch (error) {
+      console.error('Error deleting ingredient:', error);
     }
   };
 

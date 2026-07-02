@@ -26,7 +26,6 @@ import AdminCategories from '../pages/admin/AdminCategories';
 import AdminFeedback from '../pages/admin/AdminFeedback';
 import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
 import Nutrition from '../pages/nutrition/Nutrition';
-import NutritionDiaryPage from '../pages/diary/NutritionDiaryPage';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
 import SubscriptionPlans from '../pages/subscription/SubscriptionPlans';
@@ -61,8 +60,6 @@ export default function AppRoutes() {
         <Route path="/ingredients/:id" element={<IngredientDetail />} />
         <Route path="/ingredients/:id/edit" element={<IngredientForm />} />
         <Route path="/nutrition" element={<Nutrition />} />
-        <Route path="/nutrition-diary" element={<NutritionDiaryPage />} />
-        <Route path="/nhat-ky" element={<NutritionDiaryPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/health-survey" element={<SurveyPage />} />
       </Route>

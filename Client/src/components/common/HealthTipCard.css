@@ -1,0 +1,69 @@
+/* ============================================
+   HEALTH TIP CARD - SmartMeal Recommendation
+   ============================================ */
+
+.health-tip-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 20px 24px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  cursor: default;
+}
+
+.health-tip-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.health-tip-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 4px 0 0 4px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.health-tip-card:hover .health-tip-accent {
+  opacity: 1;
+}
+
+.health-tip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.health-tip-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.health-tip-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.6;
+  transition: opacity 0.4s ease;
+}
+
+/* ── Fade animation ── */
+.health-tip--fading .health-tip-text {
+  opacity: 0;
+}
+
+/* ── Theme-specific subtle tints ── */
+.health-tip-theme--eating    { border-color: rgba(76, 175, 80, 0.12); }
+.health-tip-theme--hydration { border-color: rgba(66, 165, 245, 0.12); }
+.health-tip-theme--exercise  { border-color: rgba(255, 152, 0, 0.12); }
+.health-tip-theme--sleep     { border-color: rgba(230, 81, 0, 0.12); }
+.health-tip-theme--cooking   { border-color: rgba(249, 168, 37, 0.12); }
+.health-tip-theme--motivation{ border-color: rgba(102, 187, 106, 0.12); }

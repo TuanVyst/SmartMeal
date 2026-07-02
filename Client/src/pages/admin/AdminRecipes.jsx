@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiX, FiMinus, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function AdminRecipes() {
+  const dialog = useDialog();
   const [recipes, setRecipes] = useState([]);
   const [allRecipeIngredients, setAllRecipeIngredients] = useState([]);
   const [search, setSearch] = useState('');
@@ -115,7 +117,7 @@ export default function AdminRecipes() {
       closeRecipeModal();
     } catch (error) {
       console.error('Error saving recipe:', error);
-      alert('Error saving recipe. Please check the console for details.');
+      dialog.error('Error', 'Error saving recipe. Please check the console for details.');
     }
   };
 
@@ -155,13 +157,13 @@ export default function AdminRecipes() {
   };
 
   const handleDeleteRecipe = async (id) => {
-    if (window.confirm('Are you sure you want to delete this recipe? This will also delete its labels and ingredients.')) {
-      try {
-        await adminService.deleteRecipe(id);
-        fetchAllData();
-      } catch (error) {
-        console.error('Error deleting recipe:', error);
-      }
+    const ok = await dialog.confirm({ title: 'Delete recipe?', message: 'Are you sure you want to delete this recipe? This will also delete its labels and ingredients.', confirmLabel: 'Delete', danger: true });
+    if (!ok) return;
+    try {
+      await adminService.deleteRecipe(id);
+      fetchAllData();
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
     }
   };
 

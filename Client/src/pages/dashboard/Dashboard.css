@@ -258,6 +258,13 @@
 }
 
 /* ============================================
+   HEALTH TIP SECTION
+   ============================================ */
+.health-tip-section {
+  margin-bottom: 28px;
+}
+
+/* ============================================
    NUTRITION OVERVIEW CARDS
    ============================================ */
 .nutrition-overview-grid {
@@ -380,7 +387,6 @@
   overflow-x: auto;
   padding: 8px 4px 16px;
   scrollbar-width: none;
-  scroll-behavior: smooth;
 }
 
 .meal-cards-scroll::-webkit-scrollbar { display: none; }

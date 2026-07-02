@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { useDialog } from '../../context/DialogContext';
 import { getIngredients } from '../../services/foodService';
 import { recipeService } from '../../services/recipeService';
 import { nutritionLogService } from '../../services/nutritionLogService';
@@ -9,7 +10,7 @@ import HealthProfileEditor from '../../components/HealthProfileEditor';
 import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './Nutrition.css';
 import { 
-  MdFastfood, MdCalendarToday, MdBarChart, MdAddCircleOutline, 
+  MdFastfood, MdBarChart, MdAddCircleOutline, 
   MdDeleteOutline, MdWarning, MdDoneAll, MdSettings 
 } from 'react-icons/md';
 import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiAlertCircle, FiZap } from 'react-icons/fi';
@@ -39,6 +40,7 @@ const bmiColorMap = {
 };
 
 export default function Nutrition() {
+  const dialog = useDialog();
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
   const { healthProfile, lockedIngredients, dailyCalorieBudget, dailyTargets } = useHealthProfile();
@@ -286,7 +288,8 @@ export default function Nutrition() {
   };
 
   const handleDeleteLog = async (id) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa bản ghi nhật ký này?')) return;
+    const ok = await dialog.confirm({ title: 'Xóa bản ghi?', message: 'Bạn có chắc chắn muốn xóa bản ghi nhật ký này?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
     try {
       setLoading(true);
       await nutritionLogService.delete(id);
@@ -420,7 +423,6 @@ export default function Nutrition() {
           <p className="subtitle">Ghi nhận lượng thức ăn nạp vào và so sánh với mục tiêu sức khỏe của bạn</p>
         </div>
         <div className="date-picker-wrapper">
-          <MdCalendarToday className="calendar-icon" />
           <input 
             type="date" 
             value={selectedDate} 
@@ -627,7 +629,7 @@ export default function Nutrition() {
                     <span className="macro-val">{manualMacros.sodium || 0} g</span>
                   </div>
                   <div className="preview-item">
-                    <span className="macro-dot" style={{ background: '#a855f7' }}></span>
+                    <span className="macro-dot" style={{ background: '#EAB308' }}></span>
                     <span className="macro-name">Đường:</span>
                     <span className="macro-val">{manualMacros.sugar || 0} g</span>
                   </div>
@@ -797,7 +799,7 @@ export default function Nutrition() {
                           </span>
                         </div>
                         <div className="bar-bg">
-                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sugar / activeGoal.sugar) * 100, 100)}%`, background: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#a855f7' }}></div>
+                            <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sugar / activeGoal.sugar) * 100, 100)}%`, background: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#EAB308' }}></div>
                         </div>
                         {totalsToday.sugar > activeGoal.sugar && <span className="warning-badge">Vượt giới hạn</span>}
                       </div>
@@ -839,7 +841,7 @@ export default function Nutrition() {
                           </span>
                         </div>
                         <div className="bar-bg">
-                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.cholesterol / activeGoal.cholesterol) * 100, 100)}%`, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#8b5cf6' }}></div>
+                            <div className="bar-fill" style={{ width: `${Math.min((totalsToday.cholesterol / activeGoal.cholesterol) * 100, 100)}%`, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#3B82F6' }}></div>
                         </div>
                         {totalsToday.cholesterol > activeGoal.cholesterol && <span className="warning-badge">Vượt giới hạn</span>}
                       </div>

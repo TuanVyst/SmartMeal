@@ -54,7 +54,7 @@ namespace Service.Implements
             {
                 Log_id = Guid.NewGuid(),
                 Account_id = request.Account_id,
-                LogDate = request.LogDate == default ? DateTime.UtcNow : request.LogDate,
+                LogDate = NormalizeLogDate(request.LogDate),
                 MealType = request.MealType,
                 Recipe_id = request.Recipe_id,
                 Ingredient_id = request.Ingredient_id,
@@ -84,7 +84,7 @@ namespace Service.Implements
                 throw new Exception("NutritionLog not found");
 
             entity.Account_id = request.Account_id;
-            entity.LogDate = request.LogDate == default ? DateTime.UtcNow : request.LogDate;
+            entity.LogDate = NormalizeLogDate(request.LogDate);
             entity.MealType = request.MealType;
             entity.Recipe_id = request.Recipe_id;
             entity.Ingredient_id = request.Ingredient_id;
@@ -187,6 +187,19 @@ namespace Service.Implements
                     entity.TotalCholesterol = totalChol * portion;
                 }
             }
+        }
+
+        private static DateTime NormalizeLogDate(DateTime logDate)
+        {
+            if (logDate == default)
+                return DateTime.UtcNow;
+
+            return logDate.Kind switch
+            {
+                DateTimeKind.Utc => logDate,
+                DateTimeKind.Local => logDate.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(logDate, DateTimeKind.Utc),
+            };
         }
     }
 }

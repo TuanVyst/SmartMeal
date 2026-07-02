@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
+import { FiUser, FiAward } from 'react-icons/fi';
 import './Profile.css';
 
 export default function Profile() {
@@ -136,13 +137,13 @@ export default function Profile() {
           className={`profile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveTab('profile')}
         >
-          👤 Hồ sơ cá nhân
+          <FiUser size={16} /> Hồ sơ cá nhân
         </button>
         <button
           className={`profile-tab-btn ${activeTab === 'subscription' ? 'active' : ''}`}
           onClick={() => setActiveTab('subscription')}
         >
-          👑 Gói Premium & Lịch sử
+          <FiAward size={16} /> Gói Premium & Lịch sử
         </button>
       </div>
 

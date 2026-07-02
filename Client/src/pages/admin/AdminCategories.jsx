@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function AdminCategories() {
+  const dialog = useDialog();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -48,18 +50,18 @@ export default function AdminCategories() {
       setModal(null);
     } catch (error) {
       console.error(error);
-      alert('Lỗi khi lưu danh mục');
+      dialog.error('Lỗi', 'Lỗi khi lưu danh mục');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      try {
-        await adminService.deleteCategory(id);
-        fetchCategories();
-      } catch (error) {
-        console.error(error);
-      }
+    const ok = await dialog.confirm({ title: 'Delete category?', message: 'Are you sure you want to delete this category?', confirmLabel: 'Delete', danger: true });
+    if (!ok) return;
+    try {
+      await adminService.deleteCategory(id);
+      fetchCategories();
+    } catch (error) {
+      console.error(error);
     }
   };
 

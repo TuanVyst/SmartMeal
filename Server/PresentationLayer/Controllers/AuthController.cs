@@ -2,7 +2,6 @@ using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
 using Service.Interfaces;
 
 namespace PresentationLayer.Controllers
@@ -12,12 +11,12 @@ namespace PresentationLayer.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAccountService _service;
-        private readonly IWebHostEnvironment _environment;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public AuthController(IAccountService service, IWebHostEnvironment environment)
+        public AuthController(IAccountService service, ICloudinaryService cloudinaryService)
         {
             _service = service;
-            _environment = environment;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpGet("accounts")]
@@ -185,24 +184,8 @@ namespace PresentationLayer.Controllers
 
                 if (request.AvatarFile != null && request.AvatarFile.Length > 0)
                 {
-                    var uploadsRoot = Path.Combine(_environment.WebRootPath ?? Path.Combine(AppContext.BaseDirectory, "wwwroot"), "uploads", "avatars");
-                    Directory.CreateDirectory(uploadsRoot);
-
-                    var extension = Path.GetExtension(request.AvatarFile.FileName);
-                    if (string.IsNullOrWhiteSpace(extension))
-                    {
-                        extension = ".jpg";
-                    }
-
-                    var fileName = $"{accountId}_{Guid.NewGuid():N}{extension}";
-                    var filePath = Path.Combine(uploadsRoot, fileName);
-
-                    await using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await request.AvatarFile.CopyToAsync(stream);
-                    }
-
-                    avatarUrl = $"{Request.Scheme}://{Request.Host}/uploads/avatars/{fileName}";
+                    using var stream = request.AvatarFile.OpenReadStream();
+                    avatarUrl = await _cloudinaryService.UploadImageAsync(stream, request.AvatarFile.FileName);
                 }
 
                 if (string.IsNullOrWhiteSpace(avatarUrl))

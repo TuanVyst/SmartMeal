@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { FiSearch } from 'react-icons/fi';
 import { getIngredients } from '../../services/foodService';
 import { recipeService } from '../../services/recipeService';
 import { allergyService } from '../../services/allergyService';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
-import IngredientLockBadge from '../../components/common/IngredientLockBadge';
 import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
@@ -14,11 +14,11 @@ import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
 } from 'react-icons/md';
-import { FiHeart } from 'react-icons/fi';
 
 export default function MealSuggestion() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const accountId = user?.accountId || user?.account_id;
   const { 
     lockedIngredients = [], 
@@ -38,6 +38,7 @@ export default function MealSuggestion() {
   const [showAllergicRecipes, setShowAllergicRecipes] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
   const [drawerRecipe, setDrawerRecipe] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   const fetchIngredients = async () => {
     try {
@@ -50,13 +51,8 @@ export default function MealSuggestion() {
 
   const fetchRecipes = async () => {
     try {
-      if (pantryItems.length > 0 && accountId) {
-        const res = await recipeService.suggestFromPantry(accountId);
-        setRecipes(res.data.data || []);
-      } else {
-        const res = await recipeService.getAll();
-        setRecipes(res.data.data || []);
-      }
+      const res = await recipeService.getAll();
+      setRecipes(res.data.data || []);
     } catch (err) {
       console.error('Không thể tải công thức:', err);
     }
@@ -289,6 +285,11 @@ export default function MealSuggestion() {
     };
   })
   .filter(recipe => showAllergicRecipes || !recipe.hasAllergyConflict)
+  .filter(recipe => {
+    if (!searchQuery.trim()) return true;
+    const q = normalizeText(searchQuery);
+    return normalizeText(recipe.title).includes(q);
+  })
   .sort((a, b) => b.matchPercentage - a.matchPercentage);
 
   return (
@@ -315,27 +316,17 @@ export default function MealSuggestion() {
             <MdBlock className="tab-icon" />
             Dị ứng
           </button>
-          <button
-            className={`sidebar-tab-btn ${leftTab === 'health' ? 'active' : ''}`}
-            onClick={() => setLeftTab('health')}
-          >
-            <FiHeart size={16} /> Sức khoẻ
-          </button>
         </div>
 
-        {leftTab === 'health' ? (
-          <div className="tab-info-text">
-            <p>Thông tin dinh dưỡng dựa trên hồ sơ sức khoẻ của bạn</p>
-          </div>
-        ) : (
-          <div className="tab-info-text">
-            {leftTab === 'pantry' ? (
+        {leftTab === 'pantry' ? (
+            <div className="tab-info-text">
               <p>Chọn các nguyên liệu bạn đang **sẵn có** ở nhà để hệ thống gợi ý thực đơn thích hợp nhất.</p>
-            ) : (
+            </div>
+          ) : (
+            <div className="tab-info-text">
               <p>Chọn những thực phẩm bạn **bị dị ứng** (không ăn được) để lọc sạch các công thức nguy hiểm.</p>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
         <div className="category-scroll-container">
           {leftTab === 'pantry' && Object.keys(groupedIngredients).map(categoryName => (
@@ -383,50 +374,6 @@ export default function MealSuggestion() {
               </div>
             </div>
           ))}
-
-          {leftTab === 'health' && (
-            <div>
-              {lockedIngredients.length === 0 && reducedIngredients.length === 0 && preferredIngredients.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 32, color: '#94a3b8' }}>
-                  <p style={{ fontSize: 14, marginBottom: 8 }}>Chưa có hồ sơ sức khoẻ</p>
-                  <p style={{ fontSize: 13 }}>Vui lòng hoàn thành khảo sát sức khoẻ để nhận gợi ý</p>
-                </div>
-              ) : (
-                <>
-                  {lockedIngredients.length > 0 && (
-                    <div className="category-group" style={{ marginBottom: 20 }}>
-                      <h4 className="category-header" style={{ color: '#dc2626' }}>Nguyên liệu bị khoá</h4>
-                      <div className="ingredients-pills-list">
-                        {lockedIngredients.map(ing => (
-                          <IngredientLockBadge key={ing} ingredient={ing} type="locked" />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {reducedIngredients.length > 0 && (
-                    <div className="category-group" style={{ marginBottom: 20 }}>
-                      <h4 className="category-header" style={{ color: '#ea580c' }}>Nguyên liệu giảm lượng</h4>
-                      <div className="ingredients-pills-list">
-                        {reducedIngredients.map(ing => (
-                          <IngredientLockBadge key={ing} ingredient={ing} type="reduced" />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {preferredIngredients.length > 0 && (
-                    <div className="category-group" style={{ marginBottom: 20 }}>
-                      <h4 className="category-header" style={{ color: '#16a34a' }}>Nguyên liệu ưu tiên</h4>
-                      <div className="ingredients-pills-list">
-                        {preferredIngredients.map(ing => (
-                          <IngredientLockBadge key={ing} ingredient={ing} type="preferred" />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
@@ -434,7 +381,20 @@ export default function MealSuggestion() {
         <div className="suggestions-header-bar">
           <div>
             <h2>Gợi ý Thực đơn Thông minh</h2>
-            <span className="results-count-text">Tìm thấy {suggestedRecipes.length} công thức món ăn</span>
+            <span className="results-count-text">
+              {searchQuery.trim()
+                ? `Tìm thấy ${suggestedRecipes.length} công thức cho "${searchQuery}"`
+                : `Tìm thấy ${suggestedRecipes.length} công thức món ăn`}
+            </span>
+          </div>
+          <div className="suggestions-search-bar">
+            <FiSearch size={16} />
+            <input
+              type="text"
+              placeholder="Tìm theo tên món ăn..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
           <div className="allergy-toggle-checkbox">
             <label>

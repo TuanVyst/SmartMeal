@@ -472,7 +472,7 @@ export default function HealthProfileEditor() {
               <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
                 <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Mục tiêu</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#1E293B' }}>
-                  {goalInfo ? `${goalInfo.icon} ${goalInfo.label}` : 'Chưa chọn'}
+                  {goalInfo ? <>{goalInfo.icon} {goalInfo.label}</> : 'Chưa chọn'}
                 </div>
                 <div style={{ fontSize: 12, color: '#22C55E', fontWeight: 500 }}>{dailyCalorieBudget} kcal/ngày</div>
               </div>
