@@ -1468,24 +1468,6 @@
     ]
   },
   {
-    "Name": "Giấm",
-    "AveragePrice": 2.0,
-    "ImageUrl": "/images/giấm.jpg",
-    "NutritionalValues": {
-      "Calories": 21,
-      "Protein": 0,
-      "Carbs": 0.9,
-      "Fat": 0,
-      "Fiber": 0,
-      "Sugar": 0.4,
-      "Salt": 0.005,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [ "Gia vị" ]
-  },
-  {
     "Name": "Đường",
     "AveragePrice": 2.0,
     "ImageUrl": "/images/đường.jpg",
