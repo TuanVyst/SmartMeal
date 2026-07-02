@@ -1,0 +1,14 @@
+[
+  { "Name": "Rau củ", "Category": "Thực vật" },
+  { "Name": "Trái cây", "Category": "Thực vật" },
+  { "Name": "Thịt", "Category": "Protein" },
+    { "Name": "Hải sản", "Category": "Protein" },
+  { "Name": "Gia vị", "Category": "Nếm nếm" },
+  { "Name": "Sữa & Trứng", "Category": "Dairy" },
+  { "Name": "Ngũ cốc", "Category": "Lương thực" },
+  { "Name": "Đậu & Đậu phụ", "Category": "Protein" },
+  { "Name": "Đồ khô", "Category": "Lương thực" },
+  { "Name": "Rau thơm", "Category": "Thực vật" },
+  { "Name": "Nước chấm & Gia vị lỏng", "Category": "Nếm nếm" },
+  { "Name": "Bơ & Dầu", "Category": "Chất béo" }
+]

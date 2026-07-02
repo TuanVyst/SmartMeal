@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiArrowLeft, FiChevronDown } from 'react-icons/fi';
+import { FiClock, FiHeart, FiArrowLeft, FiChevronDown, FiZap } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
-import { mockRecipesData } from '../../utils/mockData';
-import api from '../../services/api';
+import { resolveRecipeImageUrl } from '../../utils/recipeImages';
+import { recipeService } from '../../services/recipeService';
 import './MealDetail.css';
 
 export default function MealDetail() {
@@ -29,7 +29,7 @@ export default function MealDetail() {
     const fetchRecipe = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/recipe/${id}`);
+        const response = await recipeService.getById(id);
         if (response.data && response.data.success) {
           const item = response.data.data;
           
@@ -43,8 +43,7 @@ export default function MealDetail() {
           const difficulty = item.difficulty || item.Difficulty || "";
           const recipeIngredients = item.recipeIngredients || item.RecipeIngredients || [];
 
-          const mockRecipe = mockRecipesData.find(r => r.id === id || r.title.toLowerCase() === recipeName.toLowerCase());
-          const imageUrl = mockRecipe ? mockRecipe.imageUrl : "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop";
+          const imageUrl = resolveRecipeImageUrl(recipeName);
 
           const steps = instruction
             ? instruction.split('\n')
@@ -180,7 +179,7 @@ export default function MealDetail() {
               </div>
             </div>
             <div className="meta-box">
-              <span className="meta-icon">🔥</span>
+              <FiZap className="meta-icon" />
               <div>
                 <span className="meta-label">Dinh dưỡng</span>
                 <span className="meta-value">{recipe.calories}</span>

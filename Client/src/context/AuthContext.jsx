@@ -64,8 +64,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateAvatar = async (avatarFile) => {
+    const { data } = await authService.updateAvatar(avatarFile);
+    const updatedUser = { ...user, avatar: data.avatarUrl ?? user?.avatar };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
+import { formatDateVi } from '../../utils/dateTime';
 
 export default function AdminFeedbackDetail() {
   const { id } = useParams();
@@ -34,7 +35,7 @@ export default function AdminFeedbackDetail() {
           <div className="feedback-detail-meta">
             <span><strong>From:</strong> {feedback.name}</span>
             <span><strong>Email:</strong> {feedback.email}</span>
-            <span><strong>Date:</strong> {new Date(feedback.date || feedback.created_at || Date.now()).toLocaleDateString()}</span>
+            <span><strong>Date:</strong> {formatDateVi(feedback.date || feedback.created_at || Date.now())}</span>
           </div>
         </div>
         <div className="feedback-detail-body">

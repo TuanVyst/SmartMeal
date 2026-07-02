@@ -2,6 +2,7 @@ import { useReducer, useMemo, useState } from 'react';
 import { calculateBMI } from '../../utils/bmiCalculator';
 import { getLockedIngredientsForProfile, getDailyCalorieBudget } from '../../utils/healthRules';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiLock } from 'react-icons/fi';
 
 const TOTAL_STEPS = 5;
 
@@ -68,11 +69,11 @@ const conditionsList = [
 const allergyTags = ['Gluten', 'Lactose', 'Hải sản', 'Đậu phộng', 'Trứng', 'Đậu nành', 'Hạt cây', 'Fructose'];
 
 const goalCards = [
-  { value: 'lose', icon: '🔥', label: 'Giảm cân', desc: 'Giảm mỡ và kiểm soát cân nặng' },
-  { value: 'gain', icon: '💪', label: 'Tăng cơ', desc: 'Xây dựng cơ bắp và sức mạnh' },
-  { value: 'maintain', icon: '⚖️', label: 'Duy trì', desc: 'Giữ vóc dáng hiện tại' },
-  { value: 'heart', icon: '❤️', label: 'Cải thiện tim mạch', desc: 'Tốt cho sức khoẻ tim' },
-  { value: 'diabetes', icon: '🩸', label: 'Kiểm soát đường huyết', desc: 'Ổn định đường trong máu' },
+  { value: 'lose', icon: <FiTrendingDown size={28} />, label: 'Giảm cân', desc: 'Giảm mỡ và kiểm soát cân nặng' },
+  { value: 'gain', icon: <FiActivity size={28} />, label: 'Tăng cơ', desc: 'Xây dựng cơ bắp và sức mạnh' },
+  { value: 'maintain', icon: <FiMinimize2 size={28} />, label: 'Duy trì', desc: 'Giữ vóc dáng hiện tại' },
+  { value: 'heart', icon: <FiHeart size={28} />, label: 'Cải thiện tim mạch', desc: 'Tốt cho sức khoẻ tim' },
+  { value: 'diabetes', icon: <FiDroplet size={28} />, label: 'Kiểm soát đường huyết', desc: 'Ổn định đường trong máu' },
 ];
 
 const bmiColors = {
@@ -419,7 +420,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
                     textAlign: 'left', transition: 'all 0.2s',
                   }}
                 >
-                  <div style={{ fontSize: 28, marginBottom: 8 }}>{card.icon}</div>
+                  <div style={{ marginBottom: 8 }}>{card.icon}</div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: '#1E293B', marginBottom: 4 }}>{card.label}</div>
                   <div style={{ fontSize: 12, color: '#64748b' }}>{card.desc}</div>
                 </button>
@@ -467,7 +468,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
                         padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
                         borderRadius: 12, fontSize: 12, fontWeight: 500,
                       }}>
-                        🔒 {ing}
+                        <FiLock size={12} /> {ing}
                       </span>
                     ))}
                   </div>

@@ -1,0 +1,15 @@
+[
+  { "Name": "Bữa sáng", "Type": "meal" },
+  { "Name": "Bữa trưa", "Type": "meal" },
+  { "Name": "Bữa tối", "Type": "meal" },
+  { "Name": "Tráng miệng", "Type": "meal" },
+  { "Name": "Nhẹ", "Type": "meal" },
+  { "Name": "Lành mạnh", "Type": "diet" },
+  { "Name": "Nhanh", "Type": "prep" },
+  { "Name": "Cay", "Type": "taste" },
+  { "Name": "Chay", "Type": "diet" },
+  { "Name": "Nướng", "Type": "cook" },
+  { "Name": "Chiên", "Type": "cook" },
+  { "Name": "Canh & Súp", "Type": "meal" },
+  { "Name": "Đồ uống", "Type": "meal" }
+]

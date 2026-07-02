@@ -150,6 +150,14 @@
   transition: all 0.3s ease;
 }
 
+button.sidebar-stat-card {
+  font: inherit;
+}
+
+.sidebar-stat-card-clickable {
+  cursor: pointer;
+}
+
 .sidebar-stat-card:hover {
   background: linear-gradient(135deg, #f0faf0, #e8f7e8);
   border-color: rgba(108, 203, 99, 0.4);
@@ -252,6 +260,7 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.25s ease;
+  color: #111827;
 }
 
 .nav-item:hover .nav-item-icon {
@@ -260,7 +269,7 @@
 
 .nav-item.active .nav-item-icon {
   transform: scale(1.1);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  filter: none;
 }
 
 .nav-item-text {

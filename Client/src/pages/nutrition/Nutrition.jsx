@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
-import api from '../../services/api';
+import { getIngredients } from '../../services/foodService';
+import { recipeService } from '../../services/recipeService';
+import { nutritionLogService } from '../../services/nutritionLogService';
+import { nutritionGoalService } from '../../services/nutritionGoalService';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
+import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './Nutrition.css';
 import { 
   MdFastfood, MdCalendarToday, MdBarChart, MdAddCircleOutline, 
   MdDeleteOutline, MdWarning, MdDoneAll, MdSettings 
 } from 'react-icons/md';
+import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiAlertCircle, FiZap } from 'react-icons/fi';
 
 const conditionLabels = {
   diabetes: 'Tiểu đường type 2',
@@ -19,11 +24,11 @@ const conditionLabels = {
 };
 
 const goalLabels = {
-  lose: { icon: '🔥', label: 'Giảm cân' },
-  gain: { icon: '💪', label: 'Tăng cơ' },
-  maintain: { icon: '⚖️', label: 'Duy trì' },
-  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
-  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+  lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
+  gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
+  maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
+  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
+  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColorMap = {
@@ -44,7 +49,7 @@ export default function Nutrition() {
   const hasHeartDisease = conditions.includes('heartDisease');
 
   const [activeTab, setActiveTab] = useState('log'); // log | history | stats
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getTodayDateKey());
 
   // Data from backend
   const [ingredients, setIngredients] = useState([]);
@@ -100,10 +105,10 @@ export default function Nutrition() {
 
   const fetchBaseData = async () => {
     try {
-      const ingRes = await api.get('/ingredient');
+      const ingRes = await getIngredients();
       setIngredients(ingRes.data.data || []);
 
-      const recRes = await api.get('/recipe');
+      const recRes = await recipeService.getAll();
       setRecipes(recRes.data.data || []);
     } catch (err) {
       console.error('Lỗi khi tải nguyên liệu/công thức:', err);
@@ -114,11 +119,10 @@ export default function Nutrition() {
     try {
       setLoading(true);
       // Fetch logs
-      const logsRes = await api.get(`/nutritionlog?accountId=${accountId}`);
+      const logsRes = await nutritionLogService.getAll(accountId);
       setNutritionLogs(logsRes.data.data || []);
 
-      // Fetch goals
-      const goalsRes = await api.get(`/nutritiongoal?accountId=${accountId}`);
+      const goalsRes = await nutritionGoalService.getAll(accountId);
       const userGoals = goalsRes.data.data || [];
       if (userGoals.length > 0) {
         // Find first active/latest goal
@@ -260,7 +264,7 @@ export default function Nutrition() {
         totalCholesterol: (logType === 'recipe' || logType === 'custom' || manualMacros.cholesterol > 0) ? parseFloat(manualMacros.cholesterol) : null
       };
 
-      await api.post('/nutritionlog', payload);
+      await nutritionLogService.create(payload);
       triggerAlert('Ghi nhận bữa ăn thành công!', 'success');
       
       // Reset form
@@ -285,7 +289,7 @@ export default function Nutrition() {
     if (!confirm('Bạn có chắc chắn muốn xóa bản ghi nhật ký này?')) return;
     try {
       setLoading(true);
-      await api.delete(`/nutritionlog/${id}`);
+      await nutritionLogService.delete(id);
       triggerAlert('Đã xóa bản ghi nhật ký.', 'success');
       await fetchUserLogsAndGoals();
     } catch (err) {
@@ -312,9 +316,9 @@ export default function Nutrition() {
       };
 
       if (currentGoal) {
-        await api.put(`/nutritiongoal/${currentGoal.goal_id}`, payload);
+        await nutritionGoalService.update(currentGoal.goal_id, payload);
       } else {
-        await api.post('/nutritiongoal', payload);
+        await nutritionGoalService.create(payload);
       }
 
       triggerAlert('Cập nhật mục tiêu dinh dưỡng thành công!', 'success');
@@ -335,7 +339,7 @@ export default function Nutrition() {
 
   // Helper calculations for current date
   const logsToday = nutritionLogs.filter(log => {
-    const logDateStr = log.logDate?.split('T')[0];
+    const logDateStr = toDateKey(log.logDate);
     return logDateStr === selectedDate;
   });
 
@@ -366,22 +370,24 @@ export default function Nutrition() {
 
   // SVG Chart data preparations (Last 7 days)
   const getLast7Days = () => {
+    const today = new Date();
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(d.getDate() - i);
-      days.push(d.toISOString().split('T')[0]);
+      days.push(toDateKey(d));
     }
     return days;
   };
 
   const last7Days = getLast7Days();
   const dailyCaloriesData = last7Days.map(dateStr => {
-    const dayLogs = nutritionLogs.filter(l => l.logDate?.split('T')[0] === dateStr);
+    const dayLogs = nutritionLogs.filter(l => toDateKey(l.logDate) === dateStr);
     const cal = dayLogs.reduce((sum, l) => sum + (l.totalCalories || 0), 0);
     return {
       date: dateStr,
-      displayDate: new Date(dateStr).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric' }),
+      displayWeekday: formatDateVi(dateStr, { weekday: 'short' }),
+      displayDayMonth: formatDateVi(dateStr, { day: '2-digit', month: '2-digit' }),
       calories: cal
     };
   });
@@ -764,7 +770,7 @@ export default function Nutrition() {
                     {/* Sugar & Sodium dietary restriction bars */}
                     <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span>⚕️</span> Hạn chế ăn uống
+                        <FiAlertCircle size={14} /> Hạn chế ăn uống
                         {(hasDiabetes || hasHypertension || hasHeartDisease) && (
                           <span style={{
                             fontSize: 10, padding: '2px 8px', borderRadius: 8,
@@ -779,7 +785,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🍬 Đường
+                            <FiZap size={14} /> Đường
                             {hasDiabetes && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sugar > activeGoal.sugar ? '#fef2f2' : '#fffbeb', color: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Tiểu đường
@@ -800,7 +806,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🧂 Muối
+                            <FiDroplet size={14} /> Muối
                             {(hasHypertension || hasHeartDisease) && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sodium > activeGoal.sodium ? '#fef2f2' : '#fffbeb', color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Huyết áp
@@ -821,7 +827,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            💗 Cholesterol
+                            <FiHeart size={14} /> Cholesterol
                             {hasHeartDisease && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#fef2f2' : '#fffbeb', color: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Tim mạch
@@ -880,7 +886,7 @@ export default function Nutrition() {
 
               {/* Logs history list */}
               <div className="logs-list-card">
-                <h3>Các bữa ăn đã nạp ngày {new Date(selectedDate).toLocaleDateString('vi-VN')}</h3>
+                <h3>Các bữa ăn đã nạp ngày {formatDateVi(selectedDate)}</h3>
                 <div className="logs-list-container">
                   {logsToday.length === 0 ? (
                     <div className="empty-logs-placeholder">
@@ -970,10 +976,10 @@ export default function Nutrition() {
                           />
                           {/* X label */}
                           <text x={x + colWidth / 2} y="215" textAnchor="middle" fill="#666" fontSize="10">
-                            {d.displayDate.split(',')[0]}
+                            {d.displayWeekday}
                           </text>
                           <text x={x + colWidth / 2} y="228" textAnchor="middle" fill="#999" fontSize="9">
-                            {d.displayDate.split(' ')[1]}
+                            {d.displayDayMonth}
                           </text>
                         </g>
                       );

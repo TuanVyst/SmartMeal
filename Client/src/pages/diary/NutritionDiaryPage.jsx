@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useNutritionDiary } from '../../hooks/useNutritionDiary';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
+import { FiSunrise, FiSun, FiMoon, FiCoffee, FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiFileText, FiLock, FiAlertCircle, FiZap, FiTrash2 } from 'react-icons/fi';
 
 const mealSections = [
-  { key: 'breakfast', label: 'Bữa sáng', icon: '🌅' },
-  { key: 'lunch', label: 'Bữa trưa', icon: '☀️' },
-  { key: 'dinner', label: 'Bữa tối', icon: '🌙' },
-  { key: 'snack', label: 'Bữa phụ', icon: '🍿' },
+  { key: 'breakfast', label: 'Bữa sáng', icon: <FiSunrise size={18} /> },
+  { key: 'lunch', label: 'Bữa trưa', icon: <FiSun size={18} /> },
+  { key: 'dinner', label: 'Bữa tối', icon: <FiMoon size={18} /> },
+  { key: 'snack', label: 'Bữa phụ', icon: <FiCoffee size={18} /> },
 ];
 
 const conditionLabels = {
@@ -21,11 +22,11 @@ const conditionLabels = {
 };
 
 const goalLabels = {
-  lose: { icon: '🔥', label: 'Giảm cân' },
-  gain: { icon: '💪', label: 'Tăng cơ' },
-  maintain: { icon: '⚖️', label: 'Duy trì' },
-  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
-  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+  lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
+  gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
+  maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
+  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
+  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColors = {
@@ -100,7 +101,7 @@ function HealthProfileCard({ healthProfile, dailyCalorieBudget, lockedIngredient
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 20 }}>📋</span>
+          <FiFileText size={20} />
           <span style={{ fontSize: 15, fontWeight: 600, color: '#1E293B' }}>Hồ sơ sức khỏe</span>
           {bmiResult && bmiStyle && (
             <span style={{
@@ -161,7 +162,7 @@ function HealthProfileCard({ healthProfile, dailyCalorieBudget, lockedIngredient
                     padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 500,
                     background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
                   }}>
-                    🏥 {label}
+                    {label}
                   </span>
                 );
               })}
@@ -181,7 +182,7 @@ function HealthProfileCard({ healthProfile, dailyCalorieBudget, lockedIngredient
                   padding: '3px 8px', borderRadius: 10, fontSize: 11, fontWeight: 500,
                   background: '#fef2f2', color: '#dc2626',
                 }}>
-                  🔒 {ing}
+                  <FiLock size={12} /> {ing}
                 </span>
               ))}
               {lockedIngredients.length > 8 && (
@@ -313,7 +314,7 @@ export default function NutritionDiaryPage() {
             }} />
 
             <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>⚕️</span> Hạn chế ăn uống
+              <FiAlertCircle size={14} /> Hạn chế ăn uống
               {(hasDiabetes || hasHypertension || hasHeartDisease) && (
                 <span style={{
                   fontSize: 10, padding: '2px 8px', borderRadius: 8,
@@ -329,7 +330,7 @@ export default function NutritionDiaryPage() {
               value={totalMacros.sugar}
               max={dailyTargets?.sugarLimit || 50}
               color="#a855f7"
-              icon="🍬"
+              icon={<FiZap size={14} />}
               warning={hasDiabetes ? 'Tiểu đường' : null}
             />
             <MacroBar
@@ -338,7 +339,7 @@ export default function NutritionDiaryPage() {
               max={dailyTargets?.saltLimit || 5}
               color="#06b6d4"
               unit="g"
-              icon="🧂"
+              icon={<FiDroplet size={14} />}
               warning={(hasHypertension || hasHeartDisease) ? 'Huyết áp' : null}
             />
             <MacroBar
@@ -347,7 +348,7 @@ export default function NutritionDiaryPage() {
               max={300}
               color="#8b5cf6"
               unit="mg"
-              icon="💗"
+              icon={<FiHeart size={14} />}
               warning={hasHeartDisease ? 'Tim mạch' : null}
             />
           </div>
@@ -357,14 +358,14 @@ export default function NutritionDiaryPage() {
               textAlign: 'center', padding: 60, background: 'white', borderRadius: 12,
               boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
+              <div style={{ fontSize: 48, marginBottom: 16, color: '#94a3b8' }}><FiFileText size={48} /></div>
               <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1E293B', marginBottom: 8 }}>Chưa có bữa ăn nào</h3>
               <p style={{ fontSize: 14, color: '#64748b', marginBottom: 20 }}>
                 Hôm nay bạn chưa ghi lại bữa ăn nào. Hãy khám phá các món ăn!
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/goi-y')}
+                onClick={() => navigate('/meal-suggestions')}
                 style={{
                   padding: '12px 28px', border: 'none', borderRadius: 10,
                   background: '#22C55E', color: 'white', fontSize: 15, fontWeight: 600,
@@ -422,7 +423,7 @@ export default function NutritionDiaryPage() {
                             }}
                             title="Xóa"
                           >
-                            🗑️
+                            <FiTrash2 size={16} />
                           </button>
                         </div>
                       </div>

@@ -10,7 +10,6 @@ import Dashboard from '../pages/dashboard/Dashboard';
 import Profile from '../pages/profile/Profile';
 import MealSuggestions from '../pages/MealSuggestion/MealSuggestion';
 import Favorites from '../pages/food/Favorites';
-import MealPlanList from '../pages/mealplan/MealPlanList';
 import MealDetail from '../pages/MealDetail/MealDetail';
 import IngredientList from '../pages/food/IngredientList';
 import IngredientForm from '../pages/food/IngredientForm';
@@ -29,6 +28,7 @@ import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
 import Nutrition from '../pages/nutrition/Nutrition';
 import NutritionDiaryPage from '../pages/diary/NutritionDiaryPage';
 import SurveyPage from '../pages/survey/SurveyPage';
+import RecipeForm from '../pages/food/RecipeForm';
 
 export default function AppRoutes() {
   return (
@@ -46,9 +46,11 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/meal-plans" element={<MealPlanList />} />
+        <Route path="/recipes/new" element={<RecipeForm />} />
+        <Route path="/recipes/:id/edit" element={<RecipeForm />} />
         <Route path="/recipe/:id" element={<MealDetail />} />
         <Route path="/ingredients" element={<IngredientList />} />
         <Route path="/ingredients/new" element={<IngredientForm />} />
@@ -57,6 +59,7 @@ export default function AppRoutes() {
         <Route path="/nutrition" element={<Nutrition />} />
         <Route path="/nutrition-diary" element={<NutritionDiaryPage />} />
         <Route path="/nhat-ky" element={<NutritionDiaryPage />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/health-survey" element={<SurveyPage />} />
       </Route>
       <Route
