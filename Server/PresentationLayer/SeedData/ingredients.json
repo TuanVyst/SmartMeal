@@ -1003,26 +1003,7 @@
       "Ngũ cốc"
     ]
   },
-  {
-    "Name": "Đường",
-    "AveragePrice": 1.0,
-    "ImageUrl": "/images/duong.jpg",
-    "NutritionalValues": {
-      "Calories": 387,
-      "Protein": 0,
-      "Carbs": 100,
-      "Fat": 0,
-      "Fiber": 0,
-      "Sugar": 100,
-      "Salt": 0.001,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Gia vị"
-    ]
-  },
+ 
   {
     "Name": "Giấm",
     "AveragePrice": 1.5,
@@ -1483,26 +1464,7 @@
       "Nước chấm & Gia vị lỏng"
     ]
   },
-  {
-    "Name": "Bún",
-    "AveragePrice": 2.0,
-    "ImageUrl": "/images/bún-tươi.jpg",
-    "NutritionalValues": {
-      "Calories": 110,
-      "Protein": 2,
-      "Carbs": 25,
-      "Fat": 0.2,
-      "Fiber": 1,
-      "Sugar": 0.2,
-      "Salt": 0.01,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Ngũ cốc"
-    ]
-  },
+  
   {
     "Name": "Mắm ruốc",
     "AveragePrice": 2.0,
@@ -1563,26 +1525,7 @@
       "Ngũ cốc"
     ]
   },
-  {
-    "Name": "Đậu phộng",
-    "AveragePrice": 2.0,
-    "ImageUrl": "/images/đậu-phộng.jpg",
-    "NutritionalValues": {
-      "Calories": 567,
-      "Protein": 25.8,
-      "Carbs": 16.1,
-      "Fat": 49.2,
-      "Fiber": 8.5,
-      "Sugar": 4.7,
-      "Salt": 0.01,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Đậu & Đậu phụ"
-    ]
-  },
+  
   {
     "Name": "Bắp chuối",
     "AveragePrice": 2.0,
