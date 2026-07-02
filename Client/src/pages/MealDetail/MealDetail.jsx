@@ -5,7 +5,7 @@ import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
 import { mockRecipesData } from '../../utils/mockData';
-import api from '../../services/api';
+import { recipeService } from '../../services/recipeService';
 import './MealDetail.css';
 
 export default function MealDetail() {
@@ -29,7 +29,7 @@ export default function MealDetail() {
     const fetchRecipe = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/recipe/${id}`);
+        const response = await recipeService.getById(id);
         if (response.data && response.data.success) {
           const item = response.data.data;
           

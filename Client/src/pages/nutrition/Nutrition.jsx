@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
-import api from '../../services/api';
+import { getIngredients } from '../../services/foodService';
+import { recipeService } from '../../services/recipeService';
+import { nutritionLogService } from '../../services/nutritionLogService';
+import { nutritionGoalService } from '../../services/nutritionGoalService';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
 import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './Nutrition.css';
@@ -101,10 +104,10 @@ export default function Nutrition() {
 
   const fetchBaseData = async () => {
     try {
-      const ingRes = await api.get('/ingredient');
+      const ingRes = await getIngredients();
       setIngredients(ingRes.data.data || []);
 
-      const recRes = await api.get('/recipe');
+      const recRes = await recipeService.getAll();
       setRecipes(recRes.data.data || []);
     } catch (err) {
       console.error('Lỗi khi tải nguyên liệu/công thức:', err);
@@ -115,11 +118,10 @@ export default function Nutrition() {
     try {
       setLoading(true);
       // Fetch logs
-      const logsRes = await api.get(`/nutritionlog?accountId=${accountId}`);
+      const logsRes = await nutritionLogService.getAll(accountId);
       setNutritionLogs(logsRes.data.data || []);
 
-      // Fetch goals
-      const goalsRes = await api.get(`/nutritiongoal?accountId=${accountId}`);
+      const goalsRes = await nutritionGoalService.getAll(accountId);
       const userGoals = goalsRes.data.data || [];
       if (userGoals.length > 0) {
         // Find first active/latest goal
@@ -261,7 +263,7 @@ export default function Nutrition() {
         totalCholesterol: (logType === 'recipe' || logType === 'custom' || manualMacros.cholesterol > 0) ? parseFloat(manualMacros.cholesterol) : null
       };
 
-      await api.post('/nutritionlog', payload);
+      await nutritionLogService.create(payload);
       triggerAlert('Ghi nhận bữa ăn thành công!', 'success');
       
       // Reset form
@@ -286,7 +288,7 @@ export default function Nutrition() {
     if (!confirm('Bạn có chắc chắn muốn xóa bản ghi nhật ký này?')) return;
     try {
       setLoading(true);
-      await api.delete(`/nutritionlog/${id}`);
+      await nutritionLogService.delete(id);
       triggerAlert('Đã xóa bản ghi nhật ký.', 'success');
       await fetchUserLogsAndGoals();
     } catch (err) {
@@ -313,9 +315,9 @@ export default function Nutrition() {
       };
 
       if (currentGoal) {
-        await api.put(`/nutritiongoal/${currentGoal.goal_id}`, payload);
+        await nutritionGoalService.update(currentGoal.goal_id, payload);
       } else {
-        await api.post('/nutritiongoal', payload);
+        await nutritionGoalService.create(payload);
       }
 
       triggerAlert('Cập nhật mục tiêu dinh dưỡng thành công!', 'success');

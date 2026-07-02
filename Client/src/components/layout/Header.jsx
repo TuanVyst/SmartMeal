@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { IoLogOut } from 'react-icons/io5';
+import { FaUser } from 'react-icons/fa';
 import './Header.css';
 
 export default function Header() {
@@ -76,11 +77,11 @@ export default function Header() {
 
           {isDropdownOpen && (
             <div className="profile-dropdown">
-              <div className="profile-card">
-                <div className="profile-main-row" onClick={handleProfile}>
-                  <div className="profile-header-avatar">{initials}</div>
-                  <span className="profile-name">{displayName}</span>
+              <div className="dropdown-item" onClick={handleProfile}>
+                <div className="dropdown-icon-wrapper">
+                  <FaUser />
                 </div>
+                <span className="dropdown-text">Hồ sơ</span>
               </div>
 
               <div className="dropdown-divider" />

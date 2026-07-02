@@ -29,6 +29,7 @@ import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
 import Nutrition from '../pages/nutrition/Nutrition';
 import NutritionDiaryPage from '../pages/diary/NutritionDiaryPage';
 import SurveyPage from '../pages/survey/SurveyPage';
+import RecipeForm from '../pages/food/RecipeForm';
 
 export default function AppRoutes() {
   return (
@@ -46,9 +47,12 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/meal-plans" element={<MealPlanList />} />
+        <Route path="/recipes/new" element={<RecipeForm />} />
+        <Route path="/recipes/:id/edit" element={<RecipeForm />} />
         <Route path="/recipe/:id" element={<MealDetail />} />
         <Route path="/ingredients" element={<IngredientList />} />
         <Route path="/ingredients/new" element={<IngredientForm />} />

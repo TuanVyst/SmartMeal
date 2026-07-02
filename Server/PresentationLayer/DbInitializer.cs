@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BusinessObject.Entities;
 using BusinessObject.Enums;
 using DataAccessLayer;
@@ -7,6 +8,37 @@ namespace PresentationLayer;
 
 public static class DbInitializer
 {
+    // JSON DTOs for deserialization
+    private record IngredientTagDto(string Name, string Category);
+    private record RecipeTagDto(string Name, string Type);
+    private record NutritionalValuesDto(double Calories, double? Protein, double? Carbs, double? Fat,
+        double? Fiber, double? Sugar, double? Salt, double? Cholesterol, double? ServingSize, string? ServingUnit);
+    private record IngredientDto(string Name, double AveragePrice, string ImageUrl,
+        NutritionalValuesDto NutritionalValues, List<string> TagNames);
+    private record RecipeIngredientDto(string Name, int Quantity, string UOM);
+    private record RecipeDto(string Recipe_name, string Description, string Instruction,
+        int CookTime, int PrepTime, int Servings, string Difficulty, bool IsPublic,
+        string AccountUsername, List<RecipeIngredientDto> Ingredients, List<string> TagNames);
+
+    private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
+
+    private static string SeedDataPath()
+    {
+        // Try bin output first, then source folder
+        var binPath = Path.Combine(AppContext.BaseDirectory, "SeedData");
+        if (Directory.Exists(binPath)) return binPath;
+        var srcPath = Path.Combine(Directory.GetCurrentDirectory(), "PresentationLayer", "SeedData");
+        if (Directory.Exists(srcPath)) return srcPath;
+        return binPath; // fallback
+    }
+
+    private static async Task<T[]> LoadJson<T>(string fileName)
+    {
+        var path = Path.Combine(SeedDataPath(), fileName);
+        var json = await File.ReadAllTextAsync(path);
+        return JsonSerializer.Deserialize<T[]>(json, JsonOpts) ?? [];
+    }
+
     public static async Task Initialize(AppDbContext context)
     {
         // Ensure migration history records exist for already-created tables.
@@ -50,53 +82,12 @@ public static class DbInitializer
 
         if (await context.Accounts.AnyAsync())
         {
-            // Update ingredient serving sizes if they are outdated
-            var dbOliveOil = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Dầu ô-liu");
-            if (dbOliveOil?.Nutritional_value != null && dbOliveOil.Nutritional_value.ServingSize != 1)
-            {
-                dbOliveOil.Nutritional_value.ServingSize = 1;
-                context.NutritionalValues.Update(dbOliveOil.Nutritional_value);
-            }
-
-            var dbEgg = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Trứng");
-            if (dbEgg?.Nutritional_value != null && dbEgg.Nutritional_value.ServingSize != 1)
-            {
-                dbEgg.Nutritional_value.ServingSize = 1;
-                context.NutritionalValues.Update(dbEgg.Nutritional_value);
-            }
-
-            var dbLemon = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Chanh");
-            if (dbLemon?.Nutritional_value != null && dbLemon.Nutritional_value.ServingSize != 1)
-            {
-                dbLemon.Nutritional_value.ServingSize = 1;
-                context.NutritionalValues.Update(dbLemon.Nutritional_value);
-            }
-
-            var dbSalt = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == "Muối");
-            if (dbSalt?.Nutritional_value != null)
-            {
-                dbSalt.Nutritional_value.ServingSize = 5;
-                dbSalt.Nutritional_value.ServingUnit = "g";
-                dbSalt.Nutritional_value.Salt = 5;
-                context.NutritionalValues.Update(dbSalt.Nutritional_value);
-                await context.SaveChangesAsync();
-            }
-
-            // Fix all NutritionalValues: old Sodium(mg) values stored as Salt, convert to Salt(g)
-            var saltNvId = dbSalt?.Nutritional_value?.Nv_id;
-            var allNvs = await context.NutritionalValues.Where(nv => nv.Nv_id != saltNvId).ToListAsync();
-            foreach (var nv in allNvs)
-            {
-                if (nv.Salt.HasValue && nv.Salt.Value >= 0.3)
-                {
-                    nv.Salt = Math.Round(nv.Salt.Value * 0.00254, 3);
-                    context.NutritionalValues.Update(nv);
-                }
-            }
-            await context.SaveChangesAsync();
-
-            // Force seed recipes to ensure up-to-date recipe ingredient quantities and nutrition facts
-            await SeedMatchingRecipesAsync(context);
+            // On existing DB: upsert new tags + ingredients from JSON that are missing
+            await UpsertIngredientTagsFromJsonAsync(context);
+            await UpsertRecipeTagsFromJsonAsync(context);
+            await UpsertIngredientsFromJsonAsync(context);
+            // Re-seed recipes from JSON (clear and re-add)
+            await SeedRecipesFromJsonAsync(context);
 
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
@@ -104,11 +95,13 @@ public static class DbInitializer
             return;
         }
 
-        // Roles
-    
-        await context.SaveChangesAsync();
+        // === Fresh DB: full seed from JSON ===
+        await SeedAllFromJsonAsync(context);
+    }
 
-        // Accounts
+    private static async Task SeedAllFromJsonAsync(AppDbContext context)
+    {
+        // 1. Accounts
         var adminAccount = new Account
         {
             Account_id = Guid.NewGuid(),
@@ -122,8 +115,6 @@ public static class DbInitializer
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
-
-
         var testUser = new Account
         {
             Account_id = Guid.NewGuid(),
@@ -137,268 +128,239 @@ public static class DbInitializer
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
-
-
         context.Accounts.AddRange(adminAccount, testUser);
         await context.SaveChangesAsync();
 
-        // Ingredient Tags
-        var vegTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Rau củ", Category = "Thực vật" };
-        var fruitTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Trái cây", Category = "Thực vật" };
-        var meatTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Thịt & Hải sản", Category = "Protein" };
-        var spiceTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Gia vị", Category = "NẾm nếm" };
-        var dairyTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Sữa & Trứng", Category = "Dairy" };
-        var grainTag = new IngredientTag { It_id = Guid.NewGuid(), Name = "Ngũ cốc", Category = "Lương thực" };
-        context.IngredientTags.AddRange(vegTag, fruitTag, meatTag, spiceTag, dairyTag, grainTag);
+        // 2. Ingredient Tags
+        var itagDtos = await LoadJson<IngredientTagDto>("ingredient_tags.json");
+        var itagDict = new Dictionary<string, IngredientTag>();
+        foreach (var dto in itagDtos)
+        {
+            var tag = new IngredientTag { It_id = Guid.NewGuid(), Name = dto.Name, Category = dto.Category };
+            itagDict[dto.Name] = tag;
+        }
+        context.IngredientTags.AddRange(itagDict.Values);
         await context.SaveChangesAsync();
 
-        // Ingredients with NutritionalValues
-        var tomato = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Cà chua", AveragePrice = 2.5, ImageUrl = "/images/tomato.jpg" };
-        var chickenBreast = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Thịt gà", AveragePrice = 8.0, ImageUrl = "/images/chicken.jpg" };
-        var rice = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Gạo", AveragePrice = 3.0, ImageUrl = "/images/rice.jpg" };
-        var onion = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Hành tây", AveragePrice = 1.5, ImageUrl = "/images/onion.jpg" };
-        var garlic = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Tỏi", AveragePrice = 1.0, ImageUrl = "/images/garlic.jpg" };
-        var oliveOil = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Dầu ô-liu", AveragePrice = 6.0, ImageUrl = "/images/oliveoil.jpg" };
-        var salt = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Muối", AveragePrice = 0.5, ImageUrl = "/images/salt.jpg" };
-        var pepper = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Tiêu đen", AveragePrice = 1.5, ImageUrl = "/images/pepper.jpg" };
-        var egg = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Trứng", AveragePrice = 4.0, ImageUrl = "/images/egg.jpg" };
-        var milk = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Sữa", AveragePrice = 2.0, ImageUrl = "/images/milk.jpg" };
-        var broccoli = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Bông cải xanh", AveragePrice = 3.0, ImageUrl = "/images/broccoli.jpg" };
-        var carrot = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Cà rốt", AveragePrice = 1.5, ImageUrl = "/images/carrot.jpg" };
-        var pasta = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Mì ý", AveragePrice = 2.0, ImageUrl = "/images/pasta.jpg" };
-        var salmon = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Cá hồi", AveragePrice = 12.0, ImageUrl = "/images/salmon.jpg" };
-        var lemon = new Ingredient { Ingredient_id = Guid.NewGuid(), Name = "Chanh", AveragePrice = 1.0, ImageUrl = "/images/lemon.jpg" };
-        context.Ingredients.AddRange(tomato, chickenBreast, rice, onion, garlic, oliveOil, salt, pepper, egg, milk, broccoli, carrot, pasta, salmon, lemon);
+        // 3. Ingredients + NutritionalValues + IngredientLabels
+        var ings = await LoadJson<IngredientDto>("ingredients.json");
+        var ingDict = new Dictionary<string, Ingredient>();
+        foreach (var dto in ings)
+        {
+            var ing = new Ingredient
+            {
+                Ingredient_id = Guid.NewGuid(),
+                Name = dto.Name,
+                AveragePrice = dto.AveragePrice,
+                ImageUrl = dto.ImageUrl
+            };
+            ingDict[dto.Name] = ing;
+            context.Ingredients.Add(ing);
+
+            var nv = dto.NutritionalValues;
+            context.NutritionalValues.Add(new NutritionalValue
+            {
+                Nv_id = Guid.NewGuid(),
+                Ingredient_id = ing.Ingredient_id,
+                Calories = nv.Calories,
+                Protein = nv.Protein,
+                Carbs = nv.Carbs,
+                Fat = nv.Fat,
+                Fiber = nv.Fiber,
+                Sugar = nv.Sugar,
+                Salt = nv.Salt,
+                Cholesterol = nv.Cholesterol,
+                ServingSize = nv.ServingSize,
+                ServingUnit = nv.ServingUnit
+            });
+
+            foreach (var tagName in dto.TagNames)
+            {
+                if (itagDict.TryGetValue(tagName, out var tag))
+                {
+                    context.IngredientLabels.Add(new IngredientLabel
+                    {
+                        Id = Guid.NewGuid(),
+                        It_id = tag.It_id,
+                        Ingredient_id = ing.Ingredient_id
+                    });
+                }
+            }
+        }
         await context.SaveChangesAsync();
 
-        // NutritionalValues (Salt values in grams: Salt(g) ≈ Sodium(mg) × 0.00254)
-        context.NutritionalValues.AddRange(
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = tomato.Ingredient_id, Calories = 18, Protein = 0.9, Carbs = 3.9, Fat = 0.2, Fiber = 1.2, Sugar = 2.6, Salt = 0.01, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = chickenBreast.Ingredient_id, Calories = 165, Protein = 31, Carbs = 0, Fat = 3.6, Fiber = 0, Sugar = 0, Salt = 0.19, Cholesterol = 85, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = rice.Ingredient_id, Calories = 130, Protein = 2.7, Carbs = 28, Fat = 0.3, Fiber = 0.4, Sugar = 0.1, Salt = 0.003, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = onion.Ingredient_id, Calories = 40, Protein = 1.1, Carbs = 9.3, Fat = 0.1, Fiber = 1.7, Sugar = 4.2, Salt = 0.01, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = garlic.Ingredient_id, Calories = 4, Protein = 0.2, Carbs = 1.0, Fat = 0.02, Fiber = 0.1, Sugar = 0.03, Salt = 0.001, Cholesterol = 0, ServingSize = 3, ServingUnit = "clove" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = oliveOil.Ingredient_id, Calories = 119, Protein = 0, Carbs = 0, Fat = 13.5, Fiber = 0, Sugar = 0, Salt = 0.001, Cholesterol = 0, ServingSize = 1, ServingUnit = "tbsp" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = egg.Ingredient_id, Calories = 78, Protein = 6.3, Carbs = 0.6, Fat = 5.3, Fiber = 0, Sugar = 0.6, Salt = 0.16, Cholesterol = 186, ServingSize = 1, ServingUnit = "piece" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = milk.Ingredient_id, Calories = 42, Protein = 3.4, Carbs = 5, Fat = 1, Fiber = 0, Sugar = 5, Salt = 0.11, Cholesterol = 5, ServingSize = 100, ServingUnit = "ml" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = broccoli.Ingredient_id, Calories = 34, Protein = 2.8, Carbs = 6.6, Fat = 0.4, Fiber = 2.6, Sugar = 1.7, Salt = 0.08, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = carrot.Ingredient_id, Calories = 41, Protein = 0.9, Carbs = 9.6, Fat = 0.2, Fiber = 2.8, Sugar = 4.7, Salt = 0.17, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = pasta.Ingredient_id, Calories = 131, Protein = 5, Carbs = 25, Fat = 1.1, Fiber = 1.8, Sugar = 0.8, Salt = 0.02, Cholesterol = 0, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = salmon.Ingredient_id, Calories = 208, Protein = 20, Carbs = 0, Fat = 13, Fiber = 0, Sugar = 0, Salt = 0.15, Cholesterol = 55, ServingSize = 100, ServingUnit = "g" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = lemon.Ingredient_id, Calories = 17, Protein = 0.6, Carbs = 5.4, Fat = 0.2, Fiber = 1.6, Sugar = 1.5, Salt = 0.003, Cholesterol = 0, ServingSize = 1, ServingUnit = "piece" },
-            new NutritionalValue { Nv_id = Guid.NewGuid(), Ingredient_id = salt.Ingredient_id, Calories = 0, Protein = 0, Carbs = 0, Fat = 0, Fiber = 0, Sugar = 0, Salt = 5, Cholesterol = 0, ServingSize = 5, ServingUnit = "g" }
-        );
+        // 4. Recipe Tags
+        var rtagDtos = await LoadJson<RecipeTagDto>("recipe_tags.json");
+        var rtagDict = new Dictionary<string, RecipeTag>();
+        foreach (var dto in rtagDtos)
+        {
+            var tag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = dto.Name, Type = dto.Type };
+            rtagDict[dto.Name] = tag;
+        }
+        context.RecipeTags.AddRange(rtagDict.Values);
         await context.SaveChangesAsync();
 
-        // IngredientLabels
-        context.IngredientLabels.AddRange(
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = vegTag.It_id, Ingredient_id = tomato.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = vegTag.It_id, Ingredient_id = onion.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = vegTag.It_id, Ingredient_id = garlic.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = vegTag.It_id, Ingredient_id = broccoli.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = vegTag.It_id, Ingredient_id = carrot.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = meatTag.It_id, Ingredient_id = chickenBreast.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = meatTag.It_id, Ingredient_id = salmon.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = dairyTag.It_id, Ingredient_id = egg.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = dairyTag.It_id, Ingredient_id = milk.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = grainTag.It_id, Ingredient_id = rice.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = grainTag.It_id, Ingredient_id = pasta.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = spiceTag.It_id, Ingredient_id = salt.Ingredient_id },
-            new IngredientLabel { Id = Guid.NewGuid(), It_id = spiceTag.It_id, Ingredient_id = pepper.Ingredient_id }
-        );
-        await context.SaveChangesAsync();
-
-        // Recipe Tags
-        var breakfastTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Bữa sáng", Type = "meal" };
-        var lunchTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Bữa trưa", Type = "meal" };
-        var dinnerTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Bữa tối", Type = "meal" };
-        var dessertTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Tráng miệng", Type = "meal" };
-        var snackTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Nhẹ", Type = "meal" };
-        var healthyTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Lành mạnh", Type = "diet" };
-        var quickTag = new RecipeTag { Rt_Id = Guid.NewGuid(), Name = "Nhanh", Type = "prep" };
-        context.RecipeTags.AddRange(breakfastTag, lunchTag, dinnerTag, dessertTag, snackTag, healthyTag, quickTag);
-        await context.SaveChangesAsync();
-
-        await SeedMatchingRecipesAsync(context);
+        // 5. Recipes
+        var accounts = await context.Accounts.ToListAsync();
+        var accountDict = accounts.ToDictionary(a => a.Username!);
+        await SeedRecipesFromJsonAsync(context);
     }
 
-    private static async Task SeedMatchingRecipesAsync(AppDbContext context)
+    private static async Task UpsertIngredientTagsFromJsonAsync(AppDbContext context)
     {
-        // 1. Fetch accounts
-        var adminAccount = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
-        var testUser = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "testuser");
-        if (adminAccount == null || testUser == null) return;
+        var tagDtos = await LoadJson<IngredientTagDto>("ingredient_tags.json");
+        var existingNames = new HashSet<string>(await context.IngredientTags.Select(t => t.Name).ToListAsync());
+        foreach (var dto in tagDtos)
+        {
+            if (existingNames.Contains(dto.Name)) continue;
+            context.IngredientTags.Add(new IngredientTag { It_id = Guid.NewGuid(), Name = dto.Name, Category = dto.Category });
+        }
+        if (context.ChangeTracker.HasChanges())
+            await context.SaveChangesAsync();
+    }
 
-        // 2. Clear existing recipes if any
+    private static async Task UpsertRecipeTagsFromJsonAsync(AppDbContext context)
+    {
+        var tagDtos = await LoadJson<RecipeTagDto>("recipe_tags.json");
+        var existingNames = new HashSet<string>(await context.RecipeTags.Select(t => t.Name).ToListAsync());
+        foreach (var dto in tagDtos)
+        {
+            if (existingNames.Contains(dto.Name)) continue;
+            context.RecipeTags.Add(new RecipeTag { Rt_Id = Guid.NewGuid(), Name = dto.Name, Type = dto.Type });
+        }
+        if (context.ChangeTracker.HasChanges())
+            await context.SaveChangesAsync();
+    }
+
+    private static async Task UpsertIngredientsFromJsonAsync(AppDbContext context)
+    {
+        var ings = await LoadJson<IngredientDto>("ingredients.json");
+        var existingNames = new HashSet<string>(await context.Ingredients.Select(i => i.Name).ToListAsync());
+        var itagNames = await context.IngredientTags.Select(t => t.Name).ToDictionaryAsync(t => t, t => t);
+
+        foreach (var dto in ings)
+        {
+            if (existingNames.Contains(dto.Name)) continue;
+
+            var ing = new Ingredient
+            {
+                Ingredient_id = Guid.NewGuid(),
+                Name = dto.Name,
+                AveragePrice = dto.AveragePrice,
+                ImageUrl = dto.ImageUrl
+            };
+            context.Ingredients.Add(ing);
+
+            var nv = dto.NutritionalValues;
+            context.NutritionalValues.Add(new NutritionalValue
+            {
+                Nv_id = Guid.NewGuid(),
+                Ingredient_id = ing.Ingredient_id,
+                Calories = nv.Calories,
+                Protein = nv.Protein,
+                Carbs = nv.Carbs,
+                Fat = nv.Fat,
+                Fiber = nv.Fiber,
+                Sugar = nv.Sugar,
+                Salt = nv.Salt,
+                Cholesterol = nv.Cholesterol,
+                ServingSize = nv.ServingSize,
+                ServingUnit = nv.ServingUnit
+            });
+
+            foreach (var tagName in dto.TagNames)
+            {
+                if (itagNames.TryGetValue(tagName, out _))
+                {
+                    var tag = await context.IngredientTags.FirstAsync(t => t.Name == tagName);
+                    context.IngredientLabels.Add(new IngredientLabel
+                    {
+                        Id = Guid.NewGuid(),
+                        It_id = tag.It_id,
+                        Ingredient_id = ing.Ingredient_id
+                    });
+                }
+            }
+        }
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedRecipesFromJsonAsync(AppDbContext context)
+    {
+        var accounts = await context.Accounts.ToListAsync();
+        var accountDict = accounts.ToDictionary(a => a.Username!);
+
+        // Clear existing recipes
         var oldRecipes = await context.Recipes.ToListAsync();
         if (oldRecipes.Any())
         {
-            var oldRecipeIds = oldRecipes.Select(r => r.Recipe_id).ToList();
-            
-            var oldRecipeIngs = await context.RecipeIngredients.Where(ri => oldRecipeIds.Contains(ri.Recipe_id)).ToListAsync();
-            context.RecipeIngredients.RemoveRange(oldRecipeIngs);
-
-            var oldRecipeLabels = await context.RecipeLabels.Where(rl => oldRecipeIds.Contains(rl.Recipe_Id)).ToListAsync();
-            context.RecipeLabels.RemoveRange(oldRecipeLabels);
-
-            var nutritionLogs = await context.NutritionLogs.Where(nl => nl.Recipe_id != null && oldRecipeIds.Contains(nl.Recipe_id.Value)).ToListAsync();
-            foreach (var log in nutritionLogs)
-            {
-                log.Recipe_id = null;
-            }
-            context.NutritionLogs.UpdateRange(nutritionLogs);
-
+            var oldIds = oldRecipes.Select(r => r.Recipe_id).ToList();
+            context.RecipeIngredients.RemoveRange(
+                await context.RecipeIngredients.Where(ri => oldIds.Contains(ri.Recipe_id)).ToListAsync());
+            context.RecipeLabels.RemoveRange(
+                await context.RecipeLabels.Where(rl => oldIds.Contains(rl.Recipe_Id)).ToListAsync());
+            var logs = await context.NutritionLogs.Where(nl => nl.Recipe_id != null && oldIds.Contains(nl.Recipe_id.Value)).ToListAsync();
+            foreach (var log in logs) log.Recipe_id = null;
+            context.NutritionLogs.UpdateRange(logs);
             context.Recipes.RemoveRange(oldRecipes);
             await context.SaveChangesAsync();
         }
 
-        // 3. Fetch tags
-        var lunchTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Bữa trưa");
-        var dinnerTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Bữa tối");
-        var healthyTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Lành mạnh");
-        var quickTag = await context.RecipeTags.FirstOrDefaultAsync(t => t.Name == "Nhanh");
+        // Load recipe tags + ingredients
+        var rtagDict = await context.RecipeTags.ToDictionaryAsync(t => t.Name, t => t);
+        var ingDict = await context.Ingredients.ToDictionaryAsync(i => i.Name, i => i);
 
-        // 4. Fetch ingredients
-        var chickenBreast = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Thịt gà");
-        var garlic = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Tỏi");
-        var onion = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Hành tây");
-        var broccoli = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Bông cải xanh");
-        var carrot = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Cà rốt");
-        var rice = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Gạo");
-        var egg = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Trứng");
-        var salmon = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Cá hồi");
-        var lemon = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Chanh");
-        var oliveOil = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Dầu ô-liu");
-        var pasta = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Mì ý");
-        var tomato = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Cà chua");
-        var salt = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Muối");
-        var pepper = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Tiêu đen");
+        var recipes = await LoadJson<RecipeDto>("recipes.json");
+        var seedDate = DateTime.UtcNow;
 
-        // 5. Seed Recipe 1: Gà xào rau củ
-        var recipe1 = new Recipe
+        foreach (var dto in recipes)
         {
-            Recipe_id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            Account_id = adminAccount.Account_id,
-            Recipe_name = "Gà Xào Rau Củ",
-            Description = "Món ăn nhanh chóng và bổ dưỡng với thịt gà mềm mại và rau củ tươi giòn, phong cách ẩm thực châu Á.",
-            Instruction = "1. Thái gà thành lát mỏng và sơ chế rau củ.\n2. Đun nóng dầu trong chảo hoặc wok ở lửa vừa-mạnh.\n3. Cho gà vào rán đến khi vàng, sau đó vớt ra.\n4. Phi thơm tỏi, hành, bông cải và cà rốt cho đến khi chín mềm.\n5. Cho gà vào lại, nêm gia vị rồi xào đều.\n6. Dọn nóng kèm cơm trắng.",
-            CookTime = 20,
-            PrepTime = 5,
-            Servings = 2,
-            Difficulty = "easy",
-            IsPublic = true,
-            CreatedAt = DateTime.UtcNow
-        };
-        context.Recipes.Add(recipe1);
+            if (!accountDict.TryGetValue(dto.AccountUsername, out var owner)) continue;
 
-        // Recipe 1 Ingredients
-        if (chickenBreast != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = chickenBreast.Ingredient_id, Quantity = 200, UOM = "g" });
-        if (garlic != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = garlic.Ingredient_id, Quantity = 3, UOM = "clove" });
-        if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (broccoli != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = broccoli.Ingredient_id, Quantity = 150, UOM = "g" });
-        if (carrot != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = carrot.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (rice != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = rice.Ingredient_id, Quantity = 200, UOM = "g" });
-        if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 1, UOM = "tbsp" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
-        if (pepper != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe1.Recipe_id, Ingredient_id = pepper.Ingredient_id, Quantity = 1, UOM = "tsp" });
+            var recipe = new Recipe
+            {
+                Recipe_id = Guid.NewGuid(),
+                Account_id = owner.Account_id,
+                Recipe_name = dto.Recipe_name,
+                Description = dto.Description,
+                Instruction = dto.Instruction,
+                CookTime = dto.CookTime,
+                PrepTime = dto.PrepTime,
+                Servings = dto.Servings,
+                Difficulty = dto.Difficulty,
+                IsPublic = dto.IsPublic,
+                CreatedAt = seedDate
+            };
+            context.Recipes.Add(recipe);
 
-        // Recipe 1 Labels
-        if (lunchTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = lunchTag.Rt_Id, Recipe_Id = recipe1.Recipe_id });
-        if (dinnerTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = dinnerTag.Rt_Id, Recipe_Id = recipe1.Recipe_id });
-        if (healthyTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = healthyTag.Rt_Id, Recipe_Id = recipe1.Recipe_id });
+            foreach (var riDto in dto.Ingredients)
+            {
+                if (!ingDict.TryGetValue(riDto.Name, out var ing)) continue;
+                context.RecipeIngredients.Add(new RecipeIngredient
+                {
+                    RI_id = Guid.NewGuid(),
+                    Recipe_id = recipe.Recipe_id,
+                    Ingredient_id = ing.Ingredient_id,
+                    Quantity = riDto.Quantity,
+                    UOM = riDto.UOM
+                });
+            }
 
-        // 6. Seed Recipe 2: Cơm chiên trứng
-        var recipe2 = new Recipe
-        {
-            Recipe_id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-            Account_id = adminAccount.Account_id,
-            Recipe_name = "Cơm Chiên Trứng",
-            Description = "Món cơm chiên đơn giản mà thơm ngon với trứng bác và rau củ.",
-            Instruction = "1. Đun nóng dầu trong chảo hoặc wok.\n2. Đập trứng vào chảo, bác đến khi chín rồi đẩy sang một bên.\n3. Phi thơm hành và tỏi ở bên còn lại cho đến khi mềm.\n4. Cho cơm vào, nước tương và đảo đều.\n5. Trộn đều với trứng và đảo cho nhiệt đều khắp.\n6. Dọn ngay ăn nóng là ngon nhất.",
-            CookTime = 10,
-            PrepTime = 5,
-            Servings = 2,
-            Difficulty = "easy",
-            IsPublic = true,
-            CreatedAt = DateTime.UtcNow
-        };
-        context.Recipes.Add(recipe2);
-
-        // Recipe 2 Ingredients
-        if (egg != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = egg.Ingredient_id, Quantity = 2, UOM = "piece" });
-        if (rice != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = rice.Ingredient_id, Quantity = 300, UOM = "g" });
-        if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (garlic != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = garlic.Ingredient_id, Quantity = 2, UOM = "clove" });
-        if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 1, UOM = "tbsp" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe2.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
-
-        // Recipe 2 Labels
-        if (lunchTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = lunchTag.Rt_Id, Recipe_Id = recipe2.Recipe_id });
-        if (quickTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = quickTag.Rt_Id, Recipe_Id = recipe2.Recipe_id });
-
-        // 7. Seed Recipe 3: Cá hồi sốt bơ tỏi
-        var recipe3 = new Recipe
-        {
-            Recipe_id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-            Account_id = adminAccount.Account_id,
-            Recipe_name = "Cá Hồi Sốt Bơ Tỏi",
-            Description = "Cá hồi chiên ăn với sốt bơ tỏi thơm lừng và chanh tươi mát.",
-            Instruction = "1. Ướp cá hồi với muối và tiêu.\n2. Đun nóng dầu ô-liu trong chảo ở lửa vừa-mạnh.\n3. Chiên cá mặt da trước 4 phút.\n4. Lật mặt, cho bơ, tỏi và nước cốt chanh vào.\n5. Chiên thêm 3 phút, liên tục rưới sốt lên cá.\n6. Dọn kèm rau củ hấp.",
-            CookTime = 10,
-            PrepTime = 5,
-            Servings = 2,
-            Difficulty = "medium",
-            IsPublic = true,
-            CreatedAt = DateTime.UtcNow
-        };
-        context.Recipes.Add(recipe3);
-
-        // Recipe 3 Ingredients
-        if (salmon != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = salmon.Ingredient_id, Quantity = 300, UOM = "g" });
-        if (garlic != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = garlic.Ingredient_id, Quantity = 3, UOM = "clove" });
-        if (lemon != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = lemon.Ingredient_id, Quantity = 1, UOM = "piece" });
-        if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 2, UOM = "tbsp" });
-        if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
-        if (pepper != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe3.Recipe_id, Ingredient_id = pepper.Ingredient_id, Quantity = 1, UOM = "tsp" });
-
-        // Recipe 3 Labels
-        if (dinnerTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = dinnerTag.Rt_Id, Recipe_Id = recipe3.Recipe_id });
-        if (healthyTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = healthyTag.Rt_Id, Recipe_Id = recipe3.Recipe_id });
-        if (quickTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = quickTag.Rt_Id, Recipe_Id = recipe3.Recipe_id });
-
-        // 8. Seed Recipe 4: Mì ý sốt cà chua
-        var recipe4 = new Recipe
-        {
-            Recipe_id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
-            Account_id = testUser.Account_id,
-            Recipe_name = "Mì Ý Sốt Cà Chua",
-            Description = "Mì ý nấu đơn giản với sốt cà chua tươi và tỏi.",
-            Instruction = "1. Luộc mì trong nước sôi có muối cho đến khi chín vừa.\n2. Phi thơm tỏi và hành trong dầu ô-liu.\n3. Cho cà chua thái hạt lựu vào xào cho đến khi mềm.\n4. Nêm muối tiêu.\n5. Trộn mì với sốt.\n6. Dọn nóng, có thể rắc phô mai nếu thích.",
-            CookTime = 15,
-            PrepTime = 5,
-            Servings = 3,
-            Difficulty = "easy",
-            IsPublic = true,
-            CreatedAt = DateTime.UtcNow
-        };
-        context.Recipes.Add(recipe4);
-
-        // Recipe 4 Ingredients
-        if (pasta != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = pasta.Ingredient_id, Quantity = 300, UOM = "g" });
-        if (tomato != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = tomato.Ingredient_id, Quantity = 300, UOM = "g" });
-        if (garlic != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = garlic.Ingredient_id, Quantity = 2, UOM = "clove" });
-        if (oliveOil != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = oliveOil.Ingredient_id, Quantity = 2, UOM = "tbsp" });
-        if (onion != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = onion.Ingredient_id, Quantity = 100, UOM = "g" });
-        if (salt != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = salt.Ingredient_id, Quantity = 5, UOM = "g" });
-        if (pepper != null) context.RecipeIngredients.Add(new RecipeIngredient { RI_id = Guid.NewGuid(), Recipe_id = recipe4.Recipe_id, Ingredient_id = pepper.Ingredient_id, Quantity = 1, UOM = "tsp" });
-
-        // Recipe 4 Labels
-        if (lunchTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = lunchTag.Rt_Id, Recipe_Id = recipe4.Recipe_id });
-        if (dinnerTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = dinnerTag.Rt_Id, Recipe_Id = recipe4.Recipe_id });
-        if (quickTag != null) context.RecipeLabels.Add(new RecipeLabel { Id = Guid.NewGuid(), Rt_Id = quickTag.Rt_Id, Recipe_Id = recipe4.Recipe_id });
-
+            foreach (var tagName in dto.TagNames)
+            {
+                if (rtagDict.TryGetValue(tagName, out var tag))
+                {
+                    context.RecipeLabels.Add(new RecipeLabel
+                    {
+                        Id = Guid.NewGuid(),
+                        Rt_Id = tag.Rt_Id,
+                        Recipe_Id = recipe.Recipe_id
+                    });
+                }
+            }
+        }
         await context.SaveChangesAsync();
+        Console.WriteLine($"[DbInitializer] Seeded {recipes.Length} recipes from JSON.");
     }
 
     /// <summary>

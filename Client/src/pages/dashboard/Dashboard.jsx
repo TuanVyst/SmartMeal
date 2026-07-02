@@ -3,8 +3,7 @@ import { Navigate, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
-import api from '../../services/api';
-import { getRecipes } from '../../services/foodService';
+import { nutritionLogService } from '../../services/nutritionLogService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import { mockRecipesData } from '../../utils/mockData';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
@@ -82,7 +81,8 @@ export default function Dashboard() {
     if (accountId) {
       const fetchTodayLogs = async () => {
         try {
-          const res = await api.get(`/nutritionlog?accountId=${accountId}`);
+          setLoading(true);
+          const res = await nutritionLogService.getAll(accountId);
           setNutritionLogs(res.data.data || []);
         } catch (err) {
           console.error("Lỗi khi tải nhật ký dinh dưỡng:", err);
@@ -237,6 +237,13 @@ export default function Dashboard() {
           <NavLink to="/meal-suggestions" className="section-see-all">
             Xem tất cả →
           </NavLink>
+          <button
+            className="hero-cta-btn"
+            style={{ fontSize: 13, padding: '6px 14px', marginLeft: 8 }}
+            onClick={() => navigate('/recipes/new')}
+          >
+            + Tạo công thức
+          </button>
         </div>
 
         <div className="meal-cards-scroll">
