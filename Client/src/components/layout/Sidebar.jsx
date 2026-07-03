@@ -7,6 +7,8 @@ import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { getRecommendation } from '../../utils/recommendationEngine';
 import avocadoMascot from '../../assets/avocado_mascot.png';
 import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward } from 'react-icons/fi';
+import SidebarProgressAvatar from '../common/SidebarProgressAvatar';
+import { useTodayCalorieProgress } from '../../hooks/useTodayCalorieProgress';
 import './Sidebar.css';
 
 function getPreviousDateKey(dateKey) {
@@ -127,12 +129,7 @@ export default function Sidebar() {
   const initials     = displayName.charAt(0).toUpperCase();
   const isAdmin      = user?.role === 'Admin';
   const avatarSrc    = user?.avatar || '';
-
-  // Progress ring SVG (percentage = 70% filled)
-  const RADIUS       = 30;
-  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-  const progress     = 0.70;
-  const strokeDash   = `${CIRCUMFERENCE * progress} ${CIRCUMFERENCE * (1 - progress)}`;
+  const { caloriesToday, targetCalories } = useTodayCalorieProgress();
 
   return (
     <aside className="main-sidebar">
@@ -144,37 +141,13 @@ export default function Sidebar() {
 
       {/* ── Profile Card ── */}
       <div className="sidebar-profile-card">
-        <div className="sidebar-avatar-wrapper">
-          <svg className="sidebar-avatar-ring" viewBox="0 0 72 72" fill="none">
-            <circle cx="36" cy="36" r={RADIUS} stroke={isPremium ? "#fdf6e2" : "#e8f7e8"} strokeWidth="4" />
-            <circle
-              cx="36" cy="36" r={RADIUS}
-              stroke={isPremium ? "#D4AF37" : "#6CCB63"} strokeWidth="4"
-              strokeLinecap="round"
-              strokeDasharray={strokeDash}
-              strokeDashoffset={CIRCUMFERENCE * 0.25}
-              style={{ transition: 'stroke-dasharray 1s ease' }}
-            />
-          </svg>
-          {avatarSrc ? (
-            <img 
-              className="sidebar-avatar sidebar-avatar-image" 
-              src={avatarSrc} 
-              alt="Avatar" 
-              style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}
-            />
-          ) : (
-            <div 
-              className="sidebar-avatar" 
-              style={{ border: isPremium ? '2px solid #D4AF37' : 'none' }}
-            >
-              {initials}
-            </div>
-          )}
-          <div className="sidebar-streak-badge">
-            <FiTrendingUp size={14} />
-          </div>
-        </div>
+        <SidebarProgressAvatar
+          avatarSrc={avatarSrc}
+          initials={initials}
+          isPremium={isPremium}
+          caloriesToday={caloriesToday}
+          targetCalories={targetCalories}
+        />
 
         <div className="sidebar-user-greeting">
           <h4 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>

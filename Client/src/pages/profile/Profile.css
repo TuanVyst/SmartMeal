@@ -105,7 +105,7 @@
 }
 
 .btn-save {
-  background-color: #444;
+  background-color: #16a34a;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -117,7 +117,7 @@
 }
 
 .btn-save:hover {
-  background-color: #008f4c;
+  background-color: #15803d;
 }
 
 .btn-save:disabled {
@@ -199,7 +199,7 @@
 }
 
 .btn-renew-premium {
-  background-color: #444;
+  background-color: #16a34a;
   color: white;
   border: none;
   padding: 0.65rem 1.25rem;
@@ -213,7 +213,7 @@
 }
 
 .btn-renew-premium:hover {
-  background-color: #008f4c;
+  background-color: #15803d;
 }
 
 .history-title {

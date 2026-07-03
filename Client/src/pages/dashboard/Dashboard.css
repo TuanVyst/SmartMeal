@@ -157,7 +157,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #444, #444);
+  background: linear-gradient(135deg, #16a34a, #22c55e);
   color: white;
   border: none;
   border-radius: 16px;
@@ -172,7 +172,7 @@
 }
 
 .hero-cta-btn:hover {
-  background: linear-gradient(135deg, #444, #3da33b);
+  background: linear-gradient(135deg, #15803d, #16a34a);
   box-shadow: 0 10px 32px rgba(108, 203, 99, 0.55);
   transform: translateY(-3px);
 }

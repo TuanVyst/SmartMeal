@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { addDiaryEntry } from '../../services/nutritionDiaryService';
-import { getTodayDateKey } from '../../utils/dateTime';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
 import { FiSunrise, FiSun, FiMoon, FiCoffee } from 'react-icons/fi';
 
 const mealTypes = [
@@ -65,6 +66,12 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
       }
       
       await addDiaryEntry(payload);
+
+      // Notify Sidebar Progress Ring to update immediately
+      if (toDateKey(date) === getTodayDateKey()) {
+        notifyNutritionUpdated({ deltaCalories: macros.calories });
+      }
+
       setToast({ type: 'success', text: 'Đã thêm vào nhật ký!' });
       setTimeout(() => {
         setToast(null);
