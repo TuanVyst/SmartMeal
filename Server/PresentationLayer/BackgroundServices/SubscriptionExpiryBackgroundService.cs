@@ -49,23 +49,33 @@ namespace PresentationLayer.BackgroundServices
             var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             var now = DateTime.UtcNow;
+
+            // Expire active subscriptions past their EndDate
             var expiredSubscriptions = await ctx.Subscriptions
                 .Where(s => !s.IsDeleted && s.Status == "active" && s.EndDate != null && s.EndDate <= now)
                 .ToListAsync();
 
-            if (expiredSubscriptions.Count == 0)
+            if (expiredSubscriptions.Count > 0)
             {
-                _logger.LogDebug("No expired subscriptions found at {Time}", now);
-                return;
+                foreach (var sub in expiredSubscriptions)
+                    sub.Status = "expired";
+                _logger.LogInformation("Expired {Count} active subscriptions", expiredSubscriptions.Count);
             }
 
-            foreach (var sub in expiredSubscriptions)
+            // Cancel pending subscriptions older than 15 minutes
+            var cutoff = now.AddMinutes(-15);
+            var stalePending = await ctx.Subscriptions
+                .Where(s => !s.IsDeleted && s.Status == "pending" && s.StartDate <= cutoff)
+                .ToListAsync();
+
+            if (stalePending.Count > 0)
             {
-                sub.Status = "expired";
+                foreach (var sub in stalePending)
+                    sub.Status = "cancelled";
+                _logger.LogInformation("Cancelled {Count} stale pending subscriptions", stalePending.Count);
             }
 
             await ctx.SaveChangesAsync();
-            _logger.LogInformation("Expired {Count} subscriptions at {Time}", expiredSubscriptions.Count, now);
         }
     }
 }

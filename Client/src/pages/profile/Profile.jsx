@@ -306,7 +306,11 @@ export default function Profile() {
                     const planInfo = plans.find((p) => p.plan_id === sub.plan_id);
                     const now = new Date();
                     const isExpired = sub.endDate && new Date(sub.endDate) < now;
-                    let displayStatus = sub.status === 'active' ? (isExpired ? 'Hết hạn' : 'Đang hoạt động') : sub.status;
+                    let displayStatus = sub.status === 'pending' ? 'Đang tiến hành'
+                      : sub.status === 'active' ? (isExpired ? 'Hết hạn' : 'Hoàn thành')
+                      : sub.status === 'cancelled' ? 'Đã huỷ'
+                      : sub.status === 'expired' ? 'Hết hạn'
+                      : sub.status;
 
                     return (
                       <tr key={sub.sub_id}>
