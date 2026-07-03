@@ -266,7 +266,7 @@ export default function Profile() {
               {isPremium && subscription ? (
                 <>
                   <h3>Trạng thái: <strong style={{color: '#16a34a'}}>Đã đăng ký (Premium PRO)</strong></h3>
-                  <p>Hạn dùng đến hết: <strong>{subscription.endDate ? new Date(subscription.endDate).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Vĩnh viễn'}</strong></p>
+                  <p>Hạn dùng đến hết: <strong>{subscription.endDate ? new Date(subscription.endDate).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Vĩnh viễn'}</strong></p>
                 </>
               ) : (
                 <>
@@ -311,8 +311,8 @@ export default function Profile() {
                     return (
                       <tr key={sub.sub_id}>
                         <td><strong>{planInfo?.name || 'Pro'}</strong></td>
-                        <td>{new Date(sub.startDate).toLocaleDateString('vi-VN')}</td>
-                        <td>{sub.endDate ? new Date(sub.endDate).toLocaleDateString('vi-VN') : 'Vĩnh viễn'}</td>
+                        <td>{new Date(sub.startDate).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                        <td>{sub.endDate ? new Date(sub.endDate).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Vĩnh viễn'}</td>
                         <td><code style={{background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.85rem'}}>{sub.paymentRef || 'N/A'}</code></td>
                         <td>
                           <span className={`status-badge ${sub.status === 'active' ? (isExpired ? 'expired' : 'active') : sub.status}`}>

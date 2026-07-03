@@ -29,14 +29,15 @@ export default function Payment() {
     };
   }, []);
 
-  const startPolling = useCallback((accountId) => {
+  const startPolling = useCallback((accountId, currentOrderCode) => {
     if (pollingRef.current) clearInterval(pollingRef.current);
+    const orderCodeStr = currentOrderCode?.toString();
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await subscriptionService.getSubscriptionsByAccountId(accountId);
         const subs = Array.isArray(data) ? data : data?.data || [];
         const active = subs.find(
-          (s) => s.status === 'active' && s.paymentRef === orderCode?.toString()
+          (s) => s.status === 'active' && s.paymentRef?.toString() === orderCodeStr
         );
         if (active) {
           clearInterval(pollingRef.current);
@@ -47,7 +48,7 @@ export default function Payment() {
         /* ignore polling errors */
       }
     }, 5000);
-  }, [orderCode, checkPremiumStatus]);
+  }, [checkPremiumStatus]);
 
   useEffect(() => {
     if (step !== 'pending' || timeLeft <= 0) return;
@@ -79,7 +80,7 @@ export default function Payment() {
         setOrderCode(resp.orderCode);
         setQrImage(resp.qrCode || '');
         setStep('pending');
-        startPolling(accountId);
+        startPolling(accountId, resp.orderCode);
       } else {
         setErrorMsg(data.message || 'Không thể tạo thanh toán. Vui lòng thử lại.');
         setStep('idle');

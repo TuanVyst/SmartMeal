@@ -39,10 +39,14 @@ export function AuthProvider({ children }) {
       const { data } = await subscriptionService.getSubscriptionsByAccountId(accountId);
       const subs = data.data || [];
       const now = new Date();
-      const activeSub = subs.find(s =>
-        s.status === 'active' &&
-        (!s.endDate || new Date(s.endDate) > now)
-      );
+      const activeSubs = subs
+        .filter(s => s.status === 'active' && (!s.endDate || new Date(s.endDate) > now))
+        .sort((a, b) => {
+          if (!a.endDate) return 1;
+          if (!b.endDate) return -1;
+          return new Date(b.endDate) - new Date(a.endDate);
+        });
+      const activeSub = activeSubs[0] || null;
 
       if (activeSub) {
         setSubscription(activeSub);
