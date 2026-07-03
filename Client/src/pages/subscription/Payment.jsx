@@ -18,6 +18,8 @@ export default function Payment() {
   const [timeLeft, setTimeLeft] = useState(900);
   const [errorMsg, setErrorMsg] = useState('');
   const pollingRef = useRef(null);
+  const orderCodeRef = useRef(null);
+  const planIdRef = useRef(null);
 
   useEffect(() => {
     if (!plan) navigate('/subscription');
@@ -31,13 +33,18 @@ export default function Payment() {
 
   const startPolling = useCallback((accountId, currentOrderCode) => {
     if (pollingRef.current) clearInterval(pollingRef.current);
-    const orderCodeStr = currentOrderCode?.toString();
+    if (currentOrderCode == null || currentOrderCode === undefined) return;
+    const orderCodeStr = currentOrderCode.toString();
+    orderCodeRef.current = orderCodeStr;
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await subscriptionService.getSubscriptionsByAccountId(accountId);
         const subs = Array.isArray(data) ? data : data?.data || [];
         const active = subs.find(
-          (s) => s.status === 'active' && s.paymentRef?.toString() === orderCodeStr
+          (s) =>
+            s.status === 'active' &&
+            s.plan_id === planIdRef.current &&
+            s.paymentRef?.toString() === orderCodeRef.current
         );
         if (active) {
           clearInterval(pollingRef.current);
@@ -80,6 +87,7 @@ export default function Payment() {
         setOrderCode(resp.orderCode);
         setQrImage(resp.qrCode || '');
         setStep('pending');
+        planIdRef.current = plan.plan_id;
         startPolling(accountId, resp.orderCode);
       } else {
         setErrorMsg(data.message || 'Không thể tạo thanh toán. Vui lòng thử lại.');

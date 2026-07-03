@@ -60,7 +60,7 @@ namespace Service.Implements
                 Plan_id = request.Plan_id,
                 StartDate = startDate,
                 EndDate = endDate,
-                Status = "active",
+                Status = request.Status,
                 PaymentRef = request.PaymentRef,
                 IsDeleted = false
             };
