@@ -91,15 +91,15 @@ namespace Service.Implements
             try
             {
                 var jsonString = JsonSerializer.Serialize(webhookData);
-                var webhookPayload = JsonSerializer.Deserialize<JsonElement>(jsonString);
+                var json = JsonSerializer.Deserialize<JsonElement>(jsonString);
 
-                if (!webhookPayload.TryGetProperty("success", out var successProp) || !successProp.GetBoolean())
+                if (!json.TryGetProperty("code", out var codeProp) || codeProp.GetString() != "00")
                 {
                     _logger.LogWarning("PayOS webhook indicates failure");
                     return;
                 }
 
-                if (!webhookPayload.TryGetProperty("data", out var data))
+                if (!json.TryGetProperty("data", out var data))
                 {
                     _logger.LogWarning("PayOS webhook missing data field");
                     return;
@@ -109,7 +109,8 @@ namespace Service.Implements
                 var amount = data.GetProperty("amount").GetInt32();
                 var reference = data.TryGetProperty("reference", out var refProp) ? refProp.GetString() : "";
 
-                _logger.LogInformation("PayOS webhook received: OrderCode={OrderCode}, Amount={Amount}, Ref={Reference}", orderCode, amount, reference);
+                _logger.LogInformation("PayOS webhook received: OrderCode={OrderCode}, Amount={Amount}, Ref={Reference}",
+                    orderCode, amount, reference);
 
                 var subscriptions = await _subscriptionRepo.GetAllSubscriptions();
                 var subscription = subscriptions.Find(s => s.PaymentRef == orderCode.ToString());

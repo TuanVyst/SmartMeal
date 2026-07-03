@@ -17,6 +17,7 @@ export default function Payment() {
   const [orderCode, setOrderCode] = useState(null);
   const [timeLeft, setTimeLeft] = useState(900);
   const [errorMsg, setErrorMsg] = useState('');
+  const [copied, setCopied] = useState(null);
   const pollingRef = useRef(null);
   const orderCodeRef = useRef(null);
   const planIdRef = useRef(null);
@@ -150,6 +151,69 @@ export default function Payment() {
               </div>
             </div>
           </div>
+
+          {step === 'pending' && (
+            <div className="transfer-info-card">
+              <h3>Thông tin chuyển khoản thủ công:</h3>
+              <div className="detail-rows">
+                <div className="detail-item">
+                  <span className="item-label">Ngân hàng</span>
+                  <div className="item-value-row">
+                    <span className="item-value">BIDV</span>
+                  </div>
+                </div>
+                <div className="detail-item">
+                  <span className="item-label">Số tài khoản</span>
+                  <div className="item-value-row">
+                    <span className="item-value font-mono">7621983180</span>
+                    <button
+                      className="btn-copy"
+                      onClick={() => {
+                        navigator.clipboard.writeText('7621983180');
+                        setCopied('stk');
+                        setTimeout(() => setCopied(null), 2000);
+                      }}
+                    >
+                      {copied === 'stk' ? 'Đã sao chép' : 'Sao chép'}
+                    </button>
+                  </div>
+                </div>
+                <div className="detail-item">
+                  <span className="item-label">Chủ tài khoản</span>
+                  <div className="item-value-row">
+                    <span className="item-value">MAI TUAN VY</span>
+                  </div>
+                </div>
+                <div className="detail-item">
+                  <span className="item-label">Số tiền</span>
+                  <div className="item-value-row">
+                    <span className="item-value font-bold">
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(plan.price)}
+                    </span>
+                  </div>
+                </div>
+                <div className="detail-item highlighted-item">
+                  <span className="item-label">Nội dung chuyển khoản</span>
+                  <div className="item-value-row">
+                    <span className="item-value font-bold font-mono">{orderCode ?? ''}</span>
+                    <button
+                      className="btn-copy btn-copy-highlight"
+                      onClick={() => {
+                        navigator.clipboard.writeText(orderCode?.toString() ?? '');
+                        setCopied('content');
+                        setTimeout(() => setCopied(null), 2000);
+                      }}
+                    >
+                      {copied === 'content' ? 'Đã sao chép' : 'Sao chép'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p className="transfer-note">
+                Sau khi chuyển khoản, vui lòng đợi hệ thống xác nhận tự động (có thể mất đến 2 phút).
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="payment-right-card">

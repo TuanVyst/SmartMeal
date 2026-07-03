@@ -381,6 +381,27 @@
    SMARTMEAL CHECKOUT PAYMENT - Styling
    ============================================ */
 
+.transfer-info-card {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+  margin-top: 24px;
+}
+
+.transfer-info-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.transfer-note {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 12px;
+  line-height: 1.4;
+  font-style: italic;
+}
+
 .payment-page-container {
   max-width: 1100px;
   margin: 0 auto;
