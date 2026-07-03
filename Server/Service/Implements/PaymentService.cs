@@ -48,7 +48,7 @@ namespace Service.Implements
 
             var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var amount = (int)plan.Price;
-            var description = $"SMARTMEAL {plan.Name}";
+            var description = orderCode.ToString();
 
             var returnUrl = _configuration["PayOS:ReturnUrl"] ?? "https://smart-meal-three.vercel.app/payment/success";
             var cancelUrl = _configuration["PayOS:CancelUrl"] ?? "https://smart-meal-three.vercel.app/payment/cancel";
@@ -142,7 +142,6 @@ namespace Service.Implements
                 subscription.Status = "active";
                 subscription.StartDate = startDate;
                 subscription.EndDate = endDate;
-                subscription.PaymentRef = reference ?? orderCode.ToString();
 
                 await _subscriptionRepo.UpdateSubscription(subscription);
 
