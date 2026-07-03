@@ -71,9 +71,18 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPost("webhook")]
+        [HttpPut("webhook")]
+        [HttpGet("webhook")]
+        [HttpOptions("webhook")]
         [AllowAnonymous]
         public async Task<IActionResult> Webhook([FromBody] object payload)
         {
+            if (Request.Method == "OPTIONS")
+                return Ok();
+
+            if (Request.Method == "GET")
+                return Ok(new { code = "00", desc = "success", success = true });
+
             try
             {
                 _logger.LogInformation("PayOS webhook received");
