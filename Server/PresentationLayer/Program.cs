@@ -165,6 +165,9 @@ builder.Services.AddScoped<Service.Interfaces.IPlanService, Service.Implements.P
 builder.Services.AddScoped<Repository.Interfaces.ISubscriptionRepo, Repository.Implements.SubscriptionRepo>();
 builder.Services.AddScoped<Service.Interfaces.ISubscriptionService, Service.Implements.SubscriptionService>();
 
+// Payment
+builder.Services.AddScoped<Service.Interfaces.IPaymentService, Service.Implements.PaymentService>();
+
 // Background Services
 builder.Services.AddHostedService<SubscriptionExpiryBackgroundService>();
 

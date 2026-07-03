@@ -30,6 +30,8 @@ import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
 import SubscriptionPlans from '../pages/subscription/SubscriptionPlans';
 import Payment from '../pages/subscription/Payment';
+import PaymentSuccess from '../pages/subscription/PaymentSuccess';
+import PaymentCancel from '../pages/subscription/PaymentCancel';
 
 export default function AppRoutes() {
   return (
@@ -49,6 +51,8 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/subscription" element={<SubscriptionPlans />} />
         <Route path="/subscription/payment" element={<Payment />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
         <Route path="/favorites" element={<Favorites />} />

@@ -74,7 +74,7 @@
 }
 
 .form-input:focus {
-  border-color: #00a859;
+  border-color: #444;
   box-shadow: 0 0 0 3px rgba(0, 168, 89, 0.1);
 }
 
@@ -105,7 +105,7 @@
 }
 
 .btn-save {
-  background-color: #00a859;
+  background-color: #444;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -127,7 +127,7 @@
 
 .alert-success {
   background-color: #e6f7ef;
-  color: #00a859;
+  color: #444;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -163,7 +163,7 @@
 }
 
 .profile-tab-btn.active {
-  color: #00a859;
+  color: #444;
   background-color: #e6f7ef;
 }
 
@@ -199,7 +199,7 @@
 }
 
 .btn-renew-premium {
-  background-color: #00a859;
+  background-color: #444;
   color: white;
   border: none;
   padding: 0.65rem 1.25rem;

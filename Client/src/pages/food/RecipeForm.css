@@ -41,7 +41,7 @@
 .recipe-form-card .form-group input:focus,
 .recipe-form-card .form-group textarea:focus,
 .recipe-form-card .form-group select:focus {
-  border-color: #22C55E;
+  border-color: #444;
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
   background: #fff;
 }
@@ -82,7 +82,7 @@
 .recipe-form-card .checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #22C55E;
+  accent-color: #444;
   cursor: pointer;
 }
 
@@ -119,12 +119,12 @@
 }
 
 .recipe-form-card .tag-chip:hover {
-  border-color: #22C55E;
+  border-color: #444;
   background: #f0fdf4;
 }
 
 .recipe-form-card .tag-chip.active {
-  border-color: #22C55E;
+  border-color: #444;
   background: #dcfce7;
   color: #15803d;
   font-weight: 500;
@@ -133,7 +133,7 @@
 .recipe-form-card .tag-chip input[type="checkbox"] {
   width: 14px;
   height: 14px;
-  accent-color: #22C55E;
+  accent-color: #444;
 }
 
 .recipe-form-card .form-actions {
