@@ -76,7 +76,7 @@ export default function Payment() {
       if (data.success && data.data) {
         const resp = data.data;
         setOrderCode(resp.orderCode);
-        setQrImage(resp.qrCode || '');
+        setQrImage(resp.qrCode ? `data:image/png;base64,${resp.qrCode}` : '');
         setStep('pending');
         startPolling(accountId);
       } else {
@@ -154,6 +154,10 @@ export default function Payment() {
                 Đi tới Bảng điều khiển
               </button>
             </div>
+          ) : step === 'pending' && !qrImage ? (
+            <div className="qr-code-wrapper">
+              <p className="qr-caption">Không thể tạo mã QR. Vui lòng thử lại.</p>
+            </div>
           ) : step === 'pending' && qrImage ? (
             <>
               <div className="countdown-timer">
@@ -167,7 +171,14 @@ export default function Payment() {
                   src={qrImage}
                   alt="QR Code thanh toán"
                   className="qr-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
                 />
+                <p className="qr-caption" style={{ display: 'none' }}>
+                  Lỗi hiển thị QR. Vui lòng bấm "Thanh toán ngay" lại.
+                </p>
                 <p className="qr-caption">
                   Quét mã QR bằng app ngân hàng hoặc MoMo
                 </p>
