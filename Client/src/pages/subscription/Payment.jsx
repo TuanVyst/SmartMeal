@@ -167,11 +167,11 @@ export default function Payment() {
                 <div className="detail-item">
                   <span className="item-label">Số tài khoản</span>
                   <div className="item-value-row">
-                    <span className="item-value font-mono">7621983180</span>
+                    <span className="item-value font-mono">V3CAS7621983180</span>
                     <button
                       className="btn-copy"
                       onClick={() => {
-                        navigator.clipboard.writeText('7621983180');
+                        navigator.clipboard.writeText('V3CAS7621983180');
                         setCopied('stk');
                         setTimeout(() => setCopied(null), 2000);
                       }}
