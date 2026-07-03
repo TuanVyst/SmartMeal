@@ -7,5 +7,6 @@ namespace BusinessObject.Dtos.ResponseModels
         public int Amount { get; set; }
         public string QrCode { get; set; }
         public string PaymentLinkId { get; set; }
+        public string TransferContent { get; set; }
     }
 }

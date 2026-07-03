@@ -15,6 +15,7 @@ export default function Payment() {
   const [step, setStep] = useState('idle');
   const [qrImage, setQrImage] = useState('');
   const [orderCode, setOrderCode] = useState(null);
+  const [transferContent, setTransferContent] = useState('');
   const [timeLeft, setTimeLeft] = useState(900);
   const [errorMsg, setErrorMsg] = useState('');
   const [copied, setCopied] = useState(null);
@@ -87,6 +88,7 @@ export default function Payment() {
         const resp = data.data;
         setOrderCode(resp.orderCode);
         setQrImage(resp.qrCode || '');
+        setTransferContent(resp.transferContent || resp.qrCode || '');
         setStep('pending');
         planIdRef.current = plan.plan_id;
         startPolling(accountId, resp.orderCode);
@@ -195,11 +197,11 @@ export default function Payment() {
                 <div className="detail-item highlighted-item">
                   <span className="item-label">Nội dung chuyển khoản</span>
                   <div className="item-value-row">
-                    <span className="item-value font-bold font-mono">{orderCode ?? ''}</span>
+                    <span className="item-value font-bold font-mono">{transferContent || orderCode ?? ''}</span>
                     <button
                       className="btn-copy btn-copy-highlight"
                       onClick={() => {
-                        navigator.clipboard.writeText(orderCode?.toString() ?? '');
+                        navigator.clipboard.writeText(transferContent || orderCode?.toString() ?? '');
                         setCopied('content');
                         setTimeout(() => setCopied(null), 2000);
                       }}

@@ -7,6 +7,7 @@ using PayOS.Models.V2.PaymentRequests;
 using Repository.Interfaces;
 using Service.Interfaces;
 using System;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -76,7 +77,8 @@ namespace Service.Implements
                     OrderCode = orderCode,
                     Amount = amount,
                     QrCode = response.QrCode,
-                    PaymentLinkId = response.PaymentLinkId
+                    PaymentLinkId = response.PaymentLinkId,
+                    TransferContent = ExtractPurposeOfTransaction(response.QrCode)
                 };
             }
             catch (Exception ex)
@@ -152,6 +154,56 @@ namespace Service.Implements
                 _logger.LogError(ex, "Error processing PayOS webhook");
                 throw;
             }
+        }
+        /// <summary>
+        /// Extracts the "Purpose of Transaction" (subfield 08 inside EMV tag 62)
+        /// from a VietQR payload string — this is exactly what banking apps display
+        /// as "Nội dung chuyển khoản".
+        /// </summary>
+        private static string ExtractPurposeOfTransaction(string qrCode)
+        {
+            if (string.IsNullOrEmpty(qrCode) || qrCode.Length < 4)
+                return null;
+
+            int index = 0;
+            while (index <= qrCode.Length - 4)
+            {
+                var tag = qrCode.Substring(index, 2);
+                if (tag == "63") break;
+
+                if (!int.TryParse(qrCode.Substring(index + 2, 2), out var length))
+                    break;
+
+                if (index + 4 + length > qrCode.Length)
+                    break;
+
+                var value = qrCode.Substring(index + 4, length);
+
+                if (tag == "62")
+                    return ExtractSubfield08(value);
+
+                index += 4 + length;
+            }
+
+            return null;
+        }
+
+        private static string ExtractSubfield08(string additionalData)
+        {
+            int index = 0;
+            while (index <= additionalData.Length - 4)
+            {
+                var tag = additionalData.Substring(index, 2);
+                if (!int.TryParse(additionalData.Substring(index + 2, 2), out var length))
+                    break;
+                if (index + 4 + length > additionalData.Length)
+                    break;
+                var value = additionalData.Substring(index + 4, length);
+                if (tag == "08")
+                    return value;
+                index += 4 + length;
+            }
+            return null;
         }
     }
 }
