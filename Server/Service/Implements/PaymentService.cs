@@ -67,6 +67,8 @@ namespace Service.Implements
                 var response = await payOS.PaymentRequests.CreateAsync(paymentData);
 
                 _logger.LogInformation("PayOS payment link created: OrderCode={OrderCode}, Amount={Amount}", orderCode, amount);
+                _logger.LogInformation("PayOS response: CheckoutUrl={CheckoutUrl}, QrCode length={QrCodeLen}, PaymentLinkId={PaymentLinkId}",
+                    response.CheckoutUrl, response.QrCode?.Length ?? 0, response.PaymentLinkId);
 
                 return new PaymentResponseDto
                 {

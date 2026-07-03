@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
 import { IoChevronBackOutline } from 'react-icons/io5';
+import { QRCodeSVG } from 'qrcode.react';
 import './SubscriptionPlans.css';
 
 export default function Payment() {
@@ -76,7 +77,7 @@ export default function Payment() {
       if (data.success && data.data) {
         const resp = data.data;
         setOrderCode(resp.orderCode);
-        setQrImage(resp.qrCode ? `data:image/png;base64,${resp.qrCode}` : '');
+        setQrImage(resp.qrCode || '');
         setStep('pending');
         startPolling(accountId);
       } else {
@@ -167,18 +168,12 @@ export default function Payment() {
                 </span>
               </div>
               <div className="qr-code-wrapper">
-                <img
-                  src={qrImage}
-                  alt="QR Code thanh toán"
-                  className="qr-image"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
+                <QRCodeSVG
+                  value={qrImage}
+                  size={220}
+                  level="M"
+                  style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '8px', background: '#fff' }}
                 />
-                <p className="qr-caption" style={{ display: 'none' }}>
-                  Lỗi hiển thị QR. Vui lòng bấm "Thanh toán ngay" lại.
-                </p>
                 <p className="qr-caption">
                   Quét mã QR bằng app ngân hàng hoặc MoMo
                 </p>
