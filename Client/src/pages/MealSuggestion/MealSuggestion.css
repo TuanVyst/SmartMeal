@@ -97,6 +97,58 @@
   margin: 0;
 }
 
+/* Shared Ingredient Search Bar (below tabs) */
+.ingredient-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.ingredient-search-bar:focus-within {
+  border-color: #22C55E;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+.ingredient-search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  color: #1e293b;
+}
+.ingredient-search-bar input::placeholder {
+  color: #94a3b8;
+}
+.ingredient-search-bar svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+.ingredient-search-clear {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+.ingredient-search-clear:hover {
+  color: #64748b;
+}
+.ingredient-search-empty {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  padding: 2rem 0;
+}
+
 /* Category Scrolling and Groups */
 .category-scroll-container {
   overflow-y: auto;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FiSearch } from 'react-icons/fi';
 import { getIngredients } from '../../services/foodService';
@@ -39,6 +39,7 @@ export default function MealSuggestion() {
   const [alertMsg, setAlertMsg] = useState(null);
   const [drawerRecipe, setDrawerRecipe] = useState(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
 
   const fetchIngredients = async () => {
     try {
@@ -137,8 +138,6 @@ export default function MealSuggestion() {
     return groups;
   };
 
-  const groupedIngredients = getGroupedIngredients();
-
   const normalizeText = (str) => {
     return str
       .toLowerCase()
@@ -148,6 +147,24 @@ export default function MealSuggestion() {
       .replace(/Đ/g, 'D')
       .trim();
   };
+
+  const groupedIngredients = getGroupedIngredients();
+
+  const filteredGroupedIngredients = useMemo(() => {
+    if (!ingredientSearchQuery.trim()) return groupedIngredients;
+
+    const q = normalizeText(ingredientSearchQuery);
+    const result = {};
+    Object.keys(groupedIngredients).forEach(category => {
+      const matches = groupedIngredients[category].filter(ing =>
+        normalizeText(ing.name).includes(q)
+      );
+      if (matches.length > 0) {
+        result[category] = matches;
+      }
+    });
+    return result;
+  }, [groupedIngredients, ingredientSearchQuery]);
 
   const getRecipeHealthInfo = (recipe) => {
     if (!lockedIngredients.length) return null;
@@ -328,12 +345,31 @@ export default function MealSuggestion() {
             </div>
           )}
 
+        <div className="ingredient-search-bar">
+          <FiSearch size={16} />
+          <input
+            type="text"
+            placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
+            value={ingredientSearchQuery}
+            onChange={(e) => setIngredientSearchQuery(e.target.value)}
+          />
+          {ingredientSearchQuery && (
+            <button
+              className="ingredient-search-clear"
+              onClick={() => setIngredientSearchQuery('')}
+            >
+              &times;
+            </button>
+          )}
+        </div>
+
         <div className="category-scroll-container">
-          {leftTab === 'pantry' && Object.keys(groupedIngredients).map(categoryName => (
+          {leftTab === 'pantry' && (Object.keys(filteredGroupedIngredients).length > 0
+            ? Object.keys(filteredGroupedIngredients).map(categoryName => (
             <div key={categoryName} className="category-group">
               <h4 className="category-header">{categoryName}</h4>
               <div className="ingredients-pills-list">
-                {groupedIngredients[categoryName].map(ing => {
+                {filteredGroupedIngredients[categoryName].map(ing => {
                   const isPantry = pantryItems.includes(ing.ingredient_id);
                   const isAllergy = allergies.some(a => a.ingredient_id === ing.ingredient_id);
                   return (
@@ -352,13 +388,16 @@ export default function MealSuggestion() {
                 })}
               </div>
             </div>
-          ))}
+          ))
+            : <div className="ingredient-search-empty">Không tìm thấy nguyên liệu nào</div>
+          )}
 
-          {leftTab === 'allergy' && Object.keys(groupedIngredients).map(categoryName => (
+          {leftTab === 'allergy' && (Object.keys(filteredGroupedIngredients).length > 0
+            ? Object.keys(filteredGroupedIngredients).map(categoryName => (
             <div key={categoryName} className="category-group">
               <h4 className="category-header">{categoryName}</h4>
               <div className="ingredients-pills-list">
-                {groupedIngredients[categoryName].map(ing => {
+                {filteredGroupedIngredients[categoryName].map(ing => {
                   const isAllergy = allergies.some(a => a.ingredient_id === ing.ingredient_id);
                   return (
                     <button
@@ -373,7 +412,9 @@ export default function MealSuggestion() {
                 })}
               </div>
             </div>
-          ))}
+          ))
+            : <div className="ingredient-search-empty">Không tìm thấy nguyên liệu nào</div>
+          )}
         </div>
       </div>
 

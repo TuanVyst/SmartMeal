@@ -72,8 +72,6 @@ export function HealthProfileProvider({ children }) {
       return;
     }
 
-    setLoading(true);
-
     const fetchProfile = async () => {
       try {
         const { success, profile } = await healthSurveyService.getHealthProfile();
