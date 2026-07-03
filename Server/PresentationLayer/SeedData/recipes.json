@@ -286,7 +286,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "thịt heo",
+        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -345,11 +345,6 @@
     "Ingredients": [
       {
         "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -581,7 +576,7 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "thịt heo",
+        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -650,11 +645,6 @@
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Xương heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -1416,7 +1406,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "thịt heo",
+        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },

@@ -698,7 +698,7 @@ public static class DbInitializer
             {
                 Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
                 Name = "Gói Pro Tháng",
-                Price = 59000,
+                Price = 49000,
                 Duration = 30,
                 Description = "Lựa chọn phổ biến nhất để duy trì thói quen ăn uống lành mạnh.",
                 Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\"]",
