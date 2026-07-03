@@ -197,11 +197,11 @@ export default function Payment() {
                 <div className="detail-item highlighted-item">
                   <span className="item-label">Nội dung chuyển khoản</span>
                   <div className="item-value-row">
-                    <span className="item-value font-bold font-mono">{transferContent || orderCode ?? ''}</span>
+                    <span className="item-value font-bold font-mono">{transferContent || orderCode || ''}</span>
                     <button
                       className="btn-copy btn-copy-highlight"
                       onClick={() => {
-                        navigator.clipboard.writeText(transferContent || orderCode?.toString() ?? '');
+                        navigator.clipboard.writeText(transferContent || (orderCode?.toString() ?? ''));
                         setCopied('content');
                         setTimeout(() => setCopied(null), 2000);
                       }}
