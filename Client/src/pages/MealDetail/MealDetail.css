@@ -120,6 +120,28 @@
   color: #1e293b;
 }
 
+.meta-diary-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  padding: 0.6rem 1.2rem;
+  background-color: #fff;
+  border: 2px solid #00a859;
+  border-radius: 8px;
+  color: #00a859;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.meta-diary-btn:hover {
+  background-color: #00a859;
+  color: #fff;
+}
+
 .detail-body {
   display: grid;
   grid-template-columns: 1fr 2fr;
