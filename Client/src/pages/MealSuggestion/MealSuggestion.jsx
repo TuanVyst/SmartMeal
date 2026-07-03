@@ -49,8 +49,13 @@ export default function MealSuggestion() {
 
   const fetchRecipes = async () => {
     try {
-      const res = await recipeService.getAll();
-      setRecipes(res.data.data || []);
+      if (pantryItems.length > 0 && accountId) {
+        const res = await recipeService.suggestFromPantry(accountId);
+        setRecipes(res.data.data || []);
+      } else {
+        const res = await recipeService.getAll();
+        setRecipes(res.data.data || []);
+      }
     } catch (err) {
       console.error('Không thể tải công thức:', err);
     }
@@ -67,8 +72,11 @@ export default function MealSuggestion() {
 
   useEffect(() => {
     fetchIngredients();
-    fetchRecipes();
   }, []);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [pantryItems, accountId]);
 
   useEffect(() => {
     if (accountId) {
@@ -157,6 +165,7 @@ export default function MealSuggestion() {
   };
 
   const suggestedRecipes = recipes.map(rec => {
+    // --- Normalize fields from both getAll and suggestFromPantry response formats ---
     const recipeName = rec.recipe_name || rec.Recipe_name || "";
     const recipeId = rec.recipe_id || rec.Recipe_id || "";
     const description = rec.description || rec.Description || "";
@@ -164,81 +173,83 @@ export default function MealSuggestion() {
     const cookTime = rec.cookTime || rec.CookTime || 0;
     const servings = rec.servings || rec.Servings || 1;
     const difficultyRaw = rec.difficulty || rec.Difficulty || "easy";
-    const difficultyMap = {
-      easy: "Dễ",
-      medium: "Trung bình",
-      hard: "Khó"
-    };
+    const difficultyMap = { easy: "Dễ", medium: "Trung bình", hard: "Khó" };
     const difficulty = difficultyMap[difficultyRaw.toLowerCase()] || difficultyRaw;
     const recipeIngredients = rec.recipeIngredients || rec.RecipeIngredients || [];
 
-    // Find matching mock recipe for image
+    // --- Image ---
     const mockRecipe = mockRecipesData.find(r => r.id === recipeId || r.title.toLowerCase() === recipeName.toLowerCase());
     const imageUrl = mockRecipe ? mockRecipe.imageUrl : "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop";
 
-    // Calculate dynamic calories and other nutrition values
-    let totalCalories = 0;
-    let totalProtein = 0;
-    let totalCarbs = 0;
-    let totalFat = 0;
-    let totalFiber = 0;
-    let totalSugar = 0;
-    let totalSodium = 0;
-    let totalCholesterol = 0;
+    // --- Handle suggestFromPantry response (pre-computed matchPercentage, missingIngredients, allIngredients) ---
+    const fromPantry = rec.matchPercentage !== undefined;
+    let matchPercentage, missingIngredients, allIngredients, requiredIngredients;
+    let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0, totalFiber = 0, totalSugar = 0, totalSodium = 0, totalCholesterol = 0;
 
-    const mappedIngredients = recipeIngredients.map(ri => {
-      const quantityVal = ri.quantity || ri.Quantity || 0;
-      const uom = ri.uom || ri.UOM || "";
-      const ingName = ri.name || ri.Name || 'Nguyên liệu';
-      
-      let nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
-      const nv = ri.nutritionalValue || ri.NutritionalValue;
-      if (nv) {
-        const servingSize = nv.servingSize || nv.ServingSize || 1;
-        const multiplier = quantityVal / servingSize;
-        nutrition = {
-          calories: Math.round((nv.calories || nv.Calories || 0) * multiplier * 10) / 10,
-          protein: Math.round((nv.protein || nv.Protein || 0) * multiplier * 10) / 10,
-          carbs: Math.round((nv.carbs || nv.Carbs || nv.carbohydrates || nv.Carbohydrates || 0) * multiplier * 10) / 10,
-          fat: Math.round((nv.fat || nv.Fat || 0) * multiplier * 10) / 10,
-          fiber: Math.round((nv.fiber || nv.Fiber || 0) * multiplier * 10) / 10,
-          sugar: Math.round((nv.sugar || nv.Sugar || 0) * multiplier * 10) / 10,
-          sodium: Math.round((nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * multiplier * 10) / 10,
-          cholesterol: Math.round((nv.cholesterol || nv.Cholesterol || 0) * multiplier * 10) / 10,
-        };
-      }
-      
-      totalCalories += nutrition.calories;
-      totalProtein += nutrition.protein;
-      totalCarbs += nutrition.carbs;
-      totalFat += nutrition.fat;
-      totalFiber += nutrition.fiber;
-      totalSugar += nutrition.sugar;
-      totalSodium += nutrition.sodium;
-      totalCholesterol += nutrition.cholesterol;
+    if (fromPantry) {
+      matchPercentage = rec.matchPercentage;
+      missingIngredients = rec.missingIngredients || [];
+      allIngredients = (rec.allIngredients || []).map(ai => ({
+        name: ai.name || ai.Name || 'Nguyên liệu',
+        amount: ai.amount || ai.Amount || '',
+        possessed: ai.possessed !== undefined ? ai.possessed : false,
+        nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 }
+      }));
+      requiredIngredients = allIngredients.map(i => i.name);
+      // ponytail: suggestFromPantry doesn't return nutritional values; calories stay 0
+    } else {
+      // Existing client-side calculation for getAll response
+      const mappedIngredients = recipeIngredients.map(ri => {
+        const quantityVal = ri.quantity || ri.Quantity || 0;
+        const uom = ri.uom || ri.UOM || "";
+        const ingName = ri.name || ri.Name || 'Nguyên liệu';
 
-      const sysIng = ingredients.find(i => {
-        const dbName = normalizeText(i.name);
-        const recipeName = normalizeText(ingName);
-        return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
+        let nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+        const nv = ri.nutritionalValue || ri.NutritionalValue;
+        if (nv) {
+          const servingSize = nv.servingSize || nv.ServingSize || 1;
+          const multiplier = quantityVal / servingSize;
+          nutrition = {
+            calories: Math.round((nv.calories || nv.Calories || 0) * multiplier * 10) / 10,
+            protein: Math.round((nv.protein || nv.Protein || 0) * multiplier * 10) / 10,
+            carbs: Math.round((nv.carbs || nv.Carbs || nv.carbohydrates || nv.Carbohydrates || 0) * multiplier * 10) / 10,
+            fat: Math.round((nv.fat || nv.Fat || 0) * multiplier * 10) / 10,
+            fiber: Math.round((nv.fiber || nv.Fiber || 0) * multiplier * 10) / 10,
+            sugar: Math.round((nv.sugar || nv.Sugar || 0) * multiplier * 10) / 10,
+            sodium: Math.round((nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * multiplier * 10) / 10,
+            cholesterol: Math.round((nv.cholesterol || nv.Cholesterol || 0) * multiplier * 10) / 10,
+          };
+        }
+
+        totalCalories += nutrition.calories;
+        totalProtein += nutrition.protein;
+        totalCarbs += nutrition.carbs;
+        totalFat += nutrition.fat;
+        totalFiber += nutrition.fiber;
+        totalSugar += nutrition.sugar;
+        totalSodium += nutrition.sodium;
+        totalCholesterol += nutrition.cholesterol;
+
+        const sysIng = ingredients.find(i => {
+          const dbName = normalizeText(i.name);
+          const recipeName = normalizeText(ingName);
+          return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
+        });
+        const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
+
+        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, nutrition };
       });
-      const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
 
-      return {
-        name: ingName,
-        amount: `${quantityVal} ${uom}`.trim(),
-        possessed,
-        nutrition
-      };
-    });
+      allIngredients = mappedIngredients;
+      requiredIngredients = mappedIngredients.map(i => i.name);
+      missingIngredients = mappedIngredients.filter(i => !i.possessed).map(i => i.name);
+      const possessedCount = mappedIngredients.filter(i => i.possessed).length;
+      matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
+    }
 
     const calculatedCalories = Math.round(totalCalories / servings);
-    const requiredIngredients = mappedIngredients.map(i => i.name);
-    const missingIngredients = mappedIngredients.filter(i => !i.possessed).map(i => i.name);
 
-    const possessedCount = mappedIngredients.filter(i => i.possessed).length;
-    const matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
-
+    // --- Allergy check (always client-side) ---
     const allergicIngredients = requiredIngredients.filter(reqIng => {
       const sysIng = ingredients.find(i => {
         const dbName = normalizeText(i.name);
@@ -259,8 +270,8 @@ export default function MealSuggestion() {
       imageUrl,
       matchPercentage,
       missingIngredients,
-      allIngredients: mappedIngredients,
-      ingredients: mappedIngredients,
+      allIngredients,
+      ingredients: allIngredients,
       requiredIngredients,
       hasAllergyConflict,
       allergicIngredients,
