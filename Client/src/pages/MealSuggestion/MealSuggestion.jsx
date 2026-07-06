@@ -153,11 +153,12 @@ export default function MealSuggestion() {
   const filteredGroupedIngredients = useMemo(() => {
     if (!ingredientSearchQuery.trim()) return groupedIngredients;
 
-    const q = normalizeText(ingredientSearchQuery);
+    const escaped = ingredientSearchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu');
     const result = {};
     Object.keys(groupedIngredients).forEach(category => {
       const matches = groupedIngredients[category].filter(ing =>
-        normalizeText(ing.name).includes(q)
+        re.test(ing.name)
       );
       if (matches.length > 0) {
         result[category] = matches;
@@ -169,12 +170,14 @@ export default function MealSuggestion() {
   const getRecipeHealthInfo = (recipe) => {
     if (!lockedIngredients.length) return null;
     const recipeIngNames = (recipe.ingredients || []).map(i => i.name) || recipe.requiredIngredients || [];
-    const locked = lockedIngredients.filter(li =>
-      recipeIngNames.some(ri => normalizeText(ri).includes(normalizeText(li)))
-    );
-    const reduced = reducedIngredients.filter(ri =>
-      recipeIngNames.some(rin => normalizeText(rin).includes(normalizeText(ri)))
-    );
+    const locked = lockedIngredients.filter(li => {
+      const escaped = li.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return recipeIngNames.some(ri => new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(ri));
+    });
+    const reduced = reducedIngredients.filter(ri => {
+      const escaped = ri.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return recipeIngNames.some(rin => new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(rin));
+    });
     return { locked, reduced };
   };
 
@@ -304,8 +307,8 @@ export default function MealSuggestion() {
   .filter(recipe => showAllergicRecipes || !recipe.hasAllergyConflict)
   .filter(recipe => {
     if (!searchQuery.trim()) return true;
-    const q = normalizeText(searchQuery);
-    return normalizeText(recipe.title).includes(q);
+    const escaped = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(recipe.title);
   })
   .sort((a, b) => b.matchPercentage - a.matchPercentage);
 

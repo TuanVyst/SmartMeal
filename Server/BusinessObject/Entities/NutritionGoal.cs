@@ -18,6 +18,9 @@ namespace BusinessObject.Entities
         public double? TargetCarbs { get; set; }
         public double? TargetFat { get; set; }
         public double? TargetFiber { get; set; }
+        public double? TargetSugar { get; set; }
+        public double? TargetSalt { get; set; }
+        public double? TargetCholesterol { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

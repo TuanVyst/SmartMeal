@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { useDialog } from '../../context/DialogContext';
@@ -62,6 +63,50 @@ const bmiColorMap = {
   obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
 };
 
+function deriveLogNutrients(log, recipes, ingredients) {
+  const result = { fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+  const recipeId = log.recipe_id || log.recipe?.recipe_id;
+  const ingId = log.ingredient_id || log.ingredient?.ingredient_id;
+
+  if (recipeId) {
+    const recipe = recipes.find(r => r.recipe_id === recipeId) || log.recipe;
+    if (recipe) {
+      const riList = recipe.recipeIngredients || recipe.RecipeIngredients || [];
+      riList.forEach(ri => {
+        const nv = ri.ingredient?.nutritional_value || ri.Ingredient?.Nutritional_value
+                || ri.nutritionalValue || ri.NutritionalValue;
+        if (nv) {
+          const qty = ri.quantity || ri.Quantity || 0;
+          const sv = nv.servingSize || nv.ServingSize || 1;
+          const mult = sv > 0 ? qty / sv : 1;
+          result.fiber += (nv.fiber || nv.Fiber || 0) * mult;
+          result.sugar += (nv.sugar || nv.Sugar || 0) * mult;
+          result.sodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * mult;
+          result.cholesterol += (nv.cholesterol || nv.Cholesterol || 0) * mult;
+        }
+      });
+      const servings = recipe.servings || recipe.Servings || 1;
+      const factor = servings > 0 ? (log.quantity || 1) / servings : 1;
+      result.fiber *= factor;
+      result.sugar *= factor;
+      result.sodium *= factor;
+      result.cholesterol *= factor;
+    }
+  } else if (ingId) {
+    const ing = ingredients.find(i => i.ingredient_id === ingId) || log.ingredient;
+    if (ing && ing.nutritional_value) {
+      const nv = ing.nutritional_value;
+      const size = nv.servingSize || 100;
+      const factor = size > 0 ? (log.quantity || 100) / size : 1;
+      result.fiber = (nv.fiber || 0) * factor;
+      result.sugar = (nv.sugar || 0) * factor;
+      result.sodium = (nv.salt || nv.sodium || 0) * factor;
+      result.cholesterol = (nv.cholesterol || 0) * factor;
+    }
+  }
+  return result;
+}
+
 function canonicalMealType(mt) {
   return MEAL_TYPE_CANONICAL[mt] || mt;
 }
@@ -85,6 +130,7 @@ function mealBarColor(mt) {
 }
 
 export default function Nutrition() {
+  const navigate = useNavigate();
   const dialog = useDialog();
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
@@ -132,8 +178,9 @@ export default function Nutrition() {
     targetCarbs: 250,
     targetFat: 65,
     targetFiber: 25,
-    targetSodium: 2300, // mg
-    targetCholesterol: 300 // mg
+    targetSugar: 50,
+    targetSalt: 5,
+    targetCholesterol: 300
   });
 
   const [loading, setLoading] = useState(false);
@@ -180,8 +227,9 @@ export default function Nutrition() {
           targetCarbs: latestGoal.targetCarbs || 250,
           targetFat: latestGoal.targetFat || 65,
           targetFiber: latestGoal.targetFiber || 25,
-          targetSodium: 2300,
-          targetCholesterol: 300
+          targetSugar: latestGoal.targetSugar ?? 50,
+          targetSalt: latestGoal.targetSalt ?? 5,
+          targetCholesterol: latestGoal.targetCholesterol ?? 300
         });
       } else {
         setCurrentGoal(null);
@@ -242,7 +290,8 @@ export default function Nutrition() {
 
         const recipeIngredients = rec.recipeIngredients || rec.RecipeIngredients || [];
         recipeIngredients.forEach(ri => {
-          const nv = ri.nutritionalValue || ri.NutritionalValue;
+          const nv = ri.ingredient?.nutritional_value || ri.Ingredient?.Nutritional_value
+                  || ri.nutritionalValue || ri.NutritionalValue;
           if (nv) {
             const quantityVal = ri.quantity || ri.Quantity || 0;
             const servingSize = nv.servingSize || nv.ServingSize || 1;
@@ -381,7 +430,10 @@ export default function Nutrition() {
         targetProtein: parseFloat(goalForm.targetProtein),
         targetCarbs: parseFloat(goalForm.targetCarbs),
         targetFat: parseFloat(goalForm.targetFat),
-        targetFiber: parseFloat(goalForm.targetFiber)
+        targetFiber: parseFloat(goalForm.targetFiber),
+        targetSugar: parseFloat(goalForm.targetSugar),
+        targetSalt: parseFloat(goalForm.targetSalt),
+        targetCholesterol: parseFloat(goalForm.targetCholesterol)
       };
 
       if (currentGoal) {
@@ -417,10 +469,24 @@ export default function Nutrition() {
     acc.protein += curr.totalProtein || 0;
     acc.carbs += curr.totalCarbs || 0;
     acc.fat += curr.totalFat || 0;
-    acc.fiber += curr.totalFiber || 0;
-    acc.sugar += curr.totalSugar || 0;
-    acc.sodium += curr.totalSalt || curr.totalSodium || 0;
-    acc.cholesterol += curr.totalCholesterol || 0;
+
+    const hasFiber = curr.totalFiber != null;
+    const hasSugar = curr.totalSugar != null;
+    const hasSalt = curr.totalSalt != null || curr.totalSodium != null;
+    const hasCholesterol = curr.totalCholesterol != null;
+
+    if (hasFiber && hasSugar && hasSalt && hasCholesterol) {
+      acc.fiber += curr.totalFiber || 0;
+      acc.sugar += curr.totalSugar || 0;
+      acc.sodium += curr.totalSalt || curr.totalSodium || 0;
+      acc.cholesterol += curr.totalCholesterol || 0;
+    } else {
+      const d = deriveLogNutrients(curr, recipes, ingredients);
+      acc.fiber += hasFiber ? (curr.totalFiber || 0) : d.fiber;
+      acc.sugar += hasSugar ? (curr.totalSugar || 0) : d.sugar;
+      acc.sodium += hasSalt ? (curr.totalSalt || curr.totalSodium || 0) : d.sodium;
+      acc.cholesterol += hasCholesterol ? (curr.totalCholesterol || 0) : d.cholesterol;
+    }
     return acc;
   }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
@@ -430,9 +496,9 @@ export default function Nutrition() {
     carbs: currentGoal?.targetCarbs || dailyTargets?.carbs || 250,
     fat: currentGoal?.targetFat || dailyTargets?.fat || 65,
     fiber: currentGoal?.targetFiber || dailyTargets?.fiber || 25,
-    sugar: dailyTargets?.sugarLimit || 50,
-    sodium: dailyTargets?.saltLimit || 5,
-    cholesterol: 300
+    sugar: currentGoal?.targetSugar ?? dailyTargets?.sugarLimit ?? 50,
+    salt: currentGoal?.targetSalt ?? dailyTargets?.saltLimit ?? 5,
+    cholesterol: currentGoal?.targetCholesterol ?? 300
   };
 
   const calProgress = Math.min(Math.round((totalsToday.calories / activeGoal.calories) * 100), 200);
@@ -565,6 +631,22 @@ export default function Nutrition() {
                         <label>Mục tiêu Chất béo (g)</label>
                         <input type="number" value={goalForm.targetFat} onChange={e => setGoalForm({...goalForm, targetFat: e.target.value})} />
                       </div>
+                      <div className="group">
+                        <label>Mục tiêu Chất xơ (g)</label>
+                        <input type="number" value={goalForm.targetFiber} onChange={e => setGoalForm({...goalForm, targetFiber: e.target.value})} />
+                      </div>
+                      <div className="group">
+                        <label>Mục tiêu Đường (g)</label>
+                        <input type="number" value={goalForm.targetSugar} onChange={e => setGoalForm({...goalForm, targetSugar: e.target.value})} />
+                      </div>
+                      <div className="group">
+                        <label>Mục tiêu Muối (g)</label>
+                        <input type="number" step="0.1" value={goalForm.targetSalt} onChange={e => setGoalForm({...goalForm, targetSalt: e.target.value})} />
+                      </div>
+                      <div className="group">
+                        <label>Mục tiêu Cholesterol (mg)</label>
+                        <input type="number" value={goalForm.targetCholesterol} onChange={e => setGoalForm({...goalForm, targetCholesterol: e.target.value})} />
+                      </div>
                     </div>
                     <div className="goal-form-actions">
                       <button type="submit" className="btn-save-goal">Lưu</button>
@@ -624,23 +706,20 @@ export default function Nutrition() {
                         </div>
                         {totalsToday.fat > activeGoal.fat && <span className="warning-badge">Vượt mục tiêu</span>}
                       </div>
-                    </div>
 
-                    {/* Sugar & Sodium dietary restriction bars */}
-                    <div className="restriction-bars-section">
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <FiAlertCircle size={14} /> Hạn chế ăn uống
-                        {(hasDiabetes || hasHypertension || hasHeartDisease) && (
-                          <span style={{
-                            fontSize: 10, padding: '2px 8px', borderRadius: 8,
-                            background: '#fef2f2', color: '#dc2626', fontWeight: 600,
-                          }}>
-                            Có bệnh lý nền
-                          </span>
-                        )}
+                      {/* Fiber */}
+                      <div className="macro-bar-item">
+                        <div className="label-row">
+                          <span>Chất xơ</span>
+                          <span>{Math.round(totalsToday.fiber)}g / {activeGoal.fiber}g</span>
+                        </div>
+                        <div className="bar-bg">
+                          <div className="bar-fill fiber-bg" style={{ width: `${Math.min((totalsToday.fiber / activeGoal.fiber) * 100, 100)}%` }}></div>
+                        </div>
+                        {totalsToday.fiber > activeGoal.fiber && <span className="warning-badge">Vượt mục tiêu</span>}
                       </div>
 
-                      {/* Sugar bar */}
+                      {/* Sugar */}
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -661,28 +740,28 @@ export default function Nutrition() {
                         {totalsToday.sugar > activeGoal.sugar && <span className="warning-badge">Vượt giới hạn</span>}
                       </div>
 
-                      {/* Sodium bar */}
+                      {/* Salt */}
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                             <FiDroplet size={14} /> Muối
                             {(hasHypertension || hasHeartDisease) && (
-                              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sodium > activeGoal.sodium ? '#fef2f2' : '#fffbeb', color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#d97706', fontWeight: 600 }}>
+                              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sodium > activeGoal.salt ? '#fef2f2' : '#fffbeb', color: totalsToday.sodium > activeGoal.salt ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Huyết áp
                               </span>
                             )}
                           </span>
-                          <span style={{ fontWeight: totalsToday.sodium > activeGoal.sodium ? 700 : 400, color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : undefined }}>
-                            {Math.round(totalsToday.sodium * 10) / 10}g / {activeGoal.sodium}g
+                          <span style={{ fontWeight: totalsToday.sodium > activeGoal.salt ? 700 : 400, color: totalsToday.sodium > activeGoal.salt ? '#dc2626' : undefined }}>
+                            {Math.round(totalsToday.sodium * 10) / 10}g / {activeGoal.salt}g
                           </span>
                         </div>
                         <div className="bar-bg">
-                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sodium / activeGoal.sodium) * 100, 100)}%`, background: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#06b6d4' }}></div>
+                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sodium / activeGoal.salt) * 100, 100)}%`, background: totalsToday.sodium > activeGoal.salt ? '#dc2626' : '#06b6d4' }}></div>
                         </div>
-                        {totalsToday.sodium > activeGoal.sodium && <span className="warning-badge">Vượt giới hạn</span>}
+                        {totalsToday.sodium > activeGoal.salt && <span className="warning-badge">Vượt giới hạn</span>}
                       </div>
 
-                      {/* Cholesterol bar */}
+                      {/* Cholesterol */}
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -706,11 +785,11 @@ export default function Nutrition() {
 
                     {/* Health Limits warnings (Sodium, Cholesterol) */}
                     <div className="health-warnings-section">
-                      {totalsToday.sodium > activeGoal.sodium && (
+                      {totalsToday.sodium > activeGoal.salt && (
                         <div className="health-alert-box alert-danger">
                           <MdWarning className="warn-icon" />
                           <div>
-                            <strong>Cảnh báo huyết áp (Muối vượt ngưỡng):</strong> Bạn đã nạp {Math.round(totalsToday.sodium * 10) / 10}g Muối (Ngưỡng khuyên dùng: {activeGoal.sodium}g). Hạn chế ăn mặn!
+                            <strong>Cảnh báo huyết áp (Muối vượt ngưỡng):</strong> Bạn đã nạp {Math.round(totalsToday.sodium * 10) / 10}g Muối (Ngưỡng khuyên dùng: {activeGoal.salt}g). Hạn chế ăn mặn!
                           </div>
                         </div>
                       )}
@@ -745,7 +824,7 @@ export default function Nutrition() {
 
               {/* Logs history list */}
               <div className="logs-list-card">
-                <h3>Các bữa ăn đã nạp ngày {formatDateVi(selectedDate)}</h3>
+                <h3>Bữa ăn ngày {formatDateVi(selectedDate)}</h3>
                 <div className="logs-list-container">
                   {logsToday.length === 0 ? (
                     <div className="empty-logs-placeholder">
@@ -754,8 +833,13 @@ export default function Nutrition() {
                   ) : (
                     logsToday.map(log => {
                       const name = log.recipe?.recipe_name || log.ingredient?.name || 'Món ăn tùy chỉnh';
+                      const recipeId = log.recipe_id || log.recipe?.recipe_id;
                       return (
-                        <div key={log.log_id} className="log-list-item">
+                        <div
+                          key={log.log_id}
+                          className={`log-list-item${recipeId ? ' clickable' : ''}`}
+                          onClick={() => { if (recipeId) navigate(`/recipe/${recipeId}`); }}
+                        >
                           <div className="item-main">
                             <span className="meal-badge" style={mealBadgeStyle(log.mealType)}>{mealBadgeLabel(log.mealType)}</span>
                             <div className="item-details">
@@ -768,7 +852,7 @@ export default function Nutrition() {
                             <span>Carb: {Math.round(log.totalCarbs || 0)}g</span>
                             <span>Béo: {Math.round(log.totalFat || 0)}g</span>
                           </div>
-                          <button className="btn-delete-log" onClick={() => handleDeleteLog(log.log_id)}>
+                          <button className="btn-delete-log" onClick={(e) => { e.stopPropagation(); handleDeleteLog(log.log_id); }}>
                             <MdDeleteOutline />
                           </button>
                         </div>
@@ -1012,7 +1096,7 @@ export default function Nutrition() {
                     const highSodiumDays = dailyCaloriesData.filter(d => {
                       const dayLogs = nutritionLogs.filter(l => l.logDate?.split('T')[0] === d.date);
                       const sodium = dayLogs.reduce((sum, l) => sum + (l.totalSalt || l.totalSodium || 0), 0);
-                      return sodium > activeGoal.sodium;
+                      return sodium > activeGoal.salt;
                     }).length;
 
                     if (highSodiumDays > 0) {

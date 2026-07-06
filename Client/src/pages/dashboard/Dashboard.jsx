@@ -8,6 +8,7 @@ import { recipeService } from '../../services/recipeService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { getIngredients } from '../../services/foodService';
 import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart } from 'react-icons/fi';
 import HealthTipCard from '../../components/common/HealthTipCard';
 import './Dashboard.css';
@@ -60,12 +61,58 @@ function AnimatedBar({ pct, className }) {
   );
 }
 
+function deriveLogNutrients(log, recipes, ingredients) {
+  const result = { fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+  const recipeId = log.recipe_id || log.recipe?.recipe_id;
+  const ingId = log.ingredient_id || log.ingredient?.ingredient_id;
+
+  if (recipeId) {
+    const recipe = recipes.find(r => r.recipe_id === recipeId) || log.recipe;
+    if (recipe) {
+      const riList = recipe.recipeIngredients || recipe.RecipeIngredients || [];
+      riList.forEach(ri => {
+        const nv = ri.ingredient?.nutritional_value || ri.Ingredient?.Nutritional_value
+                || ri.nutritionalValue || ri.NutritionalValue;
+        if (nv) {
+          const qty = ri.quantity || ri.Quantity || 0;
+          const sv = nv.servingSize || nv.ServingSize || 1;
+          const mult = sv > 0 ? qty / sv : 1;
+          result.fiber += (nv.fiber || nv.Fiber || 0) * mult;
+          result.sugar += (nv.sugar || nv.Sugar || 0) * mult;
+          result.sodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * mult;
+          result.cholesterol += (nv.cholesterol || nv.Cholesterol || 0) * mult;
+        }
+      });
+      const servings = recipe.servings || recipe.Servings || 1;
+      const factor = servings > 0 ? (log.quantity || 1) / servings : 1;
+      result.fiber *= factor;
+      result.sugar *= factor;
+      result.sodium *= factor;
+      result.cholesterol *= factor;
+    }
+  } else if (ingId) {
+    const ing = ingredients.find(i => i.ingredient_id === ingId) || log.ingredient;
+    if (ing && ing.nutritional_value) {
+      const nv = ing.nutritional_value;
+      const size = nv.servingSize || 100;
+      const factor = size > 0 ? (log.quantity || 100) / size : 1;
+      result.fiber = (nv.fiber || 0) * factor;
+      result.sugar = (nv.sugar || 0) * factor;
+      result.sodium = (nv.salt || nv.sodium || 0) * factor;
+      result.cholesterol = (nv.cholesterol || 0) * factor;
+    }
+  }
+  return result;
+}
+
 export default function Dashboard() {
   const { user }         = useAuth();
   const { isFavorite, toggleFavorite } = useFavorite();
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();
   const [nutritionLogs, setNutritionLogs] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [recipes, setRecipes] = useState([]);
   const [mealSuggestions, setMealSuggestions] = useState([]);
 
   const accountId = user?.accountId || user?.account_id;
@@ -87,19 +134,24 @@ export default function Dashboard() {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchMealSuggestions = async () => {
+    const fetchData = async () => {
       try {
-        const res = await recipeService.getAll();
-        const recipes = res.data.data || [];
+        const [recRes, ingRes] = await Promise.all([
+          recipeService.getAll(),
+          getIngredients()
+        ]);
         if (isMounted) {
-          setMealSuggestions(recipes.slice(0, 8).map(mapRecipeToSuggestion));
+          const allRecipes = recRes.data.data || [];
+          setRecipes(allRecipes);
+          setMealSuggestions(allRecipes.slice(0, 8).map(mapRecipeToSuggestion));
+          setIngredients(ingRes.data.data || []);
         }
       } catch (err) {
-        console.error('Lỗi khi tải danh sách món ăn:', err);
+        console.error('Lỗi khi tải dữ liệu:', err);
       }
     };
 
-    fetchMealSuggestions();
+    fetchData();
 
     return () => { isMounted = false; };
   }, []);
@@ -165,23 +217,49 @@ export default function Dashboard() {
     acc.protein += curr.totalProtein || 0;
     acc.carbs += curr.totalCarbs || 0;
     acc.fat += curr.totalFat || 0;
+
+    const hasFiber = curr.totalFiber != null;
+    const hasSugar = curr.totalSugar != null;
+    const hasSalt = curr.totalSalt != null || curr.totalSodium != null;
+    const hasCholesterol = curr.totalCholesterol != null;
+
+    if (hasFiber && hasSugar && hasSalt && hasCholesterol) {
+      acc.fiber += curr.totalFiber || 0;
+      acc.sugar += curr.totalSugar || 0;
+      acc.sodium += curr.totalSalt || curr.totalSodium || 0;
+      acc.cholesterol += curr.totalCholesterol || 0;
+    } else {
+      const d = deriveLogNutrients(curr, recipes, ingredients);
+      acc.fiber += hasFiber ? (curr.totalFiber || 0) : d.fiber;
+      acc.sugar += hasSugar ? (curr.totalSugar || 0) : d.sugar;
+      acc.sodium += hasSalt ? (curr.totalSalt || curr.totalSodium || 0) : d.sodium;
+      acc.cholesterol += hasCholesterol ? (curr.totalCholesterol || 0) : d.cholesterol;
+    }
     return acc;
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
   const dailyTargets = healthCtx?.dailyTargets || {
-    calories: 2000, protein: 75, carbs: 250, fat: 65
+    calories: 2000, protein: 75, carbs: 250, fat: 65, fiber: 25, sugarLimit: 50, saltLimit: 5
   };
 
   const caloriesTarget = dailyTargets.calories || 2000;
   const proteinTarget = dailyTargets.protein || 75;
   const carbsTarget = dailyTargets.carbs || 250;
   const fatTarget = dailyTargets.fat || 65;
+  const fiberTarget = dailyTargets.fiber || 25;
+  const sugarTarget = dailyTargets.sugarLimit || 50;
+  const saltTarget = dailyTargets.saltLimit || 5;
 
+  const cholesterolTarget = 300;
   const nutritionData = [
     { key: 'calories',  icon: <FiZap size={20} />, label: 'Calorie nạp vào', value: Math.round(totalsToday.calories),  unit: 'kcal', target: caloriesTarget, pct: Math.min(Math.round((totalsToday.calories / caloriesTarget) * 100), 100) },
     { key: 'protein',   icon: <FiActivity size={20} />, label: 'Protein',          value: Math.round(totalsToday.protein),   unit: 'g',    target: proteinTarget,  pct: Math.min(Math.round((totalsToday.protein / proteinTarget) * 100), 100) },
     { key: 'carbs',     icon: <FiBarChart2 size={20} />, label: 'Carbs',            value: Math.round(totalsToday.carbs),     unit: 'g',    target: carbsTarget,    pct: Math.min(Math.round((totalsToday.carbs / carbsTarget) * 100), 100) },
     { key: 'fat',       icon: <FiDroplet size={20} />, label: 'Chất béo',         value: Math.round(totalsToday.fat),       unit: 'g',    target: fatTarget,      pct: Math.min(Math.round((totalsToday.fat / fatTarget) * 100), 100) },
+    { key: 'fiber',     icon: <FiZap size={20} />, label: 'Chất xơ',           value: Math.round(totalsToday.fiber),     unit: 'g',    target: fiberTarget,    pct: Math.min(Math.round((totalsToday.fiber / fiberTarget) * 100), 100) },
+    { key: 'sugar',     icon: <FiActivity size={20} />, label: 'Đường',           value: Math.round(totalsToday.sugar),     unit: 'g',    target: sugarTarget,    pct: Math.min(Math.round((totalsToday.sugar / sugarTarget) * 100), 100) },
+    { key: 'sodium',    icon: <FiDroplet size={20} />, label: 'Muối',             value: Math.round(totalsToday.sodium * 10) / 10, unit: 'g', target: saltTarget, pct: Math.min(Math.round((totalsToday.sodium / saltTarget) * 100), 100) },
+    { key: 'cholesterol', icon: <FiHeart size={20} />, label: 'Cholesterol',      value: Math.round(totalsToday.cholesterol), unit: 'mg', target: cholesterolTarget, pct: Math.min(Math.round((totalsToday.cholesterol / cholesterolTarget) * 100), 100) },
   ];
 
   return (
