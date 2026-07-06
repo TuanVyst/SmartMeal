@@ -197,15 +197,15 @@ body {
 
 .header-right button {
   padding: 8px 16px;
-  background: #e74c3c;
-  color: white;
+  background: transparent;
+  color: #374151;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .header-right button:hover {
-  background: #c0392b;
+  background: rgba(0,0,0,0.05);
 }
 
 .dashboard h2 {
@@ -264,8 +264,8 @@ body {
 }
 
 .btn-secondary {
-  background: #e2e8f0;
-  color: #475569;
+  background: #dcfce7;
+  color: #15803d;
 }
 
 .btn-secondary:hover {
@@ -331,7 +331,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  background: #f0fdf4;
 }
 
 .table td {
@@ -375,17 +375,18 @@ body {
   color: #475569;
 }
 
-.form-group input {
+.form-group input, .form-group select, .form-group textarea, .form-control {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
+  font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
 }
 
-.form-group input:focus {
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus, .form-control:focus {
   border-color: #22C55E;
 }
 
@@ -509,7 +510,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  background: #f0fdf4;
 }
 
 .admin-table td {
@@ -562,12 +563,12 @@ body {
 
 .tag-badge {
   padding: 4px 10px;
-  background: #f1f5f9;
-  color: #475569;
+  background: #dcfce7;
+  color: #15803d;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #bbf7d0;
 }
 
 .calorie-badge {
@@ -753,10 +754,10 @@ body {
   display: flex;
   gap: 12px;
   align-items: flex-end;
-  background: #f8fafc;
+  background: #f0fdf4;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #bbf7d0;
 }
 
 .mb-0 { margin-bottom: 0 !important; }
@@ -770,9 +771,9 @@ body {
 .empty-state-small {
   text-align: center;
   padding: 24px;
-  background: #f8fafc;
+  background: #f0fdf4;
   border-radius: 8px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed #86efac;
   color: #64748b;
   font-size: 14px;
 }

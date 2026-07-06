@@ -14,17 +14,25 @@ namespace Service.Implements
     public class SubscriptionService : ISubscriptionService
     {
         private readonly ISubscriptionRepo _subscriptionRepo;
+        private readonly IPlanRepo _planRepo;
         private readonly ILogger<SubscriptionService> _logger;
 
-        public SubscriptionService(ISubscriptionRepo subscriptionRepo, ILogger<SubscriptionService> logger)
+        public SubscriptionService(ISubscriptionRepo subscriptionRepo, IPlanRepo planRepo, ILogger<SubscriptionService> logger)
         {
             _subscriptionRepo = subscriptionRepo;
+            _planRepo = planRepo;
             _logger = logger;
         }
 
         public async Task<List<SubscriptionResponseDto>> GetAllSubscriptions()
         {
             var items = await _subscriptionRepo.GetAllSubscriptions();
+            return items.Select(MapToDto).ToList();
+        }
+
+        public async Task<List<SubscriptionResponseDto>> GetSubscriptionsByAccountId(Guid accountId)
+        {
+            var items = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
             return items.Select(MapToDto).ToList();
         }
 
@@ -36,53 +44,56 @@ namespace Service.Implements
 
         public async Task<SubscriptionResponseDto> CreateSubscription(SubscriptionRequest request)
         {
-            try
-            {
-                var newItem = new Subscription
-                {
-                    Sub_id = Guid.NewGuid(),
-                    Account_id = request.Account_id,
-                    Plan_id = request.Plan_id,
-                    StartDate = request.StartDate,
-                    EndDate = request.EndDate,
-                    Status = request.Status,
-                    IsDeleted = false
-                };
+            var plan = await _planRepo.GetPlanById(request.Plan_id);
+            if (plan == null)
+                throw new InvalidOperationException("Plan not found");
 
-                var result = await _subscriptionRepo.CreateSubscription(newItem);
-                _logger.LogInformation("Subscription '{Sub_id}' created successfully", newItem.Sub_id);
-                return MapToDto(result);
-            }
-            catch (Exception ex)
+            var startDate = request.StartDate == default ? DateTime.UtcNow : request.StartDate;
+            DateTime? endDate = null;
+            if (plan.Duration > 0)
+                endDate = startDate.AddDays(plan.Duration);
+
+            var newItem = new Subscription
             {
-                _logger.LogError(ex, "Error creating Subscription");
-                throw;
-            }
+                Sub_id = Guid.NewGuid(),
+                Account_id = request.Account_id,
+                Plan_id = request.Plan_id,
+                StartDate = startDate,
+                EndDate = endDate,
+                Status = request.Status,
+                PaymentRef = request.PaymentRef,
+                IsDeleted = false
+            };
+
+            var result = await _subscriptionRepo.CreateSubscription(newItem);
+            _logger.LogInformation("Subscription '{Sub_id}' created successfully", newItem.Sub_id);
+            return MapToDto(result);
         }
 
         public async Task<SubscriptionResponseDto> UpdateSubscription(Guid id, SubscriptionRequest request)
         {
-            try
-            {
-                var existingItem = await _subscriptionRepo.GetSubscriptionById(id);
-                if (existingItem == null)
-                    throw new KeyNotFoundException($"Subscription with id {id} not found");
+            var existingItem = await _subscriptionRepo.GetSubscriptionById(id);
+            if (existingItem == null)
+                throw new KeyNotFoundException($"Subscription with id {id} not found");
 
-                existingItem.Account_id = request.Account_id;
-                existingItem.Plan_id = request.Plan_id;
-                existingItem.StartDate = request.StartDate;
-                existingItem.EndDate = request.EndDate;
-                existingItem.Status = request.Status;
+            var plan = await _planRepo.GetPlanById(request.Plan_id);
+            if (plan == null)
+                throw new InvalidOperationException("Plan not found");
 
-                var result = await _subscriptionRepo.UpdateSubscription(existingItem);
-                _logger.LogInformation("Subscription '{Sub_id}' updated successfully", existingItem.Sub_id);
-                return MapToDto(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating Subscription '{Sub_id}'", id);
-                throw;
-            }
+            var startDate = request.StartDate == default ? existingItem.StartDate : request.StartDate;
+            DateTime? endDate = null;
+            if (plan.Duration > 0)
+                endDate = startDate.AddDays(plan.Duration);
+
+            existingItem.Plan_id = request.Plan_id;
+            existingItem.StartDate = startDate;
+            existingItem.EndDate = endDate;
+            existingItem.Status = request.Status;
+            existingItem.PaymentRef = request.PaymentRef;
+
+            var result = await _subscriptionRepo.UpdateSubscription(existingItem);
+            _logger.LogInformation("Subscription '{Sub_id}' updated successfully", existingItem.Sub_id);
+            return MapToDto(result);
         }
 
         public async Task<SubscriptionResponseDto> SoftDeleteSubscription(Guid id)
@@ -90,7 +101,7 @@ namespace Service.Implements
             var result = await _subscriptionRepo.SoftDeleteSubscription(id);
             return MapToDto(result);
         }
-        
+
         private SubscriptionResponseDto MapToDto(Subscription entity)
         {
             if (entity == null) return null;
@@ -102,6 +113,7 @@ namespace Service.Implements
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
                 Status = entity.Status,
+                PaymentRef = entity.PaymentRef,
                 IsDeleted = entity.IsDeleted
             };
         }

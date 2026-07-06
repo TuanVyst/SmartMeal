@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PresentationLayer;
+using PresentationLayer.BackgroundServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -155,6 +156,20 @@ builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements
 // Feedback
 builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
 builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
+
+// Plan
+builder.Services.AddScoped<Repository.Interfaces.IPlanRepo, Repository.Implements.PlanRepo>();
+builder.Services.AddScoped<Service.Interfaces.IPlanService, Service.Implements.PlanService>();
+
+// Subscription
+builder.Services.AddScoped<Repository.Interfaces.ISubscriptionRepo, Repository.Implements.SubscriptionRepo>();
+builder.Services.AddScoped<Service.Interfaces.ISubscriptionService, Service.Implements.SubscriptionService>();
+
+// Payment
+builder.Services.AddScoped<Service.Interfaces.IPaymentService, Service.Implements.PaymentService>();
+
+// Background Services
+builder.Services.AddHostedService<SubscriptionExpiryBackgroundService>();
 
 //Email
 builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();

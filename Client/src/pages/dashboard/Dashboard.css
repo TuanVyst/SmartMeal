@@ -157,7 +157,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #6CCB63, #52b84a);
+  background: linear-gradient(135deg, #16a34a, #22c55e);
   color: white;
   border: none;
   border-radius: 16px;
@@ -172,7 +172,7 @@
 }
 
 .hero-cta-btn:hover {
-  background: linear-gradient(135deg, #52b84a, #3da33b);
+  background: linear-gradient(135deg, #15803d, #16a34a);
   box-shadow: 0 10px 32px rgba(108, 203, 99, 0.55);
   transform: translateY(-3px);
 }
@@ -241,7 +241,7 @@
   gap: 5px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #6CCB63;
+  color: #444;
   background: none;
   border: none;
   cursor: pointer;
@@ -254,7 +254,14 @@
 
 .section-see-all:hover {
   background: rgba(108, 203, 99, 0.1);
-  color: #3db435;
+  color: #444;
+}
+
+/* ============================================
+   HEALTH TIP SECTION
+   ============================================ */
+.health-tip-section {
+  margin-bottom: 28px;
 }
 
 /* ============================================
@@ -380,7 +387,6 @@
   overflow-x: auto;
   padding: 8px 4px 16px;
   scrollbar-width: none;
-  scroll-behavior: smooth;
 }
 
 .meal-cards-scroll::-webkit-scrollbar { display: none; }
@@ -503,177 +509,19 @@
 }
 
 /* ============================================
-   HABIT TRACKING
-   ============================================ */
-.habits-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr) 1.2fr;
-  gap: 16px;
-  margin-bottom: 28px;
-}
-
-.habit-card {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.04);
-  transition: all 0.3s ease;
-  animation: card-fade-up 0.5s ease both;
-}
-
-.habit-card:nth-child(1) { animation-delay: 0.05s; }
-.habit-card:nth-child(2) { animation-delay: 0.1s; }
-.habit-card:nth-child(3) { animation-delay: 0.15s; }
-
-.habit-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 32px rgba(0,0,0,0.08);
-}
-
-.habit-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.habit-card-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.habit-card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.habit-card-icon.water    { background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
-.habit-card-icon.exercise { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
-.habit-card-icon.sleep    { background: linear-gradient(135deg, #ede7f6, #d1c4e9); }
-
-.habit-card-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1a2e1a;
-}
-
-.habit-card-progress-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.habit-value-row {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
-.habit-value {
-  font-size: 28px;
-  font-weight: 900;
-  color: #1a2e1a;
-  line-height: 1;
-}
-
-.habit-unit {
-  font-size: 13px;
-  font-weight: 500;
-  color: #9ca3af;
-}
-
-.habit-progress-bar-wrap {
-  height: 8px;
-  background: #f3f4f6;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.habit-progress-bar {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.habit-progress-bar.water    { background: linear-gradient(90deg, #42a5f5, #90caf9); }
-.habit-progress-bar.exercise { background: linear-gradient(90deg, #66bb6a, #a5d6a7); }
-.habit-progress-bar.sleep    { background: linear-gradient(90deg, #7e57c2, #b39ddb); }
-
-/* Streak special card */
-.habit-card.streak-card {
-  background: linear-gradient(135deg, #6CCB63 0%, #3db435 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.habit-card.streak-card::before {
-  content: '';
-  position: absolute;
-  top: -30px; right: -30px;
-  width: 100px; height: 100px;
-  background: rgba(255,255,255,0.12);
-  border-radius: 50%;
-}
-
-.streak-card-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.85);
-  margin-bottom: 8px;
-}
-
-.streak-card-value {
-  font-size: 48px;
-  font-weight: 900;
-  color: white;
-  line-height: 1;
-  text-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.streak-card-unit {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.8);
-  margin-top: 4px;
-}
-
-.streak-mascot {
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  animation: hero-float 3.5s ease-in-out infinite;
-  opacity: 0.9;
-}
-
-/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 1200px) {
   .nutrition-overview-grid { grid-template-columns: repeat(2, 1fr); }
-  .habits-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 900px) {
   .dashboard-hero { flex-direction: column; gap: 24px; padding: 28px; }
   .hero-food-img { width: 200px; height: 180px; }
   .nutrition-overview-grid { grid-template-columns: repeat(2, 1fr); }
-  .habits-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 600px) {
   .dashboard-page { padding: 16px; }
   .nutrition-overview-grid { grid-template-columns: 1fr; }
-  .habits-grid { grid-template-columns: 1fr; }
 }

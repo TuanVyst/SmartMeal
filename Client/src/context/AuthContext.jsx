@@ -1,20 +1,66 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { subscriptionService } from '../services/subscriptionService';
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+function readStoredUser() {
+  try {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      return JSON.parse(storedUser);
     }
-    setLoading(false);
+  } catch {
+    // Ignore invalid stored auth data
+  }
+  return null;
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(readStoredUser);
+  const [loading, setLoading] = useState(false);
+  const [subscription, setSubscription] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    const storedUser = readStoredUser();
+    const accId = storedUser?.accountId || storedUser?.account_id;
+    if (accId) checkPremiumStatus(accId);
   }, []);
+
+  const checkPremiumStatus = async (accountId) => {
+    if (!accountId) {
+      setSubscription(null);
+      setIsPremium(false);
+      return;
+    }
+    try {
+      const { data } = await subscriptionService.getSubscriptionsByAccountId(accountId);
+      const subs = data.data || [];
+      const now = new Date();
+      const activeSubs = subs
+        .filter(s => s.status === 'active' && (!s.endDate || new Date(s.endDate) > now))
+        .sort((a, b) => {
+          if (!a.endDate) return 1;
+          if (!b.endDate) return -1;
+          return new Date(b.endDate) - new Date(a.endDate);
+        });
+      const activeSub = activeSubs[0] || null;
+
+      if (activeSub) {
+        setSubscription(activeSub);
+        setIsPremium(true);
+      } else {
+        setSubscription(null);
+        setIsPremium(false);
+      }
+    } catch (err) {
+      console.error('Error checking premium status:', err);
+      setSubscription(null);
+      setIsPremium(false);
+    }
+  };
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials);
@@ -22,6 +68,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
+    const accId = data.accountId || data.account_id;
+    if (accId) await checkPremiumStatus(accId);
     return data;
   };
 
@@ -30,6 +78,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
+    const accId = data.accountId || data.account_id;
+    if (accId) await checkPremiumStatus(accId);
     return data;
   };
 
@@ -39,6 +89,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
+    const accId = data.accountId || data.account_id;
+    if (accId) await checkPremiumStatus(accId);
     return data;
   };
 
@@ -47,6 +99,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
+    const accId = data.accountId || data.account_id;
+    if (accId) await checkPremiumStatus(accId);
     return data;
   };
 
@@ -55,6 +109,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
+    const accId = data.accountId || data.account_id;
+    if (accId) await checkPremiumStatus(accId);
     return data;
   };
 
@@ -62,18 +118,20 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setSubscription(null);
+    setIsPremium(false);
   };
 
-  const updateAvatar = async (avatarUrl) => {
-    const { data } = await authService.updateAvatar(avatarUrl);
-    const updatedUser = { ...user, avatar: data.avatarUrl ?? avatarUrl };
+  const updateAvatar = async (avatarFile) => {
+    const { data } = await authService.updateAvatar(avatarFile);
+    const updatedUser = { ...user, avatar: data.avatarUrl ?? user?.avatar };
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
     return data;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar, subscription, isPremium, checkPremiumStatus }}>
       {children}
     </AuthContext.Provider>
   );

@@ -11,10 +11,12 @@ namespace PresentationLayer.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAccountService _service;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public AuthController(IAccountService service)
+        public AuthController(IAccountService service, ICloudinaryService cloudinaryService)
         {
             _service = service;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpGet("accounts")]
@@ -173,12 +175,25 @@ namespace PresentationLayer.Controllers
 
         [HttpPut("avatar")]
         [Authorize]
-        public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
+        public async Task<IActionResult> UpdateAvatar([FromForm] UpdateAvatarRequest request)
         {
             try
             {
                 var accountId = GetAccountId();
-                var account = await _service.UpdateAvatarUrl(accountId, request.AvatarUrl);
+                string avatarUrl = request.AvatarUrl?.Trim() ?? string.Empty;
+
+                if (request.AvatarFile != null && request.AvatarFile.Length > 0)
+                {
+                    using var stream = request.AvatarFile.OpenReadStream();
+                    avatarUrl = await _cloudinaryService.UploadImageAsync(stream, request.AvatarFile.FileName);
+                }
+
+                if (string.IsNullOrWhiteSpace(avatarUrl))
+                {
+                    return BadRequest(new { success = false, message = "Avatar file is required" });
+                }
+
+                var account = await _service.UpdateAvatarUrl(accountId, avatarUrl);
                 return Ok(new { success = true, avatarUrl = account.AvatarUrl });
             }
             catch (InvalidOperationException ex)
@@ -208,6 +223,7 @@ namespace PresentationLayer.Controllers
 
     public class UpdateAvatarRequest
     {
-        public string AvatarUrl { get; set; }
+        public IFormFile? AvatarFile { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }

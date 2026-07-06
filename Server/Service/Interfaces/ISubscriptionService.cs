@@ -9,6 +9,7 @@ namespace Service.Interfaces
     public interface ISubscriptionService
     {
         Task<List<SubscriptionResponseDto>> GetAllSubscriptions();
+        Task<List<SubscriptionResponseDto>> GetSubscriptionsByAccountId(Guid accountId);
         Task<SubscriptionResponseDto?> GetSubscriptionById(Guid id);
         Task<SubscriptionResponseDto> CreateSubscription(SubscriptionRequest subscription);
         Task<SubscriptionResponseDto> UpdateSubscription(Guid id, SubscriptionRequest subscription);

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiX } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function AdminRecipeTags() {
+  const dialog = useDialog();
   const [tags, setTags] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -47,13 +49,13 @@ export default function AdminRecipeTags() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this tag?')) {
-      try {
-        await adminService.deleteRecipeTag(id);
-        fetchTags();
-      } catch (error) {
-        console.error('Error deleting tag:', error);
-      }
+    const ok = await dialog.confirm({ title: 'Delete tag?', message: 'Are you sure you want to delete this tag?', confirmLabel: 'Delete', danger: true });
+    if (!ok) return;
+    try {
+      await adminService.deleteRecipeTag(id);
+      fetchTags();
+    } catch (error) {
+      console.error('Error deleting tag:', error);
     }
   };
 

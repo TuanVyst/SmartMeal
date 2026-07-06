@@ -1,16 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { useDialog } from '../../context/DialogContext';
 import { getIngredients } from '../../services/foodService';
 import { recipeService } from '../../services/recipeService';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { nutritionGoalService } from '../../services/nutritionGoalService';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
+import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
 import './Nutrition.css';
 import { 
-  MdFastfood, MdCalendarToday, MdBarChart, MdAddCircleOutline, 
+  MdFastfood, MdBarChart, MdAddCircleOutline, 
   MdDeleteOutline, MdWarning, MdDoneAll, MdSettings 
 } from 'react-icons/md';
+import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiAlertCircle, FiZap } from 'react-icons/fi';
+
+// Meal type mapping: normalizes English keys and Vietnamese labels to a canonical key
+const MEAL_TYPE_CANONICAL = {
+  breakfast: 'breakfast', Sáng: 'breakfast',
+  lunch: 'lunch', Trưa: 'lunch',
+  dinner: 'dinner', Tối: 'dinner',
+  snack: 'snack', 'Bữa phụ': 'snack',
+};
+
+const MEAL_TYPE_DISPLAY = {
+  breakfast: 'Sáng',
+  lunch: 'Trưa',
+  dinner: 'Tối',
+  snack: 'Phụ',
+};
+
+const MEAL_TYPE_COLOR = {
+  breakfast: { bg: '#dcfce7', text: '#15803d' },   // light green
+  lunch:     { bg: '#ffedd5', text: '#c2410c' },    // orange
+  dinner:    { bg: '#f3e8ff', text: '#7c3aed' },    // purple
+  snack:     { bg: '#fef9c3', text: '#a16207' },    // yellow
+};
 
 const conditionLabels = {
   diabetes: 'Tiểu đường type 2',
@@ -22,11 +48,11 @@ const conditionLabels = {
 };
 
 const goalLabels = {
-  lose: { icon: '🔥', label: 'Giảm cân' },
-  gain: { icon: '💪', label: 'Tăng cơ' },
-  maintain: { icon: '⚖️', label: 'Duy trì' },
-  heart: { icon: '❤️', label: 'Cải thiện tim mạch' },
-  diabetes: { icon: '🩸', label: 'Kiểm soát đường huyết' },
+  lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
+  gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
+  maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
+  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
+  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColorMap = {
@@ -36,7 +62,30 @@ const bmiColorMap = {
   obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
 };
 
+function canonicalMealType(mt) {
+  return MEAL_TYPE_CANONICAL[mt] || mt;
+}
+
+function mealBadgeStyle(mt) {
+  const key = canonicalMealType(mt);
+  const c = MEAL_TYPE_COLOR[key];
+  return c ? { background: c.bg, color: c.text } : {};
+}
+
+function mealBadgeLabel(mt) {
+  const key = canonicalMealType(mt);
+  return MEAL_TYPE_DISPLAY[key] || mt;
+}
+
+function mealBarColor(mt) {
+  const key = canonicalMealType(mt);
+  const c = MEAL_TYPE_COLOR[key];
+  if (!c) return 'linear-gradient(90deg, #16a34a, #4ade80)';
+  return `linear-gradient(90deg, ${c.text}, ${c.bg})`;
+}
+
 export default function Nutrition() {
+  const dialog = useDialog();
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
   const { healthProfile, lockedIngredients, dailyCalorieBudget, dailyTargets } = useHealthProfile();
@@ -46,8 +95,8 @@ export default function Nutrition() {
   const hasHypertension = conditions.includes('hypertension');
   const hasHeartDisease = conditions.includes('heartDisease');
 
-  const [activeTab, setActiveTab] = useState('log'); // log | history | stats
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [activeTab, setActiveTab] = useState('history'); // history | stats
+  const [selectedDate, setSelectedDate] = useState(getTodayDateKey());
 
   // Data from backend
   const [ingredients, setIngredients] = useState([]);
@@ -58,7 +107,7 @@ export default function Nutrition() {
   // Form states
   const [logType, setLogType] = useState('ingredient'); // ingredient | recipe | custom
   const [selectedItem, setSelectedItem] = useState('');
-  const [mealType, setMealType] = useState('Sáng');
+  const [mealType, setMealType] = useState('breakfast');
   const [quantity, setQuantity] = useState(100);
   const [unit, setUnit] = useState('g');
 
@@ -120,14 +169,13 @@ export default function Nutrition() {
   const fetchUserLogsAndGoals = async () => {
     try {
       setLoading(true);
-      // Fetch logs
       const logsRes = await nutritionLogService.getAll(accountId);
-      setNutritionLogs(logsRes.data.data || []);
+      const logs = logsRes.data.data || [];
+      setNutritionLogs(logs);
 
       const goalsRes = await nutritionGoalService.getAll(accountId);
       const userGoals = goalsRes.data.data || [];
       if (userGoals.length > 0) {
-        // Find first active/latest goal
         const latestGoal = userGoals[0];
         setCurrentGoal(latestGoal);
         setGoalForm({
@@ -136,14 +184,17 @@ export default function Nutrition() {
           targetCarbs: latestGoal.targetCarbs || 250,
           targetFat: latestGoal.targetFat || 65,
           targetFiber: latestGoal.targetFiber || 25,
-          targetSodium: 2300, // fallback defaults
+          targetSodium: 2300,
           targetCholesterol: 300
         });
       } else {
         setCurrentGoal(null);
       }
+
+      return logs;
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu người dùng:', err);
+      return [];
     } finally {
       setLoading(false);
     }
@@ -279,6 +330,13 @@ export default function Nutrition() {
 
       await nutritionLogService.create(payload);
       triggerAlert('Ghi nhận bữa ăn thành công!', 'success');
+
+      // Immediate delta update for Sidebar Progress Ring + hook will auto-refetch
+      const logDateKey = toDateKey(new Date(selectedDate).toISOString());
+      if (logDateKey === getTodayDateKey()) {
+        const addedCalories = parseFloat(manualMacros.calories) || parseFloat(payload.totalCalories) || 0;
+        notifyNutritionUpdated({ deltaCalories: addedCalories });
+      }
       
       // Reset form
       setSelectedItem('');
@@ -287,7 +345,7 @@ export default function Nutrition() {
         calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0, customName: ''
       });
 
-      // Reload
+      // Reload Nutrition page data (hook auto-refetches separately for sidebar sync)
       await fetchUserLogsAndGoals();
       setActiveTab('history');
     } catch (err) {
@@ -299,11 +357,24 @@ export default function Nutrition() {
   };
 
   const handleDeleteLog = async (id) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa bản ghi nhật ký này?')) return;
+    const ok = await dialog.confirm({ title: 'Xóa bản ghi?', message: 'Bạn có chắc chắn muốn xóa bản ghi nhật ký này?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
     try {
       setLoading(true);
+      const logToDelete = nutritionLogs.find(
+        (log) => (log.id || log.log_id || log.nutrition_log_id) === id
+      );
+      const removedCalories = logToDelete?.totalCalories || 0;
+      const logDateKey = toDateKey(logToDelete?.logDate);
+
       await nutritionLogService.delete(id);
       triggerAlert('Đã xóa bản ghi nhật ký.', 'success');
+
+      // Immediate delta update for Sidebar Progress Ring + hook will auto-refetch
+      if (logDateKey === getTodayDateKey() && removedCalories > 0) {
+        notifyNutritionUpdated({ deltaCalories: -removedCalories });
+      }
+
       await fetchUserLogsAndGoals();
     } catch (err) {
       console.error(err);
@@ -352,7 +423,7 @@ export default function Nutrition() {
 
   // Helper calculations for current date
   const logsToday = nutritionLogs.filter(log => {
-    const logDateStr = log.logDate?.split('T')[0];
+    const logDateStr = toDateKey(log.logDate);
     return logDateStr === selectedDate;
   });
 
@@ -383,35 +454,45 @@ export default function Nutrition() {
 
   // SVG Chart data preparations (Last 7 days)
   const getLast7Days = () => {
+    const today = new Date();
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(d.getDate() - i);
-      days.push(d.toISOString().split('T')[0]);
+      days.push(toDateKey(d));
     }
     return days;
   };
 
   const last7Days = getLast7Days();
   const dailyCaloriesData = last7Days.map(dateStr => {
-    const dayLogs = nutritionLogs.filter(l => l.logDate?.split('T')[0] === dateStr);
+    const dayLogs = nutritionLogs.filter(l => toDateKey(l.logDate) === dateStr);
     const cal = dayLogs.reduce((sum, l) => sum + (l.totalCalories || 0), 0);
+    const dObj = new Date(dateStr);
+    const weekdays = ['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
     return {
       date: dateStr,
-      displayDate: new Date(dateStr).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric' }),
+      displayWeekday: weekdays[dObj.getDay()],
+      displayDayMonth: `${dateStr.substring(8,10)}/${dateStr.substring(5,7)}`,
       calories: cal
     };
   });
 
   const maxCalInChart = Math.max(...dailyCaloriesData.map(d => d.calories), activeGoal.calories, 1000);
 
-  // Average Calories per MealType
-  const mealTypeAverages = ['Sáng', 'Trưa', 'Tối', 'Bữa phụ'].map(type => {
-    const typeLogs = nutritionLogs.filter(l => l.mealType === type);
+  // Average Calories per MealType (normalized to English keys for filtering)
+  const mealTypeAverages = [
+    { key: 'breakfast', label: 'Sáng' },
+    { key: 'lunch', label: 'Trưa' },
+    { key: 'dinner', label: 'Tối' },
+    { key: 'snack', label: 'Bữa phụ' },
+  ].map(({ key, label }) => {
+    const typeLogs = nutritionLogs.filter(l => canonicalMealType(l.mealType) === key);
     const total = typeLogs.reduce((sum, l) => sum + (l.totalCalories || 0), 0);
     const count = new Set(typeLogs.map(l => l.logDate?.split('T')[0])).size || 1;
     return {
-      type,
+      key,
+      type: label,
       avg: Math.round(total / count)
     };
   });
@@ -432,7 +513,6 @@ export default function Nutrition() {
           <p className="subtitle">Ghi nhận lượng thức ăn nạp vào và so sánh với mục tiêu sức khỏe của bạn</p>
         </div>
         <div className="date-picker-wrapper">
-          <MdCalendarToday className="calendar-icon" />
           <input 
             type="date" 
             value={selectedDate} 
@@ -447,13 +527,7 @@ export default function Nutrition() {
 
       {/* Tabs Switcher */}
       <div className="tabs-nav">
-        <button 
-          className={`tab-btn ${activeTab === 'log' ? 'active' : ''}`}
-          onClick={() => setActiveTab('log')}
-        >
-          <MdAddCircleOutline className="tab-icon" />
-          Ghi nhận bữa ăn
-        </button>
+
         <button 
           className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
@@ -472,219 +546,8 @@ export default function Nutrition() {
 
       <div className="tab-content-wrapper">
         
-        {/* TAB 1: LOG MEAL */}
-        {activeTab === 'log' && (
-          <div className="tab-panel animate-fade-in">
-            <div className="grid-2-cols">
-              <div className="form-card">
-                <h2>Khởi tạo bữa ăn mới</h2>
-                <form onSubmit={handleAddLog}>
-                  <div className="log-type-selector">
-                    <label className={`type-btn ${logType === 'ingredient' ? 'active' : ''}`}>
-                      <input 
-                        type="radio" 
-                        name="logType" 
-                        value="ingredient" 
-                        checked={logType === 'ingredient'}
-                        onChange={() => setLogType('ingredient')}
-                      />
-                      Nguyên liệu đơn lẻ
-                    </label>
-                    <label className={`type-btn ${logType === 'recipe' ? 'active' : ''}`}>
-                      <input 
-                        type="radio" 
-                        name="logType" 
-                        value="recipe" 
-                        checked={logType === 'recipe'}
-                        onChange={() => setLogType('recipe')}
-                      />
-                      Công thức món ăn
-                    </label>
-                    <label className={`type-btn ${logType === 'custom' ? 'active' : ''}`}>
-                      <input 
-                        type="radio" 
-                        name="logType" 
-                        value="custom" 
-                        checked={logType === 'custom'}
-                        onChange={() => setLogType('custom')}
-                      />
-                      Tự nhập chỉ số
-                    </label>
-                  </div>
 
-                  {logType === 'ingredient' && (
-                    <div className="form-group">
-                      <label htmlFor="ingredient-select">Chọn nguyên liệu</label>
-                      <select 
-                        id="ingredient-select" 
-                        value={selectedItem} 
-                        onChange={(e) => setSelectedItem(e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="">-- Chọn nguyên liệu --</option>
-                        {ingredients.map(i => (
-                          <option key={i.ingredient_id} value={i.ingredient_id}>
-                            {i.name} ({i.nutritional_value?.calories} kcal / {i.nutritional_value?.servingSize || 100}g)
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
 
-                  {logType === 'recipe' && (
-                    <div className="form-group">
-                      <label htmlFor="recipe-select">Chọn công thức món ăn</label>
-                      <select 
-                        id="recipe-select" 
-                        value={selectedItem} 
-                        onChange={(e) => setSelectedItem(e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="">-- Chọn công thức --</option>
-                        {recipes.map(r => (
-                          <option key={r.recipe_id} value={r.recipe_id}>
-                            {r.recipe_name} ({r.cookTime + r.prepTime} phút - {r.servings || r.Servings || 1} khẩu phần)
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {logType === 'custom' && (
-                    <div className="form-group">
-                      <label htmlFor="custom-name">Tên bữa ăn / Món ăn</label>
-                      <input 
-                        type="text" 
-                        id="custom-name"
-                        value={manualMacros.customName}
-                        onChange={(e) => setManualMacros({...manualMacros, customName: e.target.value})}
-                        placeholder="Ví dụ: Phở bò, Sinh tố bơ..."
-                        className="form-input"
-                        required
-                      />
-                    </div>
-                  )}
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="meal-type">Loại bữa ăn</label>
-                      <select 
-                        id="meal-type" 
-                        value={mealType} 
-                        onChange={(e) => setMealType(e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="Sáng">Bữa Sáng</option>
-                        <option value="Trưa">Bữa Trưa</option>
-                        <option value="Tối">Bữa Tối</option>
-                        <option value="Bữa phụ">Bữa phụ</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="quantity">Số lượng ({unit})</label>
-                      <input 
-                        type="number" 
-                        id="quantity" 
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, parseFloat(e.target.value) || 0))}
-                        className="form-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-actions">
-                    <button type="submit" className="btn-submit" disabled={loading}>
-                      {loading ? 'Đang ghi nhận...' : 'Lưu vào nhật ký'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Dynamic nutritional preview card */}
-              <div className="preview-card glass-panel">
-                <h3>Xem trước Dinh dưỡng</h3>
-                <p className="preview-subtitle">Dựa trên khối lượng nạp vào ước tính</p>
-                
-                <div className="preview-calories-gauge">
-                  <div className="gauge-value">{manualMacros.calories || 0}</div>
-                  <div className="gauge-label">kCal nạp vào</div>
-                </div>
-
-                <div className="preview-grid">
-                  <div className="preview-item">
-                    <span className="macro-dot protein-dot"></span>
-                    <span className="macro-name">Đạm:</span>
-                    <span className="macro-val">{manualMacros.protein || 0} g</span>
-                  </div>
-                  <div className="preview-item">
-                    <span className="macro-dot carbs-dot"></span>
-                    <span className="macro-name">Carb:</span>
-                    <span className="macro-val">{manualMacros.carbs || 0} g</span>
-                  </div>
-                  <div className="preview-item">
-                    <span className="macro-dot fat-dot"></span>
-                    <span className="macro-name">Chất béo:</span>
-                    <span className="macro-val">{manualMacros.fat || 0} g</span>
-                  </div>
-                  <div className="preview-item">
-                    <span className="macro-dot fiber-dot"></span>
-                    <span className="macro-name">Chất xơ:</span>
-                    <span className="macro-val">{manualMacros.fiber || 0} g</span>
-                  </div>
-                  <div className="preview-item">
-                    <span className="macro-dot sodium-dot"></span>
-                    <span className="macro-name">Muối:</span>
-                    <span className="macro-val">{manualMacros.sodium || 0} g</span>
-                  </div>
-                  <div className="preview-item">
-                    <span className="macro-dot" style={{ background: '#a855f7' }}></span>
-                    <span className="macro-name">Đường:</span>
-                    <span className="macro-val">{manualMacros.sugar || 0} g</span>
-                  </div>
-                  <div className="preview-item">
-                    <span className="macro-dot cholesterol-dot"></span>
-                    <span className="macro-name">Cholesterol:</span>
-                    <span className="macro-val">{manualMacros.cholesterol || 0} mg</span>
-                  </div>
-                </div>
-
-                {logType === 'custom' && (
-                  <div className="custom-fields-editor">
-                    <h4>Cấu hình chi tiết (Tùy chỉnh)</h4>
-                    <div className="custom-fields-grid">
-                      <div className="field">
-                        <label>Năng lượng (kcal)</label>
-                        <input type="number" step="any" value={manualMacros.calories} onChange={e => setManualMacros({...manualMacros, calories: parseFloat(e.target.value) || 0})}/>
-                      </div>
-                      <div className="field">
-                        <label>Đạm (g)</label>
-                        <input type="number" step="any" value={manualMacros.protein} onChange={e => setManualMacros({...manualMacros, protein: parseFloat(e.target.value) || 0})}/>
-                      </div>
-                      <div className="field">
-                        <label>Carb (g)</label>
-                        <input type="number" step="any" value={manualMacros.carbs} onChange={e => setManualMacros({...manualMacros, carbs: parseFloat(e.target.value) || 0})}/>
-                      </div>
-                      <div className="field">
-                        <label>Chất béo (g)</label>
-                        <input type="number" step="any" value={manualMacros.fat} onChange={e => setManualMacros({...manualMacros, fat: parseFloat(e.target.value) || 0})}/>
-                      </div>
-                      <div className="field">
-                        <label>Muối (g)</label>
-                        <input type="number" step="any" value={manualMacros.sodium} onChange={e => setManualMacros({...manualMacros, sodium: parseFloat(e.target.value) || 0})}/>
-                      </div>
-                      <div className="field">
-                        <label>Cholesterol (mg)</label>
-                        <input type="number" step="any" value={manualMacros.cholesterol} onChange={e => setManualMacros({...manualMacros, cholesterol: parseFloat(e.target.value) || 0})}/>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* TAB 2: HISTORY & GOALS */}
         {activeTab === 'history' && (
@@ -734,7 +597,7 @@ export default function Nutrition() {
                       </div>
                       <div className="gauge-bar-bg">
                         <div 
-                          className={`gauge-bar-fill ${calProgress > 100 ? 'over' : ''}`}
+                          className={`gauge-bar-fill ${calProgress <= 33 ? 'safe' : calProgress <= 66 ? 'warning' : 'danger'}`}
                           style={{ width: `${Math.min(calProgress, 100)}%` }}
                         ></div>
                       </div>
@@ -780,9 +643,9 @@ export default function Nutrition() {
                     </div>
 
                     {/* Sugar & Sodium dietary restriction bars */}
-                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
+                    <div className="restriction-bars-section">
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span>⚕️</span> Hạn chế ăn uống
+                        <FiAlertCircle size={14} /> Hạn chế ăn uống
                         {(hasDiabetes || hasHypertension || hasHeartDisease) && (
                           <span style={{
                             fontSize: 10, padding: '2px 8px', borderRadius: 8,
@@ -797,7 +660,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🍬 Đường
+                            <FiZap size={14} /> Đường
                             {hasDiabetes && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sugar > activeGoal.sugar ? '#fef2f2' : '#fffbeb', color: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Tiểu đường
@@ -809,7 +672,7 @@ export default function Nutrition() {
                           </span>
                         </div>
                         <div className="bar-bg">
-                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sugar / activeGoal.sugar) * 100, 100)}%`, background: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#a855f7' }}></div>
+                            <div className="bar-fill" style={{ width: `${Math.min((totalsToday.sugar / activeGoal.sugar) * 100, 100)}%`, background: totalsToday.sugar > activeGoal.sugar ? '#dc2626' : '#EAB308' }}></div>
                         </div>
                         {totalsToday.sugar > activeGoal.sugar && <span className="warning-badge">Vượt giới hạn</span>}
                       </div>
@@ -818,7 +681,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🧂 Muối
+                            <FiDroplet size={14} /> Muối
                             {(hasHypertension || hasHeartDisease) && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.sodium > activeGoal.sodium ? '#fef2f2' : '#fffbeb', color: totalsToday.sodium > activeGoal.sodium ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Huyết áp
@@ -839,7 +702,7 @@ export default function Nutrition() {
                       <div className="macro-bar-item">
                         <div className="label-row">
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            💗 Cholesterol
+                            <FiHeart size={14} /> Cholesterol
                             {hasHeartDisease && (
                               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 8, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#fef2f2' : '#fffbeb', color: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#d97706', fontWeight: 600 }}>
                                 Tim mạch
@@ -851,7 +714,7 @@ export default function Nutrition() {
                           </span>
                         </div>
                         <div className="bar-bg">
-                          <div className="bar-fill" style={{ width: `${Math.min((totalsToday.cholesterol / activeGoal.cholesterol) * 100, 100)}%`, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#8b5cf6' }}></div>
+                            <div className="bar-fill" style={{ width: `${Math.min((totalsToday.cholesterol / activeGoal.cholesterol) * 100, 100)}%`, background: totalsToday.cholesterol > activeGoal.cholesterol ? '#dc2626' : '#3B82F6' }}></div>
                         </div>
                         {totalsToday.cholesterol > activeGoal.cholesterol && <span className="warning-badge">Vượt giới hạn</span>}
                       </div>
@@ -898,7 +761,7 @@ export default function Nutrition() {
 
               {/* Logs history list */}
               <div className="logs-list-card">
-                <h3>Các bữa ăn đã nạp ngày {new Date(selectedDate).toLocaleDateString('vi-VN')}</h3>
+                <h3>Các bữa ăn đã nạp ngày {formatDateVi(selectedDate)}</h3>
                 <div className="logs-list-container">
                   {logsToday.length === 0 ? (
                     <div className="empty-logs-placeholder">
@@ -910,7 +773,7 @@ export default function Nutrition() {
                       return (
                         <div key={log.log_id} className="log-list-item">
                           <div className="item-main" style={{ cursor: 'pointer' }} onClick={() => handleViewLogDetail(log.log_id)}>
-                            <span className="meal-badge">{log.mealType}</span>
+                            <span className="meal-badge" style={mealBadgeStyle(log.mealType)}>{mealBadgeLabel(log.mealType)}</span>
                             <div className="item-details">
                               <span className="item-name">{name}</span>
                               <span className="item-qty">{log.quantity} {log.unit} &middot; {log.totalCalories} kcal</span>
@@ -943,71 +806,163 @@ export default function Nutrition() {
               <div className="stats-card glass-panel">
                 <h3>Xu hướng Năng lượng 7 ngày qua</h3>
                 <div className="chart-wrapper">
-                  <svg viewBox="0 0 500 240" className="svg-chart">
-                    {/* Grid Lines */}
-                    <line x1="40" y1="30" x2="480" y2="30" stroke="#f0f2f5" strokeDasharray="4" />
-                    <line x1="40" y1="95" x2="480" y2="95" stroke="#f0f2f5" strokeDasharray="4" />
-                    <line x1="40" y1="160" x2="480" y2="160" stroke="#f0f2f5" strokeDasharray="4" />
-                    <line x1="40" y1="195" x2="480" y2="195" stroke="#ccc" />
+                  <svg viewBox="0 0 700 310" className="svg-chart">
+                    <defs>
+                      <linearGradient id="grad-normal" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#22c55e" />
+                        <stop offset="100%" stopColor="#86efac" />
+                      </linearGradient>
+                      <linearGradient id="grad-over" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="#fca5a5" />
+                      </linearGradient>
+                    </defs>
 
-                    {/* Goal Line */}
-                    {(() => {
-                      const goalY = 195 - (activeGoal.calories / maxCalInChart) * 165;
+                    {/* Y-axis grid lines + value labels */}
+                    {[0, 1, 2, 3].map(i => {
+                      const yVal = Math.round((maxCalInChart / 3) * i);
+                      const yPos = 245 - (yVal / maxCalInChart) * 210;
                       return (
-                        <>
-                          <line x1="40" y1={goalY} x2="480" y2={goalY} stroke="var(--primary-color, #ff6b6b)" strokeWidth="2" strokeDasharray="6 3" />
-                          <text x="440" y={goalY - 5} fill="var(--primary-color, #ff6b6b)" fontSize="10" fontWeight="bold">Mục tiêu</text>
-                        </>
-                      );
-                    })()}
-
-                    {/* Columns */}
-                    {dailyCaloriesData.map((d, index) => {
-                      const colWidth = 35;
-                      const colSpacing = 60;
-                      const x = 50 + index * colSpacing;
-                      const barHeight = (d.calories / maxCalInChart) * 165;
-                      const y = 195 - barHeight;
-
-                      return (
-                        <g key={d.date} className="bar-group">
-                          {/* Value label */}
-                          {d.calories > 0 && (
-                            <text x={x + colWidth / 2} y={y - 8} textAnchor="middle" fill="#555" fontSize="10" fontWeight="bold">
-                              {Math.round(d.calories)}
-                            </text>
-                          )}
-                          {/* Bar */}
-                          <rect 
-                            x={x} 
-                            y={y} 
-                            width={colWidth} 
-                            height={Math.max(barHeight, 2)} 
-                            rx="4" 
-                            fill={d.calories >= activeGoal.calories ? 'url(#grad-over)' : 'url(#grad-normal)'}
+                        <g key={`grid-${i}`}>
+                          <line
+                            x1="56" y1={yPos} x2="670" y2={yPos}
+                            stroke={i === 0 ? '#cbd5e1' : '#e2e8f0'}
+                            strokeDasharray={i === 0 ? '0' : '5 4'}
+                            strokeWidth="1"
                           />
-                          {/* X label */}
-                          <text x={x + colWidth / 2} y="215" textAnchor="middle" fill="#666" fontSize="10">
-                            {d.displayDate.split(',')[0]}
-                          </text>
-                          <text x={x + colWidth / 2} y="228" textAnchor="middle" fill="#999" fontSize="9">
-                            {d.displayDate.split(' ')[1]}
+                          <text
+                            x="50" y={yPos + 4}
+                            textAnchor="end"
+                            fill="#94a3b8"
+                            fontSize="10"
+                            fontFamily="Inter, sans-serif"
+                          >
+                            {yVal > 0 ? `${(yVal / 1000).toFixed(1)}k` : '0'}
                           </text>
                         </g>
                       );
                     })}
 
-                    {/* Definitions of Gradients */}
-                    <defs>
-                      <linearGradient id="grad-normal" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#4facfe" />
-                        <stop offset="100%" stopColor="#00f2fe" />
-                      </linearGradient>
-                      <linearGradient id="grad-over" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#ff0844" />
-                        <stop offset="100%" stopColor="#ffb199" />
-                      </linearGradient>
-                    </defs>
+                    {/* Goal Line */}
+                    {(() => {
+                      const goalY = 245 - (activeGoal.calories / maxCalInChart) * 210;
+                      return (
+                        <>
+                          <line
+                            x1="56" y1={goalY} x2="670" y2={goalY}
+                            stroke="#f59e0b"
+                            strokeWidth="2"
+                            strokeDasharray="8 4"
+                            opacity="0.85"
+                          />
+                          <rect
+                            x="598" y={goalY - 13}
+                            width="70" height="16"
+                            rx="4"
+                            fill="#fef3c7"
+                            stroke="#f59e0b"
+                            strokeWidth="1"
+                          />
+                          <text
+                            x="633" y={goalY - 2}
+                            textAnchor="middle"
+                            fill="#b45309"
+                            fontSize="9.5"
+                            fontWeight="700"
+                            fontFamily="Inter, sans-serif"
+                          >
+                            Mục tiêu
+                          </text>
+                        </>
+                      );
+                    })()}
+
+                    {/* Bars */}
+                    {dailyCaloriesData.map((d, index) => {
+                      const COL_W = 42;
+                      const COL_SPACING = 85;
+                      const x = 72 + index * COL_SPACING;
+                      const barHeight = d.calories > 0
+                        ? Math.max((d.calories / maxCalInChart) * 210, 3)
+                        : 0;
+                      const y = 245 - barHeight;
+                      const isOver = d.calories >= activeGoal.calories;
+                      const isToday = index === 6;
+
+                      return (
+                        <g key={d.date} className="bar-group">
+                          <title>
+                            {`${d.displayWeekday} ${d.displayDayMonth} — Năng lượng: ${Math.round(d.calories)} kcal / Mục tiêu: ${activeGoal.calories} kcal`}
+                          </title>
+
+                          {/* Bar */}
+                          <rect
+                            x={x}
+                            y={barHeight > 0 ? y : 243}
+                            width={COL_W}
+                            height={Math.max(barHeight, 2)}
+                            rx="6"
+                            fill={d.calories > 0
+                              ? (isOver ? 'url(#grad-over)' : 'url(#grad-normal)')
+                              : '#e2e8f0'}
+                            opacity={d.calories > 0 ? 1 : 0.45}
+                          />
+
+                          {/* Today highlight ring */}
+                          {isToday && barHeight > 0 && (
+                            <rect
+                              x={x - 2} y={y - 2}
+                              width={COL_W + 4} height={barHeight + 4}
+                              rx="8"
+                              fill="none"
+                              stroke="#22c55e"
+                              strokeWidth="2"
+                              opacity="0.65"
+                            />
+                          )}
+
+                          {/* Value label above bar */}
+                          {d.calories > 0 && (
+                            <text
+                              x={x + COL_W / 2}
+                              y={y - 7}
+                              textAnchor="middle"
+                              fill={isOver ? '#dc2626' : '#15803d'}
+                              fontSize="10"
+                              fontWeight="700"
+                              fontFamily="Inter, sans-serif"
+                            >
+                              {Math.round(d.calories)}
+                            </text>
+                          )}
+
+                          {/* X-axis: Weekday */}
+                          <text
+                            x={x + COL_W / 2}
+                            y="267"
+                            textAnchor="middle"
+                            fill={isToday ? '#15803d' : '#4b5563'}
+                            fontSize="11"
+                            fontWeight={isToday ? '700' : '500'}
+                            fontFamily="Inter, sans-serif"
+                          >
+                            {d.displayWeekday}
+                          </text>
+
+                          {/* X-axis: Day/Month */}
+                          <text
+                            x={x + COL_W / 2}
+                            y="283"
+                            textAnchor="middle"
+                            fill={isToday ? '#22c55e' : '#9ca3af'}
+                            fontSize="9.5"
+                            fontFamily="Inter, sans-serif"
+                          >
+                            {d.displayDayMonth}
+                          </text>
+                        </g>
+                      );
+                    })}
                   </svg>
                 </div>
               </div>
@@ -1019,16 +974,22 @@ export default function Nutrition() {
                 <div className="meal-averages-list">
                   {mealTypeAverages.map(m => {
                     const pctOfGoal = Math.min(Math.round((m.avg / activeGoal.calories) * 100), 100);
+                    const c = MEAL_TYPE_COLOR[m.key];
+                    const isFull = m.avg >= activeGoal.calories;
+                    const barBg = c ? c.bg : '#edf2f7';
+                    const barFill = isFull
+                      ? (c ? c.text : '#16a34a')
+                      : (c ? `linear-gradient(90deg, ${c.text}, ${c.bg})` : 'linear-gradient(90deg, #16a34a, #4ade80)');
                     return (
-                      <div key={m.type} className="meal-avg-item">
+                      <div key={m.key} className="meal-avg-item">
                         <div className="meal-info">
-                          <span className="meal-type-name">{m.type}</span>
+                          <span className="meal-type-name" style={c ? { color: c.text } : {}}>{m.type}</span>
                           <span className="meal-avg-val">{m.avg} kcal</span>
                         </div>
                         <div className="meal-avg-bar-bg">
                           <div 
                             className="meal-avg-bar-fill"
-                            style={{ width: `${pctOfGoal}%` }}
+                            style={{ width: `${pctOfGoal}%`, background: barFill }}
                           ></div>
                         </div>
                       </div>

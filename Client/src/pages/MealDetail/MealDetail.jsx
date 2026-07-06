@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiArrowLeft, FiChevronDown } from 'react-icons/fi';
+import { FiClock, FiHeart, FiArrowLeft, FiChevronDown, FiZap, FiBookOpen } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
-import { mockRecipesData } from '../../utils/mockData';
+import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { recipeService } from '../../services/recipeService';
+import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
 import './MealDetail.css';
 
 export default function MealDetail() {
@@ -17,6 +18,7 @@ export default function MealDetail() {
   const [expandedIngredients, setExpandedIngredients] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [drawerRecipe, setDrawerRecipe] = useState(null);
 
   const toggleExpand = (idx) => {
     setExpandedIngredients(prev => ({
@@ -43,8 +45,7 @@ export default function MealDetail() {
           const difficulty = item.difficulty || item.Difficulty || "";
           const recipeIngredients = item.recipeIngredients || item.RecipeIngredients || [];
 
-          const mockRecipe = mockRecipesData.find(r => r.id === id || r.title.toLowerCase() === recipeName.toLowerCase());
-          const imageUrl = mockRecipe ? mockRecipe.imageUrl : "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop";
+          const imageUrl = resolveRecipeImageUrl(recipeName);
 
           const steps = instruction
             ? instruction.split('\n')
@@ -180,7 +181,7 @@ export default function MealDetail() {
               </div>
             </div>
             <div className="meta-box">
-              <span className="meta-icon">🔥</span>
+              <FiZap className="meta-icon" />
               <div>
                 <span className="meta-label">Dinh dưỡng</span>
                 <span className="meta-value">{recipe.calories}</span>
@@ -193,6 +194,10 @@ export default function MealDetail() {
                 <span className="meta-value">{recipe.difficulty}</span>
               </div>
             </div>
+            <button className="meta-diary-btn" onClick={() => setDrawerRecipe(recipe)}>
+              <FiBookOpen className="meta-icon" />
+              <span>Thêm vào nhật ký</span>
+            </button>
           </div>
 
           <div className="detail-body">
@@ -339,6 +344,11 @@ export default function MealDetail() {
           </div>
         </div>
       </div>
+      <DiaryEntryDrawer
+        recipe={drawerRecipe}
+        isOpen={!!drawerRecipe}
+        onClose={() => setDrawerRecipe(null)}
+      />
     </div>
   );
 }

@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import { addDiaryEntry } from '../../services/nutritionDiaryService';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
+import { FiSunrise, FiSun, FiMoon, FiCoffee } from 'react-icons/fi';
 
 const mealTypes = [
-  { key: 'breakfast', label: 'Sáng', icon: '🌅' },
-  { key: 'lunch', label: 'Trưa', icon: '☀️' },
-  { key: 'dinner', label: 'Tối', icon: '🌙' },
-  { key: 'snack', label: 'Phụ', icon: '🍿' },
+  { key: 'breakfast', label: 'Sáng', icon: <FiSunrise size={18} /> },
+  { key: 'lunch', label: 'Trưa', icon: <FiSun size={18} /> },
+  { key: 'dinner', label: 'Tối', icon: <FiMoon size={18} /> },
+  { key: 'snack', label: 'Phụ', icon: <FiCoffee size={18} /> },
 ];
 
 export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
   const [mealType, setMealType] = useState('lunch');
   const [servings, setServings] = useState(1);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getTodayDateKey());
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
@@ -33,7 +36,7 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
     if (isOpen) {
       setMealType('lunch');
       setServings(1);
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(getTodayDateKey());
       setNote('');
       setSubmitting(false);
       setToast(null);
@@ -63,6 +66,12 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
       }
       
       await addDiaryEntry(payload);
+
+      // Notify Sidebar Progress Ring to update immediately
+      if (toDateKey(date) === getTodayDateKey()) {
+        notifyNutritionUpdated({ deltaCalories: macros.calories });
+      }
+
       setToast({ type: 'success', text: 'Đã thêm vào nhật ký!' });
       setTimeout(() => {
         setToast(null);

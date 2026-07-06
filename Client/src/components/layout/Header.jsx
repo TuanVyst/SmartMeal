@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { IoLogOut } from 'react-icons/io5';
 import { FaUser } from 'react-icons/fa';
+import { FiBell, FiChevronDown } from 'react-icons/fi';
 import './Header.css';
 
 export default function Header() {
   const { user, logout }  = useAuth();
   const navigate          = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchValue, setSearchValue]       = useState('');
   const dropdownRef = useRef(null);
 
   const handleLogout = () => {
@@ -35,32 +35,13 @@ export default function Header() {
   const displayName = user?.username || 'Bạn';
   const initials    = displayName.charAt(0).toUpperCase();
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter' && searchValue.trim()) {
-      navigate(`/meal-suggestions?q=${encodeURIComponent(searchValue.trim())}`);
-      setSearchValue('');
-    }
-  };
-
   return (
     <header className="main-header">
-      {/* ── Search Bar ── */}
-      <div className="header-search">
-        <span className="header-search-icon">🔍</span>
-        <input
-          type="text"
-          placeholder="Tìm kiếm món ăn, nguyên liệu..."
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          onKeyDown={handleSearch}
-        />
-      </div>
-
       {/* ── Right Controls ── */}
       <div className="header-right">
         {/* Notification Bell */}
         <button className="header-notif-btn" title="Thông báo">
-          🔔
+          <FiBell size={20} />
           <span className="header-notif-dot" />
         </button>
 
@@ -70,9 +51,13 @@ export default function Header() {
             className={`header-profile-btn${isDropdownOpen ? ' open' : ''}`}
             onClick={() => setIsDropdownOpen(prev => !prev)}
           >
-            <div className="profile-icon">{initials}</div>
+            {user?.avatar ? (
+              <img src={user.avatar} alt="Avatar" className="profile-icon profile-image" />
+            ) : (
+              <div className="profile-icon">{initials}</div>
+            )}
             <span className="header-profile-name">{displayName}</span>
-            <span className="header-profile-chevron">▾</span>
+            <FiChevronDown className="header-profile-chevron" size={14} />
           </button>
 
           {isDropdownOpen && (
