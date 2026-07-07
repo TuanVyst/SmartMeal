@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { addDiaryEntry } from '../../services/nutritionDiaryService';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
+import { predictNutritionAfterAdd } from '../../utils/nutritionPredictor';
+import NutritionOverflowPopup from './NutritionOverflowPopup';
 import { FiSunrise, FiSun, FiMoon, FiCoffee } from 'react-icons/fi';
 
 const mealTypes = [
@@ -11,13 +13,14 @@ const mealTypes = [
   { key: 'snack', label: 'Phụ', icon: <FiCoffee size={18} /> },
 ];
 
-export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
+export default function DiaryEntryDrawer({ recipe, isOpen, onClose, todayTotals = {}, dailyGoal = {} }) {
   const [mealType, setMealType] = useState('lunch');
   const [servings, setServings] = useState(1);
   const [date, setDate] = useState(getTodayDateKey());
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showOverflowPopup, setShowOverflowPopup] = useState(false);
 
   const recipeName = recipe?.title || recipe?.name || '';
   const baseCalories = recipe?.nutrition?.calories || recipe?.calories || 0;
@@ -40,19 +43,33 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
       setNote('');
       setSubmitting(false);
       setToast(null);
+      setShowOverflowPopup(false);
     }
   }, [isOpen]);
 
   const handleSubmit = async () => {
     if (!recipe) return;
+
+    // Check overflow
+    const prediction = predictNutritionAfterAdd(todayTotals, recipe.nutrition || recipe, servings, dailyGoal);
+    if (prediction.hasOverflow && toDateKey(date) === getTodayDateKey()) {
+      setShowOverflowPopup(true);
+      return;
+    }
+
+    await processSubmit(servings);
+  };
+
+  const processSubmit = async (finalServings) => {
     setSubmitting(true);
+    setShowOverflowPopup(false);
     try {
       const isMockRecipe = typeof recipe.id === 'string' && /^(1111|2222|3333|4444)/.test(recipe.id);
       
       const payload = {
         recipeName: recipeName,
         mealType,
-        servings,
+        servings: finalServings,
         calories: macros.calories,
         carbs: macros.carbs,
         protein: macros.protein,
@@ -69,7 +86,7 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
 
       // Notify Sidebar Progress Ring to update immediately
       if (toDateKey(date) === getTodayDateKey()) {
-        notifyNutritionUpdated({ deltaCalories: macros.calories });
+        notifyNutritionUpdated({ deltaCalories: Math.round(baseCalories * finalServings) });
       }
 
       setToast({ type: 'success', text: 'Đã thêm vào nhật ký!' });
@@ -270,6 +287,17 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose }) {
             </div>
           </div>
         </div>
+      )}
+
+      {showOverflowPopup && (
+        <NutritionOverflowPopup
+          recipe={recipe}
+          servings={servings}
+          todayTotals={todayTotals}
+          dailyGoal={dailyGoal}
+          onCancel={() => setShowOverflowPopup(false)}
+          onConfirm={(finalServings) => processSubmit(finalServings)}
+        />
       )}
     </>
   );

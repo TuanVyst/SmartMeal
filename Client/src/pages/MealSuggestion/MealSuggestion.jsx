@@ -8,8 +8,11 @@ import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
 import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
+import HealthWarningPopup from '../../components/common/HealthWarningPopup';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { nutritionLogService } from '../../services/nutritionLogService';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
@@ -24,7 +27,8 @@ export default function MealSuggestion() {
     lockedIngredients = [], 
     reducedIngredients = [], 
     preferredIngredients = [], 
-    getHealthScoreForRecipe 
+    getHealthScoreDetails,
+    dailyTargets
   } = useHealthProfile();
 
   const [ingredients, setIngredients] = useState([]);
@@ -38,8 +42,35 @@ export default function MealSuggestion() {
   const [showAllergicRecipes, setShowAllergicRecipes] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
   const [drawerRecipe, setDrawerRecipe] = useState(null);
+  const [warningPopupData, setWarningPopupData] = useState(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
+  const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
+
+  const fetchTodayLogs = async () => {
+    if (!accountId) return;
+    try {
+      const res = await nutritionLogService.getAll(accountId);
+      const logs = res.data?.data || [];
+      const today = getTodayDateKey();
+      const todayLogs = logs.filter(l => toDateKey(l.logDate) === today);
+      
+      const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+      todayLogs.forEach(l => {
+        totals.calories += l.totalCalories || 0;
+        totals.protein += l.totalProtein || 0;
+        totals.carbs += l.totalCarbs || 0;
+        totals.fat += l.totalFat || 0;
+        totals.fiber += l.totalFiber || 0;
+        totals.sugar += l.totalSugar || 0;
+        totals.sodium += l.totalSalt || l.totalSodium || 0;
+        totals.cholesterol += l.totalCholesterol || 0;
+      });
+      setTodayTotals(totals);
+    } catch (err) {
+      console.error('Không thể tải nhật ký hôm nay:', err);
+    }
+  };
 
   const fetchIngredients = async () => {
     try {
@@ -79,6 +110,7 @@ export default function MealSuggestion() {
   useEffect(() => {
     if (accountId) {
       fetchUserAllergies();
+      fetchTodayLogs();
     }
   }, [accountId]);
 
@@ -276,6 +308,22 @@ export default function MealSuggestion() {
     });
     const hasAllergyConflict = allergicIngredients.length > 0;
 
+    // --- Health Score ---
+    const healthDetails = getHealthScoreDetails ? getHealthScoreDetails({
+      nutrition: {
+        calories: calculatedCalories,
+        protein: totalProtein / servings,
+        carbs: totalCarbs / servings,
+        fat: totalFat / servings,
+        fiber: totalFiber / servings,
+        sugar: totalSugar / servings,
+        sodium: totalSodium / servings,
+        cholesterol: totalCholesterol / servings
+      },
+      ingredients: allIngredients,
+      title: recipeName
+    }) : { score: 100, reasons: [], allergyBlock: false, matchedAllergies: [] };
+
     return {
       id: recipeId,
       title: recipeName,
@@ -301,7 +349,8 @@ export default function MealSuggestion() {
         sugar: Math.round(totalSugar / servings),
         sodium: Math.round(totalSodium / servings),
         cholesterol: Math.round(totalCholesterol / servings)
-      }
+      },
+      healthDetails
     };
   })
   .filter(recipe => showAllergicRecipes || !recipe.hasAllergyConflict)
@@ -310,7 +359,20 @@ export default function MealSuggestion() {
     const escaped = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(recipe.title);
   })
-  .sort((a, b) => b.matchPercentage - a.matchPercentage);
+  .sort((a, b) => {
+    const scoreA = (a.healthDetails?.score || 0) * 0.6 + (a.matchPercentage || 0) * 0.4;
+    const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
+    return scoreB - scoreA;
+  });
+
+  const handleAddToDiaryClick = (recipe) => {
+    const { score, reasons, allergyBlock, matchedAllergies } = recipe.healthDetails || {};
+    if (allergyBlock || (score !== undefined && score < 80)) {
+      setWarningPopupData({ recipe, score, reasons, allergyBlock, matchedAllergies });
+    } else {
+      setDrawerRecipe(recipe);
+    }
+  };
 
   return (
     <div className="meal-suggestion-container">
@@ -461,8 +523,8 @@ export default function MealSuggestion() {
           <div className="recipes-grid-suggestions">
             {suggestedRecipes.map(recipe => {
               const healthInfo = getRecipeHealthInfo(recipe);
-              const score = getHealthScoreForRecipe(recipe);
-              const lowScore = score < 50;
+              const score = recipe.healthDetails?.score ?? 100;
+              const lowScore = score < 60;
 
               return (
                 <div
@@ -477,39 +539,39 @@ export default function MealSuggestion() {
                   )}
 
                   <div style={{
-                    opacity: lowScore ? 0.6 : 1,
+                    opacity: recipe.hasAllergyConflict || lowScore ? 0.7 : 1,
                     transition: 'opacity 0.2s',
                     position: 'relative',
                   }}>
-                    {lowScore && (
-                      <div style={{
-                        position: 'absolute', top: 8, left: 8, zIndex: 10,
-                        background: '#fef2f2', color: '#dc2626',
-                        padding: '4px 10px', borderRadius: 8,
-                        fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4,
-                      }}>
-                        <MdWarning /> Ít phù hợp
-                      </div>
-                    )}
+                    {/* Badge nổi bật trên ảnh card */}
+                    <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
+                      <RecipeHealthScore recipe={recipe} variant="card" />
+                    </div>
+
+                    {/* Nút dấu cộng nằm ngay bên dưới Health Score */}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleAddToDiaryClick(recipe); }}
+                      title="Thêm vào nhật ký"
+                      style={{
+                        position: 'absolute', top: 152, right: 12, zIndex: 10,
+                        width: 36, height: 36, borderRadius: '50%',
+                        background: '#22C55E', color: 'white', border: 'none',
+                        fontSize: 24, fontWeight: 600, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        boxShadow: '0 4px 12px rgba(34,197,94,0.4)',
+                        lineHeight: 1, paddingBottom: 4
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      +
+                    </button>
 
                     <RecipeCard recipe={recipe} />
 
                     <div style={{ padding: '8px 16px 12px', borderTop: '1px solid #f1f5f9' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <RecipeHealthScore recipe={recipe} />
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setDrawerRecipe(recipe); }}
-                          style={{
-                            padding: '6px 14px', border: '1px solid #22C55E', borderRadius: 8,
-                            background: 'white', color: '#22C55E',
-                            fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
-                        >
-                          + Thêm vào nhật ký
-                        </button>
-                      </div>
                       {healthInfo?.reduced?.length > 0 && (
                         <div style={{ marginTop: 6 }}>
                           <span style={{
@@ -531,9 +593,23 @@ export default function MealSuggestion() {
         )}
       </div>
 
+      {warningPopupData && (
+        <HealthWarningPopup
+          {...warningPopupData}
+          onCancel={() => setWarningPopupData(null)}
+          onConfirm={() => {
+            const rec = warningPopupData.recipe;
+            setWarningPopupData(null);
+            setDrawerRecipe(rec);
+          }}
+        />
+      )}
+
       <DiaryEntryDrawer
         recipe={drawerRecipe}
         isOpen={!!drawerRecipe}
+        todayTotals={todayTotals}
+        dailyGoal={dailyTargets}
         onClose={() => setDrawerRecipe(null)}
       />
     </div>

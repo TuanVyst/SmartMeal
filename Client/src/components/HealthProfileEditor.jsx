@@ -30,19 +30,15 @@ const bmiColors = {
   obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
 };
 
-const allergyTags = ['Gluten', 'Lactose', 'Hải sản', 'Đậu phộng', 'Trứng', 'Đậu nành', 'Hạt cây', 'Fructose'];
-
 export default function HealthProfileEditor() {
   const { healthProfile, updateProfile, dailyCalorieBudget, lockedIngredients } = useHealthProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [bmiHistory, setBmiHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [customAllergy, setCustomAllergy] = useState('');
-
   const [formData, setFormData] = useState({
     height: '', weight: '', goal: '',
-    conditions: [], allergies: [],
+    conditions: [],
   });
 
   useEffect(() => {
@@ -52,7 +48,6 @@ export default function HealthProfileEditor() {
         weight: healthProfile.weight || '',
         goal: healthProfile.goal || '',
         conditions: healthProfile.conditions || [],
-        allergies: healthProfile.allergies || [],
       });
     }
   }, [healthProfile]);
@@ -97,7 +92,6 @@ export default function HealthProfileEditor() {
         weight: Number(formData.weight) || null,
         goal: formData.goal || 'maintain',
         conditions: formData.conditions,
-        allergies: formData.allergies,
       };
       const result = await updateProfile(payload);
       if (result.success) {
@@ -120,21 +114,7 @@ export default function HealthProfileEditor() {
     }));
   };
 
-  const toggleAllergy = (value) => {
-    setFormData(prev => ({
-      ...prev,
-      allergies: prev.allergies.includes(value)
-        ? prev.allergies.filter(a => a !== value)
-        : [...prev.allergies, value],
-    }));
-  };
 
-  const addCustomAllergy = () => {
-    const val = customAllergy.trim();
-    if (!val || formData.allergies.includes(val)) return;
-    setFormData(prev => ({ ...prev, allergies: [...prev.allergies, val] }));
-    setCustomAllergy('');
-  };
 
   if (!healthProfile) return null;
 
@@ -213,13 +193,27 @@ export default function HealthProfileEditor() {
                     padding: '8px 12px', background: 'white', borderRadius: 8,
                     border: '1px solid #e2e8f0', fontSize: 12,
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <span style={{ color: '#64748b' }}>
                           {formatDateVi(log.recordedAt)}
-                      </span>
-                      <span style={{ color: '#1E293B', fontWeight: 500 }}>
-                        {log.weight}kg / {log.height}cm
-                      </span>
+                        </span>
+                        <span style={{ color: '#1E293B', fontWeight: 500 }}>
+                          {log.weight}kg / {log.height}cm
+                        </span>
+                      </div>
+                      {(healthProfile?.conditions || []).length > 0 && (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          {healthProfile.conditions.map(c => (
+                            <span key={c} style={{
+                              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 500,
+                              background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
+                            }}>
+                              {conditionsList.find(cl => cl.value === c)?.label || c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontWeight: 600, color: '#1E293B' }}>{log.bmi}</span>
@@ -351,77 +345,6 @@ export default function HealthProfileEditor() {
               </div>
             </div>
 
-            {/* Allergies */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
-                Dị ứng
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                {allergyTags.map(tag => {
-                  const selected = formData.allergies.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleAllergy(tag)}
-                      style={{
-                        padding: '5px 12px', borderRadius: 16, fontSize: 12, fontWeight: 500,
-                        border: `2px solid ${selected ? '#ef4444' : '#e2e8f0'}`,
-                        background: selected ? '#fef2f2' : 'transparent',
-                        color: selected ? '#dc2626' : '#475569',
-                        cursor: 'pointer', transition: 'all 0.2s',
-                      }}
-                    >
-                      {tag}
-                    </button>
-                  );
-                })}
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input
-                  type="text"
-                  value={customAllergy}
-                  onChange={e => setCustomAllergy(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomAllergy(); } }}
-                  placeholder="Thêm dị ứng khác..."
-                  style={{
-                    flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: 6,
-                    fontSize: 12, outline: 'none',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={addCustomAllergy}
-                  style={{
-                    padding: '6px 12px', background: '#22C55E', color: 'white', border: 'none',
-                    borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                  }}
-                >
-                  Thêm
-                </button>
-              </div>
-              {formData.allergies.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-                  {formData.allergies.map(a => (
-                    <span key={a} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '3px 8px', background: '#fef2f2', color: '#dc2626',
-                      borderRadius: 12, fontSize: 11, fontWeight: 500,
-                    }}>
-                      {a}
-                      <button
-                        type="button"
-                        onClick={() => toggleAllergy(a)}
-                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* Save/Cancel */}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
@@ -433,7 +356,6 @@ export default function HealthProfileEditor() {
                     weight: healthProfile.weight || '',
                     goal: healthProfile.goal || '',
                     conditions: healthProfile.conditions || [],
-                    allergies: healthProfile.allergies || [],
                   });
                 }}
                 style={{

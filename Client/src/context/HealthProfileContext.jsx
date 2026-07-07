@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import { getLockedIngredientsForProfile, calculateDailyTargets, HEALTH_CONDITION_RULES } from '../utils/healthRules';
+import { calculateHealthScore } from '../utils/healthScoreEngine';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { useAuth } from './AuthContext';
 
@@ -145,28 +146,22 @@ export function HealthProfileProvider({ children }) {
     return result;
   }, [computeDerivedState]);
 
+  /**
+   * Tính Health Score (0-100) cho một recipe.
+   * Dùng engine mới từ healthScoreEngine.js.
+   */
   const getHealthScoreForRecipe = useCallback((recipe) => {
-    if (!healthProfile) return 100;
+    const result = calculateHealthScore(recipe, healthProfile, dailyCalorieBudget);
+    return result.score;
+  }, [healthProfile, dailyCalorieBudget]);
 
-    let score = 100;
-
-    const recipeIngredients = recipe.ingredients?.map(i => i.name?.toLowerCase()) || [];
-    const lockedLower = lockedIngredients.map(i => i.toLowerCase());
-
-    lockedLower.forEach(locked => {
-      const hasLocked = recipeIngredients.some(ri => ri.includes(locked));
-      if (hasLocked) score -= 30;
-    });
-
-    const mealCalorieLimit = dailyCalorieBudget / 3;
-    const recipeCalories = recipe.nutrition?.calories || recipe.calories || 0;
-    if (recipeCalories > mealCalorieLimit) {
-      const excessRatio = (recipeCalories - mealCalorieLimit) / mealCalorieLimit;
-      score -= Math.min(40, Math.round(excessRatio * 40));
-    }
-
-    return Math.max(0, score);
-  }, [healthProfile, lockedIngredients, dailyCalorieBudget]);
+  /**
+   * Tính chi tiết Health Score: score + reasons + badge + allergyBlock.
+   * Dùng cho warning popup khi thêm vào nhật ký.
+   */
+  const getHealthScoreDetails = useCallback((recipe) => {
+    return calculateHealthScore(recipe, healthProfile, dailyCalorieBudget);
+  }, [healthProfile, dailyCalorieBudget]);
 
   return (
     <HealthProfileContext.Provider value={{
@@ -180,7 +175,8 @@ export function HealthProfileProvider({ children }) {
       loading,
       completeSurvey,
       updateProfile,
-      getHealthScoreForRecipe
+      getHealthScoreForRecipe,
+      getHealthScoreDetails,
     }}>
       {children}
     </HealthProfileContext.Provider>
