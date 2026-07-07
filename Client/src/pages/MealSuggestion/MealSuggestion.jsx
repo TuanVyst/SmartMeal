@@ -4,6 +4,7 @@ import { FiSearch } from 'react-icons/fi';
 import { getIngredients } from '../../services/foodService';
 import { recipeService } from '../../services/recipeService';
 import { allergyService } from '../../services/allergyService';
+import { pantryService } from '../../services/pantryService';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
@@ -31,10 +32,9 @@ export default function MealSuggestion() {
   const [allergies, setAllergies] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [leftTab, setLeftTab] = useState('pantry');
-  const [pantryItems, setPantryItems] = useState(() => {
-    const saved = localStorage.getItem(`pantry_${accountId}`);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [pantryItems, setPantryItems] = useState([]); // array of PantryResponse objects from BE
+  const [editingPantryId, setEditingPantryId] = useState(null);
+  const [editQty, setEditQty] = useState('');
   const [showAllergicRecipes, setShowAllergicRecipes] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
   const [drawerRecipe, setDrawerRecipe] = useState(null);
@@ -68,6 +68,17 @@ export default function MealSuggestion() {
     }
   };
 
+  const fetchPantry = async () => {
+    if (!accountId) return;
+    try {
+      const res = await pantryService.getAll();
+      const all = res.data.data || [];
+      setPantryItems(all.filter(p => p.account_id === accountId));
+    } catch (err) {
+      console.error('Không thể tải tủ lạnh:', err);
+    }
+  };
+
   useEffect(() => {
     fetchIngredients();
   }, []);
@@ -83,19 +94,68 @@ export default function MealSuggestion() {
   }, [accountId]);
 
   useEffect(() => {
-    if (accountId) {
-      localStorage.setItem(`pantry_${accountId}`, JSON.stringify(pantryItems));
-    }
-  }, [pantryItems, accountId]);
+    if (accountId) fetchPantry();
+  }, [accountId]);
 
-  const handleTogglePantry = (ingId) => {
-    setPantryItems(prev => {
-      if (prev.includes(ingId)) {
-        return prev.filter(id => id !== ingId);
+  const handleTogglePantry = async (ingId) => {
+    if (!accountId) return;
+    const existing = pantryItems.find(p => p.ingredient_id === ingId);
+    try {
+      if (existing) {
+        await pantryService.delete(existing.pantry_id);
+        setPantryItems(prev => prev.filter(p => p.pantry_id !== existing.pantry_id));
       } else {
-        return [...prev, ingId];
+        const res = await pantryService.create({
+          account_id: accountId,
+          ingredient_id: ingId,
+          quantity: 1,
+          unit: 'piece',
+          expiryDate: new Date(Date.now() + 30 * 86400000).toISOString()
+        });
+        const created = res.data.data;
+        setPantryItems(prev => [...prev, created]);
       }
-    });
+    } catch (err) {
+      console.error('Pantry toggle failed:', err);
+      triggerAlert('Cập nhật tủ lạnh thất bại.', 'error');
+    }
+  };
+
+  const handleStartEditQty = async (pantryId) => {
+    setEditingPantryId(pantryId);
+    setEditQty('');
+    try {
+      const res = await pantryService.getById(pantryId);
+      setEditQty(String(res.data.data?.quantity ?? ''));
+    } catch (err) {
+      console.error('Pantry getById failed:', err);
+      const local = pantryItems.find(p => p.pantry_id === pantryId);
+      setEditQty(local ? String(local.quantity) : '1');
+    }
+  };
+
+  const handleSaveQty = async () => {
+    if (!editingPantryId) return;
+    const item = pantryItems.find(p => p.pantry_id === editingPantryId);
+    if (!item) { setEditingPantryId(null); return; }
+    const qty = parseFloat(editQty);
+    if (!Number.isFinite(qty) || qty < 0) { setEditingPantryId(null); return; }
+    try {
+      const res = await pantryService.update(editingPantryId, {
+        account_id: item.account_id,
+        ingredient_id: item.ingredient_id,
+        quantity: qty,
+        unit: item.unit,
+        expiryDate: item.expiryDate
+      });
+      const updated = res.data.data;
+      setPantryItems(prev => prev.map(p => p.pantry_id === editingPantryId ? { ...p, ...updated } : p));
+    } catch (err) {
+      console.error('Pantry update failed:', err);
+      triggerAlert('Cập nhật số lượng thất bại.', 'error');
+    } finally {
+      setEditingPantryId(null);
+    }
   };
 
   const handleToggleAllergy = async (ingId) => {
@@ -111,7 +171,7 @@ export default function MealSuggestion() {
           ingredient_id: ingId
         });
         triggerAlert('Đã thêm vào danh sách dị ứng.', 'success');
-        setPantryItems(prev => prev.filter(id => id !== ingId));
+        setPantryItems(prev => prev.filter(p => p.ingredient_id !== ingId));
       }
       await fetchUserAllergies();
     } catch (err) {
@@ -149,6 +209,11 @@ export default function MealSuggestion() {
   };
 
   const groupedIngredients = getGroupedIngredients();
+
+  const pantryIngredientIds = useMemo(
+    () => new Set(pantryItems.map(p => p.ingredient_id)),
+    [pantryItems]
+  );
 
   const filteredGroupedIngredients = useMemo(() => {
     if (!ingredientSearchQuery.trim()) return groupedIngredients;
@@ -370,8 +435,39 @@ export default function MealSuggestion() {
               <h4 className="category-header">{categoryName}</h4>
               <div className="ingredients-pills-list">
                 {filteredGroupedIngredients[categoryName].map(ing => {
-                  const isPantry = pantryItems.includes(ing.ingredient_id);
+                  const isPantry = pantryIngredientIds.has(ing.ingredient_id);
                   const isAllergy = allergies.some(a => a.ingredient_id === ing.ingredient_id);
+                  const pantryEntry = isPantry ? pantryItems.find(p => p.ingredient_id === ing.ingredient_id) : null;
+                  let pantryQtyNode = null;
+                  if (pantryEntry) {
+                    if (editingPantryId === pantryEntry.pantry_id) {
+                      pantryQtyNode = (
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={editQty}
+                          autoFocus
+                          onClick={e => e.stopPropagation()}
+                          onChange={e => setEditQty(e.target.value)}
+                          onBlur={handleSaveQty}
+                          onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); }}
+                          style={{ width: '52px', marginLeft: '6px', padding: '2px 4px', fontSize: '0.85em' }}
+                        />
+                      );
+                    } else {
+                      pantryQtyNode = (
+                        <span
+                          role="button"
+                          onClick={e => { e.stopPropagation(); handleStartEditQty(pantryEntry.pantry_id); }}
+                          style={{ marginLeft: '6px', fontSize: '0.85em', opacity: 0.85, cursor: 'text' }}
+                          title="Click để sửa số lượng"
+                        >
+                          ×{pantryEntry.quantity}
+                        </span>
+                      );
+                    }
+                  }
                   return (
                     <button
                       key={ing.ingredient_id}
@@ -382,6 +478,7 @@ export default function MealSuggestion() {
                     >
                       {isPantry && <MdCheckCircle className="pill-check-icon" />}
                       {ing.name}
+                      {pantryQtyNode}
                       {isAllergy && <span className="disabled-pill-text">(Dị ứng)</span>}
                     </button>
                   );

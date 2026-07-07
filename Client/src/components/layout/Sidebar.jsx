@@ -87,14 +87,6 @@ export default function Sidebar() {
     { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
   ];
 
-  // Rotate mascot tips every 8 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTipIndex(i => (i + 1) % MASCOT_TIPS.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
   useEffect(() => {
     if (!accountId) {
       setStreakDays(0);
