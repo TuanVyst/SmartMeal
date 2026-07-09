@@ -847,3 +847,8 @@ body {
 .btn-add-new:hover {
   background: #16a34a;
 }
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}

@@ -10,5 +10,8 @@ namespace BusinessObject.Dtos.RequestModels
         public double? TargetCarbs { get; set; }
         public double? TargetFat { get; set; }
         public double? TargetFiber { get; set; }
+        public double? TargetSugar { get; set; }
+        public double? TargetSalt { get; set; }
+        public double? TargetCholesterol { get; set; }
     }
 }

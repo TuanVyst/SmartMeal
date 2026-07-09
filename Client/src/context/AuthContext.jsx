@@ -117,6 +117,8 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userHealthProfile');
+    localStorage.removeItem('healthSurveyCompleted');
     setUser(null);
     setSubscription(null);
     setIsPremium(false);
