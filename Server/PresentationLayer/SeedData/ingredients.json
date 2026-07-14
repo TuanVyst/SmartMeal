@@ -2226,26 +2226,6 @@
     ]
   },
   {
-    "Name": "Ớt chuông đỏ, vàng",
-    "AveragePrice": 2.5,
-    "ImageUrl": "/images/-t-chu-ng-----v-ng.jpg",
-    "NutritionalValues": {
-      "Calories": 22,
-      "Protein": 1.2,
-      "Carbs": 4.5,
-      "Fat": 0.2,
-      "Fiber": 1.5,
-      "Sugar": 2.0,
-      "Salt": 0.01,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Rau củ"
-    ]
-  },
-  {
     "Name": "Dưa leo",
     "AveragePrice": 2.5,
     "ImageUrl": "/images/d-a-leo.jpg",
