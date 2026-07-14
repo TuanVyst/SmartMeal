@@ -12,6 +12,11 @@ const RECIPE_IMAGE_ALIASES = {
   'cá chiên sả ớt': 'cá diêu hồng chiên xả ớt.jpg',
   'canh chua chay': 'Canh chua cá lóc.jpg',
   'cơm chiên dương châu chay': 'Cơm chiên Dương Châu chay.jpg',
+  '💚 trứng chiên lá mơ lông': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027609/smartmeal_egg_scraped_1.jpg',
+  'trứng chiên cá hộp': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027616/smartmeal_egg_scraped_2.jpg',
+  'burrito trứng': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027622/smartmeal_egg_scraped_3.jpg',
+  'bánh tổ chiên trứng gà': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027628/smartmeal_egg_scraped_4.jpg',
+  'trứng chần không dùng giấm': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027631/smartmeal_egg_scraped_5.jpg',
 };
 
 const RECIPE_IMAGE_FILES = [
