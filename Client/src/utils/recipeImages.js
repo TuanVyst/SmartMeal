@@ -16,7 +16,23 @@ const RECIPE_IMAGE_ALIASES = {
   'trứng chiên cá hộp': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027616/smartmeal_egg_scraped_2.jpg',
   'burrito trứng': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027622/smartmeal_egg_scraped_3.jpg',
   'bánh tổ chiên trứng gà': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027628/smartmeal_egg_scraped_4.jpg',
-  'trứng chần không dùng giấm': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027631/smartmeal_egg_scraped_5.jpg',
+  'trứng cuộn phô mai': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784027631/smartmeal_egg_scraped_5.jpg',
+  'trứng gà ngâm tương': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030214/smartmeal_egg_scraped_1.jpg',
+  'trứng cuộn hàn quốc': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030217/smartmeal_egg_scraped_2.jpg',
+  'cá hộp chưng trứng thịt băm': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030220/smartmeal_egg_scraped_3.jpg',
+  'trứng chiên lá lốt': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030223/smartmeal_egg_scraped_4.jpg',
+  'trứng đúc thịt hấp nồi cơm': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030228/smartmeal_egg_scraped_5.jpg',
+  'thịt xay rim trứng': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030231/smartmeal_egg_scraped_6.jpg',
+  'trứng sốt cay': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030234/smartmeal_egg_scraped_7.jpg',
+  'trứng rim cà chua nấm': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030237/smartmeal_egg_scraped_8.jpg',
+  'sườn cánh buồm kho trứng': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030240/smartmeal_egg_scraped_9.jpg',
+  'trứng sốt nước mắm tỏi ớt': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030244/smartmeal_egg_scraped_10.jpg',
+  'trứng chiên hàu': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030247/smartmeal_egg_scraped_11.jpg',
+  'sandwich trứng phô mai': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030250/smartmeal_egg_scraped_12.jpg',
+  'trứng bọc thịt chiên xù': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030256/smartmeal_egg_scraped_13.jpg',
+  'trứng cuộn rong biển': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030260/smartmeal_egg_scraped_14.jpg',
+  'trứng chưng cà chua hành tây': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030263/smartmeal_egg_scraped_15.jpg',
+  'canh trứng cà chua': 'https://res.cloudinary.com/desguhlr2/image/upload/v1784030263/smartmeal_egg_scraped_15.jpg',
 };
 
 const RECIPE_IMAGE_FILES = [
@@ -77,7 +93,12 @@ export function resolveRecipeImageUrl(recipeName) {
   if (LAU_RECIPES.has(normalizedName)) return FALLBACK_MEAL_IMAGE;
 
   const aliasFilename = RECIPE_IMAGE_ALIASES[normalizedName];
-  if (aliasFilename) return buildRecipeImageUrl(aliasFilename);
+  if (aliasFilename) {
+    if (aliasFilename.startsWith('http://') || aliasFilename.startsWith('https://')) {
+      return aliasFilename;
+    }
+    return buildRecipeImageUrl(aliasFilename);
+  }
 
   const directFilename = filenameByLowerTitle.get(normalizedName);
   if (directFilename) return buildRecipeImageUrl(directFilename);

@@ -1404,7 +1404,7 @@
     ]
   },
   {
-    "Name": "Nghệ ",
+    "Name": "Nghệ",
     "AveragePrice": 2.0,
     "ImageUrl": "/images/nghệ-tươi.jpg",
     "NutritionalValues": {
@@ -2066,26 +2066,6 @@
     ]
   },
   {
-    "Name": "Tiêu xay",
-    "AveragePrice": 2.5,
-    "ImageUrl": "/images/ti-u-xay.jpg",
-    "NutritionalValues": {
-      "Calories": 120,
-      "Protein": 2.0,
-      "Carbs": 25.0,
-      "Fat": 0.5,
-      "Fiber": 0.5,
-      "Sugar": 20.0,
-      "Salt": 40.0,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Gia vị"
-    ]
-  },
-  {
     "Name": "Bột ngọt",
     "AveragePrice": 2.5,
     "ImageUrl": "/images/b-t-ng-t.jpg",
@@ -2123,26 +2103,6 @@
     },
     "TagNames": [
       "Hải sản"
-    ]
-  },
-  {
-    "Name": "Thịt xay",
-    "AveragePrice": 2.5,
-    "ImageUrl": "/images/th-t-xay.jpg",
-    "NutritionalValues": {
-      "Calories": 210,
-      "Protein": 22.0,
-      "Carbs": 0.5,
-      "Fat": 14.0,
-      "Fiber": 0,
-      "Sugar": 0,
-      "Salt": 0.08,
-      "Cholesterol": 75,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Thịt"
     ]
   },
   {
@@ -2286,9 +2246,169 @@
     ]
   },
   {
-    "Name": "Nước sạch",
+    "Name": "Ớt sừng",
     "AveragePrice": 2.5,
-    "ImageUrl": "/images/n--c-s-ch.jpg",
+    "ImageUrl": "/images/-t-s-ng.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Cá hộp 3 cô gái",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/c--h-p-3-c--g-i.jpg",
+    "NutritionalValues": {
+      "Calories": 110,
+      "Protein": 19.0,
+      "Carbs": 0.2,
+      "Fat": 3.5,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.12,
+      "Cholesterol": 60,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Hải sản"
+    ]
+  },
+  {
+    "Name": "Lá lốt",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/lá-lốt.jpg",
+    "NutritionalValues": {
+      "Calories": 80,
+      "Protein": 3.0,
+      "Carbs": 12.0,
+      "Fat": 2.0,
+      "Fiber": 1.0,
+      "Sugar": 2.0,
+      "Salt": 0.05,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Đồ khô"
+    ]
+  },
+  {
+    "Name": "Hành phi",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/hành-phi.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Ngò rí",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/ngò-rí.jpg",
+    "NutritionalValues": {
+      "Calories": 80,
+      "Protein": 3.0,
+      "Carbs": 12.0,
+      "Fat": 2.0,
+      "Fiber": 1.0,
+      "Sugar": 2.0,
+      "Salt": 0.05,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Đồ khô"
+    ]
+  },
+  {
+    "Name": "Sườn sụn",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/sườn-sụn.jpg",
+    "NutritionalValues": {
+      "Calories": 210,
+      "Protein": 22.0,
+      "Carbs": 0.5,
+      "Fat": 14.0,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.08,
+      "Cholesterol": 75,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Thịt"
+    ]
+  },
+  {
+    "Name": "Ruột hàu sữa",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/ru-t-h-u-s-a.jpg",
+    "NutritionalValues": {
+      "Calories": 80,
+      "Protein": 3.0,
+      "Carbs": 12.0,
+      "Fat": 2.0,
+      "Fiber": 1.0,
+      "Sugar": 2.0,
+      "Salt": 0.05,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Đồ khô"
+    ]
+  },
+  {
+    "Name": "Bánh mì sandwich",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/bánh-mì-sandwich.jpg",
+    "NutritionalValues": {
+      "Calories": 80,
+      "Protein": 3.0,
+      "Carbs": 12.0,
+      "Fat": 2.0,
+      "Fiber": 1.0,
+      "Sugar": 2.0,
+      "Salt": 0.05,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Đồ khô"
+    ]
+  },
+  {
+    "Name": "Rong biển lá",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/rong-biển-lá.jpg",
     "NutritionalValues": {
       "Calories": 80,
       "Protein": 3.0,
