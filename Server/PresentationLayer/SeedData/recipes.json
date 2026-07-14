@@ -2057,5 +2057,215 @@
       "Tráng miệng",
       "Nhanh"
     ]
+  },
+  {
+    "Recipe_name": "💚 Trứng Chiên Lá Mơ Lông",
+    "Description": "Món 💚 Trứng Chiên Lá Mơ Lông thơm ngon, dễ làm tại nhà.",
+    "Instruction": "1. Đập trứng vào tô\n2. Lá mơ rửa sạch cắt nhỏ trộn chung cùng các gia vị\n3. Làm nóng chảo cho ít dầu ăn vào rồi tráng trứng, dàn đều lá mơ\n4. Trứng rán chín 1 mặt lật lại mặt kia rán thêm vài phút cho vàng mặt là được, lật lại rắc ít mè rang, gấp đôi cắt thành miếng cho vào đĩa phục vụ, dùng nóng với cơm hoặc kẹp bánh mì…",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Lá mơ lông",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Tiêu xay",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Bột ngọt",
+        "Quantity": 1,
+        "UOM": "tsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên cá hộp",
+    "Description": "Món Trứng chiên cá hộp thơm ngon, dễ làm tại nhà.",
+    "Instruction": "1. Cá hộp cho ra tô, dằm nhỏ rồi trộn với các nguyên liệu và gia vị còn lại\n2. Cho dầu ăn vào chảo, chờ chảo nóng thì cho hỗn hợp trứng vào chiên lửa nhỏ, đậy nắp lại cho nhanh chín\n3. Trứng chín mặt này thì chiên mặt còn lại cho chín vàng hai mặt là được",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cá nục sốt cà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Thịt xay",
+        "Quantity": 100,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu xay",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 3,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Burrito Trứng",
+    "Description": "Burrito là món ăn cuốn nổi tiếng của Mexico, sử dụng vỏ bánh tortilla bản lớn để bọc trọn phần nhân phong phú bên trong. Nhân bánh thường là sự kết hợp đậm đà giữa thịt bò, gà hoặc heo hầm, quyện cùng cơm hạt dài, đậu đen, bơ nạc và phô mai kéo sợi. Khi thưởng thức, chiếc bánh được cuộn chặt và áp chảo nhẹ cho nóng giòn lớp vỏ. Cắn một miếng, hương vị béo ngậy, cay nồng hòa quyện, mang lại cảm giác thỏa mãn tức thì.",
+    "Instruction": "1. Rau củ bắp cải ớt chuông cắt sợi\n2. Dưa leo cắt sợi. Trứng khuấy cho chín.\n3. Thêm tất cả các loại nhân và sốt cuộn vào, cắt đôi. Áp chảo để bánh nóng, giữ nóng bằng cách cuốn vào giấy bạc.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Vỏ bánh tortilla",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Bắp cải tím",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Lá xà lách",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Ớt chuông đỏ, vàng",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dưa leo",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Sốt guacamole",
+        "Quantity": 1,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Bánh Tổ Chiên Trứng Gà",
+    "Description": "Món ăn kỉ niệm từ bà nội chồng mỗi dịp tết cúng xong",
+    "Instruction": "1. Bánh tổ cắt lát mỏng vừa ăn.\n2. Đập trứng gà ra bát, đánh đều.\n3. Nhúng từng lát bánh tổ vào trứng gà.\n4. Làm nóng dầu trên chảo, cho bánh tổ đã nhúng trứng vào chiên vàng đều hai mặt.\n5. Gắp ra đĩa, dùng nóng.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bánh tổ người hoa",
+        "Quantity": 200,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 30,
+        "UOM": "ml"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chần không dùng giấm",
+    "Description": "Trứng chần là món kết hợp giữa trứng luộc và trứng ốp la.Tuy nhiên trứng chần rất dễ fail nhất nếu như làm ko đúng cách và cẩn thận cũng như trứng không đủ tươi và mới.Trứng này ứng dụng rất nhiều món chủ yếu là món âu,dùng để ăn mì tôm đều rất ngon",
+    "Instruction": "1. Cho trứng ra bát.Chuẩn bị nồi nước thật sôi,Cho một ít dầu vào muôi to(thậm chí nhúng muôi vào dầu).Cho trứng vào\n2. Thả vào nồi nước thật sôi.Đặt đáy muôi vào nước sôi đến khi lòng trắng đông 1 phần khoảng 1-2’ sau đó thả xuống nồi nước sôi đến khi tróc ra đun thêm 1’,vớt trứng ra",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Nước sạch",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 2,
+        "UOM": "g"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
   }
 ]

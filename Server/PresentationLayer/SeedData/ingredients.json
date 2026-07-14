@@ -1003,7 +1003,6 @@
       "Ngũ cốc"
     ]
   },
- 
   {
     "Name": "Giấm",
     "AveragePrice": 1.5,
@@ -1464,7 +1463,6 @@
       "Nước chấm & Gia vị lỏng"
     ]
   },
-  
   {
     "Name": "Mắm ruốc",
     "AveragePrice": 2.0,
@@ -1525,7 +1523,6 @@
       "Ngũ cốc"
     ]
   },
-  
   {
     "Name": "Bắp chuối",
     "AveragePrice": 2.0,
@@ -1546,7 +1543,6 @@
       "Rau củ"
     ]
   },
- 
   {
     "Name": "Đường",
     "AveragePrice": 2.0,
@@ -1787,7 +1783,6 @@
       "Rau củ"
     ]
   },
-  
   {
     "Name": "Thạch jelly",
     "AveragePrice": 2.0,
@@ -2048,6 +2043,286 @@
     "TagNames": [
       "Đồ khô",
       "Ngũ cốc"
+    ]
+  },
+  {
+    "Name": "Lá mơ lông",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/l--m--l-ng.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Tiêu xay",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/ti-u-xay.jpg",
+    "NutritionalValues": {
+      "Calories": 120,
+      "Protein": 2.0,
+      "Carbs": 25.0,
+      "Fat": 0.5,
+      "Fiber": 0.5,
+      "Sugar": 20.0,
+      "Salt": 40.0,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Gia vị"
+    ]
+  },
+  {
+    "Name": "Bột ngọt",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/b-t-ng-t.jpg",
+    "NutritionalValues": {
+      "Calories": 345,
+      "Protein": 7.5,
+      "Carbs": 76.0,
+      "Fat": 1.2,
+      "Fiber": 1.5,
+      "Sugar": 0.5,
+      "Salt": 0.02,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Ngũ cốc"
+    ]
+  },
+  {
+    "Name": "Cá nục sốt cà",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/c--n-c-s-t-c-.jpg",
+    "NutritionalValues": {
+      "Calories": 110,
+      "Protein": 19.0,
+      "Carbs": 0.2,
+      "Fat": 3.5,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.12,
+      "Cholesterol": 60,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Hải sản"
+    ]
+  },
+  {
+    "Name": "Thịt xay",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/th-t-xay.jpg",
+    "NutritionalValues": {
+      "Calories": 210,
+      "Protein": 22.0,
+      "Carbs": 0.5,
+      "Fat": 14.0,
+      "Fiber": 0,
+      "Sugar": 0,
+      "Salt": 0.08,
+      "Cholesterol": 75,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Thịt"
+    ]
+  },
+  {
+    "Name": "Hạt nêm",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/h-t-n-m.jpg",
+    "NutritionalValues": {
+      "Calories": 120,
+      "Protein": 2.0,
+      "Carbs": 25.0,
+      "Fat": 0.5,
+      "Fiber": 0.5,
+      "Sugar": 20.0,
+      "Salt": 40.0,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Gia vị"
+    ]
+  },
+  {
+    "Name": "Vỏ bánh tortilla",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/v--b-nh-tortilla.jpg",
+    "NutritionalValues": {
+      "Calories": 345,
+      "Protein": 7.5,
+      "Carbs": 76.0,
+      "Fat": 1.2,
+      "Fiber": 1.5,
+      "Sugar": 0.5,
+      "Salt": 0.02,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Ngũ cốc"
+    ]
+  },
+  {
+    "Name": "Bắp cải tím",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/b-p-c-i-t-m.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Lá xà lách",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/l--x--l-ch.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Ớt chuông đỏ, vàng",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/-t-chu-ng-----v-ng.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Dưa leo",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/d-a-leo.jpg",
+    "NutritionalValues": {
+      "Calories": 22,
+      "Protein": 1.2,
+      "Carbs": 4.5,
+      "Fat": 0.2,
+      "Fiber": 1.5,
+      "Sugar": 2.0,
+      "Salt": 0.01,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Rau củ"
+    ]
+  },
+  {
+    "Name": "Sốt guacamole",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/s-t-guacamole.jpg",
+    "NutritionalValues": {
+      "Calories": 80,
+      "Protein": 3.0,
+      "Carbs": 12.0,
+      "Fat": 2.0,
+      "Fiber": 1.0,
+      "Sugar": 2.0,
+      "Salt": 0.05,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Đồ khô"
+    ]
+  },
+  {
+    "Name": "Bánh tổ người hoa",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/b-nh-t--ng--i-hoa.jpg",
+    "NutritionalValues": {
+      "Calories": 345,
+      "Protein": 7.5,
+      "Carbs": 76.0,
+      "Fat": 1.2,
+      "Fiber": 1.5,
+      "Sugar": 0.5,
+      "Salt": 0.02,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Ngũ cốc"
+    ]
+  },
+  {
+    "Name": "Nước sạch",
+    "AveragePrice": 2.5,
+    "ImageUrl": "/images/n--c-s-ch.jpg",
+    "NutritionalValues": {
+      "Calories": 80,
+      "Protein": 3.0,
+      "Carbs": 12.0,
+      "Fat": 2.0,
+      "Fiber": 1.0,
+      "Sugar": 2.0,
+      "Salt": 0.05,
+      "Cholesterol": 0,
+      "ServingSize": 100,
+      "ServingUnit": "g"
+    },
+    "TagNames": [
+      "Đồ khô"
     ]
   }
 ]
