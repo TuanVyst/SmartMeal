@@ -45,7 +45,44 @@ export default function MealSuggestion() {
   const [warningPopupData, setWarningPopupData] = useState(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
+  const [pantryMode, setPantryMode] = useState('explore'); // 'explore' | 'cook'
+  const [selectedCookingMethod, setSelectedCookingMethod] = useState(null);
   const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
+
+  const COOKING_METHODS = [
+    { key: 'xao',   label: 'Xào',         keywords: ['xào'] },
+    { key: 'chien', label: 'Chiên/Rán',   keywords: ['chiên', 'rán'] },
+    { key: 'nuong', label: 'Nướng',       keywords: ['nướng'] },
+    { key: 'luoc',  label: 'Luộc/Hấp',    keywords: ['luộc', 'hấp'] },
+    { key: 'canh',  label: 'Canh/Súp',    keywords: ['canh', 'súp', 'lẩu', 'nước'] },
+    { key: 'kho',   label: 'Kho/Rim',     keywords: ['kho', 'rim'] },
+    { key: 'salad', label: 'Salad/Trộn',  keywords: ['salad', 'gỏi', 'trộn'] },
+    { key: 'ham',   label: 'Hầm/Ninh',    keywords: ['hầm', 'ninh', 'om'] },
+    { key: 'banh',  label: 'Làm bánh',    keywords: ['bánh'] },
+    { key: 'phache',label: 'Đồ uống/Tráng miệng', keywords: ['sinh tố', 'chè', 'nước ép', 'trà', 'cà phê', 'sữa', 'kem', 'tráng miệng', 'đồ uống'] },
+  ];
+
+  const detectCookingMethod = (recipe, normalTitle) => {
+    const labels = recipe.recipeLabels || recipe.RecipeLabels || [];
+    
+    // Check labels first
+    for (const m of COOKING_METHODS) {
+      if (labels.some(l => {
+        const nLabel = normalizeText(l.labelName || l);
+        return m.keywords.some(kw => nLabel.includes(normalizeText(kw)));
+      })) return m.key;
+    }
+    
+    // Check title with word boundary regex
+    for (const m of COOKING_METHODS) {
+      if (m.keywords.some(kw => {
+         const nKw = normalizeText(kw);
+         return new RegExp(`(^|\\s)${nKw}(\\s|$)`).test(normalTitle);
+      })) return m.key;
+    }
+    
+    return null;
+  };
 
   const fetchTodayLogs = async () => {
     if (!accountId) return;
@@ -213,7 +250,7 @@ export default function MealSuggestion() {
     return { locked, reduced };
   };
 
-  const suggestedRecipes = recipes.map(rec => {
+  const mappedRecipes = useMemo(() => recipes.map(rec => {
     // --- Normalize fields from both getAll and suggestFromPantry response formats ---
     const recipeName = rec.recipe_name || rec.Recipe_name || "";
     const recipeId = rec.recipe_id || rec.Recipe_id || "";
@@ -350,20 +387,58 @@ export default function MealSuggestion() {
         sodium: Math.round(totalSodium / servings),
         cholesterol: Math.round(totalCholesterol / servings)
       },
-      healthDetails
+      healthDetails,
+      cookingMethod: detectCookingMethod(rec, normalizeText(recipeName))
     };
-  })
-  .filter(recipe => showAllergicRecipes || !recipe.hasAllergyConflict)
-  .filter(recipe => {
-    if (!searchQuery.trim()) return true;
-    const escaped = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(recipe.title);
-  })
-  .sort((a, b) => {
-    const scoreA = (a.healthDetails?.score || 0) * 0.6 + (a.matchPercentage || 0) * 0.4;
-    const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
-    return scoreB - scoreA;
-  });
+  }), [recipes, lockedIngredients, reducedIngredients, pantryItems, getHealthScoreDetails, ingredients, allergies]);
+
+  const baseFilteredRecipes = useMemo(() => {
+    return mappedRecipes
+      .filter(recipe => showAllergicRecipes || !recipe.hasAllergyConflict)
+      .filter(recipe => {
+        // 1. Filter by Pantry Mode
+        if (pantryItems.length > 0) {
+          if (pantryMode === 'cook') {
+            if ((recipe.matchPercentage || 0) < 75) return false;
+          } else {
+            // Explore mode: must contain at least one of the selected ingredients
+            const hasPossessed = recipe.allIngredients?.some(i => i.possessed);
+            if (!hasPossessed) return false;
+          }
+        }
+        return true;
+      });
+  }, [mappedRecipes, showAllergicRecipes, pantryItems, pantryMode]);
+
+  // Calculate available cooking methods based on baseFilteredRecipes
+  const availableCookingMethods = useMemo(() => {
+    const methods = {};
+    baseFilteredRecipes.forEach(recipe => {
+      if (recipe.cookingMethod) {
+        methods[recipe.cookingMethod] = (methods[recipe.cookingMethod] || 0) + 1;
+      }
+    });
+    return methods;
+  }, [baseFilteredRecipes]);
+
+  const suggestedRecipes = useMemo(() => {
+    return baseFilteredRecipes
+      .filter(recipe => {
+        // 2. Filter by Cooking Method
+        if (selectedCookingMethod && recipe.cookingMethod !== selectedCookingMethod) {
+          return false;
+        }
+        // 3. Filter by Search Query (without accents)
+        if (!searchQuery.trim()) return true;
+        return normalizeText(recipe.title).includes(normalizeText(searchQuery));
+      })
+      .sort((a, b) => {
+        const scoreA = (a.healthDetails?.score || 0) * 0.6 + (a.matchPercentage || 0) * 0.4;
+        const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
+        return scoreB - scoreA;
+      });
+  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery]);
+
 
   const handleAddToDiaryClick = (recipe) => {
     const { score, reasons, allergyBlock, matchedAllergies } = recipe.healthDetails || {};
@@ -403,6 +478,21 @@ export default function MealSuggestion() {
         {leftTab === 'pantry' ? (
             <div className="tab-info-text">
               <p>Chọn các nguyên liệu bạn đang **sẵn có** ở nhà để hệ thống gợi ý thực đơn thích hợp nhất.</p>
+              
+              <div className="pantry-mode-switcher">
+                <button 
+                  className={`mode-btn ${pantryMode === 'explore' ? 'active' : ''}`}
+                  onClick={() => setPantryMode('explore')}
+                >
+                  🔍 Khám phá
+                </button>
+                <button 
+                  className={`mode-btn ${pantryMode === 'cook' ? 'active' : ''}`}
+                  onClick={() => setPantryMode('cook')}
+                >
+                  🍳 Nấu ăn
+                </button>
+              </div>
             </div>
           ) : (
             <div className="tab-info-text">
@@ -410,23 +500,81 @@ export default function MealSuggestion() {
             </div>
           )}
 
-        <div className="ingredient-search-bar">
-          <FiSearch size={16} />
-          <input
-            type="text"
-            placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
-            value={ingredientSearchQuery}
-            onChange={(e) => setIngredientSearchQuery(e.target.value)}
-          />
-          {ingredientSearchQuery && (
-            <button
-              className="ingredient-search-clear"
-              onClick={() => setIngredientSearchQuery('')}
-            >
-              &times;
-            </button>
+        <div className="ingredient-search-wrapper">
+          <div className="ingredient-search-bar">
+            <FiSearch size={16} />
+            <input
+              type="text"
+              placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
+              value={ingredientSearchQuery}
+              onChange={(e) => setIngredientSearchQuery(e.target.value)}
+            />
+            {ingredientSearchQuery && (
+              <button
+                className="ingredient-search-clear"
+                onClick={() => setIngredientSearchQuery('')}
+              >
+                &times;
+              </button>
+            )}
+          </div>
+          
+          {ingredientSearchQuery && Object.keys(filteredGroupedIngredients).length > 0 && (
+            <div className="ingredient-search-dropdown">
+              {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => (
+                <button 
+                  key={ing.ingredient_id} 
+                  className="dropdown-item"
+                  onClick={() => {
+                    if (leftTab === 'pantry') {
+                      if (!allergies.some(a => a.ingredient_id === ing.ingredient_id)) {
+                        handleTogglePantry(ing.ingredient_id);
+                        setIngredientSearchQuery('');
+                      }
+                    } else {
+                      handleToggleAllergy(ing.ingredient_id);
+                      setIngredientSearchQuery('');
+                    }
+                  }}
+                  disabled={leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id)}
+                >
+                  {ing.name}
+                  {leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id) && 
+                    <span className="disabled-pill-text">(Dị ứng)</span>
+                  }
+                </button>
+              ))}
+            </div>
           )}
         </div>
+
+        {pantryItems.length > 0 && (
+          <div className="cooking-method-section">
+            <h4 className="category-header">Chế biến theo</h4>
+            <div className="cooking-method-chips">
+              <button 
+                className={`cooking-chip ${selectedCookingMethod === null ? 'active' : ''}`}
+                onClick={() => setSelectedCookingMethod(null)}
+              >
+                Tất cả
+              </button>
+              {COOKING_METHODS.map(method => {
+                const count = availableCookingMethods[method.key] || 0;
+                if (count === 0) return null;
+                return (
+                  <button 
+                    key={method.key}
+                    className={`cooking-chip ${selectedCookingMethod === method.key ? 'active' : ''}`}
+                    onClick={() => setSelectedCookingMethod(method.key === selectedCookingMethod ? null : method.key)}
+                  >
+                    {method.label}
+                    <span className="recipe-count-badge">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="category-scroll-container">
           {leftTab === 'pantry' && (Object.keys(filteredGroupedIngredients).length > 0
@@ -516,8 +664,23 @@ export default function MealSuggestion() {
 
         {suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">
-            <MdWarning className="empty-warn-icon" />
-            <p>Không có công thức món ăn nào phù hợp với cài đặt của bạn. Thử thêm nguyên liệu vào tủ lạnh hoặc tắt lọc dị ứng nhé!</p>
+            {searchQuery.trim() ? (
+              <>
+                <MdWarning className="empty-warn-icon" />
+                <p className="no-recipe-found-message">Hiện SmartMeal chưa có món ăn "{searchQuery}".</p>
+                <button 
+                  className="clear-search-btn"
+                  onClick={() => setSearchQuery('')}
+                >
+                  Xoá tìm kiếm
+                </button>
+              </>
+            ) : (
+              <>
+                <MdWarning className="empty-warn-icon" />
+                <p>Không có công thức món ăn nào phù hợp với cài đặt của bạn. {pantryMode === 'cook' ? 'Thử chọn thêm nguyên liệu hoặc chuyển sang chế độ Khám phá nhé!' : 'Thử thêm nguyên liệu vào tủ lạnh hoặc tắt lọc dị ứng nhé!'}</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="recipes-grid-suggestions">
