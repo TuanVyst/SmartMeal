@@ -55,14 +55,7 @@ export function HealthProfileProvider({ children }) {
     });
     setPreferredIngredients(Array.from(preferredSet));
 
-    const budget = calculateDailyTargets(
-      profile.bmiLevel || 'normal',
-      profile.goal || 'maintain',
-      conditions,
-      profile.weight,
-      profile.targetWeight,
-      profile.targetWeeks || 12
-    );
+    const budget = calculateDailyTargets(profile);
     setDailyCalorieBudget(budget.calories);
     setDailyTargets(budget);
   }, []);

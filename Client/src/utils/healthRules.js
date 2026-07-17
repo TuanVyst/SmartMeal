@@ -308,19 +308,61 @@ export function computeCalorieDelta(currentWeight, targetWeight, weeks = 12) {
   return Math.max(-1000, Math.min(1000, weeklyDeficit / 7));
 }
 
-export function getDailyCalorieBudget(bmiLevel, goal, currentWeight = null, targetWeight = null, weeks = 12) {
-  const baseCalories = {
-    underweight: 2200,
-    normal: 2000,
-    overweight: 1800,
-    obese: 1500
-  };
+export function getDailyCalorieBudget(profile) {
+  const {
+    weight, height, goal, targetWeight,
+    targetWeeks = 12, dateOfBirth, gender, activityLevel, bmiLevel
+  } = profile || {};
 
-  const base = baseCalories[bmiLevel] || baseCalories.normal;
-  
-  if (currentWeight && targetWeight && (goal === 'lose' || goal === 'gain')) {
-    const delta = computeCalorieDelta(currentWeight, targetWeight, weeks);
-    return base + delta;
+  let tdee = 2000;
+
+  if (weight && height) {
+    let age = 30; // Default age if missing
+    if (dateOfBirth) {
+      const dob = new Date(dateOfBirth);
+      const today = new Date();
+      age = today.getFullYear() - dob.getFullYear();
+      if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+        age--;
+      }
+    }
+
+    // Mifflin-St Jeor Formula
+    let bmr;
+    const g = (gender || '').toLowerCase();
+    if (g === 'male' || g === 'nam') {
+      bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+    } else if (g === 'female' || g === 'nữ') {
+      bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+    } else {
+      bmr = (10 * weight) + (6.25 * height) - (5 * age) - 78; // Average fallback
+    }
+
+    // Activity Multiplier
+    let activityMultiplier = 1.2;
+    if (activityLevel) {
+      const level = activityLevel.toLowerCase();
+      if (level.includes('nhẹ') || level === 'light') activityMultiplier = 1.375;
+      else if (level.includes('vừa') || level.includes('trung bình') || level === 'moderate') activityMultiplier = 1.55;
+      else if (level.includes('nặng') || level === 'active') activityMultiplier = 1.725;
+      else if (level.includes('rất nặng') || level === 'very active') activityMultiplier = 1.9;
+    }
+
+    tdee = bmr * activityMultiplier;
+  } else {
+    // Fallback if height or weight is missing
+    const baseCalories = {
+      underweight: 2200,
+      normal: 2000,
+      overweight: 1800,
+      obese: 1500
+    };
+    tdee = baseCalories[bmiLevel] || baseCalories.normal;
+  }
+
+  if (weight && targetWeight && (goal === 'lose' || goal === 'gain')) {
+    const delta = computeCalorieDelta(weight, targetWeight, targetWeeks);
+    return tdee + delta;
   }
 
   const goalAdjustment = {
@@ -330,38 +372,45 @@ export function getDailyCalorieBudget(bmiLevel, goal, currentWeight = null, targ
   };
 
   const adjustment = goalAdjustment[goal] || goalAdjustment.maintain;
-
-  return base + adjustment;
+  return tdee + adjustment;
 }
 
-export function calculateDailyTargets(bmiLevel, goal, conditions = [], currentWeight = null, targetWeight = null, weeks = 12) {
-  let kcal = getDailyCalorieBudget(bmiLevel, goal, currentWeight, targetWeight, weeks);
+export function calculateDailyTargets(profile) {
+  const conditions = profile?.conditions || [];
+  let kcal = getDailyCalorieBudget(profile);
 
-  if (conditions.includes('gout')) {
-    kcal -= 100;
+  let targetProteinPct = 0.20;
+  let targetCarbsPct = 0.50;
+  let targetFatPct = 0.30;
+
+  const hasDiabetes = conditions.includes('diabetes');
+  const hasGout = conditions.includes('gout');
+  const hasHypertension = conditions.includes('hypertension');
+
+  // Prioritize strictest conditions
+  if (hasDiabetes) {
+    targetCarbsPct = 0.40; // Strict limit for carbs
+    targetProteinPct = 0.25;
+    targetFatPct = 0.35;
   }
 
-  let proteinPct = 0.20;
-  let carbsPct = 0.50;
-  let fatPct = 0.30;
-
-  if (conditions.includes('diabetes')) {
-    carbsPct = 0.40;
-    proteinPct = 0.25;
-    fatPct = 0.35;
+  if (hasGout) {
+    if (!hasDiabetes) targetCarbsPct = 0.55; // Only if diabetes is not present
+    targetProteinPct = Math.min(targetProteinPct, 0.15); // Strict limit for protein
+    targetFatPct = 1.0 - targetCarbsPct - targetProteinPct;
   }
 
-  if (conditions.includes('gout')) {
-    proteinPct = 0.15;
-    carbsPct = 0.55;
-    fatPct = 0.30;
+  if (hasHypertension && !hasDiabetes && !hasGout) {
+    targetCarbsPct = 0.52;
+    targetProteinPct = 0.18;
+    targetFatPct = 0.30;
   }
 
-  if (conditions.includes('hypertension')) {
-    proteinPct = 0.18;
-    carbsPct = 0.52;
-    fatPct = 0.30;
-  }
+  // Normalize to 1.0
+  const total = targetCarbsPct + targetProteinPct + targetFatPct;
+  const proteinPct = targetProteinPct / total;
+  const carbsPct = targetCarbsPct / total;
+  const fatPct = targetFatPct / total;
 
   const { sugarLimit, saltLimit } = getDailyLimits(conditions);
 
