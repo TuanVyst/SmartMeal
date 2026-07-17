@@ -11,6 +11,7 @@ import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { getIngredients } from '../../services/foodService';
 import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart } from 'react-icons/fi';
 import HealthTipCard from '../../components/common/HealthTipCard';
+import CalorieGoalReminder from '../../components/common/CalorieGoalReminder';
 import './Dashboard.css';
 
 const SPEED = 0.05;
@@ -312,6 +313,7 @@ export default function Dashboard() {
           dailyTargets={dailyTargets}
           healthProfile={healthCtx?.healthProfile}
         />
+        <CalorieGoalReminder />
       </section>
 
       {/* ══════════════════════════════════════════

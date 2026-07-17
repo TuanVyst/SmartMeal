@@ -8,6 +8,7 @@ import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { recipeService } from '../../services/recipeService';
 import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
 import HealthWarningPopup from '../../components/common/HealthWarningPopup';
+import RecipeHealthScore from '../../components/common/RecipeHealthScore';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { useAuth } from '../../context/AuthContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
@@ -196,7 +197,7 @@ export default function MealDetail() {
   const handleAddToDiaryClick = () => {
     if (!recipe) return;
     const { score, reasons, allergyBlock, matchedAllergies } = recipe.healthDetails || {};
-    if (allergyBlock || (score !== undefined && score < 80)) {
+    if (allergyBlock || (score !== undefined && score < 75)) {
       setWarningPopupData({ recipe, score, reasons, allergyBlock, matchedAllergies });
     } else {
       setDrawerRecipe(recipe);
@@ -216,7 +217,10 @@ export default function MealDetail() {
         
         <div className="detail-content">
           <div className="detail-header">
-            <h1 className="detail-title">{recipe.title}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <h1 className="detail-title" style={{ margin: 0 }}>{recipe.title}</h1>
+              {recipe.healthDetails && <RecipeHealthScore recipe={recipe} variant="badge" />}
+            </div>
             <button 
               className={`detail-save-btn ${isFav ? 'saved' : ''}`} 
               onClick={handleSave}
@@ -255,6 +259,31 @@ export default function MealDetail() {
               <span>Thêm vào nhật ký</span>
             </button>
           </div>
+
+          {/* Health Score Details */}
+          {recipe.healthDetails && (recipe.healthDetails.matchReasons?.length > 0 || recipe.healthDetails.reasons?.length > 0) && (
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', marginBottom: '24px', border: '1px solid #e2e8f0' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '12px' }}>Đánh giá độ phù hợp với bạn</h3>
+              
+              {recipe.healthDetails.matchReasons?.length > 0 && (
+                <div style={{ marginBottom: recipe.healthDetails.reasons?.length > 0 ? '12px' : '0' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#16a34a', marginBottom: '6px' }}>Điểm cộng:</div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: '#334155', fontSize: '13px', lineHeight: 1.5 }}>
+                    {recipe.healthDetails.matchReasons.map((r, i) => <li key={i}>{r}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {recipe.healthDetails.reasons?.length > 0 && (
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#dc2626', marginBottom: '6px' }}>Điểm trừ:</div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: '#334155', fontSize: '13px', lineHeight: 1.5 }}>
+                    {recipe.healthDetails.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="detail-body">
             <div className="ingredients-section">
