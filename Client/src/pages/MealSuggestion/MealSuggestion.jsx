@@ -17,6 +17,8 @@ import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
 } from 'react-icons/md';
+import { FiFilter, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import AdvancedRecipeFilter from '../../components/RecipeFilter/AdvancedRecipeFilter';
 
 export default function MealSuggestion() {
   const { user } = useAuth();
@@ -47,6 +49,16 @@ export default function MealSuggestion() {
   const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
   const [pantryMode, setPantryMode] = useState('explore'); // 'explore' | 'cook'
   const [selectedCookingMethod, setSelectedCookingMethod] = useState(null);
+  
+  // Advanced Filter States
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth > 992);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('suitability');
+  const [timeRange, setTimeRange] = useState([0, 180]);
+  const [difficultyFilter, setDifficultyFilter] = useState([]);
+  const [caloriesRange, setCaloriesRange] = useState([0, 1000]);
+  const [minHealthScore, setMinHealthScore] = useState(0);
+
   const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
   const COOKING_METHODS = [
@@ -428,16 +440,46 @@ export default function MealSuggestion() {
         if (selectedCookingMethod && recipe.cookingMethod !== selectedCookingMethod) {
           return false;
         }
-        // 3. Filter by Search Query (without accents)
-        if (!searchQuery.trim()) return true;
-        return normalizeText(recipe.title).includes(normalizeText(searchQuery));
+        // 3. Filter by Search Query
+        if (searchQuery.trim() && !normalizeText(recipe.title).includes(normalizeText(searchQuery))) {
+          return false;
+        }
+        
+        // 4. Advanced Filters
+        const rTime = parseInt(recipe.time) || 0;
+        if (rTime < timeRange[0] || (timeRange[1] < 180 && rTime > timeRange[1])) return false;
+        
+        if (difficultyFilter.length > 0 && !difficultyFilter.includes(recipe.difficulty)) return false;
+        
+        const rCals = recipe.healthDetails?.calories || recipe.nutrition?.calories || 0;
+        if (rCals < caloriesRange[0] || (caloriesRange[1] < 1000 && rCals > caloriesRange[1])) return false;
+        
+        const rScore = recipe.healthDetails?.score || 0;
+        if (rScore < minHealthScore) return false;
+
+        return true;
       })
       .sort((a, b) => {
+        if (sortBy === 'difficulty') {
+          const diffMap = { 'Dễ': 1, 'Trung bình': 2, 'Khó': 3 };
+          const dA = diffMap[a.difficulty] || 99;
+          const dB = diffMap[b.difficulty] || 99;
+          if (dA !== dB) return dA - dB;
+        } else if (sortBy === 'time') {
+          const tA = parseInt(a.time) || 999;
+          const tB = parseInt(b.time) || 999;
+          if (tA !== tB) return tA - tB;
+        } else if (sortBy === 'calories') {
+          const cA = a.healthDetails?.calories || a.nutrition?.calories || 9999;
+          const cB = b.healthDetails?.calories || b.nutrition?.calories || 9999;
+          if (cA !== cB) return cA - cB;
+        }
+        
         const scoreA = (a.healthDetails?.score || 0) * 0.6 + (a.matchPercentage || 0) * 0.4;
         const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
         return scoreB - scoreA;
       });
-  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery]);
+  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery, sortBy, timeRange, difficultyFilter, caloriesRange, minHealthScore]);
 
 
   const handleAddToDiaryClick = (recipe) => {
@@ -457,26 +499,42 @@ export default function MealSuggestion() {
         </div>
       )}
 
-      <div className="pantry-config-sidebar glass-panel">
-        <div className="sidebar-tabs-nav">
-          <button
-            className={`sidebar-tab-btn ${leftTab === 'pantry' ? 'active' : ''}`}
-            onClick={() => setLeftTab('pantry')}
-          >
-            <MdOutlineKitchen className="tab-icon" />
-            Tủ lạnh
-          </button>
-          <button
-            className={`sidebar-tab-btn ${leftTab === 'allergy' ? 'active' : ''}`}
-            onClick={() => setLeftTab('allergy')}
-          >
-            <MdBlock className="tab-icon" />
-            Dị ứng
+      <div className={`pantry-config-sidebar glass-panel ${!isSidebarOpen ? 'collapsed' : ''}`}>
+        <div 
+          className="sidebar-header-toggle" 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+            {leftTab === 'pantry' ? <MdOutlineKitchen size={20} color="#10b981" style={{ flexShrink: 0 }} /> : <MdBlock size={20} color="#ef4444" style={{ flexShrink: 0 }} />}
+            <span className="sidebar-title-label">Nguyên liệu & Dị ứng</span>
+          </div>
+          <button className="toggle-collapse-btn">
+            {isSidebarOpen ? <FiChevronUp size={20} className="mobile-icon" /> : <FiChevronDown size={20} className="mobile-icon" />}
+            {isSidebarOpen ? <FiChevronLeft size={20} className="desktop-icon" /> : <FiChevronRight size={20} className="desktop-icon" />}
           </button>
         </div>
 
-        {leftTab === 'pantry' ? (
-            <div className="tab-info-text">
+        <div className="sidebar-collapsible-wrapper" aria-hidden={!isSidebarOpen}>
+          <div className="sidebar-collapsible-content">
+            <div className="sidebar-tabs-nav">
+              <button
+                className={`sidebar-tab-btn ${leftTab === 'pantry' ? 'active' : ''}`}
+                onClick={() => setLeftTab('pantry')}
+              >
+                <MdOutlineKitchen className="tab-icon" />
+                Tủ lạnh
+              </button>
+              <button
+                className={`sidebar-tab-btn ${leftTab === 'allergy' ? 'active' : ''}`}
+                onClick={() => setLeftTab('allergy')}
+              >
+                <MdBlock className="tab-icon" />
+                Dị ứng
+              </button>
+            </div>
+
+            {leftTab === 'pantry' ? (
+                <div className="tab-info-text">
               <p>Chọn các nguyên liệu bạn đang **sẵn có** ở nhà để hệ thống gợi ý thực đơn thích hợp nhất.</p>
               
               <div className="pantry-mode-switcher">
@@ -628,11 +686,13 @@ export default function MealSuggestion() {
           ))
             : <div className="ingredient-search-empty">Không tìm thấy nguyên liệu nào</div>
           )}
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="suggestions-main-content">
-        <div className="suggestions-header-bar">
+        <div className="suggestions-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h2>Gợi ý Thực đơn Thông minh</h2>
             <span className="results-count-text">
@@ -641,26 +701,65 @@ export default function MealSuggestion() {
                 : `Tìm thấy ${suggestedRecipes.length} công thức món ăn`}
             </span>
           </div>
-          <div className="suggestions-search-bar">
-            <FiSearch size={16} />
-            <input
-              type="text"
-              placeholder="Tìm theo tên món ăn..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="allergy-toggle-checkbox">
-            <label>
-              <input
-                type="checkbox"
-                checked={showAllergicRecipes}
-                onChange={(e) => setShowAllergicRecipes(e.target.checked)}
-              />
-              Hiển thị món ăn chứa chất dị ứng
-            </label>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button 
+                onClick={() => setIsFilterOpen(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '9px 16px',
+                  borderRadius: '24px',
+                  border: '1px solid #e2e8f0',
+                  background: (timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) ? '#ecfdf5' : 'white',
+                  color: (timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) ? '#047857' : '#475569',
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+              >
+                <FiFilter size={16} />
+                Bộ lọc
+                {timeRange[0]!==0 || timeRange[1]!==180 ? ` (${timeRange[0]}-${timeRange[1]>=180 ? '180+' : timeRange[1]}p)` : ''}
+              </button>
+              
+              <div className="suggestions-search-bar" style={{ margin: 0 }}>
+                <FiSearch size={16} />
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên món ăn..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="allergy-toggle-checkbox" style={{ margin: 0 }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showAllergicRecipes}
+                  onChange={(e) => setShowAllergicRecipes(e.target.checked)}
+                />
+                Hiển thị món ăn chứa chất dị ứng
+              </label>
+            </div>
           </div>
         </div>
+
+        {isFilterOpen && (
+          <AdvancedRecipeFilter 
+            sortBy={sortBy} setSortBy={setSortBy}
+            timeRange={timeRange} setTimeRange={setTimeRange}
+            difficultyFilter={difficultyFilter} setDifficultyFilter={setDifficultyFilter}
+            caloriesRange={caloriesRange} setCaloriesRange={setCaloriesRange}
+            minHealthScore={minHealthScore} setMinHealthScore={setMinHealthScore}
+            onClose={() => setIsFilterOpen(false)}
+            totalResults={suggestedRecipes.length}
+          />
+        )}
 
         {suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">

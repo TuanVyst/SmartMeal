@@ -1,26 +1,40 @@
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 
 const BADGE_STYLES = {
-  green: {
+  excellent: {
     background: 'linear-gradient(135deg, #16a34a, #22c55e)',
     color: 'white',
     border: '1.5px solid #15803d',
-    icon: '🟢',
-    glow: 'rgba(34,197,94,0.25)',
+    icon: '✨',
+    glow: 'rgba(34,197,94,0.3)',
   },
-  yellow: {
+  good: {
+    background: 'linear-gradient(135deg, #0284c7, #0ea5e9)',
+    color: 'white',
+    border: '1.5px solid #0369a1',
+    icon: '👌',
+    glow: 'rgba(14,165,233,0.3)',
+  },
+  fair: {
     background: 'linear-gradient(135deg, #ca8a04, #eab308)',
     color: 'white',
     border: '1.5px solid #a16207',
-    icon: '🟡',
-    glow: 'rgba(234,179,8,0.25)',
+    icon: '🤔',
+    glow: 'rgba(234,179,8,0.3)',
   },
-  red: {
+  poor: {
+    background: 'linear-gradient(135deg, #ea580c, #f97316)',
+    color: 'white',
+    border: '1.5px solid #c2410c',
+    icon: '⚠️',
+    glow: 'rgba(249,115,22,0.3)',
+  },
+  bad: {
     background: 'linear-gradient(135deg, #b91c1c, #ef4444)',
     color: 'white',
     border: '1.5px solid #991b1b',
-    icon: '🔴',
-    glow: 'rgba(239,68,68,0.25)',
+    icon: '🚫',
+    glow: 'rgba(239,68,68,0.3)',
   },
 };
 
@@ -34,7 +48,7 @@ export default function RecipeHealthScore({ recipe, variant = 'badge' }) {
   if (!healthProfile) return null;
 
   const { score, badge } = getHealthScoreDetails(recipe);
-  const style = BADGE_STYLES[badge.level] || BADGE_STYLES.green;
+  const style = BADGE_STYLES[badge.level] || BADGE_STYLES.excellent;
 
   if (variant === 'card') {
     // Badge lớn, đặt overlay trên ảnh card

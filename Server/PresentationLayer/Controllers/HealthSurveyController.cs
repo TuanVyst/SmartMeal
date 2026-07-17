@@ -109,6 +109,8 @@ namespace PresentationLayer.Controllers
                     Account_id = accountId,
                     Height = request.Height ?? 0,
                     Weight = request.Weight ?? 0,
+                    TargetWeight = request.TargetWeight,
+                    TargetWeeks = request.TargetWeeks ?? 12,
                     Goal = request.Goal ?? "maintain",
                     DateOfBirth = request.Age.HasValue
                         ? DateTime.UtcNow.AddYears(-request.Age.Value)
@@ -188,6 +190,8 @@ namespace PresentationLayer.Controllers
                         profile.Account_id,
                         profile.Height,
                         profile.Weight,
+                        profile.TargetWeight,
+                        profile.TargetWeeks,
                         profile.Goal,
                         profile.Gender,
                         profile.DateOfBirth,
@@ -224,6 +228,8 @@ namespace PresentationLayer.Controllers
                         profile.Account_id,
                         profile.Height,
                         profile.Weight,
+                        profile.TargetWeight,
+                        profile.TargetWeeks,
                         profile.Goal,
                         profile.Gender,
                         profile.DateOfBirth,
@@ -254,6 +260,8 @@ namespace PresentationLayer.Controllers
                     Account_id = accountId,
                     Height = request.Height ?? existing.Height ?? 0,
                     Weight = request.Weight ?? existing.Weight ?? 0,
+                    TargetWeight = request.TargetWeight ?? existing.TargetWeight,
+                    TargetWeeks = request.TargetWeeks ?? existing.TargetWeeks ?? 12,
                     Goal = request.Goal ?? existing.Goal ?? "maintain",
                     DateOfBirth = request.Age.HasValue
                         ? DateTime.UtcNow.AddYears(-request.Age.Value)
@@ -374,6 +382,8 @@ namespace PresentationLayer.Controllers
                         profile.Account_id,
                         profile.Height,
                         profile.Weight,
+                        profile.TargetWeight,
+                        profile.TargetWeeks,
                         profile.Goal,
                         profile.Gender,
                         profile.DateOfBirth,
@@ -431,6 +441,8 @@ namespace PresentationLayer.Controllers
     {
         public double? Height { get; set; }
         public double? Weight { get; set; }
+        public double? TargetWeight { get; set; }
+        public int? TargetWeeks { get; set; }
         public int? Age { get; set; }
         public string? Gender { get; set; }
         public List<string>? Conditions { get; set; }

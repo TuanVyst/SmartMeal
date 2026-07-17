@@ -22,7 +22,108 @@
   max-height: calc(100vh - 64px - 2rem);
   display: flex;
   flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-header-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.sidebar-title-label {
+  transition: opacity 0.3s ease, width 0.3s ease;
+  white-space: nowrap;
+}
+.toggle-collapse-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.toggle-collapse-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+.desktop-icon { display: block; }
+.mobile-icon { display: none; }
+
+.sidebar-collapsible-wrapper {
+  display: block; /* Desktop default, we will override for mobile */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-collapsible-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
+  margin-top: 1.25rem;
+  width: 292px; /* 340px - 48px padding to prevent layout shift */
+}
+
+/* --- Desktop Horizontal Collapse --- */
+@media (min-width: 993px) {
+  .pantry-config-sidebar.collapsed {
+    flex: 0 0 68px; /* Just the icon + padding */
+    width: 68px;
+    padding: 1.5rem 0.6rem;
+  }
+  .pantry-config-sidebar.collapsed .sidebar-title-label {
+    opacity: 0;
+    width: 0;
+    pointer-events: none;
+  }
+  .pantry-config-sidebar.collapsed .sidebar-collapsible-wrapper {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .pantry-config-sidebar.collapsed .sidebar-header-toggle {
+    justify-content: center;
+  }
+}
+
+/* --- Mobile Vertical Collapse --- */
+@media (max-width: 992px) {
+  .desktop-icon { display: none; }
+  .mobile-icon { display: block; }
+
+  .pantry-config-sidebar {
+    flex: auto;
+    width: 100%;
+    position: static;
+    max-height: none;
+  }
+  .sidebar-collapsible-content {
+    width: 100%;
+  }
+
+  .sidebar-collapsible-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar-collapsible-wrapper[aria-hidden="true"] {
+    grid-template-rows: 0fr;
+  }
+  .sidebar-collapsible-content {
+    min-height: 0;
+    transition: margin-top 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 1;
+  }
+  .sidebar-collapsible-wrapper[aria-hidden="true"] .sidebar-collapsible-content {
+    margin-top: 0;
+    opacity: 0;
+  }
 }
 
 /* Custom Scrollbar for Sidebar */

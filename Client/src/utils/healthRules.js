@@ -299,7 +299,16 @@ export function getDailyLimits(conditions = []) {
   return { sugarLimit, saltLimit };
 }
 
-export function getDailyCalorieBudget(bmiLevel, goal) {
+export function computeCalorieDelta(currentWeight, targetWeight, weeks = 12) {
+  if (!currentWeight || !targetWeight || weeks <= 0) return 0;
+  const weightDiff = targetWeight - currentWeight;
+  // 1 kg = 7700 kcal
+  const weeklyDeficit = (weightDiff * 7700) / weeks;
+  // Clamp to safe limits: max -1000 kcal to +1000 kcal per day
+  return Math.max(-1000, Math.min(1000, weeklyDeficit / 7));
+}
+
+export function getDailyCalorieBudget(bmiLevel, goal, currentWeight = null, targetWeight = null, weeks = 12) {
   const baseCalories = {
     underweight: 2200,
     normal: 2000,
@@ -307,20 +316,26 @@ export function getDailyCalorieBudget(bmiLevel, goal) {
     obese: 1500
   };
 
+  const base = baseCalories[bmiLevel] || baseCalories.normal;
+  
+  if (currentWeight && targetWeight && (goal === 'lose' || goal === 'gain')) {
+    const delta = computeCalorieDelta(currentWeight, targetWeight, weeks);
+    return base + delta;
+  }
+
   const goalAdjustment = {
     lose: -500,
     maintain: 0,
     gain: 500
   };
 
-  const base = baseCalories[bmiLevel] || baseCalories.normal;
   const adjustment = goalAdjustment[goal] || goalAdjustment.maintain;
 
   return base + adjustment;
 }
 
-export function calculateDailyTargets(bmiLevel, goal, conditions = []) {
-  let kcal = getDailyCalorieBudget(bmiLevel, goal);
+export function calculateDailyTargets(bmiLevel, goal, conditions = [], currentWeight = null, targetWeight = null, weeks = 12) {
+  let kcal = getDailyCalorieBudget(bmiLevel, goal, currentWeight, targetWeight, weeks);
 
   if (conditions.includes('gout')) {
     kcal -= 100;

@@ -9,6 +9,10 @@ public class HealthProfileRequest
     public double Height { get; set; }
 
     public double Weight { get; set; }
+    
+    public double? TargetWeight { get; set; }
+    
+    public int? TargetWeeks { get; set; }
 
     public string ActivityLevel { get; set; }
 
