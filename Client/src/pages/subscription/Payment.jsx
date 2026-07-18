@@ -40,15 +40,8 @@ export default function Payment() {
     orderCodeRef.current = orderCodeStr;
     pollingRef.current = setInterval(async () => {
       try {
-        const { data } = await subscriptionService.getSubscriptionsByAccountId(accountId);
-        const subs = Array.isArray(data) ? data : data?.data || [];
-        const active = subs.find(
-          (s) =>
-            s.status === 'active' &&
-            s.plan_id === planIdRef.current &&
-            s.paymentRef?.toString() === orderCodeRef.current
-        );
-        if (active) {
+        const { data } = await subscriptionService.checkPaymentStatus(orderCodeStr);
+        if (data && data.success && data.isPaid) {
           clearInterval(pollingRef.current);
           await checkPremiumStatus(accountId);
           setStep('success');
@@ -56,7 +49,7 @@ export default function Payment() {
       } catch {
         /* ignore polling errors */
       }
-    }, 5000);
+    }, 3000); // Polling every 3 seconds for better responsiveness
   }, [checkPremiumStatus]);
 
   useEffect(() => {
