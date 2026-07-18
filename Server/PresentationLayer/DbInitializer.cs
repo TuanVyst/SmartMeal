@@ -89,8 +89,11 @@ public static class DbInitializer
             await UpsertIngredientTagsFromJsonAsync(context);
             await UpsertRecipeTagsFromJsonAsync(context);
             await UpsertIngredientsFromJsonAsync(context);
-            // Re-seed recipes from JSON (clear and re-add)
-            await SeedRecipesFromJsonAsync(context);
+            // Only seed recipes if none exist yet — preserves IsPrimary and admin edits
+            if (!await context.Recipes.AnyAsync())
+            {
+                await SeedRecipesFromJsonAsync(context);
+            }
 
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
