@@ -4,12 +4,13 @@ import { getLockedIngredientsForProfile, getDailyCalorieBudget } from '../../uti
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiLock } from 'react-icons/fi';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const initialState = {
   step: 1,
   formData: {
     height: '', weight: '', age: '', gender: '',
+    activityLevel: '',
     conditions: [], allergies: [], goal: '',
   },
   error: '',
@@ -93,7 +94,10 @@ function validateStep(step, formData) {
       if (isNaN(formData.age) || Number(formData.age) <= 0 || Number(formData.age) > 150) return 'Tuổi không hợp lệ';
       return '';
     }
-    case 3:
+    case 2:
+      if (!formData.activityLevel) return 'Vui lòng chọn mức độ vận động của bạn';
+      return '';
+    case 4:
       if (!formData.goal) return 'Vui lòng chọn mục tiêu dinh dưỡng';
       return '';
     default:
@@ -126,15 +130,22 @@ function StepIndicator({ current }) {
   );
 }
 
-function InputField({ label, value, onChange, type = 'text', placeholder, suffix }) {
+function InputField({ label, value, onChange, type = 'text', placeholder, suffix, min = "1" }) {
   return (
     <div style={{ flex: 1 }}>
       <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>{label}</label>
       <div style={{ position: 'relative' }}>
         <input
           type={type}
+          min={type === 'number' ? min : undefined}
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={e => {
+            let val = e.target.value;
+            if (type === 'number' && Number(val) < 0) {
+              val = '1';
+            }
+            onChange(val);
+          }}
           placeholder={placeholder}
           style={{
             width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8,
@@ -167,10 +178,17 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
   }, [height, weight]);
 
   const summaryBudget = useMemo(() => {
-    if (!bmiResult) return 2000;
-    const g = ['lose', 'maintain', 'gain'].includes(goal) ? goal : 'maintain';
-    return getDailyCalorieBudget(bmiResult.level, g);
-  }, [bmiResult, goal]);
+    if (!bmiResult) return { calories: 2000, bmr: 0, tdee: 0 };
+    const mockProfile = {
+      weight: Number(formData.weight),
+      height: Number(formData.height),
+      gender: formData.gender,
+      activityLevel: formData.activityLevel || 'sedentary',
+      goal: formData.goal || 'maintain',
+      conditions: formData.conditions || [],
+    };
+    return getDailyCalorieBudget(mockProfile);
+  }, [bmiResult, formData.goal, formData.activityLevel, formData.weight, formData.height, formData.gender]);
 
   const summaryLocked = useMemo(() => {
     return getLockedIngredientsForProfile(conditions);
@@ -186,7 +204,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
     dispatch({ type: 'SET_SUBMITTING', value: true });
     dispatch({ type: 'SET_ERROR', value: '' });
     try {
-      // Auto-add BMI-derived condition (e.g., Thiếu cân / Thừa cân / Béo phì) instead of manual checkbox
       const inferred = bmiResult ? (
         bmiResult.level === 'underweight' ? 'Thiếu cân' :
         bmiResult.level === 'overweight' ? 'Thừa cân' :
@@ -194,7 +211,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
       ) : null;
 
       const nextConditions = Array.isArray(conditions) ? [...conditions] : [];
-      // remove 'none' if present
       const filtered = nextConditions.filter(c => c !== 'none');
       if (inferred && !filtered.includes(inferred)) filtered.push(inferred);
 
@@ -202,6 +218,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
         height: Number(height), weight: Number(weight), age: Number(age),
         gender, conditions: filtered, allergies, goal,
         bmiLevel: bmiResult?.level || 'normal',
+        activityLevel: formData.activityLevel || 'sedentary',
       };
       const result = await completeSurvey(payload);
       if (result.success) {
@@ -217,7 +234,35 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
   };
 
 
-  const stepTitles = ['Thông tin cơ bản', 'Tình trạng sức khoẻ', 'Mục tiêu dinh dưỡng', 'Tổng kết'];
+  const stepTitles = ['Thông tin cơ bản', 'Mức độ vận động', 'Tình trạng sức khoẻ', 'Mục tiêu dinh dưỡng', 'Tổng kết'];
+
+  const ACTIVITY_OPTIONS = [
+    {
+      value: 'sedentary', emoji: '🪑', label: 'Chủ yếu ngồi hoặc ít vận động',
+      factor: 1.2,
+      examples: ['Làm việc văn phòng', 'Học tập', 'Ít tập thể dục', 'Đi bộ rất ít']
+    },
+    {
+      value: 'light', emoji: '🚶', label: 'Có vận động nhẹ',
+      factor: 1.375,
+      examples: ['Đi bộ hằng ngày', 'Tập 1–3 buổi/tuần', 'Thường xuyên di chuyển']
+    },
+    {
+      value: 'moderate', emoji: '🏃', label: 'Vận động khá thường xuyên',
+      factor: 1.55,
+      examples: ['Gym / chạy bộ', 'Thể thao 3–5 buổi/tuần']
+    },
+    {
+      value: 'active', emoji: '💪', label: 'Vận động nhiều',
+      factor: 1.725,
+      examples: ['Lao động tay chân', 'Tập gần như mỗi ngày', 'Thể thao cường độ cao']
+    },
+    {
+      value: 'very_active', emoji: '🔥', label: 'Rất năng động',
+      factor: 1.9,
+      examples: ['Vận động viên', 'Lao động nặng', 'Tập luyện cường độ rất cao']
+    },
+  ];
 
   const renderStep = () => {
     switch (step) {
@@ -239,7 +284,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>Giới tính</label>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  {['Nam', 'Nữ', 'Khác'].map(g => (
+                  {['Nam', 'Nữ'].map(g => (
                     <button
                       key={g}
                       type="button"
@@ -280,6 +325,59 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
         return (
           <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
+              Mức độ vận động hằng ngày
+            </h3>
+            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
+              Điều này giúp SmartMeal ước tính chính xác lượng năng lượng cơ thể tiêu hao mỗi ngày.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {ACTIVITY_OPTIONS.map(opt => {
+                const isSelected = formData.activityLevel === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => dispatch({ type: 'SET_FIELD', field: 'activityLevel', value: opt.value })}
+                    style={{
+                      padding: '14px 16px', borderRadius: 12, textAlign: 'left', cursor: 'pointer',
+                      border: `2px solid ${isSelected ? '#22C55E' : '#e2e8f0'}`,
+                      background: isSelected ? '#f0fdf4' : 'white',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <span style={{ fontSize: 22 }}>{opt.emoji}</span>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: isSelected ? '#16a34a' : '#1E293B' }}>
+                        {opt.label}
+                      </span>
+                      <span style={{
+                        marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+                        padding: '2px 8px', borderRadius: 10,
+                        background: isSelected ? '#dcfce7' : '#f1f5f9',
+                        color: isSelected ? '#15803d' : '#64748b',
+                      }}>
+                        ×{opt.factor}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, paddingLeft: 32 }}>
+                      {opt.examples.map(ex => (
+                        <span key={ex} style={{
+                          fontSize: 11, padding: '2px 8px', borderRadius: 8,
+                          background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0',
+                        }}>{ex}</span>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
               Tình trạng sức khoẻ
             </h3>
             <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
@@ -312,7 +410,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
@@ -342,15 +440,11 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
-              Tổng kết
-            </h3>
-            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
-              Kiểm tra lại thông tin trước khi bắt đầu
-            </p>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Tổng kết</h3>
+            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>Kiểm tra lại thông tin trước khi bắt đầu</p>
             <div style={{ background: '#f8fafc', borderRadius: 12, padding: 20, marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: '#64748b' }}>Chỉ số BMI</span>
@@ -359,28 +453,31 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 14, color: '#64748b' }}>Mức độ vận động</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>
+                  {ACTIVITY_OPTIONS.find(a => a.value === formData.activityLevel)?.emoji} {ACTIVITY_OPTIONS.find(a => a.value === formData.activityLevel)?.label || 'Chưa chọn'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: '#64748b' }}>Mục tiêu</span>
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>
                   {goalCards.find(c => c.value === goal)?.label || 'Chưa chọn'}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontSize: 14, color: '#64748b' }}>Khuyến nghị calo/ngày</span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#22C55E' }}>
-                  {summaryBudget} kcal
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 14, color: '#64748b' }}>TDEE (tiêu hao/ngày)</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#475569' }}>{summaryBudget.tdee} kcal</span>
               </div>
-              {conditions.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 14, color: '#64748b' }}>Mục tiêu calo/ngày</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#22C55E' }}>{summaryBudget.calories} kcal</span>
+              </div>
+              {summaryLocked.length > 0 && (
                 <div>
-                  <span style={{ fontSize: 14, color: '#64748b', display: 'block', marginBottom: 8 }}>
-                    Nguyên liệu bị khoá ({summaryLocked.length})
-                  </span>
+                  <span style={{ fontSize: 14, color: '#64748b', display: 'block', marginBottom: 8 }}>Nguyên liệu bị khoá ({summaryLocked.length})</span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {summaryLocked.map(ing => (
-                      <span key={ing} style={{
-                        padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
-                        borderRadius: 12, fontSize: 12, fontWeight: 500,
-                      }}>
+                      <span key={ing} style={{ padding: '4px 10px', background: '#fef2f2', color: '#dc2626', borderRadius: 12, fontSize: 12, fontWeight: 500 }}>
                         <FiLock size={12} /> {ing}
                       </span>
                     ))}

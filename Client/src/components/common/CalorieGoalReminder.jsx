@@ -5,13 +5,13 @@ import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { useTodayCalorieProgress } from '../../hooks/useTodayCalorieProgress';
 
 export default function CalorieGoalReminder() {
-  const { healthProfile } = useHealthProfile();
+  const { healthProfile, dailyTargets } = useHealthProfile();
   const { caloriesToday, targetCalories } = useTodayCalorieProgress();
 
   const reminderInfo = useMemo(() => {
-    if (!healthProfile || !healthProfile.goal || !healthProfile.weight || !healthProfile.targetWeight || (healthProfile.goal !== 'lose' && healthProfile.goal !== 'gain')) {
+    if (!healthProfile || !healthProfile.goal) {
       return {
-        missingSetup: true,
+        type: 'missing',
         calRemaining: Math.max(0, targetCalories - caloriesToday),
         targetCalories
       };
@@ -21,22 +21,44 @@ export default function CalorieGoalReminder() {
     const currentWeight = healthProfile.weight;
     const targetWeight = healthProfile.targetWeight;
     const targetWeeks = healthProfile.targetWeeks || 12;
+    const { goalTooAggressive, estimatedWeeks, deficit, maintenance } = dailyTargets || {};
+
+    if (goal === 'maintain' || goal === 'heart' || goal === 'diabetes') {
+      const goalNames = {
+        maintain: 'Duy trì cân nặng',
+        heart: 'Cải thiện tim mạch',
+        diabetes: 'Kiểm soát đường huyết'
+      };
+      return {
+        type: 'health_goal',
+        goalText: goalNames[goal],
+        calRemaining: Math.max(0, targetCalories - caloriesToday),
+        targetCalories
+      };
+    }
+    
+    if (!currentWeight || !targetWeight) {
+      return {
+        type: 'missing',
+        calRemaining: Math.max(0, targetCalories - caloriesToday),
+        targetCalories
+      };
+    }
     
     if (goal === 'lose' && currentWeight <= targetWeight) {
-      return { missingSetup: true, calRemaining: Math.max(0, targetCalories - caloriesToday), targetCalories, message: 'Bạn đã đạt hoặc vượt mục tiêu giảm cân!' };
+      return { type: 'achieved', calRemaining: Math.max(0, targetCalories - caloriesToday), targetCalories, message: 'Bạn đã đạt hoặc vượt mục tiêu giảm cân!' };
     }
     if (goal === 'gain' && currentWeight >= targetWeight) {
-      return { missingSetup: true, calRemaining: Math.max(0, targetCalories - caloriesToday), targetCalories, message: 'Bạn đã đạt hoặc vượt mục tiêu tăng cân!' };
+      return { type: 'achieved', calRemaining: Math.max(0, targetCalories - caloriesToday), targetCalories, message: 'Bạn đã đạt hoặc vượt mục tiêu tăng cân!' };
     }
 
     const diff = Math.abs(currentWeight - targetWeight);
-    const delta = computeCalorieDelta(currentWeight, targetWeight, targetWeeks);
-    const dailyDeltaAbs = Math.abs(Math.round(delta));
+    const dailyDeltaAbs = Math.abs(deficit || computeCalorieDelta(currentWeight, targetWeight, targetWeeks));
 
     const calRemaining = Math.max(0, targetCalories - caloriesToday);
     
     return {
-      missingSetup: false,
+      type: 'weight_goal',
       goalText: goal === 'lose' ? 'Giảm cân' : 'Tăng cơ',
       diffStr: diff.toFixed(1),
       targetWeeks,
@@ -44,12 +66,14 @@ export default function CalorieGoalReminder() {
       calRemaining,
       targetCalories,
       isLose: goal === 'lose',
+      goalTooAggressive,
+      estimatedWeeks,
     };
-  }, [healthProfile, caloriesToday, targetCalories]);
+  }, [healthProfile, dailyTargets, caloriesToday, targetCalories]);
 
   if (!reminderInfo) return null;
 
-  if (reminderInfo.missingSetup) {
+  if (reminderInfo.type === 'missing' || reminderInfo.type === 'achieved') {
     return (
       <div style={{
         background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
@@ -70,7 +94,7 @@ export default function CalorieGoalReminder() {
             <FiInfo size={18} />
           </div>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#334155' }}>
-            Chưa thiết lập mục tiêu cân nặng
+            {reminderInfo.type === 'achieved' ? 'Hoàn thành mục tiêu!' : 'Chưa thiết lập mục tiêu cân nặng'}
           </h3>
         </div>
         <p style={{ margin: 0, fontSize: '14px', color: '#475569', lineHeight: 1.5 }}>
@@ -82,6 +106,47 @@ export default function CalorieGoalReminder() {
         }}>
           <FiActivity size={16} color="#0284c7" />
           <span style={{ fontSize: '13px', color: '#334155', fontWeight: 500 }}>
+            Hôm nay bạn còn có thể nạp thêm <strong>{reminderInfo.calRemaining} kcal</strong>.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (reminderInfo.type === 'health_goal') {
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+        borderRadius: '16px',
+        padding: '20px',
+        marginBottom: '24px',
+        boxShadow: '0 4px 12px rgba(34, 197, 94, 0.1)',
+        border: '1px solid #bbf7d0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)', color: '#16a34a'
+          }}>
+            <FiActivity size={18} />
+          </div>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#14532d' }}>
+            Mục tiêu: {reminderInfo.goalText}
+          </h3>
+        </div>
+        <p style={{ margin: 0, fontSize: '14px', color: '#166534', lineHeight: 1.5 }}>
+          Duy trì chế độ ăn uống lành mạnh và cân bằng. Mức calo mục tiêu của bạn là <strong>{reminderInfo.targetCalories} kcal/ngày</strong>.
+        </p>
+        <div style={{
+          marginTop: '8px', padding: '12px', background: 'white', borderRadius: '12px',
+          display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #bbf7d0'
+        }}>
+          <FiInfo size={16} color="#16a34a" />
+          <span style={{ fontSize: '13px', color: '#14532d', fontWeight: 500 }}>
             Hôm nay bạn còn có thể nạp thêm <strong>{reminderInfo.calRemaining} kcal</strong>.
           </span>
         </div>
@@ -118,6 +183,18 @@ export default function CalorieGoalReminder() {
         Để đạt được mục tiêu trong {reminderInfo.targetWeeks} tuần tới, bạn cần {reminderInfo.isLose ? 'giảm bớt' : 'nạp thêm'} khoảng <strong>{reminderInfo.dailyDeltaAbs} kcal/ngày</strong> so với mức giữ cân.
         Mức calo mục tiêu của bạn là <strong>{reminderInfo.targetCalories} kcal</strong>.
       </p>
+
+      {reminderInfo.goalTooAggressive && (
+        <div style={{
+          marginTop: '4px', padding: '10px 12px', background: '#fff7ed', borderRadius: '10px',
+          display: 'flex', alignItems: 'flex-start', gap: '8px', border: '1px solid #fed7aa'
+        }}>
+          <FiInfo size={16} color="#ea580c" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}>
+            Mục tiêu <strong>{reminderInfo.targetWeeks} tuần</strong> quá khắc nghiệt và không an toàn. Hệ thống đã tự động điều chỉnh calo về ngưỡng an toàn. Thời gian dự kiến mới: <strong>~{reminderInfo.estimatedWeeks} tuần</strong>.
+          </span>
+        </div>
+      )}
 
       <div style={{
         marginTop: '8px', padding: '12px', background: 'white', borderRadius: '12px',

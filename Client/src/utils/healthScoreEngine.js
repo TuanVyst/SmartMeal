@@ -6,7 +6,7 @@
  * Có thể mở rộng dễ dàng bằng cách thêm conditions vào CONDITION_SCORERS.
  */
 
-import { HEALTH_CONDITION_RULES } from './healthRules';
+import { HEALTH_CONDITION_RULES, GOAL_RULES } from './healthRules';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -379,24 +379,68 @@ export function calculateHealthScore(recipe, healthProfile, dailyCalorieBudget =
     if (condMatchReasons) matchReasons.push(...condMatchReasons);
   });
 
-  // 3. Goal-based bonus
+  // 3. Goal-based scoring
   const goal = healthProfile.goal;
-  if (goal === 'lose') {
+  if (goal && GOAL_RULES[goal]) {
+    const rules = GOAL_RULES[goal].scoreRules || {};
     const fat = nutrition.fat || 0;
-    const calories = nutrition.calories || 0;
-    if (fat < 10) {
-      score += 5;
-      matchReasons.push('🥑 Ít chất béo — tốt cho giảm cân');
-    }
-    if (calories < 400) {
-      score += 5;
-      matchReasons.push('🥗 Ít calo — phù hợp ăn kiêng');
-    }
-  } else if (goal === 'gain') {
     const protein = nutrition.protein || 0;
-    if (protein > 25) {
-      score += 5;
-      matchReasons.push('💪 Giàu protein — hỗ trợ tăng cơ');
+    const carbs = nutrition.carbs || 0;
+    const sugar = nutrition.sugar || 0;
+    const sodium = nutrition.sodium || 0;
+
+    if (goal === 'lose') {
+      if (fat < 10) {
+        score += 5;
+        matchReasons.push('🥑 Ít chất béo — tốt cho giảm cân');
+      }
+      if ((nutrition.calories || 0) < 400) {
+        score += 5;
+        matchReasons.push('🥗 Ít calo — phù hợp ăn kiêng');
+      }
+      if (fat > 20) {
+        score -= rules.highFatPenalty || 15;
+        reasons.push('Chứa nhiều dầu mỡ — không phù hợp giảm cân');
+      }
+    } else if (goal === 'gain') {
+      if (protein > 25) {
+        score += rules.highProteinBonus || 15;
+        matchReasons.push('💪 Giàu protein — hỗ trợ tăng cơ');
+      }
+    } else if (goal === 'heart') {
+      if (sodium > 600) {
+        score -= rules.highSodiumPenalty || 20;
+        reasons.push('Nhiều muối — không phù hợp mục tiêu tim mạch');
+      }
+      if (fat > 20) {
+        score -= rules.highFatPenalty || 15;
+        reasons.push('Chất béo cao — ảnh hưởng tim mạch');
+      }
+      if (ingredientsContainAny(ingredientNames, ['rau', 'cải', 'xà lách', 'bí', 'cà chua', 'cà rốt'])) {
+        score += rules.vegetableBonus || 10;
+        matchReasons.push('🥗 Nhiều rau củ — rất tốt cho tim mạch');
+      }
+    } else if (goal === 'diabetes') {
+      if (sugar > 10) {
+        score -= rules.highSugarPenalty || 20;
+        reasons.push('Nhiều đường — không tốt cho đường huyết');
+      }
+      if (carbs > 60) {
+        score -= rules.highCarbsPenalty || 15;
+        reasons.push('Nhiều tinh bột — dễ tăng đường huyết');
+      }
+      if (fat > 25) {
+        score -= rules.highFatPenalty || 10;
+        reasons.push('Dầu mỡ cao — hạn chế cho kiểm soát đường huyết');
+      }
+    }
+    
+    // Chung: phạt đồ chiên rán nếu rule có yêu cầu
+    if (rules.friedKeywords && rules.friedPenalty) {
+      if (ingredientsContainAny(ingredientNames, rules.friedKeywords) || containsAny(recipeTitle, rules.friedKeywords)) {
+        score -= rules.friedPenalty;
+        reasons.push('Chứa đồ chiên/rán — không tốt cho mục tiêu hiện tại');
+      }
     }
   }
 

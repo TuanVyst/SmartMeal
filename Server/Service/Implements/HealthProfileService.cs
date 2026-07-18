@@ -62,7 +62,7 @@ namespace Service.Implements
             healthProfile.Height = request.Height;
             healthProfile.Weight = request.Weight;
             healthProfile.TargetWeight = request.TargetWeight;
-            if (request.TargetWeeks.HasValue) healthProfile.TargetWeeks = request.TargetWeeks;
+            healthProfile.TargetWeeks = request.TargetWeeks;
             healthProfile.ActivityLevel = request.ActivityLevel;
             healthProfile.Goal = request.Goal;
             healthProfile.UpdatedAt = DateTime.UtcNow;
