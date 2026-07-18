@@ -155,6 +155,61 @@ namespace Service.Implements
                 throw;
             }
         }
+
+        public async Task<bool> CheckPaymentStatusAsync(long orderCode)
+        {
+            try
+            {
+                var clientId = _configuration["PayOS:ClientId"];
+                var apiKey = _configuration["PayOS:ApiKey"];
+                var checksumKey = _configuration["PayOS:ChecksumKey"];
+                var payOS = new PayOSClient(clientId, apiKey, checksumKey);
+
+                var paymentInfo = await payOS.PaymentRequests.GetAsync(orderCode);
+                
+                if (paymentInfo.Status.ToString() != "PAID")
+                {
+                    return false;
+                }
+
+                var subscriptions = await _subscriptionRepo.GetAllSubscriptions();
+                var subscription = subscriptions.Find(s => s.PaymentRef == orderCode.ToString());
+
+                if (subscription == null)
+                {
+                    _logger.LogWarning("No subscription found for OrderCode={OrderCode}", orderCode);
+                    return true; // Already paid on PayOS side, but we don't have it (maybe deleted)
+                }
+
+                if (subscription.Status == "active")
+                {
+                    return true;
+                }
+
+                var plan = await _planRepo.GetPlanById(subscription.Plan_id);
+                if (plan == null) return true;
+
+                var startDate = DateTime.UtcNow;
+                DateTime? endDate = null;
+                if (plan.Duration > 0)
+                    endDate = startDate.AddDays(plan.Duration);
+
+                subscription.Status = "active";
+                subscription.StartDate = startDate;
+                subscription.EndDate = endDate;
+
+                await _subscriptionRepo.UpdateSubscription(subscription);
+
+                _logger.LogInformation("Subscription {SubId} activated via polling CheckPaymentStatusAsync", subscription.Sub_id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to check payment status for orderCode: {OrderCode}", orderCode);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Extracts the "Purpose of Transaction" (subfield 08 inside EMV tag 62)
         /// from a VietQR payload string — this is exactly what banking apps display
