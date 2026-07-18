@@ -65,10 +65,17 @@ namespace Service.Implements
                     tags.Add(existingTag);
                 }
 
+                Guid authorId = request.Account_id;
+                if (authorId == Guid.Empty)
+                {
+                    var existingRecipes = await _recipeRepo.GetAllRecipes();
+                    authorId = existingRecipes.FirstOrDefault()?.Account_id ?? Guid.Empty;
+                }
+
                 var newItem = new Recipe
                 {
                     Recipe_id = Guid.NewGuid(),
-                    Account_id = request.Account_id,
+                    Account_id = authorId,
                     Recipe_name = request.Recipe_name,
                     Description = request.Description,
                     Instruction = request.Instruction,
@@ -117,7 +124,10 @@ namespace Service.Implements
                 if (request.RecipeTagIds != null && !request.RecipeTagIds.Any())
                     throw new ArgumentException("A recipe must have at least one label");
 
-                existingItem.Account_id = request.Account_id;
+                if (request.Account_id != Guid.Empty)
+                {
+                    existingItem.Account_id = request.Account_id;
+                }
                 existingItem.Recipe_name = request.Recipe_name;
                 existingItem.Description = request.Description;
                 existingItem.Instruction = request.Instruction;
@@ -217,6 +227,7 @@ namespace Service.Implements
                     if (!recipeIngs.Any()) continue;
 
                     int matchCount = 0;
+                    bool missingPrimary = false;
                     var missing = new List<string>();
                     var allIngDetails = new List<IngredientStatusDto>();
 
@@ -228,7 +239,8 @@ namespace Service.Implements
                         allIngDetails.Add(new IngredientStatusDto
                         {
                             Name = ingName,
-                            Possessed = isPossessed
+                            Possessed = isPossessed,
+                            IsPrimary = ri.IsPrimary
                         });
 
                         if (isPossessed)
@@ -238,10 +250,14 @@ namespace Service.Implements
                         else
                         {
                             missing.Add(ingName);
+                            if (ri.IsPrimary)
+                            {
+                                missingPrimary = true;
+                            }
                         }
                     }
 
-                    double matchPercentage = (double)matchCount / recipeIngs.Count * 100;
+                    double matchPercentage = missingPrimary ? 0 : ((double)matchCount / recipeIngs.Count * 100);
 
                     suggestions.Add(new RecipeSuggestionResponseDto
                     {
@@ -294,7 +310,8 @@ namespace Service.Implements
                     Ingredient_id = ri.Ingredient_id,
                     Name = ri.Ingredient?.Name ?? "",
                     Quantity = ri.Quantity,
-                    UOM = ri.UOM ?? "",
+                    Uom = ri.UOM ?? "",
+                    IsPrimary = ri.IsPrimary,
                     NutritionalValue = ri.Ingredient?.Nutritional_value == null ? null : new NutritionalValueSimpleDto
                     {
                         Id = ri.Ingredient.Nutritional_value.Nv_id,

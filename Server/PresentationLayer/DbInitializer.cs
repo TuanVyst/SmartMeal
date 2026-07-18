@@ -1,4 +1,4 @@
-using System.Text.Json;
+    using System.Text.Json;
 using BusinessObject.Entities;
 using BusinessObject.Enums;
 using DataAccessLayer;
@@ -77,7 +77,7 @@ public static class DbInitializer
         var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
         if (existingAdmin != null)
         {
-            existingAdmin.Email = "qdam100@gmail.com";
+            existingAdmin.Email = "maituanvyst@gmail.com";
             existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("Admin@123");
             context.Accounts.Update(existingAdmin);
             await context.SaveChangesAsync();
@@ -89,8 +89,11 @@ public static class DbInitializer
             await UpsertIngredientTagsFromJsonAsync(context);
             await UpsertRecipeTagsFromJsonAsync(context);
             await UpsertIngredientsFromJsonAsync(context);
-            // Re-seed recipes from JSON (clear and re-add)
-            await SeedRecipesFromJsonAsync(context);
+            // Only seed recipes if none exist yet — preserves IsPrimary and admin edits
+            if (!await context.Recipes.AnyAsync())
+            {
+                await SeedRecipesFromJsonAsync(context);
+            }
 
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
@@ -111,7 +114,7 @@ public static class DbInitializer
             Username = "admin",
             Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
             Name = "Admin",
-            Email = "qdam100@gmail.com",
+            Email = "maituanvyst@gmail.com",
             Phone = "0123456789",
             Address = "SmartMeal HQ",
             Role = RoleEnum.Admin,

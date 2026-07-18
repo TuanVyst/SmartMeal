@@ -20,5 +20,6 @@ namespace BusinessObject.Dtos.ResponseModels
     {
         public string Name { get; set; }
         public bool Possessed { get; set; }
+        public bool IsPrimary { get; set; }
     }
 }

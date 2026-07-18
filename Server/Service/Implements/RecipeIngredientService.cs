@@ -45,6 +45,7 @@ namespace Service.Implements
                     Ingredient_id = request.Ingredient_id,
                     Quantity = request.Quantity,
                     UOM = request.UOM,
+                    IsPrimary = request.IsPrimary,
                     IsDeleted = false
                 };
 
@@ -71,6 +72,7 @@ namespace Service.Implements
                 existingItem.Ingredient_id = request.Ingredient_id;
                 existingItem.Quantity = request.Quantity;
                 existingItem.UOM = request.UOM;
+                existingItem.IsPrimary = request.IsPrimary;
 
                 var result = await _recipeIngredientRepo.UpdateRecipeIngredient(existingItem);
                 _logger.LogInformation("RecipeIngredient '{RI_id}' updated successfully", existingItem.RI_id);
@@ -94,12 +96,13 @@ namespace Service.Implements
             if (entity == null) return null;
             return new RecipeIngredientResponseDto
             {
-                RI_id = entity.RI_id,
+                Id = entity.RI_id,
                 Recipe_id = entity.Recipe_id,
                 Ingredient_id = entity.Ingredient_id,
                 Quantity = entity.Quantity,
-                UOM = entity.UOM,
-                IsDeleted = entity.IsDeleted
+                Uom = entity.UOM,
+                IsDeleted = entity.IsDeleted,
+                IsPrimary = entity.IsPrimary
             };
         }
     }

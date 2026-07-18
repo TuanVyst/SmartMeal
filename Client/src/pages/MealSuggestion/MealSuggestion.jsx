@@ -297,15 +297,17 @@ export default function MealSuggestion() {
     let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0, totalFiber = 0, totalSugar = 0, totalSodium = 0, totalCholesterol = 0;
 
     if (fromPantry) {
-      matchPercentage = rec.matchPercentage;
-      missingIngredients = rec.missingIngredients || [];
       allIngredients = (rec.allIngredients || []).map(ai => ({
         name: ai.name || ai.Name || 'Nguyên liệu',
         amount: ai.amount || ai.Amount || '',
         possessed: ai.possessed !== undefined ? ai.possessed : false,
+        isPrimary: ai.isPrimary !== undefined ? ai.isPrimary : (ai.IsPrimary !== undefined ? ai.IsPrimary : false),
         nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 }
       }));
       requiredIngredients = allIngredients.map(i => i.name);
+      missingIngredients = rec.missingIngredients || [];
+      const hasMissingPrimary = allIngredients.some(i => i.isPrimary && !i.possessed);
+      matchPercentage = hasMissingPrimary ? 0 : rec.matchPercentage;
       // ponytail: suggestFromPantry doesn't return nutritional values; calories stay 0
     } else {
       // Existing client-side calculation for getAll response
@@ -342,15 +344,21 @@ export default function MealSuggestion() {
 
         const sysIng = matchSystemIngredient(ingName, ingredients);
         const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
+        const isPrimary = ri.isPrimary !== undefined ? ri.isPrimary : (ri.IsPrimary !== undefined ? ri.IsPrimary : false);
 
-        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, nutrition };
+        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, isPrimary, nutrition };
       });
 
       allIngredients = mappedIngredients;
       requiredIngredients = mappedIngredients.map(i => i.name);
       missingIngredients = mappedIngredients.filter(i => !i.possessed).map(i => i.name);
-      const possessedCount = mappedIngredients.filter(i => i.possessed).length;
-      matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
+      const hasMissingPrimary = mappedIngredients.some(i => i.isPrimary && !i.possessed);
+      if (hasMissingPrimary) {
+        matchPercentage = 0;
+      } else {
+        const possessedCount = mappedIngredients.filter(i => i.possessed).length;
+        matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
+      }
     }
 
     const calculatedCalories = Math.round(totalCalories / servings);
@@ -416,7 +424,16 @@ export default function MealSuggestion() {
         // 1. Filter by Pantry Mode
         if (pantryItems.length > 0) {
           if (pantryMode === 'cook') {
-            if ((recipe.matchPercentage || 0) < 75) return false;
+            // Cook mode: must have ALL primary ingredients in pantry
+            const primaryIngs = recipe.allIngredients?.filter(i => i.isPrimary) || [];
+            if (primaryIngs.length > 0) {
+              // If recipe has primary ingredients, all must be possessed
+              const allPrimaryPossessed = primaryIngs.every(i => i.possessed);
+              if (!allPrimaryPossessed) return false;
+            } else {
+              // No primary ingredients defined → require at least 50% match
+              if ((recipe.matchPercentage || 0) < 50) return false;
+            }
           } else {
             // Explore mode: must contain at least one of the selected ingredients
             const hasPossessed = recipe.allIngredients?.some(i => i.possessed);
@@ -606,11 +623,14 @@ export default function MealSuggestion() {
               {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => (
                 <button 
                   key={ing.ingredient_id} 
-                  className="dropdown-item"
+                  className={`dropdown-item ${leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) ? 'already-selected' : ''}`}
                   onClick={() => {
                     if (leftTab === 'pantry') {
                       if (!allergies.some(a => a.ingredient_id === ing.ingredient_id)) {
-                        handleTogglePantry(ing.ingredient_id);
+                        // Only ADD — never remove via dropdown (use the pill to toggle)
+                        if (!pantryItems.includes(ing.ingredient_id)) {
+                          handleTogglePantry(ing.ingredient_id);
+                        }
                         setIngredientSearchQuery('');
                       }
                     } else {
@@ -621,6 +641,9 @@ export default function MealSuggestion() {
                   disabled={leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id)}
                 >
                   {ing.name}
+                  {leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) &&
+                    <span className="already-selected-label"> ✓ Đã chọn</span>
+                  }
                   {leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id) && 
                     <span className="disabled-pill-text">(Dị ứng)</span>
                   }

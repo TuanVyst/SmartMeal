@@ -756,3 +756,19 @@
     display: none !important;
   }
 }
+
+/* Dropdown item already selected state */
+.dropdown-item.already-selected {
+  color: #16a34a;
+  background: #f0fdf4;
+  cursor: default;
+}
+.dropdown-item.already-selected:hover {
+  background: #dcfce7;
+}
+.already-selected-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #16a34a;
+  margin-left: 6px;
+}
