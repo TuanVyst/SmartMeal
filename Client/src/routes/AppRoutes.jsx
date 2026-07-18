@@ -25,6 +25,7 @@ import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
 import AdminFeedback from '../pages/admin/AdminFeedback';
 import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
+import AdminTransactions from '../pages/admin/AdminTransactions';
 import Nutrition from '../pages/nutrition/Nutrition';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
@@ -85,6 +86,7 @@ export default function AppRoutes() {
         <Route path="categories" element={<AdminCategories />} />
         <Route path="feedback" element={<AdminFeedback />} />
         <Route path="feedback/:id" element={<AdminFeedbackDetail />} />
+        <Route path="transactions" element={<AdminTransactions />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -78,3 +78,20 @@ export function formatDatePartsVi(value, options = {}) {
     ...options,
   }).formatToParts(date);
 }
+
+export function formatDateTimeVi(value, options = {}) {
+  const date = toDateObject(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat(VIETNAM_LOCALE, {
+    timeZone: VIETNAM_TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    ...options,
+  }).format(date);
+}

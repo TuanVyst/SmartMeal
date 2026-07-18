@@ -221,4 +221,10 @@ export const adminService = {
     const res = await api.delete(`/RecipeIngredient/${id}`);
     return res.data;
   },
+
+  // Transaction history (admin)
+  getTransactionHistory: async () => {
+    const res = await api.get('/Subscription/admin/all');
+    return res.data.data || [];
+  },
 };

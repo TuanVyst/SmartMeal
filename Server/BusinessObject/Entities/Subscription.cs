@@ -34,6 +34,11 @@ namespace BusinessObject.Entities
         [MaxLength(255)]
         public string PaymentRef { get; set; }
 
+        /// <summary>
+        /// Thời điểm thanh toán thành công (UTC). Dùng cho Lịch sử giao dịch admin.
+        /// </summary>
+        public DateTime? TransactionDate { get; set; }
+
                 public bool IsDeleted { get; set; } = false;
 
         // Navigation properties

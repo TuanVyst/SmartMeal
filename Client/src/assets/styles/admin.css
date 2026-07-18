@@ -545,3 +545,71 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Transaction History (Admin) */
+.status-badge.expired {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.status-badge.cancelled {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.toolbar-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar-controls select.admin-table-search {
+  width: auto;
+  min-width: 140px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.history-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.history-table tr:hover td {
+  background: #f8fafc;
+}
+
+.cell-strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cell-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.payment-ref {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #475569;
+}

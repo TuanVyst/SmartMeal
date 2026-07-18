@@ -114,7 +114,12 @@ namespace Service.Implements
                 EndDate = entity.EndDate,
                 Status = entity.Status,
                 PaymentRef = entity.PaymentRef,
-                IsDeleted = entity.IsDeleted
+                TransactionDate = entity.TransactionDate,
+                IsDeleted = entity.IsDeleted,
+                AccountName = entity.Account?.Name ?? "",
+                AccountEmail = entity.Account?.Email ?? "",
+                PlanName = entity.Plan?.Name ?? "",
+                PlanPrice = entity.Plan?.Price ?? 0
             };
         }
     }

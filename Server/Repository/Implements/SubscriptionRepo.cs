@@ -21,6 +21,8 @@ namespace Repository.Implements
         {
             return await _ctx.Subscriptions
                 .Where(i => i.IsDeleted == false)
+                .Include(i => i.Account)
+                .Include(i => i.Plan)
                 .ToListAsync();
         }
 

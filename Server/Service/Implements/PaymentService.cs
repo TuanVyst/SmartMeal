@@ -149,6 +149,7 @@ namespace Service.Implements
                 subscription.Status = "active";
                 subscription.StartDate = startDate;
                 subscription.EndDate = endDate;
+                subscription.TransactionDate = DateTime.UtcNow;
 
                 await _subscriptionRepo.UpdateSubscription(subscription);
 
@@ -208,6 +209,7 @@ namespace Service.Implements
                 subscription.Status = "active";
                 subscription.StartDate = startDate;
                 subscription.EndDate = endDate;
+                subscription.TransactionDate = DateTime.UtcNow;
 
                 await _subscriptionRepo.UpdateSubscription(subscription);
 
