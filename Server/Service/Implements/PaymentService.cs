@@ -42,10 +42,15 @@ namespace Service.Implements
                 throw new InvalidOperationException("Free plan does not require payment");
 
             var clientId = _configuration["PayOS:ClientId"];
+            if (string.IsNullOrEmpty(clientId)) clientId = _configuration["PAYOS_CLIENT_ID"];
+            
             var apiKey = _configuration["PayOS:ApiKey"];
+            if (string.IsNullOrEmpty(apiKey)) apiKey = _configuration["PAYOS_API_KEY"];
+            
             var checksumKey = _configuration["PayOS:ChecksumKey"];
+            if (string.IsNullOrEmpty(checksumKey)) checksumKey = _configuration["PAYOS_CHECKSUM_KEY"];
 
-            var payOS = new PayOSClient(clientId, apiKey, checksumKey);
+            var payOS = new PayOSClient(clientId?.Trim(), apiKey?.Trim(), checksumKey?.Trim());
 
             var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var amount = (int)plan.Price;
@@ -161,13 +166,19 @@ namespace Service.Implements
             try
             {
                 var clientId = _configuration["PayOS:ClientId"];
+                if (string.IsNullOrEmpty(clientId)) clientId = _configuration["PAYOS_CLIENT_ID"];
+
                 var apiKey = _configuration["PayOS:ApiKey"];
+                if (string.IsNullOrEmpty(apiKey)) apiKey = _configuration["PAYOS_API_KEY"];
+
                 var checksumKey = _configuration["PayOS:ChecksumKey"];
-                var payOS = new PayOSClient(clientId, apiKey, checksumKey);
+                if (string.IsNullOrEmpty(checksumKey)) checksumKey = _configuration["PAYOS_CHECKSUM_KEY"];
+                
+                var payOS = new PayOSClient(clientId?.Trim(), apiKey?.Trim(), checksumKey?.Trim());
 
                 var paymentInfo = await payOS.PaymentRequests.GetAsync(orderCode);
                 
-                if (paymentInfo.Status.ToString() != "PAID")
+                if (!paymentInfo.Status.ToString().Equals("PAID", StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
