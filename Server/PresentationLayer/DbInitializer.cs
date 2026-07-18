@@ -243,7 +243,24 @@ public static class DbInitializer
 
         foreach (var dto in ings)
         {
-            if (existingNames.Contains(dto.Name)) continue;
+            if (existingNames.Contains(dto.Name)) 
+            {
+                var existingIng = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == dto.Name);
+                if (existingIng != null && existingIng.Nutritional_value != null)
+                {
+                    existingIng.Nutritional_value.Calories = dto.NutritionalValues.Calories;
+                    existingIng.Nutritional_value.Protein = dto.NutritionalValues.Protein;
+                    existingIng.Nutritional_value.Carbs = dto.NutritionalValues.Carbs;
+                    existingIng.Nutritional_value.Fat = dto.NutritionalValues.Fat;
+                    existingIng.Nutritional_value.Fiber = dto.NutritionalValues.Fiber;
+                    existingIng.Nutritional_value.Sugar = dto.NutritionalValues.Sugar;
+                    existingIng.Nutritional_value.Salt = dto.NutritionalValues.Salt;
+                    existingIng.Nutritional_value.Cholesterol = dto.NutritionalValues.Cholesterol;
+                    existingIng.Nutritional_value.ServingSize = dto.NutritionalValues.ServingSize;
+                    existingIng.Nutritional_value.ServingUnit = dto.NutritionalValues.ServingUnit;
+                }
+                continue;
+            }
 
             var ing = new Ingredient
             {

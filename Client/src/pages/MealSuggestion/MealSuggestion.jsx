@@ -17,7 +17,7 @@ import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
 } from 'react-icons/md';
-import { FiFilter, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiFilter, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
 import AdvancedRecipeFilter from '../../components/RecipeFilter/AdvancedRecipeFilter';
 
 export default function MealSuggestion() {
@@ -262,6 +262,19 @@ export default function MealSuggestion() {
     return { locked, reduced };
   };
 
+  const matchSystemIngredient = (recipeIngName, allSysIngredients) => {
+    const rName = normalizeText(recipeIngName);
+    const matches = allSysIngredients.filter(sysIng => {
+      const dbName = normalizeText(sysIng.name);
+      if (dbName === rName) return true;
+      const escapedDbName = dbName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(?<!\\p{L})${escapedDbName}(?!\\p{L})`, 'iu');
+      return regex.test(rName);
+    });
+    if (matches.length === 0) return null;
+    return matches.sort((a, b) => b.name.length - a.name.length)[0];
+  };
+
   const mappedRecipes = useMemo(() => recipes.map(rec => {
     // --- Normalize fields from both getAll and suggestFromPantry response formats ---
     const recipeName = rec.recipe_name || rec.Recipe_name || "";
@@ -327,11 +340,7 @@ export default function MealSuggestion() {
         totalSodium += nutrition.sodium;
         totalCholesterol += nutrition.cholesterol;
 
-        const sysIng = ingredients.find(i => {
-          const dbName = normalizeText(i.name);
-          const recipeName = normalizeText(ingName);
-          return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
-        });
+        const sysIng = matchSystemIngredient(ingName, ingredients);
         const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
 
         return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, nutrition };
@@ -348,11 +357,7 @@ export default function MealSuggestion() {
 
     // --- Allergy check (always client-side) ---
     const allergicIngredients = requiredIngredients.filter(reqIng => {
-      const sysIng = ingredients.find(i => {
-        const dbName = normalizeText(i.name);
-        const recipeName = normalizeText(reqIng);
-        return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
-      });
+      const sysIng = matchSystemIngredient(reqIng, ingredients);
       return sysIng && allergies.some(a => a.ingredient_id === sysIng.ingredient_id);
     });
     const hasAllergyConflict = allergicIngredients.length > 0;
@@ -559,20 +564,39 @@ export default function MealSuggestion() {
           )}
 
         <div className="ingredient-search-wrapper">
-          <div className="ingredient-search-bar">
-            <FiSearch size={16} />
-            <input
-              type="text"
-              placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
-              value={ingredientSearchQuery}
-              onChange={(e) => setIngredientSearchQuery(e.target.value)}
-            />
-            {ingredientSearchQuery && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className="ingredient-search-bar" style={{ flex: 1 }}>
+              <FiSearch size={16} />
+              <input
+                type="text"
+                placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
+                value={ingredientSearchQuery}
+                onChange={(e) => setIngredientSearchQuery(e.target.value)}
+              />
+              {ingredientSearchQuery && (
+                <button
+                  className="ingredient-search-clear"
+                  onClick={() => setIngredientSearchQuery('')}
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+            
+            {leftTab === 'pantry' && pantryItems.length > 0 && (
               <button
-                className="ingredient-search-clear"
-                onClick={() => setIngredientSearchQuery('')}
+                onClick={() => setPantryItems([])}
+                title={`Xóa chọn ${pantryItems.length} nguyên liệu`}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569',
+                  padding: '10px', borderRadius: '10px', cursor: 'pointer', flexShrink: 0,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#475569'; }}
               >
-                &times;
+                <FiRefreshCw size={16} />
               </button>
             )}
           </div>
@@ -704,6 +728,28 @@ export default function MealSuggestion() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {!isSidebarOpen && (
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '9px 16px',
+                    borderRadius: '24px',
+                    border: '1px solid #10b981',
+                    background: '#ecfdf5',
+                    color: '#047857',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  }}
+                  className="desktop-only-btn"
+                >
+                  <MdOutlineKitchen size={16} />
+                  Hiện nguyên liệu
+                </button>
+              )}
               <button 
                 onClick={() => setIsFilterOpen(true)}
                 style={{
@@ -854,6 +900,17 @@ export default function MealSuggestion() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button for Sidebar */}
+      {!isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="fab-reopen-sidebar"
+          title="Mở bảng nguyên liệu"
+        >
+          <MdOutlineKitchen size={24} />
+        </button>
+      )}
 
       {warningPopupData && (
         <HealthWarningPopup
