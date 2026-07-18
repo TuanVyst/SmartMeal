@@ -623,11 +623,14 @@ export default function MealSuggestion() {
               {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => (
                 <button 
                   key={ing.ingredient_id} 
-                  className="dropdown-item"
+                  className={`dropdown-item ${leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) ? 'already-selected' : ''}`}
                   onClick={() => {
                     if (leftTab === 'pantry') {
                       if (!allergies.some(a => a.ingredient_id === ing.ingredient_id)) {
-                        handleTogglePantry(ing.ingredient_id);
+                        // Only ADD — never remove via dropdown (use the pill to toggle)
+                        if (!pantryItems.includes(ing.ingredient_id)) {
+                          handleTogglePantry(ing.ingredient_id);
+                        }
                         setIngredientSearchQuery('');
                       }
                     } else {
@@ -638,6 +641,9 @@ export default function MealSuggestion() {
                   disabled={leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id)}
                 >
                   {ing.name}
+                  {leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) &&
+                    <span className="already-selected-label"> ✓ Đã chọn</span>
+                  }
                   {leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id) && 
                     <span className="disabled-pill-text">(Dị ứng)</span>
                   }
