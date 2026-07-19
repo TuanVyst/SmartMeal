@@ -1,6 +1,7 @@
     using System.Text.Json;
 using BusinessObject.Entities;
 using BusinessObject.Enums;
+using BusinessObject.Helpers;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 
@@ -98,11 +99,13 @@ public static class DbInitializer
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
 
+            await SeedEverydayUnits(context);
             return;
         }
 
         // === Fresh DB: full seed from JSON ===
         await SeedAllFromJsonAsync(context);
+        await SeedEverydayUnits(context);
     }
 
     private static async Task SeedAllFromJsonAsync(AppDbContext context)
@@ -607,7 +610,14 @@ public static class DbInitializer
 
                     if (ingredient?.Nutritional_value != null)
                     {
-                        var multiplier = (log.Quantity ?? 100.0) / (ingredient.Nutritional_value.ServingSize ?? 100.0);
+                        var multiplier = UnitConverter.GetMultiplier(
+                            log.Quantity ?? 100.0,
+                            log.Unit,
+                            ingredient.Nutritional_value.ServingSize ?? 100.0,
+                            ingredient.Nutritional_value.ServingUnit,
+                            ingredient.Name,
+                            ingredient.Nutritional_value.EverydayWeight
+                        );
                         if (multiplier <= 0) multiplier = 1.0;
 
                         log.TotalCalories = ingredient.Nutritional_value.Calories * multiplier;
@@ -645,7 +655,14 @@ public static class DbInitializer
                     {
                         if (ri.Ingredient?.Nutritional_value != null)
                         {
-                            var multiplier = (ri.Quantity) / (ri.Ingredient.Nutritional_value.ServingSize ?? 100.0);
+                            var multiplier = UnitConverter.GetMultiplier(
+                                ri.Quantity,
+                                ri.UOM,
+                                ri.Ingredient.Nutritional_value.ServingSize ?? 100.0,
+                                ri.Ingredient.Nutritional_value.ServingUnit,
+                                ri.Ingredient.Name,
+                                ri.Ingredient.Nutritional_value.EverydayWeight
+                            );
                             if (multiplier <= 0) multiplier = 1.0;
 
                             totalCal += ri.Ingredient.Nutritional_value.Calories * multiplier;
@@ -739,5 +756,120 @@ public static class DbInitializer
         context.Plans.AddRange(plans);
         await context.SaveChangesAsync();
         Console.WriteLine("[DbInitializer] Successfully seeded 4 subscription plans.");
+    }
+
+    private static async Task SeedEverydayUnits(AppDbContext context)
+    {
+        var everydayUnits = new Dictionary<string, (string Unit, double Weight)>
+        {
+            { "cà tím", ("quả", 150.0) },
+            { "ngò rí", ("bó", 30.0) },
+            { "cải bó xôi", ("bó", 100.0) },
+            { "rau muống", ("bó", 300.0) },
+            { "giá đỗ", ("nắm", 50.0) },
+            { "cà chua", ("quả", 120.0) },
+            { "cà rốt", ("củ", 100.0) },
+            { "hành tây", ("củ", 150.0) },
+            { "bông cải xanh", ("cây", 300.0) },
+            { "dưa chuột", ("quả", 150.0) },
+            { "dưa leo", ("quả", 150.0) },
+            { "bắp cải", ("cái", 800.0) },
+            { "ớt chuông", ("quả", 150.0) },
+            { "ớt tươi", ("quả", 5.0) },
+            { "hành lá", ("nhánh", 5.0) },
+            { "rau mùi", ("bó", 30.0) },
+            { "rau răm", ("bó", 30.0) },
+            { "rau", ("bó", 150.0) },
+            { "cải", ("bó", 200.0) },
+            { "xà lách", ("cây", 150.0) },
+            { "tỏi", ("tép", 3.0) },
+            { "gừng", ("củ", 20.0) },
+            { "sả", ("cây", 15.0) },
+            { "khoai tây", ("củ", 150.0) },
+            { "khoai lang", ("củ", 150.0) },
+            { "khoai", ("củ", 150.0) },
+            { "nấm", ("chén", 70.0) },
+            { "gạo", ("chén", 150.0) },
+            { "bún", ("bát", 150.0) },
+            { "phở", ("bát", 150.0) },
+            { "bánh phở", ("bát", 150.0) },
+            { "miến", ("bát", 150.0) },
+            { "mì", ("bát", 150.0) },
+            { "mì ý", ("bát", 150.0) },
+            { "đậu phộng", ("nắm", 30.0) },
+            { "mè", ("thìa canh", 10.0) },
+            { "vụn bánh mì", ("chén", 60.0) },
+            { "bột mì", ("chén", 120.0) },
+            { "bột", ("chén", 120.0) },
+            { "đậu xanh", ("nắm", 30.0) },
+            { "đậu đỏ", ("nắm", 30.0) },
+            { "đậu", ("nắm", 30.0) },
+            { "hạt", ("nắm", 30.0) },
+            { "thịt gà", ("lát", 100.0) },
+            { "thịt bò", ("lát", 100.0) },
+            { "thịt heo", ("lát", 100.0) },
+            { "thịt", ("lát", 100.0) },
+            { "cá hồi", ("phi lê", 150.0) },
+            { "cá", ("con", 200.0) },
+            { "tôm", ("con", 15.0) },
+            { "mực", ("con", 100.0) },
+            { "chanh", ("quả", 50.0) },
+            { "bơ", ("quả", 150.0) },
+            { "chuối", ("quả", 120.0) },
+            { "xoài", ("quả", 250.0) },
+            { "táo", ("quả", 150.0) },
+            { "dứa", ("quả", 500.0) },
+            { "trứng", ("quả", 50.0) },
+            { "sữa đặc có đường", ("thìa canh", 20.0) },
+            { "sữa", ("hộp", 200.0) },
+            { "phô mai", ("lát", 20.0) },
+            { "nước cốt dừa", ("lon", 400.0) },
+            { "dầu ô liu", ("thìa canh", 15.0) },
+            { "dầu mè", ("thìa canh", 15.0) },
+            { "dầu ăn", ("thìa canh", 15.0) },
+            { "bơ thực vật", ("thìa canh", 15.0) },
+            { "nước mắm", ("thìa canh", 15.0) },
+            { "nước tương", ("thìa canh", 15.0) },
+            { "tương ớt", ("thìa canh", 15.0) },
+            { "giấm", ("thìa canh", 15.0) },
+            { "nước", ("cốc", 250.0) },
+            { "mật ong", ("thìa canh", 20.0) },
+            { "muối", ("thìa cà phê", 5.0) },
+            { "đường", ("thìa cà phê", 4.0) },
+            { "tiêu", ("thìa cà phê", 2.0) },
+            { "tiêu đen", ("thìa cà phê", 2.0) },
+            { "bánh mì", ("cái", 80.0) },
+            { "đậu hủ", ("bìa", 150.0) }
+        };
+
+        var nutritionalValues = await context.NutritionalValues
+            .Include(nv => nv.Ingredient)
+            .Where(nv => string.IsNullOrEmpty(nv.EverydayUnit))
+            .ToListAsync();
+
+        bool changed = false;
+        foreach (var nv in nutritionalValues)
+        {
+            if (nv.Ingredient == null) continue;
+            var name = nv.Ingredient.Name.Trim().ToLower();
+
+            foreach (var kvp in everydayUnits)
+            {
+                if (name.Contains(kvp.Key) || kvp.Key.Contains(name))
+                {
+                    nv.EverydayUnit = kvp.Value.Unit;
+                    nv.EverydayWeight = kvp.Value.Weight;
+                    changed = true;
+                    Console.WriteLine($"[DbInitializer] Migrated everyday unit for {nv.Ingredient.Name}: {nv.EverydayUnit} ({nv.EverydayWeight}g)");
+                    break;
+                }
+            }
+        }
+
+        if (changed)
+        {
+            await context.SaveChangesAsync();
+            Console.WriteLine("[DbInitializer] Everyday unit mappings saved to DB successfully.");
+        }
     }
 }

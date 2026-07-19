@@ -17,14 +17,14 @@ export default function AdminSidebar() {
   const navItems = [
     { to: '/admin', icon: <FiGrid />, label: 'Dashboard', end: true },
     { to: '/admin/users', icon: <FiUsers />, label: 'Users' },
-    { to: '/admin/meals', icon: <FiCoffee />, label: 'Meals' },
     { to: '/admin/ingredient-tags', icon: <FiShoppingBag />, label: 'Ingredient Tags' },
     { to: '/admin/ingredients', icon: <FiHeart />, label: 'Ingredients' },
     { to: '/admin/recipe-tags', icon: <FiAward />, label: 'Recipe Tags' },
     { to: '/admin/recipes', icon: <FiHeart />, label: 'Recipes' },
     { to: '/admin/categories', icon: <FiTag />, label: 'Categories' },
-    { to: '/admin/feedback', icon: <FiMessageSquare />, label: 'Feedback' },
     { to: '/admin/transactions', icon: <FiCreditCard />, label: 'Transaction History' },
+    { to: '/admin/plans', icon: <FiAward />, label: 'Plans' },
+    { to: '/admin/statistics', icon: <FiGrid />, label: 'Statistics' },
   ];
 
   return (

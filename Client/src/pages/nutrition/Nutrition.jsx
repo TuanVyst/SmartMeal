@@ -10,6 +10,7 @@ import { nutritionGoalService } from '../../services/nutritionGoalService';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
 import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
+import { getMultiplier } from '../../utils/unitConverter';
 import './Nutrition.css';
 import { 
   MdFastfood, MdBarChart, MdAddCircleOutline, 
@@ -78,7 +79,11 @@ function deriveLogNutrients(log, recipes, ingredients) {
         if (nv) {
           const qty = ri.quantity || ri.Quantity || 0;
           const sv = nv.servingSize || nv.ServingSize || 1;
-          const mult = sv > 0 ? qty / sv : 1;
+          const sUnit = nv.servingUnit || nv.ServingUnit || 'g';
+          const uom = ri.uom || ri.Uom || ri.UOM || 'g';
+          const ingName = ri.ingredient?.name || ri.Ingredient?.name || '';
+          
+          const mult = getMultiplier(qty, uom, sv, sUnit, ingName, nv.everydayWeight);
           result.fiber += (nv.fiber || nv.Fiber || 0) * mult;
           result.sugar += (nv.sugar || nv.Sugar || 0) * mult;
           result.sodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * mult;
@@ -97,7 +102,8 @@ function deriveLogNutrients(log, recipes, ingredients) {
     if (ing && ing.nutritional_value) {
       const nv = ing.nutritional_value;
       const size = nv.servingSize || 100;
-      const factor = size > 0 ? (log.quantity || 100) / size : 1;
+      const sUnit = nv.servingUnit || 'g';
+      const factor = getMultiplier(log.quantity || 100, log.unit || 'g', size, sUnit, ing.name, nv.everydayWeight);
       result.fiber = (nv.fiber || 0) * factor;
       result.sugar = (nv.sugar || 0) * factor;
       result.sodium = (nv.salt || nv.sodium || 0) * factor;
@@ -260,7 +266,8 @@ export default function Nutrition() {
       if (ing && ing.nutritional_value) {
         const nv = ing.nutritional_value;
         const size = nv.servingSize || 100;
-        const factor = quantity / size;
+        const sUnit = nv.servingUnit || 'g';
+        const factor = getMultiplier(quantity, unit, size, sUnit, ing.name, nv.everydayWeight);
         setUnit(nv.servingUnit || 'g');
         setManualMacros({
           calories: Math.round(nv.calories * factor * 10) / 10,
@@ -295,7 +302,10 @@ export default function Nutrition() {
           if (nv) {
             const quantityVal = ri.quantity || ri.Quantity || 0;
             const servingSize = nv.servingSize || nv.ServingSize || 1;
-            const multiplier = quantityVal / servingSize;
+            const servingUnit = nv.servingUnit || nv.ServingUnit || 'g';
+            const ingName = ri.ingredient?.name || ri.Ingredient?.name || '';
+            const uom = ri.uom || ri.Uom || ri.UOM || 'g';
+            const multiplier = getMultiplier(quantityVal, uom, servingSize, servingUnit, ingName, nv.everydayWeight);
             totalCalories += (nv.calories || nv.Calories || 0) * multiplier;
             totalProtein += (nv.protein || nv.Protein || 0) * multiplier;
             totalCarbs += (nv.carbs || nv.Carbs || nv.carbohydrates || nv.Carbohydrates || 0) * multiplier;

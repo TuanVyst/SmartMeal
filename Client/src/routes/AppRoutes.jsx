@@ -17,15 +17,14 @@ import IngredientDetail from '../pages/food/IngredientDetail';
 import LandingPage from '../pages/landing/LandingPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/AdminUsers';
-import AdminMeals from '../pages/admin/AdminMeals';
 import AdminIngredientTags from '../pages/admin/AdminIngredientTags';
 import AdminIngredients from '../pages/admin/AdminIngredients';
 import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
 import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
-import AdminFeedback from '../pages/admin/AdminFeedback';
-import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
 import AdminTransactions from '../pages/admin/AdminTransactions';
+import AdminPlans from '../pages/admin/AdminPlans';
+import AdminStatistics from '../pages/admin/AdminStatistics';
 import Nutrition from '../pages/nutrition/Nutrition';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
@@ -78,15 +77,14 @@ export default function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="meals" element={<AdminMeals />} />
         <Route path="ingredient-tags" element={<AdminIngredientTags />} />
         <Route path="ingredients" element={<AdminIngredients />} />
         <Route path="recipe-tags" element={<AdminRecipeTags />} />
         <Route path="recipes" element={<AdminRecipes />} />
         <Route path="categories" element={<AdminCategories />} />
-        <Route path="feedback" element={<AdminFeedback />} />
-        <Route path="feedback/:id" element={<AdminFeedbackDetail />} />
         <Route path="transactions" element={<AdminTransactions />} />
+        <Route path="plans" element={<AdminPlans />} />
+        <Route path="statistics" element={<AdminStatistics />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

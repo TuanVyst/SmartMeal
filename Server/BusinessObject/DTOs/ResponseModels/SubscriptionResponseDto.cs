@@ -12,6 +12,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public string Status { get; set; }
         public string PaymentRef { get; set; }
         public DateTime? TransactionDate { get; set; }
+        public double PricePaid { get; set; }
         public bool IsDeleted { get; set; }
 
         // Joined display fields for admin transaction history

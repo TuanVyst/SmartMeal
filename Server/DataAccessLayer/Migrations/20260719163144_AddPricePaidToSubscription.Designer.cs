@@ -3,6 +3,7 @@ using System;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260719163144_AddPricePaidToSubscription")]
+    partial class AddPricePaidToSubscription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,6 +266,38 @@ namespace DataAccessLayer.Migrations
                     b.HasKey("Diet_id");
 
                     b.ToTable("DietPlan");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Feedback", b =>
+                {
+                    b.Property<Guid>("Feedback_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Feedback_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.ToTable("Feedback");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
@@ -622,12 +657,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<double?>("Cholesterol")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("EverydayUnit")
-                        .HasColumnType("text");
-
-                    b.Property<double?>("EverydayWeight")
-                        .HasColumnType("double precision");
-
                     b.Property<double?>("Fat")
                         .HasColumnType("double precision");
 
@@ -968,9 +997,6 @@ namespace DataAccessLayer.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<DateTime?>("TransactionDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Sub_id");
 
                     b.HasIndex("Account_id");
@@ -1121,6 +1147,17 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("DietPlan");
 
                     b.Navigation("MedicalCondition");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Feedback", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>

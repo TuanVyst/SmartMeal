@@ -3,7 +3,7 @@ import api from './api';
 export const adminService = {
   // Update dashboard stats to include all relevant data
   getDashboardStats: async () => {
-    const [usersRes, mealsRes, categoriesRes, ingredientsRes, tagsRes] = await Promise.allSettled([
+    const [usersRes, recipesRes, categoriesRes, ingredientsRes, tagsRes] = await Promise.allSettled([
       api.get('/auth/accounts'), // Placeholder if Auth/Account missing
       api.get('/Recipe'),
       api.get('/IngredientLabel'),
@@ -11,17 +11,16 @@ export const adminService = {
       api.get('/IngredientTag'),
     ]);
     const users = usersRes.status === 'fulfilled' ? usersRes.value.data.data || [] : [];
-    const meals = mealsRes.status === 'fulfilled' ? mealsRes.value.data.data || [] : [];
+    const recipes = recipesRes.status === 'fulfilled' ? recipesRes.value.data.data || [] : [];
     const categories = categoriesRes.status === 'fulfilled' ? categoriesRes.value.data.data || [] : [];
     const ingredients = ingredientsRes.status === 'fulfilled' ? ingredientsRes.value.data.data || [] : [];
     const tags = tagsRes.status === 'fulfilled' ? tagsRes.value.data.data || [] : [];
     return {
       totalUsers: users.length,
-      totalMeals: meals.length,
+      totalRecipes: recipes.length,
       totalCategories: categories.length,
       totalIngredients: ingredients.length,
       totalTags: tags.length,
-      totalFeedback: 0,
     };
   },
 
@@ -32,16 +31,6 @@ export const adminService = {
 
   toggleUserStatus: async (id, isActive) => {
     const res = await api.put(`/auth/accounts/${id}`, { isActive });
-    return res.data;
-  },
-
-  getAllMeals: async () => {
-    const res = await api.get('/Recipe');
-    return res.data.data || [];
-  },
-
-  deleteMeal: async (id) => {
-    const res = await api.delete(`/Recipe/${id}`);
     return res.data;
   },
 
@@ -63,16 +52,6 @@ export const adminService = {
   deleteCategory: async (id) => {
     const res = await api.delete(`/IngredientLabel/${id}`);
     return res.data;
-  },
-
-  getFeedbackList: async () => {
-    const res = await api.get('/Feedback');
-    return res.data.data || [];
-  },
-
-  getFeedbackDetail: async (id) => {
-    const res = await api.get(`/Feedback/${id}`);
-    return res.data.data;
   },
 
   // Ingredient Tag operations
@@ -226,5 +205,38 @@ export const adminService = {
   getTransactionHistory: async () => {
     const res = await api.get('/Subscription/admin/all');
     return res.data.data || [];
+  },
+
+  // Plan operations
+  getAllPlans: async () => {
+    const res = await api.get('/Plan');
+    return res.data.data || [];
+  },
+
+  createPlan: async (data) => {
+    const res = await api.post('/Plan', data);
+    return res.data;
+  },
+
+  updatePlan: async (id, data) => {
+    const res = await api.put(`/Plan/${id}`, data);
+    return res.data;
+  },
+
+  deletePlan: async (id) => {
+    const res = await api.delete(`/Plan/${id}`);
+    return res.data;
+  },
+
+  // Statistics
+  getSubscriptionStatistics: async (startDate, endDate) => {
+    let url = '/Statistic/subscriptions';
+    const params = [];
+    if (startDate) params.push(`startDate=${startDate}`);
+    if (endDate) params.push(`endDate=${endDate}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    
+    const res = await api.get(url);
+    return res.data.data;
   },
 };

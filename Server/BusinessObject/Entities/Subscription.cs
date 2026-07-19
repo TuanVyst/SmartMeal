@@ -33,13 +33,15 @@ namespace BusinessObject.Entities
 
         [MaxLength(255)]
         public string PaymentRef { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public double PricePaid { get; set; } = 0;
 
         /// <summary>
         /// Thời điểm thanh toán thành công (UTC). Dùng cho Lịch sử giao dịch admin.
         /// </summary>
         public DateTime? TransactionDate { get; set; }
 
-                public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual Account Account { get; set; }

@@ -154,10 +154,6 @@ builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.
 builder.Services.AddScoped<Repository.Interfaces.IBmiLogRepo, Repository.Implements.BmiLogRepo>();
 builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements.BmiLogService>();
 
-// Feedback
-builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
-builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
-
 // Plan
 builder.Services.AddScoped<Repository.Interfaces.IPlanRepo, Repository.Implements.PlanRepo>();
 builder.Services.AddScoped<Service.Interfaces.IPlanService, Service.Implements.PlanService>();
@@ -168,6 +164,9 @@ builder.Services.AddScoped<Service.Interfaces.ISubscriptionService, Service.Impl
 
 // Payment
 builder.Services.AddScoped<Service.Interfaces.IPaymentService, Service.Implements.PaymentService>();
+
+// Statistic
+builder.Services.AddScoped<Service.Interfaces.IStatisticService, Service.Implements.StatisticService>();
 
 // Background Services
 builder.Services.AddHostedService<SubscriptionExpiryBackgroundService>();
