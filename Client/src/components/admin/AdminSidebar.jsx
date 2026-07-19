@@ -24,6 +24,8 @@ export default function AdminSidebar() {
     { to: '/admin/recipes', icon: <FiHeart />, label: 'Recipes' },
     { to: '/admin/categories', icon: <FiTag />, label: 'Categories' },
     { to: '/admin/feedback', icon: <FiMessageSquare />, label: 'Feedback' },
+    { to: '/admin/plans', icon: <FiAward />, label: 'Plans' },
+    { to: '/admin/statistics', icon: <FiGrid />, label: 'Statistics' },
   ];
 
   return (

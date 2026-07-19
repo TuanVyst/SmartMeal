@@ -62,6 +62,7 @@ namespace Service.Implements
                 EndDate = endDate,
                 Status = request.Status,
                 PaymentRef = request.PaymentRef,
+                PricePaid = request.PricePaid > 0 ? request.PricePaid : plan.Price,
                 IsDeleted = false
             };
 
@@ -90,6 +91,7 @@ namespace Service.Implements
             existingItem.EndDate = endDate;
             existingItem.Status = request.Status;
             existingItem.PaymentRef = request.PaymentRef;
+            if (request.PricePaid > 0) existingItem.PricePaid = request.PricePaid;
 
             var result = await _subscriptionRepo.UpdateSubscription(existingItem);
             _logger.LogInformation("Subscription '{Sub_id}' updated successfully", existingItem.Sub_id);
@@ -114,6 +116,7 @@ namespace Service.Implements
                 EndDate = entity.EndDate,
                 Status = entity.Status,
                 PaymentRef = entity.PaymentRef,
+                PricePaid = entity.PricePaid,
                 IsDeleted = entity.IsDeleted
             };
         }

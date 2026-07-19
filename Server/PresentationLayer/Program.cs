@@ -169,6 +169,9 @@ builder.Services.AddScoped<Service.Interfaces.ISubscriptionService, Service.Impl
 // Payment
 builder.Services.AddScoped<Service.Interfaces.IPaymentService, Service.Implements.PaymentService>();
 
+// Statistic
+builder.Services.AddScoped<Service.Interfaces.IStatisticService, Service.Implements.StatisticService>();
+
 // Background Services
 builder.Services.AddHostedService<SubscriptionExpiryBackgroundService>();
 
