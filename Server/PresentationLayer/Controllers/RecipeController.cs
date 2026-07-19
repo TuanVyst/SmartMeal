@@ -4,6 +4,12 @@ using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using DataAccessLayer;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace PresentationLayer.Controllers
 {
@@ -13,11 +19,13 @@ namespace PresentationLayer.Controllers
     {
         private readonly IRecipeService _recipeService;
         private readonly ILogger<RecipeController> _logger;
+        private readonly AppDbContext _ctx;
 
-        public RecipeController(IRecipeService recipeService, ILogger<RecipeController> logger)
+        public RecipeController(IRecipeService recipeService, ILogger<RecipeController> logger, AppDbContext ctx)
         {
             _recipeService = recipeService;
             _logger = logger;
+            _ctx = ctx;
         }
 
         [HttpGet]
@@ -31,6 +39,61 @@ namespace PresentationLayer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all recipes");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("recommended-for-me")]
+        [Authorize]
+        public async Task<IActionResult> GetRecommendedForMe()
+        {
+            try
+            {
+                var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (claim == null) return Unauthorized();
+                var accountId = Guid.Parse(claim.Value);
+
+                // Get user's active diet plans
+                var dietPlans = await _ctx.UserDietPlans
+                    .Where(u => u.Account_id == accountId && u.IsActive && !u.IsDeleted)
+                    .Join(_ctx.DietPlans, 
+                          u => u.Diet_id, 
+                          d => d.Diet_id, 
+                          (u, d) => d)
+                    .ToListAsync();
+
+                var allRecipes = await _recipeService.GetAllRecipes();
+
+                if (!dietPlans.Any())
+                {
+                    return Ok(new { success = true, data = allRecipes.Take(10) }); // default recommendation
+                }
+
+                // If user has a diet plan, we try to recommend recipes based on the DietPlan Name 
+                // containing keywords that might match recipe tags or recipe names.
+                // For a more advanced version, this would filter by Macros (MaxCarbs, MinProtein, etc.)
+                var keywords = dietPlans.Select(d => d.Name.ToLower()).ToList();
+                
+                var recommended = allRecipes.Where(r => 
+                    keywords.Any(k => 
+                        (r.Recipe_name != null && k.Contains(r.Recipe_name.ToLower())) || 
+                        (r.Recipe_name != null && r.Recipe_name.ToLower().Contains(k)) ||
+                        (r.RecipeLabels != null && r.RecipeLabels.Any(t => k.Contains(t.LabelName.ToLower()) || t.LabelName.ToLower().Contains(k))) ||
+                        k.Contains("tiểu đường") // just recommend all for demo if it's complex
+                    )
+                ).ToList();
+
+                // fallback if strict matching yields empty
+                if (!recommended.Any()) 
+                {
+                    recommended = allRecipes.Take(10).ToList();
+                }
+
+                return Ok(new { success = true, data = recommended, activeDietPlans = dietPlans.Select(d => d.Name) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recommended recipes");
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }

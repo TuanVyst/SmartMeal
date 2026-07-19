@@ -53,6 +53,9 @@ public static class DbInitializer
         // Seed subscription plans
         await SeedPlansAsync(context);
 
+        // Seed DietPlans and Recommendations
+        await SeedDietPlansAsync(context);
+
         // Check for English data and clear the database if found to force a Vietnamese re-seed
         var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
         var hasEnglishTags = await context.IngredientTags.AnyAsync(t => t.Name == "VEGETABLE" || t.Name == "GRAIN");
@@ -719,5 +722,121 @@ public static class DbInitializer
         context.Plans.AddRange(plans);
         await context.SaveChangesAsync();
         Console.WriteLine("[DbInitializer] Successfully seeded 4 subscription plans.");
+    }
+
+    private static async Task SeedDietPlansAsync(AppDbContext context)
+    {
+        if (await context.DietPlans.AnyAsync()) return;
+
+        var dietPlans = new List<DietPlan>
+        {
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                Name = "Chế độ ăn cho người Tiểu đường",
+                Description = "Chế độ ăn kiểm soát lượng carbohydrate, tập trung vào carbohydrate phức hợp và giàu chất xơ giúp ổn định đường huyết.",
+                MaxCarbs = 130, // example
+                TargetCalories = 1800,
+                MinProtein = 60,
+                MaxFat = 60
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                Name = "Chế độ ăn Huyết áp cao (DASH)",
+                Description = "Chế độ ăn giảm natri, giàu kali, canxi và magie giúp kiểm soát huyết áp.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 90,
+                MaxFat = 60
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                Name = "Chế độ ăn giảm mỡ máu (Cholesterol cao)",
+                Description = "Chế độ ăn hạn chế chất béo bão hòa, tránh chất béo chuyển hóa, giàu chất xơ hòa tan.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 75,
+                MaxFat = 50
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                Name = "Chế độ ăn cho người Bệnh tim mạch",
+                Description = "Chế độ ăn lành mạnh cho tim mạch, ít chất béo bão hòa và muối, nhiều rau củ quả.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 80,
+                MaxFat = 55
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                Name = "Chế độ ăn thân thiện với Dạ dày (GERD)",
+                Description = "Chế độ ăn nhạt, tránh thực phẩm cay nóng, chua, nhiều dầu mỡ và thức uống có ga.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 75,
+                MaxFat = 65
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("66666666-6666-6666-6666-666666666666"),
+                Name = "Chế độ ăn cho người Gout",
+                Description = "Chế độ ăn giảm purine, hạn chế thịt đỏ, hải sản và rượu bia, tăng cường rau củ quả.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 60,
+                MaxFat = 65
+            }
+        };
+
+        context.DietPlans.AddRange(dietPlans);
+        await context.SaveChangesAsync();
+        
+        // Also map to MedicalConditions
+        var allConditions = await context.MedicalConditions.ToListAsync();
+        if (allConditions.Any())
+        {
+            var recommendations = new List<ConditionDietRecommendation>();
+            foreach (var cond in allConditions)
+            {
+                if (cond.Name == null) continue;
+                
+                Guid? matchedDietId = null;
+                if (cond.Name.Contains("Tiểu đường", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                else if (cond.Name.Contains("Huyết áp", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                else if (cond.Name.Contains("Cholesterol", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+                else if (cond.Name.Contains("tim mạch", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+                else if (cond.Name.Contains("Dạ dày", StringComparison.OrdinalIgnoreCase) || cond.Name.Contains("Trào ngược", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+                else if (cond.Name.Contains("Gout", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
+                if (matchedDietId.HasValue)
+                {
+                    recommendations.Add(new ConditionDietRecommendation
+                    {
+                        Rec_id = Guid.NewGuid(),
+                        Condition_id = cond.Condition_id,
+                        Diet_id = matchedDietId.Value,
+                        Priority = 1,
+                        Notes = "Hệ thống tự động đề xuất dựa trên bệnh lý."
+                    });
+                }
+            }
+            if (recommendations.Any())
+            {
+                context.ConditionDietRecommendations.AddRange(recommendations);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        Console.WriteLine("[DbInitializer] Successfully seeded Diet Plans and Recommendations.");
     }
 }

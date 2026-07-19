@@ -97,6 +97,51 @@ namespace PresentationLayer.Controllers
                 .ToListAsync();
         }
 
+        private async Task AssignRecommendedDietPlansAsync(Guid accountId)
+        {
+            // Get all current conditions for the user
+            var userConditions = await _ctx.UserConditions
+                .Where(uc => uc.Account_id == accountId && !uc.IsDeleted)
+                .Select(uc => uc.Condition_id)
+                .ToListAsync();
+
+            if (!userConditions.Any()) return;
+
+            // Find recommended diet plans for these conditions
+            var recommendedDietIds = await _ctx.ConditionDietRecommendations
+                .Where(cdr => userConditions.Contains(cdr.Condition_id) && !cdr.IsDeleted)
+                .Select(cdr => cdr.Diet_id)
+                .Distinct()
+                .ToListAsync();
+
+            if (!recommendedDietIds.Any()) return;
+
+            // Get existing assigned diet plans
+            var existingUserDiets = await _ctx.UserDietPlans
+                .Where(udp => udp.Account_id == accountId && !udp.IsDeleted)
+                .Select(udp => udp.Diet_id)
+                .ToListAsync();
+
+            var newDietPlans = recommendedDietIds.Except(existingUserDiets).ToList();
+
+            if (newDietPlans.Any())
+            {
+                foreach (var dietId in newDietPlans)
+                {
+                    _ctx.UserDietPlans.Add(new UserDietPlan
+                    {
+                        UDP_id = Guid.NewGuid(),
+                        Account_id = accountId,
+                        Diet_id = dietId,
+                        StartDate = DateTime.UtcNow,
+                        IsActive = true,
+                        IsDeleted = false
+                    });
+                }
+                await _ctx.SaveChangesAsync();
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> SubmitSurvey([FromBody] HealthSurveyRequest request)
         {
@@ -171,6 +216,9 @@ namespace PresentationLayer.Controllers
                         }
                     }
                 }
+                
+                // Auto-assign diet plans based on conditions
+                await AssignRecommendedDietPlansAsync(accountId);
 
                 if (request.Height > 0 && request.Weight > 0)
                 {
@@ -317,6 +365,9 @@ namespace PresentationLayer.Controllers
                         }
                     }
                 }
+                
+                // Auto-assign diet plans based on conditions
+                await AssignRecommendedDietPlansAsync(accountId);
 
                 var existingAllergies = await _ctx.Allergies
                     .Where(a => a.Account_id == accountId && !a.IsDeleted)
