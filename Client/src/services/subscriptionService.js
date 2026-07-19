@@ -5,4 +5,5 @@ export const subscriptionService = {
   getSubscriptionsByAccountId: (accountId) => api.get(`/subscription?accountId=${accountId}`),
   createSubscription: (data) => api.post('/subscription', data),
   createPayment: (data) => api.post('/payment/create', data),
+  checkPaymentStatus: (orderCode) => api.get(`/payment/check-status/${orderCode}`),
 };

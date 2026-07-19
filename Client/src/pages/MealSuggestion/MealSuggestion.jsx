@@ -17,6 +17,8 @@ import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
 } from 'react-icons/md';
+import { FiFilter, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
+import AdvancedRecipeFilter from '../../components/RecipeFilter/AdvancedRecipeFilter';
 
 export default function MealSuggestion() {
   const { user } = useAuth();
@@ -47,6 +49,16 @@ export default function MealSuggestion() {
   const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
   const [pantryMode, setPantryMode] = useState('explore'); // 'explore' | 'cook'
   const [selectedCookingMethod, setSelectedCookingMethod] = useState(null);
+  
+  // Advanced Filter States
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth > 992);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('suitability');
+  const [timeRange, setTimeRange] = useState([0, 180]);
+  const [difficultyFilter, setDifficultyFilter] = useState([]);
+  const [caloriesRange, setCaloriesRange] = useState([0, 1000]);
+  const [minHealthScore, setMinHealthScore] = useState(0);
+
   const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
   const COOKING_METHODS = [
@@ -250,6 +262,19 @@ export default function MealSuggestion() {
     return { locked, reduced };
   };
 
+  const matchSystemIngredient = (recipeIngName, allSysIngredients) => {
+    const rName = normalizeText(recipeIngName);
+    const matches = allSysIngredients.filter(sysIng => {
+      const dbName = normalizeText(sysIng.name);
+      if (dbName === rName) return true;
+      const escapedDbName = dbName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(?<!\\p{L})${escapedDbName}(?!\\p{L})`, 'iu');
+      return regex.test(rName);
+    });
+    if (matches.length === 0) return null;
+    return matches.sort((a, b) => b.name.length - a.name.length)[0];
+  };
+
   const mappedRecipes = useMemo(() => recipes.map(rec => {
     // --- Normalize fields from both getAll and suggestFromPantry response formats ---
     const recipeName = rec.recipe_name || rec.Recipe_name || "";
@@ -272,15 +297,17 @@ export default function MealSuggestion() {
     let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0, totalFiber = 0, totalSugar = 0, totalSodium = 0, totalCholesterol = 0;
 
     if (fromPantry) {
-      matchPercentage = rec.matchPercentage;
-      missingIngredients = rec.missingIngredients || [];
       allIngredients = (rec.allIngredients || []).map(ai => ({
         name: ai.name || ai.Name || 'Nguyên liệu',
         amount: ai.amount || ai.Amount || '',
         possessed: ai.possessed !== undefined ? ai.possessed : false,
+        isPrimary: ai.isPrimary !== undefined ? ai.isPrimary : (ai.IsPrimary !== undefined ? ai.IsPrimary : false),
         nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 }
       }));
       requiredIngredients = allIngredients.map(i => i.name);
+      missingIngredients = rec.missingIngredients || [];
+      const hasMissingPrimary = allIngredients.some(i => i.isPrimary && !i.possessed);
+      matchPercentage = hasMissingPrimary ? 0 : rec.matchPercentage;
       // ponytail: suggestFromPantry doesn't return nutritional values; calories stay 0
     } else {
       // Existing client-side calculation for getAll response
@@ -315,32 +342,30 @@ export default function MealSuggestion() {
         totalSodium += nutrition.sodium;
         totalCholesterol += nutrition.cholesterol;
 
-        const sysIng = ingredients.find(i => {
-          const dbName = normalizeText(i.name);
-          const recipeName = normalizeText(ingName);
-          return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
-        });
+        const sysIng = matchSystemIngredient(ingName, ingredients);
         const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
+        const isPrimary = ri.isPrimary !== undefined ? ri.isPrimary : (ri.IsPrimary !== undefined ? ri.IsPrimary : false);
 
-        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, nutrition };
+        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, isPrimary, nutrition };
       });
 
       allIngredients = mappedIngredients;
       requiredIngredients = mappedIngredients.map(i => i.name);
       missingIngredients = mappedIngredients.filter(i => !i.possessed).map(i => i.name);
-      const possessedCount = mappedIngredients.filter(i => i.possessed).length;
-      matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
+      const hasMissingPrimary = mappedIngredients.some(i => i.isPrimary && !i.possessed);
+      if (hasMissingPrimary) {
+        matchPercentage = 0;
+      } else {
+        const possessedCount = mappedIngredients.filter(i => i.possessed).length;
+        matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
+      }
     }
 
     const calculatedCalories = Math.round(totalCalories / servings);
 
     // --- Allergy check (always client-side) ---
     const allergicIngredients = requiredIngredients.filter(reqIng => {
-      const sysIng = ingredients.find(i => {
-        const dbName = normalizeText(i.name);
-        const recipeName = normalizeText(reqIng);
-        return dbName === recipeName || dbName.includes(recipeName) || recipeName.includes(dbName);
-      });
+      const sysIng = matchSystemIngredient(reqIng, ingredients);
       return sysIng && allergies.some(a => a.ingredient_id === sysIng.ingredient_id);
     });
     const hasAllergyConflict = allergicIngredients.length > 0;
@@ -399,7 +424,16 @@ export default function MealSuggestion() {
         // 1. Filter by Pantry Mode
         if (pantryItems.length > 0) {
           if (pantryMode === 'cook') {
-            if ((recipe.matchPercentage || 0) < 75) return false;
+            // Cook mode: must have ALL primary ingredients in pantry
+            const primaryIngs = recipe.allIngredients?.filter(i => i.isPrimary) || [];
+            if (primaryIngs.length > 0) {
+              // If recipe has primary ingredients, all must be possessed
+              const allPrimaryPossessed = primaryIngs.every(i => i.possessed);
+              if (!allPrimaryPossessed) return false;
+            } else {
+              // No primary ingredients defined → require at least 50% match
+              if ((recipe.matchPercentage || 0) < 50) return false;
+            }
           } else {
             // Explore mode: must contain at least one of the selected ingredients
             const hasPossessed = recipe.allIngredients?.some(i => i.possessed);
@@ -428,16 +462,46 @@ export default function MealSuggestion() {
         if (selectedCookingMethod && recipe.cookingMethod !== selectedCookingMethod) {
           return false;
         }
-        // 3. Filter by Search Query (without accents)
-        if (!searchQuery.trim()) return true;
-        return normalizeText(recipe.title).includes(normalizeText(searchQuery));
+        // 3. Filter by Search Query
+        if (searchQuery.trim() && !normalizeText(recipe.title).includes(normalizeText(searchQuery))) {
+          return false;
+        }
+        
+        // 4. Advanced Filters
+        const rTime = parseInt(recipe.time) || 0;
+        if (rTime < timeRange[0] || (timeRange[1] < 180 && rTime > timeRange[1])) return false;
+        
+        if (difficultyFilter.length > 0 && !difficultyFilter.includes(recipe.difficulty)) return false;
+        
+        const rCals = recipe.healthDetails?.calories || recipe.nutrition?.calories || 0;
+        if (rCals < caloriesRange[0] || (caloriesRange[1] < 1000 && rCals > caloriesRange[1])) return false;
+        
+        const rScore = recipe.healthDetails?.score || 0;
+        if (rScore < minHealthScore) return false;
+
+        return true;
       })
       .sort((a, b) => {
+        if (sortBy === 'difficulty') {
+          const diffMap = { 'Dễ': 1, 'Trung bình': 2, 'Khó': 3 };
+          const dA = diffMap[a.difficulty] || 99;
+          const dB = diffMap[b.difficulty] || 99;
+          if (dA !== dB) return dA - dB;
+        } else if (sortBy === 'time') {
+          const tA = parseInt(a.time) || 999;
+          const tB = parseInt(b.time) || 999;
+          if (tA !== tB) return tA - tB;
+        } else if (sortBy === 'calories') {
+          const cA = a.healthDetails?.calories || a.nutrition?.calories || 9999;
+          const cB = b.healthDetails?.calories || b.nutrition?.calories || 9999;
+          if (cA !== cB) return cA - cB;
+        }
+        
         const scoreA = (a.healthDetails?.score || 0) * 0.6 + (a.matchPercentage || 0) * 0.4;
         const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
         return scoreB - scoreA;
       });
-  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery]);
+  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery, sortBy, timeRange, difficultyFilter, caloriesRange, minHealthScore]);
 
 
   const handleAddToDiaryClick = (recipe) => {
@@ -457,26 +521,42 @@ export default function MealSuggestion() {
         </div>
       )}
 
-      <div className="pantry-config-sidebar glass-panel">
-        <div className="sidebar-tabs-nav">
-          <button
-            className={`sidebar-tab-btn ${leftTab === 'pantry' ? 'active' : ''}`}
-            onClick={() => setLeftTab('pantry')}
-          >
-            <MdOutlineKitchen className="tab-icon" />
-            Tủ lạnh
-          </button>
-          <button
-            className={`sidebar-tab-btn ${leftTab === 'allergy' ? 'active' : ''}`}
-            onClick={() => setLeftTab('allergy')}
-          >
-            <MdBlock className="tab-icon" />
-            Dị ứng
+      <div className={`pantry-config-sidebar glass-panel ${!isSidebarOpen ? 'collapsed' : ''}`}>
+        <div 
+          className="sidebar-header-toggle" 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+            {leftTab === 'pantry' ? <MdOutlineKitchen size={20} color="#10b981" style={{ flexShrink: 0 }} /> : <MdBlock size={20} color="#ef4444" style={{ flexShrink: 0 }} />}
+            <span className="sidebar-title-label">Nguyên liệu & Dị ứng</span>
+          </div>
+          <button className="toggle-collapse-btn">
+            {isSidebarOpen ? <FiChevronUp size={20} className="mobile-icon" /> : <FiChevronDown size={20} className="mobile-icon" />}
+            {isSidebarOpen ? <FiChevronLeft size={20} className="desktop-icon" /> : <FiChevronRight size={20} className="desktop-icon" />}
           </button>
         </div>
 
-        {leftTab === 'pantry' ? (
-            <div className="tab-info-text">
+        <div className="sidebar-collapsible-wrapper" aria-hidden={!isSidebarOpen}>
+          <div className="sidebar-collapsible-content">
+            <div className="sidebar-tabs-nav">
+              <button
+                className={`sidebar-tab-btn ${leftTab === 'pantry' ? 'active' : ''}`}
+                onClick={() => setLeftTab('pantry')}
+              >
+                <MdOutlineKitchen className="tab-icon" />
+                Tủ lạnh
+              </button>
+              <button
+                className={`sidebar-tab-btn ${leftTab === 'allergy' ? 'active' : ''}`}
+                onClick={() => setLeftTab('allergy')}
+              >
+                <MdBlock className="tab-icon" />
+                Dị ứng
+              </button>
+            </div>
+
+            {leftTab === 'pantry' ? (
+                <div className="tab-info-text">
               <p>Chọn các nguyên liệu bạn đang **sẵn có** ở nhà để hệ thống gợi ý thực đơn thích hợp nhất.</p>
               
               <div className="pantry-mode-switcher">
@@ -501,20 +581,39 @@ export default function MealSuggestion() {
           )}
 
         <div className="ingredient-search-wrapper">
-          <div className="ingredient-search-bar">
-            <FiSearch size={16} />
-            <input
-              type="text"
-              placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
-              value={ingredientSearchQuery}
-              onChange={(e) => setIngredientSearchQuery(e.target.value)}
-            />
-            {ingredientSearchQuery && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className="ingredient-search-bar" style={{ flex: 1 }}>
+              <FiSearch size={16} />
+              <input
+                type="text"
+                placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
+                value={ingredientSearchQuery}
+                onChange={(e) => setIngredientSearchQuery(e.target.value)}
+              />
+              {ingredientSearchQuery && (
+                <button
+                  className="ingredient-search-clear"
+                  onClick={() => setIngredientSearchQuery('')}
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+            
+            {leftTab === 'pantry' && pantryItems.length > 0 && (
               <button
-                className="ingredient-search-clear"
-                onClick={() => setIngredientSearchQuery('')}
+                onClick={() => setPantryItems([])}
+                title={`Xóa chọn ${pantryItems.length} nguyên liệu`}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569',
+                  padding: '10px', borderRadius: '10px', cursor: 'pointer', flexShrink: 0,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#475569'; }}
               >
-                &times;
+                <FiRefreshCw size={16} />
               </button>
             )}
           </div>
@@ -524,11 +623,14 @@ export default function MealSuggestion() {
               {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => (
                 <button 
                   key={ing.ingredient_id} 
-                  className="dropdown-item"
+                  className={`dropdown-item ${leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) ? 'already-selected' : ''}`}
                   onClick={() => {
                     if (leftTab === 'pantry') {
                       if (!allergies.some(a => a.ingredient_id === ing.ingredient_id)) {
-                        handleTogglePantry(ing.ingredient_id);
+                        // Only ADD — never remove via dropdown (use the pill to toggle)
+                        if (!pantryItems.includes(ing.ingredient_id)) {
+                          handleTogglePantry(ing.ingredient_id);
+                        }
                         setIngredientSearchQuery('');
                       }
                     } else {
@@ -539,6 +641,9 @@ export default function MealSuggestion() {
                   disabled={leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id)}
                 >
                   {ing.name}
+                  {leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) &&
+                    <span className="already-selected-label"> ✓ Đã chọn</span>
+                  }
                   {leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id) && 
                     <span className="disabled-pill-text">(Dị ứng)</span>
                   }
@@ -628,11 +733,13 @@ export default function MealSuggestion() {
           ))
             : <div className="ingredient-search-empty">Không tìm thấy nguyên liệu nào</div>
           )}
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="suggestions-main-content">
-        <div className="suggestions-header-bar">
+        <div className="suggestions-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h2>Gợi ý Thực đơn Thông minh</h2>
             <span className="results-count-text">
@@ -641,26 +748,87 @@ export default function MealSuggestion() {
                 : `Tìm thấy ${suggestedRecipes.length} công thức món ăn`}
             </span>
           </div>
-          <div className="suggestions-search-bar">
-            <FiSearch size={16} />
-            <input
-              type="text"
-              placeholder="Tìm theo tên món ăn..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="allergy-toggle-checkbox">
-            <label>
-              <input
-                type="checkbox"
-                checked={showAllergicRecipes}
-                onChange={(e) => setShowAllergicRecipes(e.target.checked)}
-              />
-              Hiển thị món ăn chứa chất dị ứng
-            </label>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {!isSidebarOpen && (
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '9px 16px',
+                    borderRadius: '24px',
+                    border: '1px solid #10b981',
+                    background: '#ecfdf5',
+                    color: '#047857',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  }}
+                  className="desktop-only-btn"
+                >
+                  <MdOutlineKitchen size={16} />
+                  Hiện nguyên liệu
+                </button>
+              )}
+              <button 
+                onClick={() => setIsFilterOpen(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '9px 16px',
+                  borderRadius: '24px',
+                  border: '1px solid #e2e8f0',
+                  background: (timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) ? '#ecfdf5' : 'white',
+                  color: (timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) ? '#047857' : '#475569',
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+              >
+                <FiFilter size={16} />
+                Bộ lọc
+                {timeRange[0]!==0 || timeRange[1]!==180 ? ` (${timeRange[0]}-${timeRange[1]>=180 ? '180+' : timeRange[1]}p)` : ''}
+              </button>
+              
+              <div className="suggestions-search-bar" style={{ margin: 0 }}>
+                <FiSearch size={16} />
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên món ăn..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="allergy-toggle-checkbox" style={{ margin: 0 }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showAllergicRecipes}
+                  onChange={(e) => setShowAllergicRecipes(e.target.checked)}
+                />
+                Hiển thị món ăn chứa chất dị ứng
+              </label>
+            </div>
           </div>
         </div>
+
+        {isFilterOpen && (
+          <AdvancedRecipeFilter 
+            sortBy={sortBy} setSortBy={setSortBy}
+            timeRange={timeRange} setTimeRange={setTimeRange}
+            difficultyFilter={difficultyFilter} setDifficultyFilter={setDifficultyFilter}
+            caloriesRange={caloriesRange} setCaloriesRange={setCaloriesRange}
+            minHealthScore={minHealthScore} setMinHealthScore={setMinHealthScore}
+            onClose={() => setIsFilterOpen(false)}
+            totalResults={suggestedRecipes.length}
+          />
+        )}
 
         {suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">
@@ -755,6 +923,17 @@ export default function MealSuggestion() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button for Sidebar */}
+      {!isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="fab-reopen-sidebar"
+          title="Mở bảng nguyên liệu"
+        >
+          <MdOutlineKitchen size={24} />
+        </button>
+      )}
 
       {warningPopupData && (
         <HealthWarningPopup

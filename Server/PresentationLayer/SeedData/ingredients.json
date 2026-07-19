@@ -105,16 +105,16 @@
     "AveragePrice": 8.0,
     "ImageUrl": "/images/dau-oliu.jpg",
     "NutritionalValues": {
-      "Calories": 119,
+      "Calories": 248.4,
       "Protein": 0,
       "Carbs": 0,
-      "Fat": 13.5,
+      "Fat": 27.6,
       "Fiber": 0,
       "Sugar": 0,
       "Salt": 0,
       "Cholesterol": 0,
-      "ServingSize": 1,
-      "ServingUnit": "muỗng canh"
+      "ServingSize": 100,
+      "ServingUnit": "ml"
     },
     "TagNames": [
       "Bơ & Dầu"
@@ -816,8 +816,8 @@
       "Sugar": 3.6,
       "Salt": 2.0,
       "Cholesterol": 0,
-      "ServingSize": 1,
-      "ServingUnit": "muỗng canh"
+      "ServingSize": 100,
+      "ServingUnit": "ml"
     },
     "TagNames": [
       "Nước chấm & Gia vị lỏng"
@@ -848,16 +848,16 @@
     "AveragePrice": 5.0,
     "ImageUrl": "/images/dau-me.jpg",
     "NutritionalValues": {
-      "Calories": 120,
+      "Calories": 800,
       "Protein": 0,
       "Carbs": 0,
-      "Fat": 13.6,
+      "Fat": 90.7,
       "Fiber": 0,
       "Sugar": 0,
       "Salt": 0,
       "Cholesterol": 0,
-      "ServingSize": 1,
-      "ServingUnit": "muỗng canh"
+      "ServingSize": 100,
+      "ServingUnit": "ml"
     },
     "TagNames": [
       "Bơ & Dầu"
@@ -1929,16 +1929,16 @@
     "AveragePrice": 3.0,
     "ImageUrl": "/images/dau-an.jpg",
     "NutritionalValues": {
-      "Calories": 120,
+      "Calories": 248.4,
       "Protein": 0,
       "Carbs": 0,
-      "Fat": 13.6,
+      "Fat": 27.6,
       "Fiber": 0,
       "Sugar": 0,
       "Salt": 0,
       "Cholesterol": 0,
-      "ServingSize": 1,
-      "ServingUnit": "muỗng canh"
+      "ServingSize": 100,
+      "ServingUnit": "ml"
     },
     "TagNames": [
       "Bơ & Dầu"

@@ -1,4 +1,4 @@
-using System.Text.Json;
+    using System.Text.Json;
 using BusinessObject.Entities;
 using BusinessObject.Enums;
 using DataAccessLayer;
@@ -80,7 +80,7 @@ public static class DbInitializer
         var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
         if (existingAdmin != null)
         {
-            existingAdmin.Email = "qdam100@gmail.com";
+            existingAdmin.Email = "maituanvyst@gmail.com";
             existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("Admin@123");
             context.Accounts.Update(existingAdmin);
             await context.SaveChangesAsync();
@@ -92,8 +92,11 @@ public static class DbInitializer
             await UpsertIngredientTagsFromJsonAsync(context);
             await UpsertRecipeTagsFromJsonAsync(context);
             await UpsertIngredientsFromJsonAsync(context);
-            // Re-seed recipes from JSON (clear and re-add)
-            await SeedRecipesFromJsonAsync(context);
+            // Only seed recipes if none exist yet — preserves IsPrimary and admin edits
+            if (!await context.Recipes.AnyAsync())
+            {
+                await SeedRecipesFromJsonAsync(context);
+            }
 
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
@@ -114,7 +117,7 @@ public static class DbInitializer
             Username = "admin",
             Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
             Name = "Admin",
-            Email = "qdam100@gmail.com",
+            Email = "maituanvyst@gmail.com",
             Phone = "0123456789",
             Address = "SmartMeal HQ",
             Role = RoleEnum.Admin,
@@ -246,7 +249,24 @@ public static class DbInitializer
 
         foreach (var dto in ings)
         {
-            if (existingNames.Contains(dto.Name)) continue;
+            if (existingNames.Contains(dto.Name)) 
+            {
+                var existingIng = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == dto.Name);
+                if (existingIng != null && existingIng.Nutritional_value != null)
+                {
+                    existingIng.Nutritional_value.Calories = dto.NutritionalValues.Calories;
+                    existingIng.Nutritional_value.Protein = dto.NutritionalValues.Protein;
+                    existingIng.Nutritional_value.Carbs = dto.NutritionalValues.Carbs;
+                    existingIng.Nutritional_value.Fat = dto.NutritionalValues.Fat;
+                    existingIng.Nutritional_value.Fiber = dto.NutritionalValues.Fiber;
+                    existingIng.Nutritional_value.Sugar = dto.NutritionalValues.Sugar;
+                    existingIng.Nutritional_value.Salt = dto.NutritionalValues.Salt;
+                    existingIng.Nutritional_value.Cholesterol = dto.NutritionalValues.Cholesterol;
+                    existingIng.Nutritional_value.ServingSize = dto.NutritionalValues.ServingSize;
+                    existingIng.Nutritional_value.ServingUnit = dto.NutritionalValues.ServingUnit;
+                }
+                continue;
+            }
 
             var ing = new Ingredient
             {

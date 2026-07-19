@@ -98,6 +98,22 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("check-status/{orderCode}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CheckStatus(long orderCode)
+        {
+            try
+            {
+                var isPaid = await _paymentService.CheckPaymentStatusAsync(orderCode);
+                return Ok(new { success = true, isPaid });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking payment status for orderCode: {OrderCode}", orderCode);
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("return")]
         [AllowAnonymous]
         public IActionResult Return([FromQuery] string id, [FromQuery] string orderCode, [FromQuery] string cancel)

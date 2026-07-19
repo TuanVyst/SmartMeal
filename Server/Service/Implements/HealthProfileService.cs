@@ -39,6 +39,8 @@ namespace Service.Implements
                 Gender = request.Gender,
                 Height = request.Height,
                 Weight = request.Weight,
+                TargetWeight = request.TargetWeight,
+                TargetWeeks = request.TargetWeeks ?? 12,
                 ActivityLevel = request.ActivityLevel,
                 Goal = request.Goal,
                 UpdatedAt = DateTime.UtcNow,
@@ -59,6 +61,8 @@ namespace Service.Implements
             healthProfile.Gender = request.Gender;
             healthProfile.Height = request.Height;
             healthProfile.Weight = request.Weight;
+            healthProfile.TargetWeight = request.TargetWeight;
+            healthProfile.TargetWeeks = request.TargetWeeks;
             healthProfile.ActivityLevel = request.ActivityLevel;
             healthProfile.Goal = request.Goal;
             healthProfile.UpdatedAt = DateTime.UtcNow;

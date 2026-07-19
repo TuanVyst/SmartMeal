@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiX, FiMinus, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminRecipes() {
   const dialog = useDialog();
+  const { user } = useAuth();
+  const accountId = user?.accountId || user?.account_id;
   const [recipes, setRecipes] = useState([]);
   const [allRecipeIngredients, setAllRecipeIngredients] = useState([]);
   const [search, setSearch] = useState('');
@@ -21,6 +24,7 @@ export default function AdminRecipes() {
     difficulty: 'easy',
     isPublic: true,
     recipeTagIds: [],
+    account_id: '',
     ingredients: [] // Array of { ingredient_id, quantity, uom, id? (for existing) }
   });
   const [editingRecipe, setEditingRecipe] = useState(null);
@@ -64,7 +68,8 @@ export default function AdminRecipes() {
         servings: recipeFormData.servings,
         difficulty: recipeFormData.difficulty,
         isPublic: recipeFormData.isPublic,
-        recipeTagIds: recipeFormData.recipeTagIds
+        recipeTagIds: recipeFormData.recipeTagIds,
+        account_id: recipeFormData.account_id || accountId
       };
 
       if (editingRecipe) {
@@ -87,14 +92,15 @@ export default function AdminRecipes() {
               recipe_id: editingRecipe.recipe_id,
               ingredient_id: ing.ingredient_id,
               quantity: ing.quantity,
-              uom: ing.uom
+              UOM: ing.uom || 'g',
+              IsPrimary: !!ing.isPrimary
             });
           }
         }
       } else {
         // Create Recipe
         // Note: Make sure Account_id is set appropriately in your backend or by passing a default here
-        baseRecipeData.Account_id = '00000000-0000-0000-0000-000000000000'; // Default or get from auth context
+        baseRecipeData.Account_id = accountId || '00000000-0000-0000-0000-000000000000'; // Default or get from auth context
         
         const newRecipeResponse = await adminService.createRecipe(baseRecipeData);
         const createdRecipe = newRecipeResponse?.data || newRecipeResponse;
@@ -107,7 +113,8 @@ export default function AdminRecipes() {
                 recipe_id: createdRecipe.recipe_id,
                 ingredient_id: ing.ingredient_id,
                 quantity: ing.quantity,
-                uom: ing.uom
+                UOM: ing.uom || 'g',
+                IsPrimary: !!ing.isPrimary
               });
             }
           }
@@ -116,8 +123,9 @@ export default function AdminRecipes() {
       fetchAllData();
       closeRecipeModal();
     } catch (error) {
-      console.error('Error saving recipe:', error);
-      dialog.error('Error', 'Error saving recipe. Please check the console for details.');
+      console.error('Error saving recipe:', error?.message || error);
+      if (error?.data) console.error('Server response:', error.data);
+      dialog.error('Error', `Error saving recipe: ${error?.message || 'Unknown error'}`);
     }
   };
 
@@ -137,7 +145,8 @@ export default function AdminRecipes() {
         id: ri.id || ri.ri_id,
         ingredient_id: ri.ingredient_id,
         quantity: ri.quantity,
-        uom: ri.uom || 'g'
+        uom: ri.uom || 'g',
+        isPrimary: ri.isPrimary || ri.IsPrimary || false
       }));
 
     setRecipeFormData({
@@ -151,7 +160,8 @@ export default function AdminRecipes() {
       difficulty: recipe.difficulty || 'easy',
       isPublic: recipe.isPublic || true,
       recipeTagIds: tagIds,
-      ingredients: currentIngredients.length > 0 ? currentIngredients : [{ ingredient_id: '', quantity: 0, uom: 'g' }]
+      account_id: recipe.account_id || recipe.Account_id || '',
+      ingredients: currentIngredients.length > 0 ? currentIngredients : [{ ingredient_id: '', quantity: 0, uom: 'g', isPrimary: false }]
     });
     setIsRecipeModalOpen(true);
   };
@@ -181,7 +191,8 @@ export default function AdminRecipes() {
       difficulty: 'easy',
       isPublic: true,
       recipeTagIds: [],
-      ingredients: [{ ingredient_id: '', quantity: 0, uom: 'g' }]
+      account_id: '',
+      ingredients: [{ ingredient_id: '', quantity: 0, uom: 'g', isPrimary: false }]
     });
   };
 
@@ -194,7 +205,7 @@ export default function AdminRecipes() {
   const handleAddIngredientRow = () => {
     setRecipeFormData({
       ...recipeFormData,
-      ingredients: [...recipeFormData.ingredients, { ingredient_id: '', quantity: 0, uom: 'g' }]
+      ingredients: [...recipeFormData.ingredients, { ingredient_id: '', quantity: 0, uom: 'g', isPrimary: false }]
     });
   };
 
@@ -502,6 +513,15 @@ export default function AdminRecipes() {
                             onChange={(e) => handleIngredientChange(index, 'uom', e.target.value)}
                             placeholder="g, cup..."
                             required
+                          />
+                        </div>
+                        <div className="form-group mb-0" style={{ minWidth: '70px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <label className="form-label-sm" style={{ marginBottom: '6px' }}>Primary?</label>
+                          <input
+                            type="checkbox"
+                            checked={!!ing.isPrimary}
+                            onChange={(e) => handleIngredientChange(index, 'isPrimary', e.target.checked)}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#22c55e' }}
                           />
                         </div>
                         <button 

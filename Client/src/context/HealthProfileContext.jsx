@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
-import { getLockedIngredientsForProfile, calculateDailyTargets, HEALTH_CONDITION_RULES } from '../utils/healthRules';
+import { getLockedIngredientsForProfile, calculateDailyTargets, HEALTH_CONDITION_RULES, GOAL_RULES } from '../utils/healthRules';
 import { calculateHealthScore } from '../utils/healthScoreEngine';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { useAuth } from './AuthContext';
@@ -34,7 +34,8 @@ export function HealthProfileProvider({ children }) {
     }
 
     const conditions = profile.conditions || [];
-    const locked = getLockedIngredientsForProfile(conditions);
+    const goal = profile.goal;
+    const locked = getLockedIngredientsForProfile(conditions, goal);
     setLockedIngredients(locked);
 
     const reducedSet = new Set();
@@ -44,6 +45,9 @@ export function HealthProfileProvider({ children }) {
         rules.reducedIngredients.forEach(ing => reducedSet.add(ing));
       }
     });
+    if (goal && GOAL_RULES[goal] && GOAL_RULES[goal].reducedIngredients) {
+      GOAL_RULES[goal].reducedIngredients.forEach(ing => reducedSet.add(ing));
+    }
     setReducedIngredients(Array.from(reducedSet));
 
     const preferredSet = new Set();
@@ -53,11 +57,12 @@ export function HealthProfileProvider({ children }) {
         rules.preferredIngredients.forEach(ing => preferredSet.add(ing));
       }
     });
+    if (goal && GOAL_RULES[goal] && GOAL_RULES[goal].preferredIngredients) {
+      GOAL_RULES[goal].preferredIngredients.forEach(ing => preferredSet.add(ing));
+    }
     setPreferredIngredients(Array.from(preferredSet));
 
-    const bmiLevel = profile.bmiLevel || 'normal';
-    const goal = profile.goal || 'maintain';
-    const budget = calculateDailyTargets(bmiLevel, goal, conditions);
+    const budget = calculateDailyTargets(profile);
     setDailyCalorieBudget(budget.calories);
     setDailyTargets(budget);
   }, []);

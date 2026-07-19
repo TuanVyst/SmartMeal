@@ -33,6 +33,7 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Accept any casing from client (camelCase, PascalCase, snake_case)
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
@@ -152,10 +153,6 @@ builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.
 // BmiLog
 builder.Services.AddScoped<Repository.Interfaces.IBmiLogRepo, Repository.Implements.BmiLogRepo>();
 builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements.BmiLogService>();
-
-// Feedback
-builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
-builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
 
 // Plan
 builder.Services.AddScoped<Repository.Interfaces.IPlanRepo, Repository.Implements.PlanRepo>();

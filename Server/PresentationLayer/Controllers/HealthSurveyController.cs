@@ -154,12 +154,14 @@ namespace PresentationLayer.Controllers
                     Account_id = accountId,
                     Height = request.Height ?? 0,
                     Weight = request.Weight ?? 0,
+                    TargetWeight = request.TargetWeight,
+                    TargetWeeks = request.TargetWeeks ?? 12,
                     Goal = request.Goal ?? "maintain",
                     DateOfBirth = request.Age.HasValue
                         ? DateTime.UtcNow.AddYears(-request.Age.Value)
                         : DateTime.UtcNow,
                     Gender = request.Gender ?? "Khác",
-                    ActivityLevel = "moderate",
+                    ActivityLevel = request.ActivityLevel ?? "sedentary",
                 };
 
                 var existing = await _healthProfileService.GetHealthProfileByAccountId(accountId);
@@ -236,9 +238,12 @@ namespace PresentationLayer.Controllers
                         profile.Account_id,
                         profile.Height,
                         profile.Weight,
+                        profile.TargetWeight,
+                        profile.TargetWeeks,
                         profile.Goal,
                         profile.Gender,
                         profile.DateOfBirth,
+                        profile.ActivityLevel,
                         bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
                         conditions = conditionNames,
                         allergies = allergyNames
@@ -272,9 +277,12 @@ namespace PresentationLayer.Controllers
                         profile.Account_id,
                         profile.Height,
                         profile.Weight,
+                        profile.TargetWeight,
+                        profile.TargetWeeks,
                         profile.Goal,
                         profile.Gender,
                         profile.DateOfBirth,
+                        profile.ActivityLevel,
                         bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
                         conditions = conditionNames,
                         allergies = allergyNames
@@ -302,12 +310,14 @@ namespace PresentationLayer.Controllers
                     Account_id = accountId,
                     Height = request.Height ?? existing.Height ?? 0,
                     Weight = request.Weight ?? existing.Weight ?? 0,
+                    TargetWeight = request.TargetWeight,
+                    TargetWeeks = request.TargetWeeks,
                     Goal = request.Goal ?? existing.Goal ?? "maintain",
                     DateOfBirth = request.Age.HasValue
                         ? DateTime.UtcNow.AddYears(-request.Age.Value)
                         : existing.DateOfBirth ?? DateTime.UtcNow,
                     Gender = request.Gender ?? existing.Gender ?? "Khác",
-                    ActivityLevel = "moderate",
+                    ActivityLevel = request.ActivityLevel ?? existing.ActivityLevel ?? "sedentary",
                 };
 
                 var profile = await _healthProfileService.UpdateHealthProfile(existing.Profile_id, profileRequest);
@@ -425,9 +435,12 @@ namespace PresentationLayer.Controllers
                         profile.Account_id,
                         profile.Height,
                         profile.Weight,
+                        profile.TargetWeight,
+                        profile.TargetWeeks,
                         profile.Goal,
                         profile.Gender,
                         profile.DateOfBirth,
+                        profile.ActivityLevel,
                         bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
                         conditions = conditionNames,
                         allergies = allergyNames
@@ -482,11 +495,14 @@ namespace PresentationLayer.Controllers
     {
         public double? Height { get; set; }
         public double? Weight { get; set; }
+        public double? TargetWeight { get; set; }
+        public int? TargetWeeks { get; set; }
         public int? Age { get; set; }
         public string? Gender { get; set; }
         public List<string>? Conditions { get; set; }
         public List<string>? Allergies { get; set; }
         public string? Goal { get; set; }
         public string? BmiLevel { get; set; }
+        public string? ActivityLevel { get; set; }
     }
 }
