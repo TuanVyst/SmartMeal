@@ -26,6 +26,8 @@ namespace BusinessObject.Entities
         public double? Cholesterol { get; set; }
         public double? ServingSize { get; set; }
         public string? ServingUnit { get; set; }
+        public string? EverydayUnit { get; set; }
+        public double? EverydayWeight { get; set; }
 
         public bool IsDeleted { get; set; } = false;
 

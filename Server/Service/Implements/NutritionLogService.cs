@@ -1,5 +1,6 @@
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Entities;
+using BusinessObject.Helpers;
 using Repository.Interfaces;
 using Service.Interfaces;
 using System;
@@ -119,7 +120,14 @@ namespace Service.Implements
 
                     if (ingredient?.Nutritional_value != null)
                     {
-                        var multiplier = (entity.Quantity ?? 100.0) / (ingredient.Nutritional_value.ServingSize ?? 100.0);
+                        var multiplier = UnitConverter.GetMultiplier(
+                            entity.Quantity ?? 100.0,
+                            entity.Unit,
+                            ingredient.Nutritional_value.ServingSize ?? 100.0,
+                            ingredient.Nutritional_value.ServingUnit,
+                            ingredient.Name,
+                            ingredient.Nutritional_value.EverydayWeight
+                        );
                         if (multiplier <= 0) multiplier = 1.0;
 
                         entity.TotalCalories = ingredient.Nutritional_value.Calories * multiplier;
@@ -152,7 +160,14 @@ namespace Service.Implements
                     {
                         if (ri.Ingredient?.Nutritional_value != null)
                         {
-                            var multiplier = (ri.Quantity) / (ri.Ingredient.Nutritional_value.ServingSize ?? 100.0);
+                            var multiplier = UnitConverter.GetMultiplier(
+                                ri.Quantity,
+                                ri.UOM,
+                                ri.Ingredient.Nutritional_value.ServingSize ?? 100.0,
+                                ri.Ingredient.Nutritional_value.ServingUnit,
+                                ri.Ingredient.Name,
+                                ri.Ingredient.Nutritional_value.EverydayWeight
+                            );
                             if (multiplier <= 0) multiplier = 1.0;
 
                             totalCal += ri.Ingredient.Nutritional_value.Calories * multiplier;

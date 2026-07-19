@@ -22,6 +22,10 @@ export default function AdminIngredients() {
     sugar: 0,
     sodium: 0,
     cholesterol: 0,
+    servingSize: 100,
+    servingUnit: 'g',
+    everydayUnit: '',
+    everydayWeight: '',
     ingredientTagIds: []
   });
   const [editingIngredient, setEditingIngredient] = useState(null);
@@ -63,7 +67,11 @@ export default function AdminIngredients() {
           fiber: ingredientFormData.fiber,
           sugar: ingredientFormData.sugar,
           sodium: ingredientFormData.sodium,
-          cholesterol: ingredientFormData.cholesterol
+          cholesterol: ingredientFormData.cholesterol,
+          servingSize: ingredientFormData.servingSize,
+          servingUnit: ingredientFormData.servingUnit,
+          everydayUnit: ingredientFormData.everydayUnit || null,
+          everydayWeight: ingredientFormData.everydayWeight ? parseFloat(ingredientFormData.everydayWeight) : null
         }
       };
 
@@ -101,6 +109,10 @@ export default function AdminIngredients() {
       sugar: ingredient.nutritional_value?.sugar || 0,
       sodium: ingredient.nutritional_value?.salt || ingredient.nutritional_value?.sodium || 0,
       cholesterol: ingredient.nutritional_value?.cholesterol || 0,
+      servingSize: ingredient.nutritional_value?.servingSize || 100,
+      servingUnit: ingredient.nutritional_value?.servingUnit || 'g',
+      everydayUnit: ingredient.nutritional_value?.everydayUnit || '',
+      everydayWeight: ingredient.nutritional_value?.everydayWeight || '',
       ingredientTagIds: tagIds
     });
     setIsIngredientModalOpen(true);
@@ -132,6 +144,10 @@ export default function AdminIngredients() {
       sugar: 0,
       sodium: 0,
       cholesterol: 0,
+      servingSize: 100,
+      servingUnit: 'g',
+      everydayUnit: '',
+      everydayWeight: '',
       ingredientTagIds: []
     });
   };
@@ -357,6 +373,47 @@ export default function AdminIngredients() {
                     type="number" className="form-control"
                     value={ingredientFormData.cholesterol}
                     onChange={(e) => setIngredientFormData({ ...ingredientFormData, cholesterol: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                  />
+                </div>
+              </div>
+
+              <hr />
+              <h4 style={{ marginBottom: '1rem', marginTop: '1rem' }}>Cấu hình Quy đổi Đơn vị Thường ngày & Khẩu phần</h4>
+              <div className="form-grid-3" style={{ marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Cỡ khẩu phần (Serving Size)</label>
+                  <input
+                    type="number" className="form-control"
+                    value={ingredientFormData.servingSize}
+                    placeholder="Ví dụ: 100, 1, 3..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingSize: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Đơn vị khẩu phần (Serving Unit)</label>
+                  <input
+                    type="text" className="form-control"
+                    value={ingredientFormData.servingUnit}
+                    placeholder="Ví dụ: g, ml, quả, tép..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingUnit: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Đơn vị thường ngày (Everyday Unit)</label>
+                  <input
+                    type="text" className="form-control"
+                    value={ingredientFormData.everydayUnit}
+                    placeholder="Ví dụ: quả, chén, bó..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayUnit: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Trọng lượng quy đổi tương đương (g)</label>
+                  <input
+                    type="number" className="form-control"
+                    value={ingredientFormData.everydayWeight}
+                    placeholder="Ví dụ: 50, 150, 3..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayWeight: e.target.value ? parseFloat(e.target.value) : '' })} min="0" step="0.1"
                   />
                 </div>
               </div>
