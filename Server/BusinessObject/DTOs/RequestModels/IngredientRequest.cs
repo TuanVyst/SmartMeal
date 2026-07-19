@@ -22,6 +22,10 @@ namespace BusinessObject.Dtos.RequestModels
         public double Sugar { get; set; } = 0;
         public double Sodium { get; set; } = 0;
         public double Cholesterol { get; set; } = 0;
+        public double? ServingSize { get; set; }
+        public string? ServingUnit { get; set; }
+        public string? EverydayUnit { get; set; }
+        public double? EverydayWeight { get; set; }
     }
 }
 

@@ -17,7 +17,6 @@ import IngredientDetail from '../pages/food/IngredientDetail';
 import LandingPage from '../pages/landing/LandingPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/AdminUsers';
-import AdminMeals from '../pages/admin/AdminMeals';
 import AdminIngredientTags from '../pages/admin/AdminIngredientTags';
 import AdminIngredients from '../pages/admin/AdminIngredients';
 import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
@@ -79,7 +78,6 @@ export default function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="meals" element={<AdminMeals />} />
         <Route path="ingredient-tags" element={<AdminIngredientTags />} />
         <Route path="ingredients" element={<AdminIngredients />} />
         <Route path="recipe-tags" element={<AdminRecipeTags />} />
