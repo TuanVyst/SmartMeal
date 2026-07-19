@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiGrid, FiUsers, FiTag, FiLogOut, FiMenu, FiX, FiShoppingBag, FiAward, FiHeart } from 'react-icons/fi';
+import { FiGrid, FiUsers, FiTag, FiLogOut, FiMenu, FiX, FiShoppingBag, FiAward, FiHeart, FiMessageSquare } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 import './AdminSidebar.css';
