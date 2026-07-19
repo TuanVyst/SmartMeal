@@ -17,8 +17,9 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   position: sticky;
-  top: 88px; /* Offset for main navigation header */
-  max-height: calc(100vh - 120px);
+  top: 1rem;
+  align-self: flex-start;
+  max-height: calc(100vh - 64px - 2rem);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -76,7 +77,7 @@
 
 .sidebar-tab-btn.active {
   background-color: #ffffff;
-  color: #16a34a;
+  color: #333;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
 }
 
@@ -94,6 +95,140 @@
 
 .tab-info-text p {
   margin: 0;
+}
+
+/* Shared Ingredient Search Bar (below tabs) */
+.ingredient-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.ingredient-search-bar:focus-within {
+  border-color: #444;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+.ingredient-search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  color: #1e293b;
+}
+.ingredient-search-bar input::placeholder {
+  color: #94a3b8;
+}
+.ingredient-search-bar svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+.ingredient-search-clear {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+.ingredient-search-clear:hover {
+  color: #64748b;
+}
+.ingredient-search-empty {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  padding: 2rem 0;
+}
+
+/* Pantry Mode Switcher */
+.pantry-mode-switcher {
+  display: flex;
+  margin-top: 12px;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.mode-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  color: #1e293b;
+}
+
+.mode-btn.active {
+  background-color: #ffffff;
+  color: #22c55e;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Ingredient Search Dropdown */
+.ingredient-search-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredient-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 20;
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.dropdown-item {
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-item:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #22c55e;
+}
+
+.dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Category Scrolling and Groups */
@@ -164,7 +299,7 @@
 
 .ing-pill.pantry-pill.selected:hover {
   background-color: #bbf7d0;
-  border-color: #4ade80;
+  border-color: #555;
 }
 
 /* Allergy Selected State */
@@ -201,6 +336,66 @@
   font-weight: 400;
 }
 
+/* Cooking Method Section */
+.cooking-method-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cooking-method-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cooking-chip {
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cooking-chip:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cooking-chip.active {
+  background-color: #dcfce7;
+  border-color: #22c55e;
+  color: #16a34a;
+}
+
+.chip-emoji {
+  font-size: 1rem;
+}
+
+.recipe-count-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 2px;
+}
+
+.cooking-chip.active .recipe-count-badge {
+  background: #bbf7d0;
+  color: #15803d;
+}
+
 /* Right Main Section */
 .suggestions-main-content {
   flex: 1;
@@ -215,6 +410,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 1rem;
 }
@@ -234,6 +430,38 @@
   margin-top: 4px;
 }
 
+.suggestions-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  flex: 0 1 280px;
+}
+.suggestions-search-bar:focus-within {
+  border-color: #444;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+.suggestions-search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  color: #1e293b;
+}
+.suggestions-search-bar input::placeholder {
+  color: #94a3b8;
+}
+.suggestions-search-bar svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
 .allergy-toggle-checkbox {
   display: flex;
   align-items: center;
@@ -248,7 +476,7 @@
 .allergy-toggle-checkbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #16a34a;
+  accent-color: #333;
   cursor: pointer;
   border-radius: 4px;
 }
@@ -313,7 +541,7 @@
 
 .empty-suggestions-card .empty-warn-icon {
   font-size: 3.5rem;
-  color: #eab308;
+  color: #888;
 }
 
 .empty-suggestions-card p {
@@ -322,6 +550,28 @@
   max-width: 480px;
   line-height: 1.6;
   margin: 0;
+}
+
+.no-recipe-found-message {
+  font-size: 1.1rem !important;
+  color: #334155;
+}
+
+.clear-search-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #475569;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-search-btn:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
 }
 
 /* Suggestion Alert Banner */

@@ -12,6 +12,27 @@ const RECIPE_IMAGE_ALIASES = {
   'cá chiên sả ớt': 'cá diêu hồng chiên xả ớt.jpg',
   'canh chua chay': 'Canh chua cá lóc.jpg',
   'cơm chiên dương châu chay': 'Cơm chiên Dương Châu chay.jpg',
+  '💚 trứng chiên lá mơ lông': 'trung-chien-la-mo-long.jpg',
+  'bánh tổ chiên trứng gà': 'banh-to-chien-trung-ga.jpg',
+  'trứng chiên cá hộp': 'trung-chien-ca-hop.jpg',
+  'burrito trứng': 'burrito-trung.jpg',
+  'trứng chần không dùng giấm': 'trung-chan-khong-dung-giam.jpg',
+  'trứng gà ngâm tương': 'trung-ga-ngam-tuong.jpg',
+  'trứng cuộn hàn quốc': 'trung-cuon-han-quoc.jpg',
+  'cá hộp chưng trứng thịt băm': 'ca-hop-chung-trung-thit-bam.jpg',
+  'trứng chiên lá lốt': 'trung-chien-la-lot.jpg',
+  'trứng đúc thịt hấp nồi cơm': 'trung-duc-thit-hap-noi-com.jpg',
+  'thịt xay rim trứng': 'thit-xay-rim-trung.jpg',
+  'trứng sốt cay': 'trung-sot-cay.jpg',
+  'trứng rim cà chua nấm': 'trung-rim-ca-chua-nam.jpg',
+  'sườn cánh buồm kho trứng': 'suon-canh-buom-kho-trung.jpg',
+  'trứng sốt nước mắm tỏi ớt': 'trung-sot-nuoc-mam-toi-ot.jpg',
+  'trứng chiên hàu': 'trung-chien-hau.jpg',
+  'sandwich trứng phô mai': 'sandwich-trung-pho-mai.jpg',
+  'trứng bọc thịt chiên xù': 'trung-boc-thit-chien-xu.jpg',
+  'trứng cuộn rong biển': 'trung-cuon-rong-bien.jpg',
+  'trứng chưng cà chua hành tây': 'trung-chung-ca-chua-hanh-tay.jpg',
+  'canh trứng cà chua': 'canh-trung-ca-chua.jpg',
 };
 
 const RECIPE_IMAGE_FILES = [
@@ -72,7 +93,12 @@ export function resolveRecipeImageUrl(recipeName) {
   if (LAU_RECIPES.has(normalizedName)) return FALLBACK_MEAL_IMAGE;
 
   const aliasFilename = RECIPE_IMAGE_ALIASES[normalizedName];
-  if (aliasFilename) return buildRecipeImageUrl(aliasFilename);
+  if (aliasFilename) {
+    if (aliasFilename.startsWith('http://') || aliasFilename.startsWith('https://')) {
+      return aliasFilename;
+    }
+    return buildRecipeImageUrl(aliasFilename);
+  }
 
   const directFilename = filenameByLowerTitle.get(normalizedName);
   if (directFilename) return buildRecipeImageUrl(directFilename);

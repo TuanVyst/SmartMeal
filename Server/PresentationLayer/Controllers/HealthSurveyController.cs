@@ -45,9 +45,20 @@ namespace PresentationLayer.Controllers
             return Guid.Parse(claim.Value);
         }
 
+        // Frontend key -> search keyword used to match DB record name
+        private static readonly Dictionary<string, string> ConditionKeywordMap = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "diabetes",     "tiểu đường" },
+            { "hypertension", "huyết áp" },
+            { "cholesterol",  "cholesterol" },
+            { "heartDisease", "tim mạch" },
+            { "gerd",         "dạ dày" },
+            { "gout",         "gout" },
+        };
+
         private async Task<List<string>> GetUserConditionNames(Guid accountId)
         {
-            return await _ctx.UserConditions
+            var dbNames = await _ctx.UserConditions
                 .Where(uc => uc.Account_id == accountId && !uc.IsDeleted)
                 .Join(_ctx.MedicalConditions,
                     uc => uc.Condition_id,
@@ -55,6 +66,23 @@ namespace PresentationLayer.Controllers
                     (uc, mc) => mc.Name)
                 .Where(name => name != null)
                 .ToListAsync();
+
+            // Map DB names back to frontend keys
+            var keys = new List<string>();
+            foreach (var name in dbNames)
+            {
+                var lowerName = name.ToLower();
+                foreach (var kvp in ConditionKeywordMap)
+                {
+                    if (lowerName.Contains(kvp.Value.ToLower()))
+                    {
+                        if (!keys.Contains(kvp.Key))
+                            keys.Add(kvp.Key);
+                        break;
+                    }
+                }
+            }
+            return keys;
         }
 
         private async Task<List<string>> GetUserAllergyNames(Guid accountId)
@@ -103,10 +131,36 @@ namespace PresentationLayer.Controllers
                 if (request.Conditions != null && request.Conditions.Count > 0)
                 {
                     var allConditions = await _medicalConditionService.GetAllMedicalConditions();
-                    foreach (var conditionName in request.Conditions)
+                    foreach (var conditionKey in request.Conditions)
                     {
+                        var searchKeyword = ConditionKeywordMap.TryGetValue(conditionKey, out var kw) ? kw : conditionKey;
                         var matched = allConditions.FirstOrDefault(c =>
-                            c.Name != null && c.Name.Contains(conditionName, StringComparison.OrdinalIgnoreCase));
+                            c.Name != null && c.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                            
+                        if (matched == null)
+                        {
+                            string dbName = conditionKey switch
+                            {
+                                "diabetes" => "Tiểu đường type 2",
+                                "hypertension" => "Huyết áp cao",
+                                "cholesterol" => "Cholesterol cao",
+                                "heartDisease" => "Bệnh tim mạch",
+                                "gerd" => "Dạ dày / Trào ngược axit",
+                                "gout" => "Gout",
+                                _ => conditionKey
+                            };
+                            
+                            matched = new MedicalCondition 
+                            { 
+                                Condition_id = Guid.NewGuid(), 
+                                Name = dbName, 
+                                Category = "Bệnh lý nền" 
+                            };
+                            _ctx.MedicalConditions.Add(matched);
+                            await _ctx.SaveChangesAsync();
+                            allConditions.Add(matched);
+                        }
+
                         if (matched != null)
                         {
                             await _userConditionService.CreateUserCondition(new UserConditionRequest
@@ -223,10 +277,36 @@ namespace PresentationLayer.Controllers
 
                 if (request.Conditions != null && request.Conditions.Count > 0)
                 {
-                    foreach (var conditionName in request.Conditions)
+                    foreach (var conditionKey in request.Conditions)
                     {
+                        var searchKeyword = ConditionKeywordMap.TryGetValue(conditionKey, out var kw2) ? kw2 : conditionKey;
                         var matched = allConditions.FirstOrDefault(c =>
-                            c.Name != null && c.Name.Contains(conditionName, StringComparison.OrdinalIgnoreCase));
+                            c.Name != null && c.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                            
+                        if (matched == null)
+                        {
+                            string dbName = conditionKey switch
+                            {
+                                "diabetes" => "Tiểu đường type 2",
+                                "hypertension" => "Huyết áp cao",
+                                "cholesterol" => "Cholesterol cao",
+                                "heartDisease" => "Bệnh tim mạch",
+                                "gerd" => "Dạ dày / Trào ngược axit",
+                                "gout" => "Gout",
+                                _ => conditionKey
+                            };
+                            
+                            matched = new MedicalCondition 
+                            { 
+                                Condition_id = Guid.NewGuid(), 
+                                Name = dbName, 
+                                Category = "Bệnh lý nền" 
+                            };
+                            _ctx.MedicalConditions.Add(matched);
+                            await _ctx.SaveChangesAsync();
+                            allConditions.Add(matched);
+                        }
+
                         if (matched != null)
                         {
                             await _userConditionService.CreateUserCondition(new UserConditionRequest

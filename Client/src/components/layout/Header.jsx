@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { IoLogOut } from 'react-icons/io5';
 import { FaUser } from 'react-icons/fa';
-import { FiSearch, FiBell, FiChevronDown } from 'react-icons/fi';
+import { FiBell, FiChevronDown } from 'react-icons/fi';
 import './Header.css';
 
 export default function Header() {
   const { user, logout }  = useAuth();
   const navigate          = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchValue, setSearchValue]       = useState('');
   const dropdownRef = useRef(null);
 
   const handleLogout = () => {
@@ -36,32 +35,13 @@ export default function Header() {
   const displayName = user?.username || 'Bạn';
   const initials    = displayName.charAt(0).toUpperCase();
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter' && searchValue.trim()) {
-      navigate(`/meal-suggestions?q=${encodeURIComponent(searchValue.trim())}`);
-      setSearchValue('');
-    }
-  };
-
   return (
     <header className="main-header">
-      {/* ── Search Bar ── */}
-      <div className="header-search">
-        <FiSearch className="header-search-icon" size={16} />
-        <input
-          type="text"
-          placeholder="Tìm kiếm món ăn, nguyên liệu..."
-          value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
-          onKeyDown={handleSearch}
-        />
-      </div>
-
       {/* ── Right Controls ── */}
       <div className="header-right">
         {/* Notification Bell */}
         <button className="header-notif-btn" title="Thông báo">
-          <FiBell size={50} />
+          <FiBell size={20} />
           <span className="header-notif-dot" />
         </button>
 

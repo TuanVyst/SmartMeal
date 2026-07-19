@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function AdminMeals() {
+  const dialog = useDialog();
   const [meals, setMeals] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -19,14 +21,14 @@ export default function AdminMeals() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này không?')) {
-      try {
-        await adminService.deleteMeal(id);
-        fetchMeals();
-      } catch (error) {
-        console.error(error);
-        alert('Có lỗi xảy ra khi xóa');
-      }
+    const ok = await dialog.confirm({ title: 'Xóa món ăn?', message: 'Bạn có chắc chắn muốn xóa món ăn này không?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
+    try {
+      await adminService.deleteMeal(id);
+      fetchMeals();
+    } catch (error) {
+      console.error(error);
+      dialog.error('Lỗi', 'Có lỗi xảy ra khi xóa');
     }
   };
 
@@ -85,7 +87,7 @@ export default function AdminMeals() {
                   </span>
                 </td>
                 <td>
-                  <button className="action-btn edit" onClick={() => alert('Vui lòng qua trang Manage Recipes (AdminRecipes) để chỉnh sửa đầy đủ chi tiết.')}>Sửa</button>
+                  <button className="action-btn edit" onClick={() => dialog.info('Chỉnh sửa', 'Vui lòng qua trang Manage Recipes (AdminRecipes) để chỉnh sửa đầy đủ chi tiết.')}>Sửa</button>
                   <button className="action-btn delete" onClick={() => handleDelete(meal.recipe_id || meal.id)}>Xóa</button>
                 </td>
               </tr>

@@ -35,6 +35,9 @@ namespace Service.Implements
                 TargetCarbs = request.TargetCarbs,
                 TargetFat = request.TargetFat,
                 TargetFiber = request.TargetFiber,
+                TargetSugar = request.TargetSugar,
+                TargetSalt = request.TargetSalt,
+                TargetCholesterol = request.TargetCholesterol,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
@@ -55,6 +58,9 @@ namespace Service.Implements
             entity.TargetCarbs = request.TargetCarbs;
             entity.TargetFat = request.TargetFat;
             entity.TargetFiber = request.TargetFiber;
+            entity.TargetSugar = request.TargetSugar;
+            entity.TargetSalt = request.TargetSalt;
+            entity.TargetCholesterol = request.TargetCholesterol;
 
             return await _nutritionGoalRepo.UpdateNutritionGoal(entity);
         }

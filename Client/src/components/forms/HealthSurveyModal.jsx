@@ -1,10 +1,10 @@
-import { useReducer, useMemo, useState } from 'react';
+import { useReducer, useMemo } from 'react';
 import { calculateBMI } from '../../utils/bmiCalculator';
 import { getLockedIngredientsForProfile, getDailyCalorieBudget } from '../../utils/healthRules';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiLock } from 'react-icons/fi';
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
 
 const initialState = {
   step: 1,
@@ -93,7 +93,7 @@ function validateStep(step, formData) {
       if (isNaN(formData.age) || Number(formData.age) <= 0 || Number(formData.age) > 150) return 'Tuổi không hợp lệ';
       return '';
     }
-    case 4:
+    case 3:
       if (!formData.goal) return 'Vui lòng chọn mục tiêu dinh dưỡng';
       return '';
     default:
@@ -158,7 +158,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { step, formData, error, submitting } = state;
   const { height, weight, age, gender, conditions, allergies, goal } = formData;
-  const [customInput, setCustomInput] = useState('');
 
   const bmiResult = useMemo(() => {
     if (height && weight && Number(height) > 0 && Number(weight) > 0) {
@@ -217,14 +216,8 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
     }
   };
 
-  const handleAddCustomAllergy = () => {
-    const val = customInput.trim();
-    if (!val || allergies.includes(val)) return;
-    dispatch({ type: 'TOGGLE_ALLERGY', value: val });
-    setCustomInput('');
-  };
 
-  const stepTitles = ['Thông tin cơ bản', 'Tình trạng sức khoẻ', 'Dị ứng & Không dung nạp', 'Mục tiêu dinh dưỡng', 'Tổng kết'];
+  const stepTitles = ['Thông tin cơ bản', 'Tình trạng sức khoẻ', 'Mục tiêu dinh dưỡng', 'Tổng kết'];
 
   const renderStep = () => {
     switch (step) {
@@ -323,86 +316,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
         return (
           <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
-              Dị ứng & Không dung nạp
-            </h3>
-            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
-              Chọn thực phẩm bạn bị dị ứng hoặc không dung nạp
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-              {allergyTags.map(tag => {
-                const selected = allergies.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => dispatch({ type: 'TOGGLE_ALLERGY', value: tag })}
-                    style={{
-                      padding: '8px 16px', borderRadius: 20, border: `2px solid ${selected ? '#ef4444' : '#e2e8f0'}`,
-                      background: selected ? '#fef2f2' : 'transparent',
-                      color: selected ? '#dc2626' : '#475569', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="text"
-                value={customInput}
-                onChange={e => setCustomInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomAllergy(); } }}
-                placeholder="Thêm nguyên liệu khác..."
-                style={{
-                  flex: 1, padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8,
-                  fontSize: 14, outline: 'none',
-                }}
-                onFocus={e => e.target.style.borderColor = '#22C55E'}
-                onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-              />
-              <button
-                type="button"
-                onClick={handleAddCustomAllergy}
-                style={{
-                  padding: '10px 20px', background: '#22C55E', color: 'white', border: 'none',
-                  borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap',
-                }}
-              >
-                Thêm
-              </button>
-            </div>
-            {allergies.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 8 }}>Đã chọn ({allergies.length}):</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {allergies.map(a => (
-                    <span key={a} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
-                      borderRadius: 16, fontSize: 12, fontWeight: 500,
-                    }}>
-                      {a}
-                      <button
-                        type="button"
-                        onClick={() => dispatch({ type: 'TOGGLE_ALLERGY', value: a })}
-                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-
-      case 4:
-        return (
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
               Mục tiêu dinh dưỡng
             </h3>
             <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
@@ -429,7 +342,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
           </div>
         );
 
-      case 5:
+      case 4:
         return (
           <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
@@ -474,23 +387,11 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
                   </div>
                 </div>
               )}
-              {allergies.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                  <span style={{ fontSize: 14, color: '#64748b', display: 'block', marginBottom: 8 }}>
-                    Dị ứng ({allergies.length})
-                  </span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {allergies.map(a => (
-                      <span key={a} style={{
-                        padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
-                        borderRadius: 12, fontSize: 12, fontWeight: 500,
-                      }}>
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+                <p style={{ fontSize: 12, color: '#16a34a', margin: 0 }}>
+                  💡 Bạn có thể cập nhật thông tin dị ứng thực phẩm trong <strong>Hồ sơ sức khoẻ</strong> sau khi hoàn thành.
+                </p>
+              </div>
             </div>
           </div>
         );

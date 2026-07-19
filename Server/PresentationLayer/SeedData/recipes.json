@@ -1,10 +1,656 @@
 [
   {
-    "Recipe_name": "Bánh mì trứng ốp la",
-    "Description": "Bánh mì giòn rụm kẹp trứng ốp la béo ngậy, thêm rau sống và nước mắm chua ngọt. Món ăn sáng nhanh gọn đầy năng lượng.",
-    "Instruction": "1. Cắt bánh mì theo chiều dài, phết bơ lên mặt trong.\n2. Chiên trứng ốp la với dầu ăn, giữ lòng đào còn chảy.\n3. Cà chua cắt lát, dưa chuột cắt sợi, rau mùi rửa sạch.\n4. Xếp trứng ốp la, cà chua, dưa chuột, rau mùi vào bánh mì.\n5. Pha nước mắm chua ngọt: nước mắm, đường, chanh, tỏi băm.\n6. Rưới nước mắm lên bánh mì, rắc thêm ớt tươi nếu thích.",
-    "CookTime": 5,
+    "Recipe_name": "💚 Trứng Chiên Lá Mơ Lông",
+    "Description": "Món trứng chiên lá mơ lông dân dã, thơm ngon và rất bổ dưỡng cho gia đình.",
+    "Instruction": "1. Đập trứng vào tô, thêm lá mơ lông rửa sạch cắt nhỏ và gia vị rồi khuấy đều.\n2. Làm nóng chảo, cho ít dầu ăn vào rán chín vàng đều hai mặt.\n3. Rắc mè rang lên trên rồi cuộn lại và cắt miếng vừa ăn.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Lá mơ lông",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh",
+      "Lành mạnh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên cá hộp",
+    "Description": "Trứng chiên hòa quyện với vị béo ngọt của cá hộp, là món ngon nhanh gọn cho bữa cơm.",
+    "Instruction": "1. Dằm nhỏ cá nục sốt cà trong tô rồi trộn đều với trứng gà, thịt xay và hành lá cắt nhỏ.\n2. Nêm hạt nêm và tiêu xay vừa ăn.\n3. Cho dầu vào chảo chiên lửa nhỏ hai mặt chín vàng đều.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cá nục sốt cà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 100,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Burrito Trứng",
+    "Description": "Bánh cuộn Burrito kiểu Mexico thơm ngon với nhân trứng gà béo ngậy, bắp cải tím và dưa leo tươi mát.",
+    "Instruction": "1. Bắp cải tím và dưa leo cắt sợi mỏng.\n2. Trứng gà đánh tan rồi khuấy chín mềm trên chảo.\n3. Trải vỏ bánh tortilla, xếp nhân và cuộn chặt áp chảo nhẹ cho nóng giòn vỏ bánh.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Vỏ bánh tortilla",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Bắp cải tím",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Lá xà lách",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Ớt chuông",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dưa leo",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Sốt guacamole",
+        "Quantity": 1,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Lành mạnh"
+    ]
+  },
+  {
+    "Recipe_name": "Bánh Tổ Chiên Trứng Gà",
+    "Description": "Bánh tổ ngọt dẻo chiên cùng trứng gà béo bùi, mang hương vị tết ấm áp, truyền thống.",
+    "Instruction": "1. Bánh tổ cắt lát mỏng vừa ăn.\n2. Nhúng lát bánh tổ ngập vào bát trứng gà đánh tan.\n3. Cho bánh tổ vào chảo dầu nóng chiên vàng đều hai mặt rồi gắp ra đĩa.",
+    "CookTime": 15,
     "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bánh tổ người hoa",
+        "Quantity": 200,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Tráng miệng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng gà ngâm tương",
+    "Description": "Trứng gà lòng đào ngâm nước tương ngọt thơm, dẻo bùi, ăn kèm cơm nóng cực ngon.",
+    "Instruction": "1. Luộc trứng gà lòng đào 6 phút rồi bóc vỏ.\n2. Nấu hỗn hợp nước tương, nước lọc, đường, tỏi, hành tím và ớt cắt lát.\n3. Cho trứng vào hộp, rưới nước tương ngập trứng rồi cất tủ lạnh qua đêm.",
+    "CookTime": 10,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "medium",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 6,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 100,
+        "UOM": "ml"
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 2,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Hấp dẫn"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng cuộn Hàn Quốc",
+    "Description": "Món trứng cuộn hành lá và cà rốt băm kiểu Hàn Quốc thơm ngon, đẹp mắt cho bữa sáng.",
+    "Instruction": "1. Đánh tan trứng gà với hành lá băm, cà rốt băm nhỏ và ít muối tiêu.\n2. Đổ một lớp trứng mỏng lên chảo, cuộn tròn lại khi hơi đông.\n3. Đổ tiếp lớp trứng khác nối liền rồi cuộn tiếp cho đến hết.",
+    "CookTime": 15,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Cà rốt",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Đẹp mắt"
+    ]
+  },
+  {
+    "Recipe_name": "Cá Hộp Chưng Trứng Thịt Băm",
+    "Description": "Cá hộp chưng thịt băm và trứng thơm béo, đậm đà đưa cơm cho ngày bận rộn.",
+    "Instruction": "1. Trộn đều thịt heo xay, cá hộp dằm nhỏ, trứng gà, hành tím và gia vị vào tô chịu nhiệt.\n2. Đập thêm 1 quả trứng lên mặt để tạo lòng đỏ đẹp.\n3. Hấp cách thủy 20-25 phút cho đến khi chín hoàn toàn.",
+    "CookTime": 25,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cá nục sốt cà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 2,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Đậm đà"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên lá lốt",
+    "Description": "Sự kết hợp độc đáo giữa trứng gà béo ngậy và hương thơm đặc trưng của lá lốt.",
+    "Instruction": "1. Lá lốt rửa sạch cắt sợi mỏng.\n2. Đánh trứng gà với lá lốt cắt sợi, hạt nêm, tiêu đen và hành băm.\n3. Rót hỗn hợp trứng vào chảo dầu nóng chiên chín vàng đều hai mặt.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Lá lốt",
+        "Quantity": 30,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Dân dã"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng đúc thịt hấp nồi cơm",
+    "Description": "Trứng đúc thịt băm mềm mịn, hấp chín trong nồi cơm tiện lợi, nhanh gọn và ngọt nước.",
+    "Instruction": "1. Trộn đều thịt heo xay, trứng gà băm, mộc nhĩ và hành lá cắt nhỏ vào tô chịu nhiệt.\n2. Đặt bát thịt đúc trứng vào xửng hấp của nồi cơm khi đang nấu cơm.\n3. Cơm chín thì món trứng đúc thịt cũng chín mềm ngọt nước.",
+    "CookTime": 20,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Tiện lợi"
+    ]
+  },
+  {
+    "Recipe_name": "Thịt xay rim trứng",
+    "Description": "Thịt heo xay rim đậm đà cùng trứng gà, mặn ngọt đưa cơm cho cả gia đình.",
+    "Instruction": "1. Phi thơm hành tím băm, cho thịt heo xay vào xào săn.\n2. Nêm nước mắm, đường, ít tiêu đen vừa ăn.\n3. Đập trứng gà trực tiếp vào nồi thịt rim xốt, đậy nắp lửa nhỏ cho trứng chín lòng đào.",
+    "CookTime": 15,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Đậm đà"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng sốt cay",
+    "Description": "Trứng gà chiên lòng đào quyện nước sốt ớt cay nồng, đậm đà, cực kỳ kích thích vị giác.",
+    "Instruction": "1. Chiên trứng ốp la lòng đào rồi gắp ra.\n2. Làm nước sốt: phi thơm tỏi ớt băm, thêm tương ớt, nước mắm, đường và nước lọc nấu sôi.\n3. Cho trứng ốp la vào rim nhẹ với sốt 2 phút cho ngấm gia vị.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Cay nồng"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng rim cà chua nấm",
+    "Description": "Trứng gà rim sốt cà chua chua ngọt dịu, nấm tươi thanh mát, món ngon thanh đạm mỗi ngày.",
+    "Instruction": "1. Phi thơm hành lá, cho cà chua thái hạt lựu và nấm vào xào mềm tạo sốt.\n2. Đánh tan trứng gà đổ từ từ vào nồi sốt cà chua nấm khuấy đều tay.\n3. Nêm nếm muối đường vừa vị, rắc hành lá cắt khúc lên trên dùng nóng.",
+    "CookTime": 12,
+    "PrepTime": 8,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Cà chua",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Thanh đạm"
+    ]
+  },
+  {
+    "Recipe_name": "Sườn cánh buồm kho trứng",
+    "Description": "Sườn sụn cánh buồm kho thấm vị cùng trứng cút, nước kho ngọt đậm đà, ăn hoài không ngán.",
+    "Instruction": "1. Sườn sụn luộc sơ rửa sạch, ướp với hành băm, nước mắm, nước màu.\n2. Trứng cút luộc chín bóc vỏ.\n3. Kho sườn sụn nhỏ lửa 30 phút rồi cho trứng cút vào kho cùng đến khi cạn nước sốt sệt.",
+    "CookTime": 45,
+    "PrepTime": 15,
+    "Servings": 3,
+    "Difficulty": "medium",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Sườn sụn",
+        "Quantity": 300,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 10,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 3,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Đậm đà"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng sốt nước mắm tỏi ớt",
+    "Description": "Trứng ốp la rưới sốt nước mắm tỏi ớt cay mặn, hao cơm cho ngày lười nấu nướng.",
+    "Instruction": "1. Chiên trứng gà ốp la chín lòng đào.\n2. Pha nước mắm: nước mắm, đường, nước lọc, tỏi băm, ớt băm khuấy tan.\n3. Phi thơm tỏi, rưới hỗn hợp nước mắm đun sôi nhẹ rồi trút lên trứng ốp la.",
+    "CookTime": 8,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên hàu",
+    "Description": "Hàu sữa tươi béo ngậy đúc trứng chiên vàng thơm hành lá, giàu dinh dưỡng cho gia đình.",
+    "Instruction": "1. Hàu sữa rửa sạch để ráo nước, ướp chút tiêu hạt nêm.\n2. Trứng gà đánh tan với hành lá cắt nhỏ.\n3. Xào sơ hàu sữa trên chảo cho săn lại rồi trút trứng vào chiên vàng đều hai mặt.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Ruột hàu sữa",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Bổ dưỡng"
+    ]
+  },
+  {
+    "Recipe_name": "Sandwich trứng phô mai",
+    "Description": "Bánh mì sandwich nướng kẹp trứng gà ốp la và phô mai lát béo ngậy, tiện lợi cho bữa sáng.",
+    "Instruction": "1. Chiên trứng ốp la chín tới.\n2. Đặt phô mai lát và trứng ốp la lên lát bánh mì sandwich.\n3. Kẹp lát bánh mì còn lại, cho vào lò nướng hoặc áp chảo nóng giòn chảy phô mai.",
+    "CookTime": 5,
+    "PrepTime": 3,
     "Servings": 1,
     "Difficulty": "easy",
     "IsPublic": true,
@@ -12,1850 +658,137 @@
     "Ingredients": [
       {
         "Name": "Bánh mì",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Trứng gà",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Bơ thực vật",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà chua",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Dưa chuột",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Rau mùi",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa sáng",
-      "Nhanh",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Phở gà",
-    "Description": "Phở gà thanh ngọt với nước dùng trong vắt, thịt gà mềm dai, bánh phở mịn. Món ăn sáng kinh điển của người Việt.",
-    "Instruction": "1. Luộc gà nguyên con trong nước sôi với gừng đập dập, hành tím khoảng 25 phút.\n2. Vớt gà ra ngâm nước lạnh, xé sợi vừa ăn.\n3. Lọc nước luộc gà qua rây, nêm nếm đường phèn, muối, nước mắm.\n4. Phở trụng sơ trong nước sôi, bày ra tô.\n5. Xếp thịt gà lên trên, chan nước dùng nóng.\n6. Thêm hành lá, ngò rí, hành tây cắt mỏng, chanh, tương ớt.",
-    "CookTime": 25,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Thịt gà",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bánh phở",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gừng",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường phèn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Chanh",
-        "Quantity": 1,
-        "UOM": "piece"
-      }
-    ],
-    "TagNames": [
-      "Bữa sáng",
-      "Lành mạnh",
-      "Canh & Súp"
-    ]
-  },
-  {
-    "Recipe_name": "Cháo gà",
-    "Description": "Cháo gà thơm lừng, gạo nở mềm nhuyễn, thịt gà xé sợi thấm vị. Món ăn ấm bụng lý tưởng cho bữa sáng.",
-    "Instruction": "1. Gạo vo sạch, ngâm nước 15 phút cho nhanh nhừ.\n2. Luộc gà với gừng và hành tím, lấy nước dùng.\n3. Gạo cho vào nồi nước dùng gà, ninh nhỏ lửa 20 phút khuấy đều.\n4. Thịt gà xé sợi, ướp nước mắm và tiêu.\n5. Khi cháo sánh mịn, cho thịt gà vào khuấy đều.\n6. Bắt xuống, múc ra tô, rắc hành ngò, tiêu, fried shallots.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt gà",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gạo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gừng",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa sáng",
-      "Lành mạnh",
-      "Canh & Súp"
-    ]
-  },
-  {
-    "Recipe_name": "Bánh cuốn",
-    "Description": "Bánh cuốn mềm mịn cuộn nhân thịt mộc nhĩ thơm ngon, chấm nước mắm chua ngọt. Một trong những món ăn sáng nổi tiếng Việt Nam.",
-    "Instruction": "1. Pha bột: bột gạo + bột năng + nước, khuấy đều cho mịn.\n2. Đun sôi nước trong nồi hấp, phết dầu lên mặt vải.\n3. Đổ một lớp bột mỏng, hấp 2 phút cho chín.\n4. Nhân thịt: thịt băm xào với hành tím, mộc nhĩ băm, nêm gia vị.\n5. Dùng cây cuộn bánh, cuộn mỏng ra đĩa.\n6. Pha nước chấm: nước mắm, đường, chanh, tỏi, ớt.\n7. Thêm chả lụa cắt lát, hành phi, rau sống ăn kèm.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Bột gạo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bột năng",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Mộc nhĩ",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Bữa sáng",
-      "Chiên",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Xôi xéo",
-    "Description": "Xôi xéo vàng ươm từ nghệ tươi, dẻo thơm đậu xanh cà vỏ. Món ăn sáng truyền thống đậm đà hương vị dân tộc.",
-    "Instruction": "1. Gạo nếp vo sạch, ngâm nước nghệ tươi qua đêm hoặc ít nhất 4 giờ.\n2. Đậu xanh cà vỏ ngâm nước 2 giờ,hấp chín.\n3. Vo gạo lại, trộn với đậu xanh,hấp trong 30 phút.\n4. Trong lúchấp, phi thơm hành tỏi với dầu ăn.\n5. Khi xôi chín dẻo, trộn hành phi, nêm muối.\n6. Múc xôi ra đĩa, rắc đậu xanh lên trên.\n7. Ăn kèm hành phi, giò lụa hoặc chả lụa.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Gạo nếp",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Đậu xanh",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nghệ",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa sáng",
-      "Chay",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Cơm sườn nướng",
-    "Description": "Cơm tấm sườn nướng mật ong caramelized thơm lừng, ăn kèm dưa chua và mỡ hành. Món cơm trưa phổ biến khắp Sài Gòn.",
-    "Instruction": "1. Sườn heo ướp với tỏi băm, nước mắm, mật ong, dầu hào, tiêu 15 phút.\n2. Nướng sườn trên bếp than hoặc lò nướng 200°C khoảng 10 phút mỗi mặt.\n3. Cơm tấm trụng nước sôi, để ráo.\n4. Chảo nóng, chiên cơm tấm với dầu ăn cho giòn.\n5. Pha mỡ hành: hành lá băm, dầu nóng đổ lên.\n6. Xếp cơm ra đĩa, đặt sườn nướng lên.\n7. Rưới mỡ hành, thêm dưa chua và nước mắm chua ngọt.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gạo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Mật ong",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu hào",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Nướng",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Bún bò Huế",
-    "Description": "Bún bò Huế cay nồng đặc trưng với nước dùng thơm sả và mắm ruốc. Thịt bò và giò heo thấm vị đậm đà xứ Huế.",
-    "Instruction": "1. Xương heo và giò heo luộc sơ, rửa sạch.\n2. Nướng sả, gừng, hành tím cho thơm.\n3. Đun nước dùng với xương heo, giò heo, sả nướng, mắm ruốc.\n4. Nêm nước mắm, đường phèn, ớt bột, muối.\n5. Bún trụng sôi, bày ra tô.\n6. Thịt bò tháimỏng, nhúng nước dùng nóng.\n7. Múc nước dùng lên tô bún, thêm giò heo.\n8. Ăn kèm rau sống, chanh, ớt.",
-    "CookTime": 30,
-    "PrepTime": 10,
-    "Servings": 1,
-    "Difficulty": "hard",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bún",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Sả",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Mắm ruốc",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Gừng",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Ớt bột",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Canh & Súp",
-      "Cay"
-    ]
-  },
-  {
-    "Recipe_name": "Mì Quảng gà",
-    "Description": "Mì Quảng gà thơm ngọt nước dùng gà, sợi mì vàng ươm, thịt gà xé thấm vị. Đặc sản Quảng Nam nổi tiếng.",
-    "Instruction": "1. Gà luộc với gừng, hành tím, lấy thịt xé sợi.\n2. Nước dùng gà nêm với nước mắm, đường, bột ngọt.\n3. Sợi mì Quảng trụng sơ, để ráo.\n4. Tỏi phi thơm, xào nui với dầu ăn.\n5. Bắp chuối và rau sống rửa sạch, thái sợi.\n6. Xếp mì ra tô, xếp thịt gà lên trên.\n7. Chan nước dùng đậm đà, thêm đậu phộng rang, bánh đa, chanh.",
-    "CookTime": 25,
-    "PrepTime": 10,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Thịt gà",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Mì Quảng",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gừng",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đậu phộng",
-        "Quantity": 15,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bắp chuối",
-        "Quantity": 30,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Lành mạnh",
-      "Canh & Súp"
-    ]
-  },
-  {
-    "Recipe_name": "Cơm gà Hội An",
-    "Description": "Cơm gà Hội An với cơm trộn nghệ vàng, thịt gà luộc mềm, nước chấm đặc biệt. Tinh hoa ẩm thực phố cổ.",
-    "Instruction": "1. Gà luộc với gừng, hành tím, lá dứa cho thơm.\n2. Cơm vo sạch, rang với dầu ăn và nước luộc gà.\n3. Nước luộc gà nêm đường phèn, nước mắm, giấm.\n4. Thịt gà xé sợi, trộn nước sốt.\n5. Rau răm băm nhỏ, hành phi.\n6. Múc cơm vàng ra đĩa, xếp thịt gà lên.\n7. Pha nước tương chua ngọt, chan lên gà.\n8. Ăn kèm rau sống và hành phi.",
-    "CookTime": 20,
-    "PrepTime": 10,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt gà",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gạo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nghệ",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Gừng",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Rau răm",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Lành mạnh",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Bún chả Hà Nội",
-    "Description": "Bún chả Hà Nội với chả nướng thơm khói, nước chấm chua ngọt thanh mát, bún tươi và rau sống tươi ngon.",
-    "Instruction": "1. Thịt heo tháimỏng, ướp hành tím băm, nước mắm, đường, tiêu 20 phút.\n2. Vo thành từng viên chả nhỏ, nướng trên bếp than.\n3. Thịt ba chỉ nướng vàng giòn.\n4. Pha nước chấm: nước mắm, giấm, đường, tỏi, ớt, carrots bào sợi.\n5. Bún tươi trụng nước sôi.\n6. Bày bún ra đĩa, xếp chả và thịt nướng.\n7. Chan nước chấm, thêm rau sống và dưa chua.",
-    "CookTime": 25,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bún",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước mắm",
         "Quantity": 2,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Giấm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Cà rốt",
-        "Quantity": 30,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Nướng",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Cơm tấm sườn bì chả",
-    "Description": "Cơm tấm đặc biệt với sườn nướng, bì heo và chả trứng, đầy đủ hương vị. Món cơm tấm đúng kiểu Sài Gòn chính gốc.",
-    "Instruction": "1. Sườn heo ướt tỏi, nước mắm, mật ong, tiêu.\n2. Bì heo luộc chín, thái sợi nhỏ.\n3. Chả trứng hấp chín.\n4. Sườn nướng vàng giòn trên bếp.\n5. Cơm tấm chiên giòn với dầu.\n6. Pha mỡ hành, nước mắm chua ngọt.\n7. Xếp cơm, sườn, bì, chả lên đĩa.\n8. Rưới mỡ hành, thêm dưa chua.",
-    "CookTime": 30,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "hard",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Da heo",
-        "Quantity": 120,
-        "UOM": "g"
+        "UOM": "piece"
       },
       {
         "Name": "Trứng gà",
         "Quantity": 1,
         "UOM": "piece"
-      },
-      {
-        "Name": "Gạo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Mật ong",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Nướng",
-      "Chiên"
-    ]
-  },
-  {
-    "Recipe_name": "Hủ tiếu Nam Vang",
-    "Description": "Hủ tiếu Nam Vang nước dùng ngọt thanh từ xương, tôm thịt tươi ngon. Món hủ tiếu Campuchia phổ biến tại Việt Nam.",
-    "Instruction": "1. Xương heo hầm nước dùng 20 phút, lọc bỏ bọt.\n2. Tôm cắt bỏ râu, thịt heo tháimỏng.\n3. Hủ tiếu trụng nước sôi, xếp ra tô.\n4. Xào thịt heo và tôm với tỏi.\n5. Thêm quẩy cắt nhỏ vào nước dùng.\n6. Múc nước dùng nóng lên tô.\n7. Ăn kèm rau mùi, hành lá, chanh, ớt.",
-    "CookTime": 25,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Hủ tiếu",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tôm",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Xương heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Rau mùi",
-        "Quantity": 30,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Canh & Súp",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Bún riêu cua",
-    "Description": "Bún riêu cua đồng đậm đà với nước dùng cà chua chua ngọt, riêu cua béo ngậy. Món bún nổi tiếng Hà Thành.",
-    "Instruction": "1. Cua đồng giã nát, lọc lấy nước cua và gạch.\n2. Cà chua phi thơm, nấu cùng nước cua.\n3. Thêm mắm tôm, đường, nêm vừa miệng.\n4. Bún tươi trụng sôi, bày ra tô.\n5. Chan nước riêu cua nóng lên bún.\n6. Thêm đậu hủ chiên, rau sống, mắm tôm.\n7. Ăn kèm chanh và ớt tươi.",
-    "CookTime": 35,
-    "PrepTime": 10,
-    "Servings": 1,
-    "Difficulty": "hard",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Cua đồng",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bún",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà chua",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Đậu hủ",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Mắm tôm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Canh & Súp",
-      "Cay"
-    ]
-  },
-  {
-    "Recipe_name": "Cơm rang dưa bò",
-    "Description": "Cơm rang vàng giòn với dưa chua xào thịt bò, hương vị đậm đà. Món cơm rang quen thuộc của sinh viên.",
-    "Instruction": "1. Cơm nguội để riêng, dưa chua vắt ráo nước.\n2. Thịt bò tháimỏng, ướp nước mắm và tiêu.\n3. Phi thơm tỏi, xào thịt bò chín.\n4. Cho dưa chua vào xào cùng.\n5. Cho cơm vào rang đều trên lửa lớn.\n6. Nêm nước mắm, tiêu, đảo đều.\n7. Bày ra đĩa, ăn kèm tương ớt.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Gạo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Dưa chua",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Trứng gà",
-        "Quantity": 1,
-        "UOM": "piece"
-      }
-    ],
-    "TagNames": [
-      "Bữa trưa",
-      "Chiên",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Mì xào hải sản",
-    "Description": "Mì Ý xào hải sản tươi ngon với sốt bơ tỏi thơm lừng. Món kết hợp Ý-Á lạ miệng và bổ dưỡng.",
-    "Instruction": "1. Mì Ý luộc chín theo hướng dẫn bao bì, để ráo.\n2. Tôm cắt bỏ râu, mực thái vòng.\n3. Phi tỏi với bơ, xào tôm và mực.\n4. Cho mì vào đảo đều.\n5. Nêm nước tương, dầu ô liu, tiêu.\n6. Thêm rau mùi cắt nhỏ.\n7. Bày ra đĩa, rắc phô mai Parmesan.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Mì ý",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tôm",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Mực",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bơ thực vật",
-        "Quantity": 11,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 4,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước tương",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ô liu",
-        "Quantity": 1,
-        "UOM": "tbsp"
       },
       {
         "Name": "Phô mai",
-        "Quantity": 11,
-        "UOM": "g"
+        "Quantity": 1,
+        "UOM": "piece"
       }
     ],
     "TagNames": [
-      "Bữa trưa",
-      "Chiên",
+      "Bữa sáng",
       "Nhanh"
     ]
   },
   {
-    "Recipe_name": "Cá kho tộ",
-    "Description": "Cá kho tộ đậm đà caramelized với nước mắm đường, thịt cá săn chắc thấm vị. Món kho kinh điển của người miền Nam.",
-    "Instruction": "1. Cá phi-lê cắt khúc, ướp nước mắm, đường, tỏi, ớt.\n2. Để cá thấm gia vị 15 phút.\n3. Cho đường vào nồi đất caramel.\n4. Xếp cá lên, thêm nước mắm và nước sấp mặt.\n5. Kho lửa nhỏ 25 phút cho cá thấm.\n6. Thêm tiêu, ớt trang trí.\n7. Dọn nóng với cơm trắng.",
-    "CookTime": 30,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Cá basa",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 2,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 4,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Ớt tươi",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Lành mạnh",
-      "Canh & Súp"
-    ]
-  },
-  {
-    "Recipe_name": "Canh chua cá lóc",
-    "Description": "Canh chua cá lóc đậm vị me chua, cà chua ngọt thanh, đậu bắp giòn giòn. Món canh đặc trưng miền Tây Nam Bộ.",
-    "Instruction": "1. Cá lóc cắt khúc, ướp muối và nghệ.\n2. Me ngâm nước nóng, lọc lấy nước cốt.\n3. Cà chua cắt múi, đậu bắp cắt khoanh.\n4. Phi thơm hành tỏi, cho cà chua vào xào.\n5. Thêm nước me và nước, đun sôi.\n6. Cho cá lóc vào nấu chín.\n7. Thêm đậu bắp, giá đỗ, rau ngò.\n8. Nêm nếm vừa miệng, tắt bếp.",
-    "CookTime": 25,
-    "PrepTime": 5,
-    "Servings": 1,
+    "Recipe_name": "Trứng bọc thịt chiên xù",
+    "Description": "Trứng lòng đào bọc thịt heo xay tẩm bột chiên giòn rụm bên ngoài, béo ngậy bên trong.",
+    "Instruction": "1. Trứng cút luộc lòng đào 3 phút bóc vỏ.\n2. Bọc sườn sụn thịt heo xay dẻo mịn quanh trứng cút luộc.\n3. Lăn qua bột mì, nhúng trứng gà đánh tan rồi lăn qua bột chiên xù.\n4. Chiên ngập dầu chín vàng giòn rụm rồi vớt ra ráo dầu.",
+    "CookTime": 20,
+    "PrepTime": 15,
+    "Servings": 2,
     "Difficulty": "medium",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
-      {
-        "Name": "Cá lóc",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Me",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà chua",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Đậu bắp",
-        "Quantity": 15,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nghệ",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Canh & Súp",
-      "Cay"
-    ]
-  },
-  {
-    "Recipe_name": "Thịt kho trứng",
-    "Description": "Thịt kho trứng ngọt béo với nước màu caramel, thịt heo mềm tan và trứng luộc thấm vị. Món kho quen thuộc mọi gia đình.",
-    "Instruction": "1. Thịt heo cắt khối vuông, luộc sơ.\n2. Trứng gà luộc chín, bóc vỏ.\n3. Đun đường với chảo nóng làm nước màu caramel.\n4. Cho thịt vào đảo đều cho vàng.\n5. Thêm nước mắm, nước sấp mặt thịt.\n6. Kho lửa nhỏ 20 phút.\n7. Cho trứng vào kho cùng 5 phút.\n8. Nêm nếm lại, tắt bếp.",
-    "CookTime": 25,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
       {
         "Name": "Trứng gà",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 2,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước dừa",
-        "Quantity": 11,
-        "UOM": "ml"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Lành mạnh",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Gà rang muối",
-    "Description": "Gà rang muối giòn rụm bên ngoài, thịt mềm ngọt bên trong với lớp muối ớt thơm nồng. Món ăn đơn giản mà đậm đà.",
-    "Instruction": "1. Gà chặt miếng vừa, rửa sạch.\n2. Ướp gà với muối, tiêu, ngũ vị hương.\n3. Để gà thấm 15 phút.\n4. Chiên gà vàng giòn trong dầu nóng.\n5. Vớt ra để ráo dầu.\n6. Phi tỏi ớt với muối, rang khô.\n7. Trộn gà với muối rang.\n8. Bày ra đĩa, ăn kèm rau sống.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt gà",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 5,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Ớt tươi",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Ngũ vị hương",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 2,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Chiên",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Bò lúc lắc",
-    "Description": "Bò lúc lắc thịt bò mềm ngon xào nhanhlửa lớn với hành tây giòn ngọt. Món ăn nhanh gọn mà sang trọng.",
-    "Instruction": "1. Thịt bò cắt hạt lựu, ướp nước tương, dầu mè, tiêu.\n2. Hành tây cắt vuông.\n3. Chảo nóng thật hot, phi tỏi thơm.\n4. Xào thịt bò nhanh tay 2 phút.\n5. Cho hành tây vào đảo đều.\n6. Nêm nước tương, đường.\n7. Bày ra đĩa, rắc tiêu.\n8. Ăn kèm cơm trắng hoặc bánh mì.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tây",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
         "Quantity": 4,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước tương",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu mè",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Nhanh",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Tôm rang thịt",
-    "Description": "Tôm rang thịt béo ngọt, tôm đỏ au thấm nước mắm đường caramelized. Món ăn quen thuộc và dễ chế biến.",
-    "Instruction": "1. Tôm cắt bỏ râu, rửa sạch.\n2. Thịt heo tháimỏng, ướp nước mắm.\n3. Đun đường làm nước màu.\n4. Cho thịt vào rang vàng.\n5. Thêm tôm vào rang cùng.\n6. Nêm nước mắm, tiêu.\n7. Rang đến khi tôm caramen.\n8. Bày ra đĩa, rắc hành lá.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Tôm",
-        "Quantity": 120,
-        "UOM": "g"
+        "UOM": "piece"
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Lành mạnh",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Đậu hủ sốt cà chua",
-    "Description": "Đậu hủ sốt cà chua chua ngọt mềm mịn, dễ ăn và bổ dưỡng. Món chay ngon miệng cho bữa cơm gia đình.",
-    "Instruction": "1. Đậu hủ cắt khối vuông, chiên vàng.\n2. Cà chua xay nhuyễn.\n3. Phi thơm hành tỏi, cho cà chua vào.\n4. Thêm nước mắm, đường, muối.\n5. Nấu sốt sôi lục bục.\n6. Cho đậu hủ chiên vào om 5 phút.\n7. Nêm nếm lại cho vừa miệng.\n8. Bày ra đĩa, rắc hành lá.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Đậu hủ",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà chua",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Chay",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Spaghetti bò bằm",
-    "Description": "Mì Ý spaghetti sốt bò bằm Ý đậm đà, phô mai tan chảy béo ngậy. Món Âu dễ làm tại nhà.",
-    "Instruction": "1. Mì Ý luộc chín theo hướng dẫn, để ráo.\n2. Thịt bò băm xào với hành tây băm nhỏ.\n3. Thêm sốt cà chua Ý vào.\n4. Nêm muối, tiêu, đường, hương thảo.\n5. Nấu sốt sôi nhỏ lửa 10 phút.\n6. Xếp mì ra đĩa, chan sốt lên.\n7. Rắc phô mai Parmesan.\n8. Trang trí lá húng quế.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Mì Ý",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà chua",
-        "Quantity": 30,
-        "UOM": "ml"
-      },
-      {
-        "Name": "Hành tây",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Phô mai",
-        "Quantity": 11,
-        "UOM": "g"
-      },
-      {
-        "Name": "Dầu ô liu",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Nhanh",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Cá hồi áp chảo sốt bơ tỏi",
-    "Description": "Cá hồi áp chảo vàng giòn ngoài mềm mịn trong, sốt bơ tỏi thơm lừng. Món ăn healthy và sang trọng.",
-    "Instruction": "1. Cá hồi cắt portions, lau khô.\n2. Ướp cá với muối, tiêu.\n3. Chảo nóng, áp chảo cá mặt da trước 3 phút.\n4. Lật mặt thịt, áp chảo 2 phút.\n5. Bơ tỏi: phi tỏi với bơ nóng.\n6. Thêm chanh và parsley.\n7. Rưới sốt bơ tỏi lên cá.\n8. Ăn kèm rau salad hoặc cơm trắng.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Cá hồi",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bơ thực vật",
-        "Quantity": 11,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 4,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Chanh",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Dầu ô liu",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Lành mạnh",
-      "Chiên"
-    ]
-  },
-  {
-    "Recipe_name": "Stir-fry thịt bò và bông cải",
-    "Description": "Thịt bò xào bông cải xanh giòn ngọt, sốt tương đen đậm đà. Món xào nhanh dinh dưỡng lý tưởng.",
-    "Instruction": "1. Thịt bò tháimỏng, ướp nước tương và dầu mè.\n2. Bông cải cắt khúc, rửa sạch.\n3. Chảo nóng phi tỏi.\n4. Xào thịt bò nhanh, cho ra đĩa.\n5. Xào bông cải với lửa lớn.\n6. Cho thịt bò trở lại.\n7. Nêm tương đen, đường.\n8. Bày ra đĩa, ăn kèm cơm.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bông cải xanh",
-        "Quantity": 11,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tương đen",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước tương",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu mè",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Bữa tối",
-      "Nhanh",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Sườn nướng BBQ",
-    "Description": "Sườn nướng BBQ thấm đẫm sốt caramelized ngọt cay, thịt mềm tách xương. Món nướng hoàn hảo cho bữa tiệc.",
-    "Instruction": "1. Sườn heo racks rửa sạch.\n2. Pha sốt BBQ: tương cà, mật ong, Worcestershire sauce, tỏi.\n3. Ướp sườn với sốt BBQ 30 phút.\n4. Nướng lò 180°C trong 25 phút.\n5. Lật mặt, phết sốt thêm.\n6. Nướng thêm 5 phút cho sốt caramelized.\n7. Để nghỉ 5 phút trước khi cắt.\n8. Cắt individual ribs, bày ra đĩa.",
-    "CookTime": 25,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tương cà",
-        "Quantity": 2,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Mật ong",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Sốt Worcestershire",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 4,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Nướng",
-      "Bữa tối",
-      "Cay"
-    ]
-  },
-  {
-    "Recipe_name": "Gà chiên mắm",
-    "Description": "Gà chiên giòn rụm tẩm nước mắm tỏi ớt thơm nồng, vị ngọt cay hài hòa. Món ăn vặt hot hit mọi thời đại.",
-    "Instruction": "1. Gà chặt miếng vừa, rửa sạch.\n2. Ướp gà với ngũ vị hương, muối.\n3. Pha bột chiên giòn với nước.\n4. Nhúng gà vào bột, chiên vàng giòn.\n5. Vớt ra để ráo.\n6. Phi tỏi ớt, thêm nước mắm đường.\n7. Cho gà vào đảo đều.\n8. Bày ra đĩa, rắc hành lá.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt gà",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bột chiên giòn",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 5,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Ớt tươi",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 2,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Ngũ vị hương",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Nướng",
-      "Chiên",
-      "Cay"
-    ]
-  },
-  {
-    "Recipe_name": "Tôm chiên xù",
-    "Description": "Tôm chiên xù vàng ươm giòn rụm, thịt tôm ngọt săn chắc. Món ăn vặt yêu thích của mọi lứa tuổi.",
-    "Instruction": "1. Tôm cắt bỏ râu, giữ nguyên đuôi.\n2. Lăn tôm qua bột mì.\n3. Nhúng trứng beaten.\n4. Lăn qua vụn bánh mì.\n5. Chiên vàng giòn trong dầu nóng.\n6. Vớt ra giấy thấm dầu.\n7. Ăn kèm tương ớt hoặc sốt mayo.\n8. Trang trí rau sống.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Tôm",
-        "Quantity": 120,
+        "Quantity": 150,
         "UOM": "g"
       },
       {
         "Name": "Bột mì",
-        "Quantity": 120,
+        "Quantity": 30,
         "UOM": "g"
-      },
-      {
-        "Name": "Trứng gà",
-        "Quantity": 1,
-        "UOM": "piece"
       },
       {
         "Name": "Vụn bánh mì",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 2,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Nướng",
-      "Chiên",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Nem rán",
-    "Description": "Nem rán vàng giòn với nhân thịt nấm mộc nhĩ thơm ngon. Vỏ giòn tan, nhân mềm đậm đà truyền thống.",
-    "Instruction": "1. Thịt heo băm, mộc nhĩ băm, miến ngâm mềm cắt nhỏ.\n2. Trộn nhân: thịt, mộc nhĩ, miến, carrot băm, nêm gia vị.\n3. Trải bánh tráng, cho nhân vào.\n4. Cuộn chặt, quấn 2 lớp.\n5. Chiên vàng giòn trong dầu nóng.\n6. Vớt ra giấy thấm dầu.\n7. Ăn kèm nước mắm chua ngọt.\n8. Trang trí rau sống.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "medium",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bánh tráng",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Mộc nhĩ",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Miến",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà rốt",
-        "Quantity": 30,
+        "Quantity": 50,
         "UOM": "g"
       },
       {
         "Name": "Hành tím",
-        "Quantity": 1,
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 200,
+        "UOM": "ml"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Hấp dẫn"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng cuộn rong biển",
+    "Description": "Trứng cuộn rong biển giòn thơm, nhân dẻo bùi, món ăn vặt hoặc ăn cơm yêu thích của trẻ nhỏ.",
+    "Instruction": "1. Đánh tan trứng gà với ít hạt nêm và nước lọc.\n2. Tráng lớp trứng mỏng trên chảo, xếp lá rong biển lên trên khi trứng chưa đông hẳn.\n3. Nhẹ nhàng cuộn tròn lại chiên nhỏ lửa vàng giòn rồi cắt miếng vừa ăn.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
         "UOM": "piece"
       },
       {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ăn",
+        "Name": "Rong biển lá",
         "Quantity": 2,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Nướng",
-      "Chiên",
-      "Cay"
-    ]
-  },
-  {
-    "Recipe_name": "Cá chiên sả ớt",
-    "Description": "Cá diêu hồng chiên vàng giòn với sả ớt thơm nồng cay nồng. Món chiên đơn giản mà đầy hương vị.",
-    "Instruction": "1. Cá diêu hồng cắt khúc vừa ăn.\n2. Sả băm nhỏ, ớt băm.\n3. Ướp cá với sả, ớt, muối, đường.\n4. Để thấm 15 phút.\n5. Chiên vàng giòn trong dầu nóng.\n6. Vớt ra giấy thấm dầu.\n7. Trang trí sả chiên và rau sống.\n8. Ăn kèm nước mắm tỏi ớt.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Cá diêu hồng",
-        "Quantity": 120,
-        "UOM": "g"
+        "UOM": "piece"
       },
       {
-        "Name": "Sả",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Ớt tươi",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Đường",
+        "Name": "Hạt nêm",
         "Quantity": 1,
         "UOM": "tsp"
       },
       {
         "Name": "Dầu ăn",
-        "Quantity": 2,
+        "Quantity": 1,
         "UOM": "tbsp"
       }
     ],
     "TagNames": [
-      "Nướng",
-      "Chiên",
-      "Cay"
+      "Bữa sáng",
+      "Trẻ em"
     ]
   },
   {
-    "Recipe_name": "Canh rau ngót thịt băm",
-    "Description": "Canh rau ngót thịt băm thanh ngọt, rau ngót mềm xanh mướt. Món canh gia đình quen thuộc và bổ dưỡng.",
-    "Instruction": "1. Rau ngót tách lá, rửa sạch.\n2. Thịt heo băm ướp nước mắm.\n3. Đun sôi nước dùng.\n4. Cho thịt băm vào nắn thành cục nhỏ.\n5. Khi thịt nổi, cho rau ngót vào.\n6. Nấu 3 phút cho rau chín.\n7. Nêm muối, nước mắm.\n8. Tắt bếp, rắc tiêu.",
+    "Recipe_name": "Trứng chưng cà chua hành tây",
+    "Description": "Món trứng chưng cà chua hành tây chua ngọt quen thuộc, chế biến nhanh và cực kỳ dễ ăn.",
+    "Instruction": "1. Phi thơm hành tây cắt hạt lựu, cho cà chua xào chín nhuyễn thành sốt sệt.\n2. Rót trứng gà đánh tan vào chảo sốt cà chua hành tây chưng chín xốp mềm mịn.\n3. Nêm nước mắm tiêu xanh vừa vị, ăn nóng cùng cơm trắng.",
     "CookTime": 10,
     "PrepTime": 5,
-    "Servings": 1,
+    "Servings": 2,
     "Difficulty": "easy",
     "IsPublic": true,
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Rau ngót",
-        "Quantity": 30,
-        "UOM": "g"
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
       },
       {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Canh & Súp",
-      "Lành mạnh",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Canh bí đỏ thịt băm",
-    "Description": "Canh bí đỏ thịt băm ngọt béo tự nhiên, bí đỏ mềm mịn tan trong miệng. Món canh dinh dưỡng cho cả gia đình.",
-    "Instruction": "1. Bí đỏ gọt vỏ, cắt khối vuông.\n2. Thịt heo băm ướp nước mắm.\n3. Đun sôi nước dùng.\n4. Cho thịt băm vào.\n5. Thêm bí đỏ, nấu mềm.\n6. Nêm muối, đường.\n7. Thêm hành ngò.\n8. Tắt bếp, múc ra tô.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Bí đỏ",
-        "Quantity": 18,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Hành lá",
-        "Quantity": 10,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Canh & Súp",
-      "Lành mạnh",
-      "Nhanh"
-    ]
-  },
-  {
-    "Recipe_name": "Súp bí ngô kem",
-    "Description": "Súp bí ngô kem mịn màng, vị ngọt tự nhiên của bí đỏ kết hợp kem béo ngậy. Món súp ấm áp cho ngày lạnh.",
-    "Instruction": "1. Bí đỏ gọt vỏ, cắt khối.\n2. Hành tây băm, tỏi băm.\n3. Phi thơm hành tây với bơ.\n4. Cho bí đỏ vào xào, thêm nước.\n5. Nấu bí mềm, xay nhuyễn.\n6. Thêm kem sữa, khuấy đều.\n7. Nêm muối, tiêu.\n8. Múc ra tô, trang trí kem.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Bí đỏ",
-        "Quantity": 30,
-        "UOM": "g"
+        "Name": "Cà chua",
+        "Quantity": 2,
+        "UOM": "piece"
       },
       {
         "Name": "Hành tây",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 2,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Bơ thực vật",
-        "Quantity": 11,
+        "Quantity": 50,
         "UOM": "g"
       },
       {
-        "Name": "Kem sữa",
-        "Quantity": 10,
-        "UOM": "ml"
-      },
-      {
-        "Name": "Muối",
-        "Quantity": 1,
-        "UOM": "tsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Canh & Súp",
-      "Lành mạnh",
-      "Bữa tối"
-    ]
-  },
-  {
-    "Recipe_name": "Cơm chiên dương châu chay",
-    "Description": "Cơm chiên dương châu chay vàng ươm với đậu hủ và rau củ tươi màu sắc. Món cơm chiên lạ miệng cho người ăn chay.",
-    "Instruction": "1. Cơm nguội để riêng.\n2. Đậu hủ cắt nhỏ, chiên vàng.\n3. Cà rốt, đậu que cắt nhỏ.\n4. Phi tỏi với dầu.\n5. Cho rau củ vào xào.\n6. Thêm cơm, xào đều trên lửa lớn.\n7. Nêm tương, muối, tiêu.\n8. Cho đậu hủ chiên vào đảo đều.",
-    "CookTime": 10,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Cơm",
-        "Quantity": 18,
-        "UOM": "g"
-      },
-      {
-        "Name": "Đậu hủ",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà rốt",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Đậu que",
-        "Quantity": 15,
-        "UOM": "g"
-      },
-      {
-        "Name": "Tỏi",
-        "Quantity": 3,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Nước tương",
+        "Name": "Nước mắm",
         "Quantity": 1,
         "UOM": "tbsp"
       },
@@ -1863,208 +796,84 @@
         "Name": "Dầu ăn",
         "Quantity": 1,
         "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Canh trứng cà chua",
+    "Description": "Canh trứng gà nấu cà chua và hành lá thanh mát, dễ chế biến cho bữa cơm gia đình.",
+    "Instruction": "1. Phi thơm hành tím băm nhỏ, cho cà chua cắt múi cau vào xào chín mềm.\n2. Rót nước lọc đun sôi bùng lên, sau đó rót trứng gà đánh tan từ từ khuấy nhẹ tay để tạo vân đẹp.\n3. Rắc hành lá và ngò cắt nhỏ dùng nóng.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
       },
+      {
+        "Name": "Cà chua",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Thanh mát"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chần không dùng giấm",
+    "Description": "Trứng chần là món kết hợp giữa trứng luộc và trứng ốp la.Tuy nhiên trứng chần rất dễ fail nhất nếu như làm ko đúng cách và cẩn thận cũng như trứng không đủ tươi và mới.Trứng này ứng dụng rất nhiều món chủ yếu là món âu,dùng để ăn mì tôm đều rất ngon",
+    "Instruction": "1. Cho trứng ra bát.Chuẩn bị nồi nước thật sôi,Cho một ít dầu vào muôi to(thậm chí nhúng muôi vào dầu).Cho trứng vào\n2. Thả vào nồi nước thật sôi.Đặt đáy muôi vào nước sôi đến khi lòng trắng đông 1 phần khoảng 1-2’ sau đó thả xuống nồi nước sôi đến khi tróc ra đun thêm 1’,vớt trứng ra",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
       {
         "Name": "Trứng gà",
         "Quantity": 1,
         "UOM": "piece"
-      }
-    ],
-    "TagNames": [
-      "Chay",
-      "Nhanh",
-      "Bữa trưa"
-    ]
-  },
-  {
-    "Recipe_name": "Đậu hủ kho nấm",
-    "Description": "Đậu hủ kho nấm đậm đà, đậu thấm nước mắm đường caramelized, nấm đông cô thơm lừng. Món chay giàu dinh dưỡng.",
-    "Instruction": "1. Đậu hủ cắt khối vuông, chiên vàng.\n2. Nấm đông cô ngâm mềm, thái lát.\n3. Hành tím phi thơm.\n4. Cho nấm vào xào.\n5. Thêm nước mắm, đường, nước.\n6. Cho đậu hủ vào kho 15 phút.\n7. Nêm nếm lại cho đậm vị.\n8. Rắc tiêu, bày ra đĩa.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Đậu hủ",
-        "Quantity": 30,
-        "UOM": "g"
       },
       {
-        "Name": "Nấm đông cô",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
+        "Name": "Nước sạch",
         "Quantity": 1,
         "UOM": "piece"
       },
       {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Dầu ăn",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Tiêu đen",
-        "Quantity": 1,
-        "UOM": "tsp"
-      }
-    ],
-    "TagNames": [
-      "Chay",
-      "Lành mạnh",
-      "Bữa tối"
-    ]
-  },
-  {
-    "Recipe_name": "Canh chua chay",
-    "Description": "Canh chua chay thanh mát với me chua, cà chua đỏ và đậu bắp giòn giòn. Món canh chua đặc biệt không cần cá.",
-    "Instruction": "1. Me ngâm nước nóng, lọc lấy nước cốt.\n2. Cà chua cắt múi, đậu bắp cắt khoanh.\n3. Bắp chuối cắt sợi, ngâm nước chanh.\n4. Phi thơm hành tỏi, cho cà chua vào.\n5. Thêm nước me, nước dùng rau.\n6. Cho đậu bắp và bắp chuối.\n7. Nêm đường, muối, nước mắm.\n8. Tắt bếp, thêm rau ngò.",
-    "CookTime": 15,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Me",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Cà chua",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Đậu bắp",
-        "Quantity": 15,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bắp chuối",
-        "Quantity": 30,
-        "UOM": "g"
-      },
-      {
-        "Name": "Hành tím",
-        "Quantity": 1,
-        "UOM": "piece"
-      },
-      {
-        "Name": "Tỏi",
+        "Name": "Muối",
         "Quantity": 2,
-        "UOM": "clove"
-      },
-      {
-        "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      },
-      {
-        "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "tbsp"
-      }
-    ],
-    "TagNames": [
-      "Canh & Súp",
-      "Chay",
-      "Lành mạnh"
-    ]
-  },
-  {
-    "Recipe_name": "Chè bắp",
-    "Description": "Chè bắp ngọt thanh với bắp tươi non, nước cốt dừa béo ngậy và thạch jelly dai ngon. Món tráng miệng yêu thích.",
-    "Instruction": "1. Bắp tươi tách hạt, xay nhuyễn.\n2. Đun nước với đường phèn.\n3. Cho bắp xay vào, khuấy liên tục.\n4. Nấu nhỏ lửa 15 phút đến sánh.\n5. Thêm nước cốt dừa.\n6. Thêm thạch jelly cắt nhỏ.\n7. Khuấy đều, tắt bếp.\n8. Múc ra ly, thêm đá.",
-    "CookTime": 20,
-    "PrepTime": 5,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "admin",
-    "Ingredients": [
-      {
-        "Name": "Bắp",
-        "Quantity": 18,
-        "UOM": "g"
-      },
-      {
-        "Name": "Nước cốt dừa",
-        "Quantity": 11,
-        "UOM": "ml"
-      },
-      {
-        "Name": "Đường phèn",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Bột năng",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thạch jelly",
-        "Quantity": 10,
         "UOM": "g"
       }
     ],
     "TagNames": [
-      "Tráng miệng",
-      "Nhanh",
-      "Chay"
-    ]
-  },
-  {
-    "Recipe_name": "Sinh tố bơ chuối",
-    "Description": "Sinh tố bơ chuối béo ngậy, thơm lừng, bổ dưỡng và tốt cho sức khỏe. Món đồ uống 5 phút cực nhanh.",
-    "Instruction": "1. Bơ bỏ vỏ, lấy thịt.\n2. Chuối cắt khúc.\n3. Cho bơ và chuối vào máy xay.\n4. Thêm sữa tươi và sữa đặc.\n5. Xay nhuyễn mịn.\n6. Múc ra ly.\n7. Trang trí lát bơ trên mặt.\n8. Uống ngay khi lạnh.",
-    "CookTime": 5,
-    "PrepTime": 0,
-    "Servings": 1,
-    "Difficulty": "easy",
-    "IsPublic": true,
-    "AccountUsername": "testuser",
-    "Ingredients": [
-      {
-        "Name": "Bơ",
-        "Quantity": 10,
-        "UOM": "g"
-      },
-      {
-        "Name": "Chuối",
-        "Quantity": 11,
-        "UOM": "g"
-      },
-      {
-        "Name": "Sữa",
-        "Quantity": 11,
-        "UOM": "ml"
-      },
-      {
-        "Name": "Sữa đặc có đường",
-        "Quantity": 10,
-        "UOM": "g"
-      }
-    ],
-    "TagNames": [
-      "Đồ uống",
-      "Tráng miệng",
+      "Bữa sáng",
       "Nhanh"
     ]
   }

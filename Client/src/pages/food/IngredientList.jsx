@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getIngredients, deleteIngredient } from '../../services/foodService';
+import { useDialog } from '../../context/DialogContext';
 
 export default function IngredientList() {
+  const dialog = useDialog();
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -24,7 +26,8 @@ export default function IngredientList() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Xóa nguyên liệu này?')) return;
+    const ok = await dialog.confirm({ title: 'Xóa nguyên liệu?', message: 'Xóa nguyên liệu này?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
     try {
       await deleteIngredient(id);
       setIngredients((prev) => prev.filter((i) => i.ingredient_id !== id));

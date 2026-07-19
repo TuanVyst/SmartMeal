@@ -54,6 +54,11 @@ jobs:
       CLOUDINARY_CLOUD_NAME: ${{secrets.CLOUDINARY_CLOUD_NAME}}
       CLOUDINARY_API_KEY: ${{secrets.CLOUDINARY_API_KEY}}
       CLOUDINARY_API_SECRET: ${{secrets.CLOUDINARY_API_SECRET}}
+      PAYOS_CLIENT_ID: ${{secrets.PAYOS_CLIENT_ID}}
+      PAYOS_API_KEY: ${{secrets.PAYOS_API_KEY}}
+      PAYOS_CHECKSUM_KEY: ${{secrets.PAYOS_CHECKSUM_KEY}}
+      PAYOS_RETURN_URL: ${{secrets.PAYOS_RETURN_URL}}
+      PAYOS_CANCEL_URL: ${{secrets.PAYOS_CANCEL_URL}}
     steps:
       - name: Checkout Develop
         uses: actions/checkout@v3

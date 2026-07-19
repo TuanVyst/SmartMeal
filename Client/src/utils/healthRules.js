@@ -45,7 +45,15 @@ export const HEALTH_CONDITION_RULES = {
     ],
     maxCarbsPerMeal: 45,
     maxCaloriesPerMeal: 500,
-    dailyCalorieBudget: 1600
+    dailyCalorieBudget: 1600,
+    scoreRules: {
+      highSugarThreshold: 10,
+      highCarbsThreshold: 60,
+      highSugarPenalty: 20,
+      highCarbsPenalty: 15,
+      highProteinBonus: 5,
+      highFiberBonus: 5,
+    }
   },
   hypertension: {
     lockedIngredients: [
@@ -79,7 +87,95 @@ export const HEALTH_CONDITION_RULES = {
     ],
     maxSodiumPerMeal: 600,
     maxCaloriesPerMeal: 550,
-    dailyCalorieBudget: 1800
+    dailyCalorieBudget: 1800,
+    scoreRules: {
+      highSodiumThreshold: 600,
+      highSodiumPenalty: 25,
+      lowSodiumBonus: 5,
+    }
+  },
+  cholesterol: {
+    lockedIngredients: [
+      "Lòng đỏ trứng",
+      "Nội tạng động vật",
+      "Thịt mỡ",
+      "Da gà",
+      "Bơ",
+      "Phô mai béo",
+      "Kem tươi"
+    ],
+    reducedIngredients: [
+      "Thịt bò",
+      "Thịt heo",
+      "Trứng",
+      "Dầu ăn",
+      "Mỡ heo"
+    ],
+    preferredIngredients: [
+      "Cá hồi",
+      "Cá thu",
+      "Cá ngừ",
+      "Rau xanh",
+      "Bơ (avocado)",
+      "Hạt chia",
+      "Yến mạch",
+      "Đậu nành",
+      "Dầu olive"
+    ],
+    maxCholesterolPerMeal: 100,
+    maxFatPerMeal: 20,
+    dailyCalorieBudget: 1800,
+    scoreRules: {
+      highCholesterolThreshold: 100,
+      highCholesterolPenalty: 20,
+      highFatThreshold: 20,
+      highFatPenalty: 15,
+      friedKeywordPenalty: 10,
+      fishBonus: 5,
+      vegetableBonus: 5,
+    }
+  },
+  heartDisease: {
+    lockedIngredients: [
+      "Mỡ heo",
+      "Nội tạng",
+      "Thịt mỡ",
+      "Da gà",
+      "Bơ (động vật)",
+      "Dầu cọ",
+      "Dầu dừa"
+    ],
+    reducedIngredients: [
+      "Thịt đỏ",
+      "Trứng",
+      "Phô mai",
+      "Muối",
+      "Nước mắm",
+      "Đồ chiên"
+    ],
+    preferredIngredients: [
+      "Cá hồi",
+      "Cá thu",
+      "Hạt óc chó",
+      "Hạt hạnh nhân",
+      "Dầu olive",
+      "Rau xanh đậm",
+      "Quả mọng",
+      "Yến mạch",
+      "Đậu các loại"
+    ],
+    maxSodiumPerMeal: 500,
+    maxFatPerMeal: 20,
+    dailyCalorieBudget: 1800,
+    scoreRules: {
+      highCholesterolThreshold: 100,
+      highCholesterolPenalty: 20,
+      highFatThreshold: 20,
+      highFatPenalty: 15,
+      friedKeywordPenalty: 10,
+      omega3Bonus: 10,
+      steamedKeywordBonus: 5,
+    }
   },
   gout: {
     lockedIngredients: [
@@ -116,7 +212,61 @@ export const HEALTH_CONDITION_RULES = {
       "Gạo lứt"
     ],
     maxCaloriesPerMeal: 500,
-    dailyCalorieBudget: 1800
+    dailyCalorieBudget: 1800,
+    scoreRules: {
+      seafoodKeywords: ["hải sản", "tôm", "cua", "mực", "sò", "ốc", "ngao", "hàu"],
+      organKeywords: ["nội tạng", "gan", "tim", "thận", "lòng"],
+      seafoodPenalty: 30,
+      organPenalty: 30,
+      highProteinThreshold: 30,
+      highProteinPenalty: 10,
+      vegetableBonus: 5,
+    }
+  },
+  gerd: {
+    lockedIngredients: [
+      "Ớt",
+      "Tiêu",
+      "Cà phê",
+      "Sô cô la",
+      "Rượu",
+      "Đồ cay"
+    ],
+    reducedIngredients: [
+      "Tỏi",
+      "Hành",
+      "Cà chua",
+      "Nước cam",
+      "Chanh",
+      "Giấm",
+      "Dầu ăn",
+      "Đồ chiên"
+    ],
+    preferredIngredients: [
+      "Gừng",
+      "Chuối",
+      "Táo",
+      "Rau xanh",
+      "Gạo",
+      "Bánh mì trắng",
+      "Sữa không béo",
+      "Thịt nạc hấp"
+    ],
+    maxFatPerMeal: 15,
+    dailyCalorieBudget: 1800,
+    scoreRules: {
+      spicyKeywords: ["cay", "ớt", "tiêu", "sa tế"],
+      sourKeywords: ["chua", "giấm", "chanh", "me"],
+      coffeeKeywords: ["cà phê", "cafe"],
+      friedKeywords: ["chiên", "rán", "xào nhiều dầu"],
+      spicyPenalty: 20,
+      sourPenalty: 15,
+      coffeePenalty: 20,
+      friedPenalty: 15,
+      highFatThreshold: 25,
+      highFatPenalty: 10,
+      steamedBonus: 5,
+    }
   }
 };
 

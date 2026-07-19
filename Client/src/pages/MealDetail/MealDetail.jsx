@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiArrowLeft, FiChevronDown, FiZap } from 'react-icons/fi';
+import { FiClock, FiHeart, FiArrowLeft, FiChevronDown, FiZap, FiBookOpen } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { recipeService } from '../../services/recipeService';
+import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
+import HealthWarningPopup from '../../components/common/HealthWarningPopup';
+import { useHealthProfile } from '../../hooks/useHealthProfile';
+import { useAuth } from '../../context/AuthContext';
+import { nutritionLogService } from '../../services/nutritionLogService';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './MealDetail.css';
 
 export default function MealDetail() {
@@ -17,6 +23,41 @@ export default function MealDetail() {
   const [expandedIngredients, setExpandedIngredients] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [drawerRecipe, setDrawerRecipe] = useState(null);
+  const [warningPopupData, setWarningPopupData] = useState(null);
+  const { getHealthScoreDetails, dailyTargets } = useHealthProfile();
+  const { user } = useAuth();
+  const accountId = user?.accountId || user?.account_id;
+  const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
+
+  useEffect(() => {
+    const fetchTodayLogs = async () => {
+      if (!accountId) return;
+      try {
+        const res = await nutritionLogService.getAll(accountId);
+        const logs = res.data?.data || [];
+        const today = getTodayDateKey();
+        const todayLogs = logs.filter(l => toDateKey(l.logDate) === today);
+        
+        const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+        todayLogs.forEach(l => {
+          totals.calories += l.totalCalories || 0;
+          totals.protein += l.totalProtein || 0;
+          totals.carbs += l.totalCarbs || 0;
+          totals.fat += l.totalFat || 0;
+          totals.fiber += l.totalFiber || 0;
+          totals.sugar += l.totalSugar || 0;
+          totals.sodium += l.totalSalt || l.totalSodium || 0;
+          totals.cholesterol += l.totalCholesterol || 0;
+        });
+        setTodayTotals(totals);
+      } catch (err) {
+        console.error('Không thể tải nhật ký hôm nay:', err);
+      }
+    };
+    fetchTodayLogs();
+  }, [accountId]);
+
 
   const toggleExpand = (idx) => {
     setExpandedIngredients(prev => ({
@@ -104,6 +145,12 @@ export default function MealDetail() {
             cholesterol: Math.round(totalNutri.cholesterol / servings),
           };
 
+          const healthDetails = getHealthScoreDetails ? getHealthScoreDetails({
+            nutrition: calculatedNutrition,
+            ingredients: mappedIngredients,
+            title: recipeName
+          }) : { score: 100, reasons: [], allergyBlock: false, matchedAllergies: [] };
+
           setRecipe({
             id: recipeId,
             title: recipeName,
@@ -115,7 +162,8 @@ export default function MealDetail() {
             ingredients: mappedIngredients,
             steps,
             nutrition: calculatedNutrition,
-            servings
+            servings,
+            healthDetails
           });
         } else {
           setError("Không thể tải chi tiết công thức.");
@@ -143,6 +191,16 @@ export default function MealDetail() {
 
   const handleSave = () => {
     toggleFavorite(recipe);
+  };
+
+  const handleAddToDiaryClick = () => {
+    if (!recipe) return;
+    const { score, reasons, allergyBlock, matchedAllergies } = recipe.healthDetails || {};
+    if (allergyBlock || (score !== undefined && score < 80)) {
+      setWarningPopupData({ recipe, score, reasons, allergyBlock, matchedAllergies });
+    } else {
+      setDrawerRecipe(recipe);
+    }
   };
 
   return (
@@ -192,6 +250,10 @@ export default function MealDetail() {
                 <span className="meta-value">{recipe.difficulty}</span>
               </div>
             </div>
+            <button className="meta-diary-btn" onClick={handleAddToDiaryClick}>
+              <FiBookOpen className="meta-icon" />
+              <span>Thêm vào nhật ký</span>
+            </button>
           </div>
 
           <div className="detail-body">
@@ -338,6 +400,25 @@ export default function MealDetail() {
           </div>
         </div>
       </div>
+      <DiaryEntryDrawer
+        recipe={drawerRecipe}
+        isOpen={!!drawerRecipe}
+        todayTotals={todayTotals}
+        dailyGoal={dailyTargets}
+        onClose={() => setDrawerRecipe(null)}
+      />
+
+      {warningPopupData && (
+        <HealthWarningPopup
+          {...warningPopupData}
+          onCancel={() => setWarningPopupData(null)}
+          onConfirm={() => {
+            const rec = warningPopupData.recipe;
+            setWarningPopupData(null);
+            setDrawerRecipe(rec);
+          }}
+        />
+      )}
     </div>
   );
 }

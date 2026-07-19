@@ -1,6 +1,7 @@
 using BusinessObject.Dtos.RequestModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Service.Interfaces;
 using System.Security.Claims;
 
@@ -12,10 +13,17 @@ namespace PresentationLayer.Controllers
     public class NutritionDiaryController : ControllerBase
     {
         private readonly INutritionLogService _nutritionLogService;
+        private readonly IWebHostEnvironment _environment;
+        private readonly ILogger<NutritionDiaryController> _logger;
 
-        public NutritionDiaryController(INutritionLogService nutritionLogService)
+        public NutritionDiaryController(
+            INutritionLogService nutritionLogService,
+            IWebHostEnvironment environment,
+            ILogger<NutritionDiaryController> logger)
         {
             _nutritionLogService = nutritionLogService;
+            _environment = environment;
+            _logger = logger;
         }
 
         private Guid GetAccountId()
@@ -51,8 +59,31 @@ namespace PresentationLayer.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Failed to add nutrition diary entry");
+                return BadRequest(new { success = false, message = GetDetailedErrorMessage(ex) });
             }
+        }
+
+        private string GetDetailedErrorMessage(Exception ex)
+        {
+            if (ex is DbUpdateException dbEx && dbEx.InnerException != null)
+                return dbEx.InnerException.Message;
+
+            if (_environment.IsDevelopment())
+                return ex.ToString();
+
+            return ex.Message;
+        }
+
+        private static DateTime NormalizeQueryDate(DateTime? date)
+        {
+            var value = date ?? DateTime.UtcNow;
+            return value.Kind switch
+            {
+                DateTimeKind.Utc => value,
+                DateTimeKind.Local => value.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+            };
         }
 
         [HttpGet]
@@ -61,7 +92,7 @@ namespace PresentationLayer.Controllers
             try
             {
                 var accountId = GetAccountId();
-                var queryDate = date ?? DateTime.UtcNow;
+                var queryDate = NormalizeQueryDate(date);
                 var entries = await _nutritionLogService.GetNutritionLogsByAccountAndDate(accountId, queryDate);
 
                 var totalCalories = entries.Sum(e => e.TotalCalories ?? 0);
@@ -95,7 +126,8 @@ namespace PresentationLayer.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Failed to get nutrition diary entries for date {Date}", date);
+                return BadRequest(new { success = false, message = GetDetailedErrorMessage(ex) });
             }
         }
 
@@ -109,7 +141,8 @@ namespace PresentationLayer.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Failed to delete nutrition diary entry {EntryId}", id);
+                return BadRequest(new { success = false, message = GetDetailedErrorMessage(ex) });
             }
         }
 
@@ -119,8 +152,8 @@ namespace PresentationLayer.Controllers
             try
             {
                 var accountId = GetAccountId();
-                var startDate = start ?? DateTime.UtcNow.AddDays(-7);
-                var endDate = end ?? DateTime.UtcNow;
+                var startDate = NormalizeQueryDate(start ?? DateTime.UtcNow.AddDays(-7));
+                var endDate = NormalizeQueryDate(end ?? DateTime.UtcNow);
 
                 var entries = await _nutritionLogService.GetNutritionLogsByAccountAndDateRange(accountId, startDate, endDate);
 
@@ -151,7 +184,8 @@ namespace PresentationLayer.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Failed to get nutrition diary summary");
+                return BadRequest(new { success = false, message = GetDetailedErrorMessage(ex) });
             }
         }
     }
