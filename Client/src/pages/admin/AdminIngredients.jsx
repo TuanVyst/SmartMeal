@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
+import { resolveIngredientImageUrl } from '../../utils/ingredientImages';
 
 export default function AdminIngredients() {
   const dialog = useDialog();
@@ -172,7 +173,6 @@ export default function AdminIngredients() {
             <tr>
               <th>Hình ảnh</th>
               <th>Tên</th>
-              <th>Giá TB</th>
               <th>Calories</th>
               <th>Tags</th>
               <th>Thao tác</th>
@@ -181,7 +181,7 @@ export default function AdminIngredients() {
           <tbody>
             {filteredIngredients.length === 0 && (
               <tr>
-                <td colSpan={6} className="empty-state">
+                <td colSpan={5} className="empty-state">
                   <p>Không tìm thấy nguyên liệu</p>
                 </td>
               </tr>
@@ -189,14 +189,16 @@ export default function AdminIngredients() {
             {filteredIngredients.map((ingredient) => (
               <tr key={ingredient.ingredient_id || ingredient.id}>
                 <td>
-                  {ingredient.imageUrl ? (
-                    <img src={ingredient.imageUrl} alt={ingredient.name} className="admin-table-img" />
-                  ) : (
-                    <div className="admin-table-img-placeholder">No Img</div>
-                  )}
+                  <img
+                    src={resolveIngredientImageUrl(ingredient.imageUrl, ingredient.name)}
+                    alt={ingredient.name}
+                    className="admin-table-img"
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=150&h=150&auto=format&fit=crop';
+                    }}
+                  />
                 </td>
                 <td className="font-medium">{ingredient.name}</td>
-                <td>${ingredient.averagePrice?.toFixed(2) || '0.00'}</td>
                 <td>
                   <span className="calorie-badge">
                     {ingredient.nutritional_value?.calories || 0} kcal
@@ -238,28 +240,15 @@ export default function AdminIngredients() {
               </button>
             </div>
             <form onSubmit={handleIngredientSubmit} className="modal-form">
-              <div className="form-grid-2">
-                <div className="form-group">
-                  <label className="form-label">Tên <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={ingredientFormData.name}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Giá trung bình ($)</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={ingredientFormData.averagePrice}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, averagePrice: parseFloat(e.target.value) || 0 })}
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
+              <div className="form-group">
+                <label className="form-label">Tên <span className="required">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={ingredientFormData.name}
+                  onChange={(e) => setIngredientFormData({ ...ingredientFormData, name: e.target.value })}
+                  required
+                />
               </div>
               
               <div className="form-group">
