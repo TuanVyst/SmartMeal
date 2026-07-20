@@ -2,7 +2,7 @@
   {
     "Recipe_name": "Bánh mì trứng ốp la",
     "Description": "Bánh mì giòn rụm kẹp trứng ốp la béo ngậy, thêm rau sống và nước mắm chua ngọt. Món ăn sáng nhanh gọn đầy năng lượng.",
-    "Instruction": "1. Cắt bánh mì theo chiều dài, phết bơ lên mặt trong.\n2. Chiên trứng ốp la với dầu ăn, giữ lòng đào còn chảy.\n3. Cà chua cắt lát, dưa chuột cắt sợi, rau mùi rửa sạch.\n4. Xếp trứng ốp la, cà chua, dưa chuột, rau mùi vào bánh mì.\n5. Pha nước mắm chua ngọt: nước mắm, đường, chanh, tỏi băm.\n6. Rưới nước mắm lên bánh mì, rắc thêm ớt tươi nếu thích.",
+    "Instruction": "1. Cắt bánh mì theo chiều dài, phết bơ lên mặt trong.\n2. Chiên trứng ốp la với dầu ăn, giữ lòng đào còn chảy.\n3. Cà chua cắt lát, dưa leo cắt sợi, rau mùi rửa sạch.\n4. Xếp trứng ốp la, cà chua, dưa leo, rau mùi vào bánh mì.\n5. Pha nước mắm chua ngọt: nước mắm, đường, chanh, tỏi băm.\n6. Rưới nước mắm lên bánh mì, rắc thêm ớt tươi nếu thích.",
     "CookTime": 5,
     "PrepTime": 5,
     "Servings": 1,
@@ -36,7 +36,7 @@
         "UOM": "piece"
       },
       {
-        "Name": "Dưa chuột",
+        "Name": "Dưa leo",
         "Quantity": 1,
         "UOM": "piece"
       },

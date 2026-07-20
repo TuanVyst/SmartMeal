@@ -520,26 +520,7 @@
       "Trái cây"
     ]
   },
-  {
-    "Name": "Dưa chuột",
-    "AveragePrice": 1.5,
-    "ImageUrl": "/images/dua-chuot.jpg",
-    "NutritionalValues": {
-      "Calories": 15,
-      "Protein": 0.7,
-      "Carbs": 3.6,
-      "Fat": 0.1,
-      "Fiber": 0.5,
-      "Sugar": 1.7,
-      "Salt": 0.002,
-      "Cholesterol": 0,
-      "ServingSize": 100,
-      "ServingUnit": "g"
-    },
-    "TagNames": [
-      "Trái cây"
-    ]
-  },
+
   {
     "Name": "Bơ thực vật",
     "AveragePrice": 4.0,

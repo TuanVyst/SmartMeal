@@ -54,6 +54,80 @@ public static class DbInitializer
         // Seed subscription plans
         await SeedPlansAsync(context);
 
+        // One-time data migration to merge "Dưa chuột" into "Dưa leo"
+        var duaChuot = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Dưa chuột");
+        var duaLeo = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Dưa leo");
+        if (duaChuot != null && duaLeo != null)
+        {
+            // 1. Merge RecipeIngredients
+            var riDuaChuot = await context.RecipeIngredients.Where(ri => ri.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
+            foreach (var ri in riDuaChuot)
+            {
+                var exists = await context.RecipeIngredients.AnyAsync(r => r.Recipe_id == ri.Recipe_id && r.Ingredient_id == duaLeo.Ingredient_id);
+                if (!exists)
+                {
+                    ri.Ingredient_id = duaLeo.Ingredient_id;
+                    context.RecipeIngredients.Update(ri);
+                }
+                else
+                {
+                    context.RecipeIngredients.Remove(ri);
+                }
+            }
+
+            // 2. Merge IngredientLabels (Categories)
+            var labelsDuaChuot = await context.IngredientLabels.Where(il => il.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
+            foreach (var label in labelsDuaChuot)
+            {
+                var exists = await context.IngredientLabels.AnyAsync(il => il.Ingredient_id == duaLeo.Ingredient_id && il.It_id == label.It_id);
+                if (!exists)
+                {
+                    label.Ingredient_id = duaLeo.Ingredient_id;
+                    context.IngredientLabels.Update(label);
+                }
+                else
+                {
+                    context.IngredientLabels.Remove(label);
+                }
+            }
+
+            // 3. Merge GroceryItems
+            var groceryItems = await context.GroceryItems.Where(gi => gi.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
+            foreach (var gi in groceryItems)
+            {
+                gi.Ingredient_id = duaLeo.Ingredient_id;
+                context.GroceryItems.Update(gi);
+            }
+
+            // 4. Merge Pantries
+            var pantries = await context.Pantries.Where(p => p.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
+            foreach (var p in pantries)
+            {
+                p.Ingredient_id = duaLeo.Ingredient_id;
+                context.Pantries.Update(p);
+            }
+
+            // 5. Merge Allergies
+            var allergies = await context.Allergies.Where(a => a.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
+            foreach (var a in allergies)
+            {
+                a.Ingredient_id = duaLeo.Ingredient_id;
+                context.Allergies.Update(a);
+            }
+
+            // 6. Delete Nutritional Value of Dưa chuột
+            var nvDuaChuot = await context.NutritionalValues.FirstOrDefaultAsync(nv => nv.Ingredient_id == duaChuot.Ingredient_id);
+            if (nvDuaChuot != null)
+            {
+                context.NutritionalValues.Remove(nvDuaChuot);
+            }
+
+            // 7. Delete Dưa chuột Ingredient
+            context.Ingredients.Remove(duaChuot);
+
+            await context.SaveChangesAsync();
+        }
+
         // Check for English data and clear the database if found to force a Vietnamese re-seed
         var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
         var hasEnglishTags = await context.IngredientTags.AnyAsync(t => t.Name == "VEGETABLE" || t.Name == "GRAIN");
@@ -771,7 +845,6 @@ public static class DbInitializer
             { "cà rốt", ("củ", 100.0) },
             { "hành tây", ("củ", 150.0) },
             { "bông cải xanh", ("cây", 300.0) },
-            { "dưa chuột", ("quả", 150.0) },
             { "dưa leo", ("quả", 150.0) },
             { "bắp cải", ("cái", 800.0) },
             { "ớt chuông", ("quả", 150.0) },
