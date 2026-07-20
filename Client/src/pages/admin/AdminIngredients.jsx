@@ -33,12 +33,12 @@ export default function AdminIngredients() {
   const [availableIngredientTags, setAvailableIngredientTags] = useState([]);
 
   useEffect(() => {
-    fetchAllData();
+    fetchAllData(true);
   }, []);
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const [ingredientsData, tagsData] = await Promise.all([
         adminService.getAllIngredients(),
         adminService.getAllIngredientTags()
@@ -48,7 +48,7 @@ export default function AdminIngredients() {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
@@ -158,9 +158,9 @@ export default function AdminIngredients() {
     setEditingIngredient(null);
   };
 
-  const filteredIngredients = ingredients.filter((ing) =>
-    (ing.name || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredIngredients = ingredients
+    .filter((ing) => (ing.name || '').toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
   if (loading) return <div className="admin-loading">Loading ingredients...</div>;
 
@@ -316,7 +316,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.calories}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, calories: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, calories: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -324,7 +324,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.protein}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, protein: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, protein: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -332,7 +332,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.carbohydrates}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, carbohydrates: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, carbohydrates: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -340,7 +340,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.fat}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fat: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fat: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -348,7 +348,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.fiber}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fiber: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fiber: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -356,7 +356,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.sugar}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sugar: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sugar: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -364,7 +364,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.sodium}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sodium: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sodium: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -372,7 +372,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.cholesterol}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, cholesterol: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, cholesterol: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
               </div>
@@ -386,7 +386,7 @@ export default function AdminIngredients() {
                     type="number" className="form-control"
                     value={ingredientFormData.servingSize}
                     placeholder="Ví dụ: 100, 1, 3..."
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingSize: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingSize: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -413,7 +413,7 @@ export default function AdminIngredients() {
                     type="number" className="form-control"
                     value={ingredientFormData.everydayWeight}
                     placeholder="Ví dụ: 50, 150, 3..."
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayWeight: e.target.value ? parseFloat(e.target.value) : '' })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayWeight: e.target.value ? parseFloat(e.target.value) : '' })} min="0" step="any"
                   />
                 </div>
               </div>

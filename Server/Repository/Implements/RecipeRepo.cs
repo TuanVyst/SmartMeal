@@ -24,6 +24,7 @@ namespace Repository.Implements
                 .Include(r => r.RecipeLabels).ThenInclude(rl => rl.RecipeTag)
                 .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient).ThenInclude(i => i.Nutritional_value)
                 .Where(i => i.IsDeleted == false)
+                .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }
 
