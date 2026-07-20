@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { calculateBMI } from '../utils/bmiCalculator';
-import { getLockedIngredientsForProfile } from '../utils/healthRules';
+import { getLockedIngredientsForProfile, getActivityFactor, calculateDailyTargets, computeCalorieDelta } from '../utils/healthRules';
 import { useHealthProfile } from '../hooks/useHealthProfile';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { formatDateVi } from '../utils/dateTime';
-import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiFileText, FiLock, FiEdit2, FiSave } from 'react-icons/fi';
+import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiFileText, FiLock, FiEdit2, FiSave, FiInfo, FiZap, FiAlertTriangle } from 'react-icons/fi';
 
 const conditionsList = [
   { value: 'diabetes', label: 'Tiểu đường type 2' },
@@ -30,7 +30,13 @@ const bmiColors = {
   obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
 };
 
-const allergyTags = ['Gluten', 'Lactose', 'Hải sản', 'Đậu phộng', 'Trứng', 'Đậu nành', 'Hạt cây', 'Fructose'];
+const ACTIVITY_LEVELS = [
+  { value: 'sedentary',   emoji: '🪑', label: 'Ít vận động',    factor: 1.2,    desc: 'Văn phòng, học tập' },
+  { value: 'light',       emoji: '🚶', label: 'Vận động nhẹ',  factor: 1.375,  desc: 'Đi bộ, tập 1-3 buổi/tuần' },
+  { value: 'moderate',    emoji: '🏃', label: 'Vận động vừa',   factor: 1.55,   desc: 'Gym, chạy bộ 3-5 buổi/tuần' },
+  { value: 'active',      emoji: '💪', label: 'Vận động nhiều',  factor: 1.725,  desc: 'Lao động, tập mỗi ngày' },
+  { value: 'very_active', emoji: '🔥', label: 'Rất năng động', factor: 1.9,    desc: 'Vận động viên, lao động nặng' },
+];
 
 export default function HealthProfileEditor() {
   const { healthProfile, updateProfile, dailyCalorieBudget, lockedIngredients } = useHealthProfile();
@@ -38,11 +44,9 @@ export default function HealthProfileEditor() {
   const [saving, setSaving] = useState(false);
   const [bmiHistory, setBmiHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [customAllergy, setCustomAllergy] = useState('');
-
   const [formData, setFormData] = useState({
-    height: '', weight: '', goal: '',
-    conditions: [], allergies: [],
+    height: '', weight: '', targetWeight: '', goal: '',
+    conditions: [],
   });
 
   useEffect(() => {
@@ -50,12 +54,24 @@ export default function HealthProfileEditor() {
       setFormData({
         height: healthProfile.height || '',
         weight: healthProfile.weight || '',
+        targetWeight: healthProfile.targetWeight || '',
+        targetWeeks: healthProfile.targetWeeks || '',
         goal: healthProfile.goal || '',
+        activityLevel: healthProfile.activityLevel || 'sedentary',
         conditions: healthProfile.conditions || [],
-        allergies: healthProfile.allergies || [],
       });
     }
   }, [healthProfile]);
+
+  useEffect(() => {
+    if (formData.goal && !['lose', 'gain'].includes(formData.goal)) {
+      setFormData(prev => ({
+        ...prev,
+        targetWeight: '',
+        targetWeeks: ''
+      }));
+    }
+  }, [formData.goal]);
 
   const bmiResult = useMemo(() => {
     if (formData.height && formData.weight && Number(formData.height) > 0 && Number(formData.weight) > 0) {
@@ -63,6 +79,21 @@ export default function HealthProfileEditor() {
     }
     return null;
   }, [formData.height, formData.weight]);
+
+  const editPreviewBudget = useMemo(() => {
+    const mockProfile = {
+      weight: Number(formData.weight),
+      height: Number(formData.height),
+      gender: healthProfile?.gender || 'Khác',
+      dateOfBirth: healthProfile?.dateOfBirth,
+      activityLevel: formData.activityLevel || 'sedentary',
+      goal: formData.goal || 'maintain',
+      targetWeight: Number(formData.targetWeight),
+      targetWeeks: Number(formData.targetWeeks) || 12,
+      conditions: formData.conditions || [],
+    };
+    return calculateDailyTargets(mockProfile);
+  }, [formData, healthProfile]);
 
   const currentBmi = useMemo(() => {
     if (healthProfile?.height && healthProfile?.weight) {
@@ -95,9 +126,11 @@ export default function HealthProfileEditor() {
       const payload = {
         height: Number(formData.height) || null,
         weight: Number(formData.weight) || null,
+        targetWeight: formData.targetWeight ? Number(formData.targetWeight) : null,
+        targetWeeks: formData.targetWeeks ? Number(formData.targetWeeks) : null,
         goal: formData.goal || 'maintain',
+        activityLevel: formData.activityLevel || 'sedentary',
         conditions: formData.conditions,
-        allergies: formData.allergies,
       };
       const result = await updateProfile(payload);
       if (result.success) {
@@ -120,26 +153,16 @@ export default function HealthProfileEditor() {
     }));
   };
 
-  const toggleAllergy = (value) => {
-    setFormData(prev => ({
-      ...prev,
-      allergies: prev.allergies.includes(value)
-        ? prev.allergies.filter(a => a !== value)
-        : [...prev.allergies, value],
-    }));
-  };
 
-  const addCustomAllergy = () => {
-    const val = customAllergy.trim();
-    if (!val || formData.allergies.includes(val)) return;
-    setFormData(prev => ({ ...prev, allergies: [...prev.allergies, val] }));
-    setCustomAllergy('');
-  };
 
   if (!healthProfile) return null;
 
   const bmiStyle = currentBmi ? bmiColors[currentBmi.level] : null;
   const goalInfo = healthProfile.goal ? goalLabels[healthProfile.goal] : null;
+  const activityInfo = ACTIVITY_LEVELS.find(a => a.value === (healthProfile.activityLevel || 'sedentary'));
+
+  // Tính toán dinh dưỡng dựa trên hồ sơ hiện tại (chỉ hiển thị, không phải form)
+  const nutritionAnalysis = healthProfile ? calculateDailyTargets(healthProfile) : null;
 
   return (
     <div style={{
@@ -213,13 +236,27 @@ export default function HealthProfileEditor() {
                     padding: '8px 12px', background: 'white', borderRadius: 8,
                     border: '1px solid #e2e8f0', fontSize: 12,
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <span style={{ color: '#64748b' }}>
                           {formatDateVi(log.recordedAt)}
-                      </span>
-                      <span style={{ color: '#1E293B', fontWeight: 500 }}>
-                        {log.weight}kg / {log.height}cm
-                      </span>
+                        </span>
+                        <span style={{ color: '#1E293B', fontWeight: 500 }}>
+                          {log.weight}kg / {log.height}cm
+                        </span>
+                      </div>
+                      {(healthProfile?.conditions || []).length > 0 && (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          {healthProfile.conditions.map(c => (
+                            <span key={c} style={{
+                              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 500,
+                              background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
+                            }}>
+                              {conditionsList.find(cl => cl.value === c)?.label || c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontWeight: 600, color: '#1E293B' }}>{log.bmi}</span>
@@ -253,8 +290,13 @@ export default function HealthProfileEditor() {
                 </label>
                 <input
                   type="number"
+                  min="1"
                   value={formData.height}
-                  onChange={e => setFormData(prev => ({ ...prev, height: e.target.value }))}
+                  onChange={e => {
+                    let val = e.target.value;
+                    if (Number(val) < 0) val = '1';
+                    setFormData(prev => ({ ...prev, height: val }));
+                  }}
                   placeholder="170"
                   style={{
                     width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
@@ -268,8 +310,13 @@ export default function HealthProfileEditor() {
                 </label>
                 <input
                   type="number"
+                  min="1"
                   value={formData.weight}
-                  onChange={e => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+                  onChange={e => {
+                    let val = e.target.value;
+                    if (Number(val) < 0) val = '1';
+                    setFormData(prev => ({ ...prev, weight: val }));
+                  }}
                   placeholder="65"
                   style={{
                     width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
@@ -277,6 +324,101 @@ export default function HealthProfileEditor() {
                   }}
                 />
               </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 4 }}>
+                  Mục tiêu (kg)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.targetWeight}
+                  onChange={e => {
+                    let val = e.target.value;
+                    if (Number(val) < 0) val = '1';
+                    setFormData(prev => ({ ...prev, targetWeight: val }));
+                  }}
+                  placeholder="Ví dụ: 60"
+                  disabled={!['lose', 'gain'].includes(formData.goal)}
+                  style={{
+                    width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
+                    borderRadius: 8, fontSize: 14, outline: 'none',
+                    backgroundColor: !['lose', 'gain'].includes(formData.goal) ? '#f8fafc' : 'white',
+                    color: !['lose', 'gain'].includes(formData.goal) ? '#94a3b8' : 'inherit'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 4 }}>
+                  Thời gian (tuần)
+                </label>
+                <input
+                  type="number"
+                  value={formData.targetWeeks}
+                  onChange={e => {
+                    let val = e.target.value;
+                    if (Number(val) < 0) val = '1';
+                    setFormData(prev => ({ ...prev, targetWeeks: val }));
+                  }}
+                  placeholder="Ví dụ: 12"
+                  min="1"
+                  max="52"
+                  disabled={!['lose', 'gain'].includes(formData.goal)}
+                  style={{
+                    width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
+                    borderRadius: 8, fontSize: 14, outline: 'none',
+                    backgroundColor: !['lose', 'gain'].includes(formData.goal) ? '#f8fafc' : 'white',
+                    color: !['lose', 'gain'].includes(formData.goal) ? '#94a3b8' : 'inherit'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Target Weight Delta Preview */}
+            {(formData.goal === 'lose' || formData.goal === 'gain') && formData.weight && formData.targetWeight && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10, marginBottom: 16,
+                background: '#f8fafc', border: '1px solid #e2e8f0'
+              }}>
+                <FiInfo size={16} color="#3b82f6" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.4 }}>
+                  {formData.goal === 'lose' && formData.weight > formData.targetWeight ? (
+                    <>Mục tiêu giảm <strong>{(formData.weight - formData.targetWeight).toFixed(1)}kg</strong> trong {formData.targetWeeks || 12} tuần tới. Cần giảm ~<strong>{Math.abs(Math.round(computeCalorieDelta(formData.weight, formData.targetWeight, formData.targetWeeks || 12)))} kcal/ngày</strong>.</>
+                  ) : formData.goal === 'gain' && formData.targetWeight > formData.weight ? (
+                    <>Mục tiêu tăng <strong>{(formData.targetWeight - formData.weight).toFixed(1)}kg</strong> trong {formData.targetWeeks || 12} tuần tới. Cần nạp thêm ~<strong>{Math.abs(Math.round(computeCalorieDelta(formData.weight, formData.targetWeight, formData.targetWeeks || 12)))} kcal/ngày</strong>.</>
+                  ) : (
+                    <span style={{ color: '#ef4444' }}>Vui lòng điều chỉnh lại cân nặng mục tiêu cho hợp lý với mục tiêu {formData.goal === 'lose' ? 'giảm cân' : 'tăng cơ'}.</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Live Calorie Preview Panel */}
+            <div style={{
+              background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)',
+              border: '1px solid #bbf7d0', borderRadius: 12, padding: '12px 14px', marginBottom: 16
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d' }}>Xem trước kết quả năng lượng</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: '#64748b' }}>BMR (Nền tảng)</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#475569' }}>{editPreviewBudget.bmr} kcal</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: '#64748b' }}>TDEE (Vận động)</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#0284c7' }}>{editPreviewBudget.tdee} kcal</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: '#64748b' }}>Mục tiêu</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#16a34a' }}>{editPreviewBudget.calories} kcal</div>
+                </div>
+              </div>
+              {editPreviewBudget.goalTooAggressive && (
+                <div style={{ fontSize: 11, color: '#92400e', marginTop: 8, padding: '6px 8px', background: '#fff7ed', borderRadius: 6, border: '1px solid #fed7aa' }}>
+                  <strong>Cảnh báo:</strong> Mục tiêu vượt ngưỡng an toàn. Đã tự động điều chỉnh calo. Thời gian dự kiến mới: ~{editPreviewBudget.estimatedWeeks} tuần.
+                </div>
+              )}
             </div>
 
             {/* Live BMI preview */}
@@ -320,6 +462,35 @@ export default function HealthProfileEditor() {
               </div>
             </div>
 
+            {/* Activity Level */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
+                Mức độ vận động
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {ACTIVITY_LEVELS.map(a => (
+                  <button
+                    key={a.value}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, activityLevel: a.value }))}
+                    title={a.desc}
+                    style={{
+                      padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500,
+                      border: `2px solid ${formData.activityLevel === a.value ? '#22C55E' : '#e2e8f0'}`,
+                      background: formData.activityLevel === a.value ? '#f0fdf4' : 'white',
+                      color: formData.activityLevel === a.value ? '#16a34a' : '#475569',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                    }}
+                  >
+                    {a.emoji} {a.label}
+                  </button>
+                ))}
+              </div>
+              <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
+                Hệ số đang chọn: ×{ACTIVITY_LEVELS.find(a => a.value === formData.activityLevel)?.factor || 1.2}
+              </p>
+            </div>
+
             {/* Conditions */}
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
@@ -351,77 +522,6 @@ export default function HealthProfileEditor() {
               </div>
             </div>
 
-            {/* Allergies */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
-                Dị ứng
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                {allergyTags.map(tag => {
-                  const selected = formData.allergies.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => toggleAllergy(tag)}
-                      style={{
-                        padding: '5px 12px', borderRadius: 16, fontSize: 12, fontWeight: 500,
-                        border: `2px solid ${selected ? '#ef4444' : '#e2e8f0'}`,
-                        background: selected ? '#fef2f2' : 'transparent',
-                        color: selected ? '#dc2626' : '#475569',
-                        cursor: 'pointer', transition: 'all 0.2s',
-                      }}
-                    >
-                      {tag}
-                    </button>
-                  );
-                })}
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input
-                  type="text"
-                  value={customAllergy}
-                  onChange={e => setCustomAllergy(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomAllergy(); } }}
-                  placeholder="Thêm dị ứng khác..."
-                  style={{
-                    flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: 6,
-                    fontSize: 12, outline: 'none',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={addCustomAllergy}
-                  style={{
-                    padding: '6px 12px', background: '#22C55E', color: 'white', border: 'none',
-                    borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                  }}
-                >
-                  Thêm
-                </button>
-              </div>
-              {formData.allergies.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-                  {formData.allergies.map(a => (
-                    <span key={a} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '3px 8px', background: '#fef2f2', color: '#dc2626',
-                      borderRadius: 12, fontSize: 11, fontWeight: 500,
-                    }}>
-                      {a}
-                      <button
-                        type="button"
-                        onClick={() => toggleAllergy(a)}
-                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* Save/Cancel */}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
@@ -431,9 +531,11 @@ export default function HealthProfileEditor() {
                   setFormData({
                     height: healthProfile.height || '',
                     weight: healthProfile.weight || '',
+                    targetWeight: healthProfile.targetWeight || '',
+                    targetWeeks: healthProfile.targetWeeks || '',
                     goal: healthProfile.goal || '',
+                    activityLevel: healthProfile.activityLevel || 'sedentary',
                     conditions: healthProfile.conditions || [],
-                    allergies: healthProfile.allergies || [],
                   });
                 }}
                 style={{
@@ -461,22 +563,82 @@ export default function HealthProfileEditor() {
         ) : (
           /* VIEW MODE */
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+            {/* Stats Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 16 }}>
               {currentBmi && bmiStyle && (
                 <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
-                  <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Chỉ số BMI</div>
+                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Chỉ số BMI</div>
                   <div style={{ fontSize: 22, fontWeight: 700, color: bmiStyle.text }}>{currentBmi.bmi}</div>
-                  <div style={{ fontSize: 12, color: bmiStyle.text, fontWeight: 500 }}>{currentBmi.classification}</div>
+                  <div style={{ fontSize: 11, color: bmiStyle.text, fontWeight: 500 }}>{currentBmi.classification}</div>
                 </div>
               )}
               <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
-                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Mục tiêu</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#1E293B' }}>
-                  {goalInfo ? `${goalInfo.icon} ${goalInfo.label}` : 'Chưa chọn'}
+                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Mục tiêu</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#1E293B' }}>
+                  {goalInfo ? <>{goalInfo.icon} {goalInfo.label}</> : 'Chưa chọn'}
                 </div>
-                <div style={{ fontSize: 12, color: '#22C55E', fontWeight: 500 }}>{dailyCalorieBudget} kcal/ngày</div>
               </div>
+              {activityInfo && (
+                <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
+                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Vận động</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#1E293B' }}>{activityInfo.emoji} {activityInfo.label}</div>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>×{activityInfo.factor}</div>
+                </div>
+              )}
+              {healthProfile.targetWeight && healthProfile.weight && (healthProfile.goal === 'lose' || healthProfile.goal === 'gain') && (
+                <div style={{ padding: 12, background: '#f8fafc', borderRadius: 10 }}>
+                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Cân nặng mục tiêu</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: '#1E293B' }}>{healthProfile.targetWeight} kg</div>
+                  <div style={{ fontSize: 11, color: '#3b82f6', fontWeight: 500 }}>
+                    {healthProfile.goal === 'lose' && healthProfile.weight > healthProfile.targetWeight
+                      ? `Giảm ${(healthProfile.weight - healthProfile.targetWeight).toFixed(1)}kg`
+                      : healthProfile.goal === 'gain' && healthProfile.targetWeight > healthProfile.weight
+                        ? `Tăng ${(healthProfile.targetWeight - healthProfile.weight).toFixed(1)}kg`
+                        : 'Mục tiêu chưa hợp lý'}
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Nutrition Analysis Panel */}
+            {nutritionAnalysis && (
+              <div style={{
+                background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)',
+                border: '1px solid #bbf7d0', borderRadius: 12, padding: '14px 16px', marginBottom: 14
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                  <FiZap size={14} color="#16a34a" />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d' }}>Phân tích năng lượng</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {[
+                    { label: 'BMR', value: nutritionAnalysis.bmr, unit: 'kcal', color: '#475569' },
+                    { label: 'TDEE', value: nutritionAnalysis.tdee, unit: 'kcal', color: '#0284c7' },
+                    { label: 'Mục tiêu', value: nutritionAnalysis.calories, unit: 'kcal', color: '#16a34a' },
+                    { label: nutritionAnalysis.deficit >= 0 ? 'Thâm hụt' : 'Thừa dư', value: Math.abs(nutritionAnalysis.deficit), unit: 'kcal', color: nutritionAnalysis.deficit >= 0 ? '#ea580c' : '#7c3aed' },
+                  ].map(item => (
+                    <div key={item.label} style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 10, color: '#64748b', marginBottom: 2 }}>{item.label}</div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: item.color }}>{item.value}</div>
+                      <div style={{ fontSize: 9, color: '#94a3b8' }}>{item.unit}</div>
+                    </div>
+                  ))}
+                </div>
+                {nutritionAnalysis.goalTooAggressive && (
+                  <div style={{
+                    marginTop: 10, padding: '8px 12px', background: '#fff7ed',
+                    border: '1px solid #fed7aa', borderRadius: 8,
+                    display: 'flex', alignItems: 'flex-start', gap: 6
+                  }}>
+                    <FiAlertTriangle size={13} color="#ea580c" style={{ flexShrink: 0, marginTop: 1 }} />
+                    <div style={{ fontSize: 11, color: '#92400e', lineHeight: 1.4 }}>
+                      <strong>Mục tiêu hiện tại vượt ngưỡng an toàn.</strong> SmartMeal đã tự động điều chỉnh về {nutritionAnalysis.calories} kcal/ngày.
+                      {nutritionAnalysis.estimatedWeeks && <> Thời gian thực tế dự kiến: <strong>~{nutritionAnalysis.estimatedWeeks} tuần</strong>.</>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {(healthProfile.conditions || []).length > 0 && (
               <div style={{ marginBottom: 12 }}>

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
+import { useDialog } from '../../context/DialogContext';
+import { resolveIngredientImageUrl } from '../../utils/ingredientImages';
 
 export default function AdminIngredients() {
+  const dialog = useDialog();
   const [ingredients, setIngredients] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -19,6 +22,10 @@ export default function AdminIngredients() {
     sugar: 0,
     sodium: 0,
     cholesterol: 0,
+    servingSize: 100,
+    servingUnit: 'g',
+    everydayUnit: '',
+    everydayWeight: '',
     ingredientTagIds: []
   });
   const [editingIngredient, setEditingIngredient] = useState(null);
@@ -60,7 +67,11 @@ export default function AdminIngredients() {
           fiber: ingredientFormData.fiber,
           sugar: ingredientFormData.sugar,
           sodium: ingredientFormData.sodium,
-          cholesterol: ingredientFormData.cholesterol
+          cholesterol: ingredientFormData.cholesterol,
+          servingSize: ingredientFormData.servingSize,
+          servingUnit: ingredientFormData.servingUnit,
+          everydayUnit: ingredientFormData.everydayUnit || null,
+          everydayWeight: ingredientFormData.everydayWeight ? parseFloat(ingredientFormData.everydayWeight) : null
         }
       };
 
@@ -73,7 +84,7 @@ export default function AdminIngredients() {
       closeIngredientModal();
     } catch (error) {
       console.error('Error saving ingredient:', error);
-      alert('Lỗi khi lưu nguyên liệu. Xem console để biết thêm chi tiết.');
+      dialog.error('Lỗi', 'Lỗi khi lưu nguyên liệu. Xem console để biết thêm chi tiết.');
     }
   };
 
@@ -98,19 +109,23 @@ export default function AdminIngredients() {
       sugar: ingredient.nutritional_value?.sugar || 0,
       sodium: ingredient.nutritional_value?.salt || ingredient.nutritional_value?.sodium || 0,
       cholesterol: ingredient.nutritional_value?.cholesterol || 0,
+      servingSize: ingredient.nutritional_value?.servingSize || 100,
+      servingUnit: ingredient.nutritional_value?.servingUnit || 'g',
+      everydayUnit: ingredient.nutritional_value?.everydayUnit || '',
+      everydayWeight: ingredient.nutritional_value?.everydayWeight || '',
       ingredientTagIds: tagIds
     });
     setIsIngredientModalOpen(true);
   };
 
   const handleDeleteIngredient = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa nguyên liệu này?')) {
-      try {
-        await adminService.deleteIngredient(id);
-        fetchAllData();
-      } catch (error) {
-        console.error('Error deleting ingredient:', error);
-      }
+    const ok = await dialog.confirm({ title: 'Xóa nguyên liệu?', message: 'Bạn có chắc chắn muốn xóa nguyên liệu này?', confirmLabel: 'Xóa', danger: true });
+    if (!ok) return;
+    try {
+      await adminService.deleteIngredient(id);
+      fetchAllData();
+    } catch (error) {
+      console.error('Error deleting ingredient:', error);
     }
   };
 
@@ -129,6 +144,10 @@ export default function AdminIngredients() {
       sugar: 0,
       sodium: 0,
       cholesterol: 0,
+      servingSize: 100,
+      servingUnit: 'g',
+      everydayUnit: '',
+      everydayWeight: '',
       ingredientTagIds: []
     });
   };
@@ -170,7 +189,6 @@ export default function AdminIngredients() {
             <tr>
               <th>Hình ảnh</th>
               <th>Tên</th>
-              <th>Giá TB</th>
               <th>Calories</th>
               <th>Tags</th>
               <th>Thao tác</th>
@@ -179,7 +197,7 @@ export default function AdminIngredients() {
           <tbody>
             {filteredIngredients.length === 0 && (
               <tr>
-                <td colSpan={6} className="empty-state">
+                <td colSpan={5} className="empty-state">
                   <p>Không tìm thấy nguyên liệu</p>
                 </td>
               </tr>
@@ -187,14 +205,16 @@ export default function AdminIngredients() {
             {filteredIngredients.map((ingredient) => (
               <tr key={ingredient.ingredient_id || ingredient.id}>
                 <td>
-                  {ingredient.imageUrl ? (
-                    <img src={ingredient.imageUrl} alt={ingredient.name} className="admin-table-img" />
-                  ) : (
-                    <div className="admin-table-img-placeholder">No Img</div>
-                  )}
+                  <img
+                    src={resolveIngredientImageUrl(ingredient.imageUrl, ingredient.name)}
+                    alt={ingredient.name}
+                    className="admin-table-img"
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=150&h=150&auto=format&fit=crop';
+                    }}
+                  />
                 </td>
                 <td className="font-medium">{ingredient.name}</td>
-                <td>${ingredient.averagePrice?.toFixed(2) || '0.00'}</td>
                 <td>
                   <span className="calorie-badge">
                     {ingredient.nutritional_value?.calories || 0} kcal
@@ -236,28 +256,15 @@ export default function AdminIngredients() {
               </button>
             </div>
             <form onSubmit={handleIngredientSubmit} className="modal-form">
-              <div className="form-grid-2">
-                <div className="form-group">
-                  <label className="form-label">Tên <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={ingredientFormData.name}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Giá trung bình ($)</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={ingredientFormData.averagePrice}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, averagePrice: parseFloat(e.target.value) || 0 })}
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
+              <div className="form-group">
+                <label className="form-label">Tên <span className="required">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={ingredientFormData.name}
+                  onChange={(e) => setIngredientFormData({ ...ingredientFormData, name: e.target.value })}
+                  required
+                />
               </div>
               
               <div className="form-group">
@@ -366,6 +373,47 @@ export default function AdminIngredients() {
                     type="number" className="form-control"
                     value={ingredientFormData.cholesterol}
                     onChange={(e) => setIngredientFormData({ ...ingredientFormData, cholesterol: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                  />
+                </div>
+              </div>
+
+              <hr />
+              <h4 style={{ marginBottom: '1rem', marginTop: '1rem' }}>Cấu hình Quy đổi Đơn vị Thường ngày & Khẩu phần</h4>
+              <div className="form-grid-3" style={{ marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Cỡ khẩu phần (Serving Size)</label>
+                  <input
+                    type="number" className="form-control"
+                    value={ingredientFormData.servingSize}
+                    placeholder="Ví dụ: 100, 1, 3..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingSize: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Đơn vị khẩu phần (Serving Unit)</label>
+                  <input
+                    type="text" className="form-control"
+                    value={ingredientFormData.servingUnit}
+                    placeholder="Ví dụ: g, ml, quả, tép..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingUnit: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Đơn vị thường ngày (Everyday Unit)</label>
+                  <input
+                    type="text" className="form-control"
+                    value={ingredientFormData.everydayUnit}
+                    placeholder="Ví dụ: quả, chén, bó..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayUnit: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Trọng lượng quy đổi tương đương (g)</label>
+                  <input
+                    type="number" className="form-control"
+                    value={ingredientFormData.everydayWeight}
+                    placeholder="Ví dụ: 50, 150, 3..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayWeight: e.target.value ? parseFloat(e.target.value) : '' })} min="0" step="0.1"
                   />
                 </div>
               </div>

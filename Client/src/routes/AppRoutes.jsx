@@ -17,18 +17,22 @@ import IngredientDetail from '../pages/food/IngredientDetail';
 import LandingPage from '../pages/landing/LandingPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/AdminUsers';
-import AdminMeals from '../pages/admin/AdminMeals';
 import AdminIngredientTags from '../pages/admin/AdminIngredientTags';
 import AdminIngredients from '../pages/admin/AdminIngredients';
 import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
 import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
-import AdminFeedback from '../pages/admin/AdminFeedback';
-import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
+// import AdminFeedback from '../pages/admin/AdminFeedback';
+// import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
+import AdminPlans from '../pages/admin/AdminPlans';
+import AdminStatistics from '../pages/admin/AdminStatistics';
 import Nutrition from '../pages/nutrition/Nutrition';
-import NutritionDiaryPage from '../pages/diary/NutritionDiaryPage';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
+import SubscriptionPlans from '../pages/subscription/SubscriptionPlans';
+import Payment from '../pages/subscription/Payment';
+import PaymentSuccess from '../pages/subscription/PaymentSuccess';
+import PaymentCancel from '../pages/subscription/PaymentCancel';
 
 export default function AppRoutes() {
   return (
@@ -46,6 +50,10 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/subscription" element={<SubscriptionPlans />} />
+        <Route path="/subscription/payment" element={<Payment />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
         <Route path="/favorites" element={<Favorites />} />
@@ -57,8 +65,6 @@ export default function AppRoutes() {
         <Route path="/ingredients/:id" element={<IngredientDetail />} />
         <Route path="/ingredients/:id/edit" element={<IngredientForm />} />
         <Route path="/nutrition" element={<Nutrition />} />
-        <Route path="/nutrition-diary" element={<NutritionDiaryPage />} />
-        <Route path="/nhat-ky" element={<NutritionDiaryPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/health-survey" element={<SurveyPage />} />
       </Route>
@@ -72,14 +78,15 @@ export default function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="meals" element={<AdminMeals />} />
         <Route path="ingredient-tags" element={<AdminIngredientTags />} />
         <Route path="ingredients" element={<AdminIngredients />} />
         <Route path="recipe-tags" element={<AdminRecipeTags />} />
         <Route path="recipes" element={<AdminRecipes />} />
         <Route path="categories" element={<AdminCategories />} />
-        <Route path="feedback" element={<AdminFeedback />} />
-        <Route path="feedback/:id" element={<AdminFeedbackDetail />} />
+        {/* <Route path="feedback" element={<AdminFeedback />} /> */}
+        {/* <Route path="feedback/:id" element={<AdminFeedbackDetail />} /> */}
+        <Route path="plans" element={<AdminPlans />} />
+        <Route path="statistics" element={<AdminStatistics />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

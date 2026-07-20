@@ -74,7 +74,7 @@
 }
 
 .form-input:focus {
-  border-color: #00a859;
+  border-color: #444;
   box-shadow: 0 0 0 3px rgba(0, 168, 89, 0.1);
 }
 
@@ -105,7 +105,7 @@
 }
 
 .btn-save {
-  background-color: #00a859;
+  background-color: #16a34a;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -117,7 +117,7 @@
 }
 
 .btn-save:hover {
-  background-color: #008f4c;
+  background-color: #15803d;
 }
 
 .btn-save:disabled {
@@ -127,10 +127,161 @@
 
 .alert-success {
   background-color: #e6f7ef;
-  color: #00a859;
+  color: #444;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-weight: 500;
   border: 1px solid #bbf7d0;
 }
+
+/* ── Profile Tabs ── */
+.profile-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.profile-tab-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.profile-tab-btn:hover {
+  color: #1e293b;
+  background-color: #f1f5f9;
+}
+
+.profile-tab-btn.active {
+  color: #444;
+  background-color: #e6f7ef;
+}
+
+/* ── Premium Status Section ── */
+.premium-status-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.premium-status-section.active-premium {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #bbf7d0;
+}
+
+.status-info h3 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.status-info p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-renew-premium {
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 168, 89, 0.15);
+  font-family: inherit;
+}
+
+.btn-renew-premium:hover {
+  background-color: #15803d;
+}
+
+.history-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.history-table th, .history-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.history-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+}
+
+.history-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.pending {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.status-badge.expired {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.cancelled {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.empty-history {
+  text-align: center;
+  color: #64748b;
+  padding: 2rem;
+  font-style: italic;
+}
+

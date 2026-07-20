@@ -24,6 +24,13 @@ namespace Repository.Implements
                 .ToListAsync();
         }
 
+        public async Task<List<Subscription>> GetSubscriptionsByAccountId(Guid accountId)
+        {
+            return await _ctx.Subscriptions
+                .Where(i => !i.IsDeleted && i.Account_id == accountId)
+                .ToListAsync();
+        }
+
         public async Task<Subscription?> GetSubscriptionById(Guid id)
             => await _ctx.Subscriptions
                 .Where(i => !i.IsDeleted)

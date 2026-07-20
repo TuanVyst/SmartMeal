@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PresentationLayer;
+using PresentationLayer.BackgroundServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -32,6 +33,7 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Accept any casing from client (camelCase, PascalCase, snake_case)
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
@@ -152,9 +154,22 @@ builder.Services.AddScoped<Service.Interfaces.IMedicalConditionService, Service.
 builder.Services.AddScoped<Repository.Interfaces.IBmiLogRepo, Repository.Implements.BmiLogRepo>();
 builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements.BmiLogService>();
 
-// Feedback
-builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
-builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
+// Plan
+builder.Services.AddScoped<Repository.Interfaces.IPlanRepo, Repository.Implements.PlanRepo>();
+builder.Services.AddScoped<Service.Interfaces.IPlanService, Service.Implements.PlanService>();
+
+// Subscription
+builder.Services.AddScoped<Repository.Interfaces.ISubscriptionRepo, Repository.Implements.SubscriptionRepo>();
+builder.Services.AddScoped<Service.Interfaces.ISubscriptionService, Service.Implements.SubscriptionService>();
+
+// Payment
+builder.Services.AddScoped<Service.Interfaces.IPaymentService, Service.Implements.PaymentService>();
+
+// Statistic
+builder.Services.AddScoped<Service.Interfaces.IStatisticService, Service.Implements.StatisticService>();
+
+// Background Services
+builder.Services.AddHostedService<SubscriptionExpiryBackgroundService>();
 
 //Email
 builder.Services.AddScoped<Service.Interfaces.IEmailService, Service.Implements.EmailService>();

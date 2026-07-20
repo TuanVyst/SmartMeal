@@ -265,38 +265,6 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("DietPlan");
                 });
 
-            modelBuilder.Entity("BusinessObject.Entities.Feedback", b =>
-                {
-                    b.Property<Guid>("Feedback_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Account_id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.HasKey("Feedback_id");
-
-                    b.HasIndex("Account_id");
-
-                    b.ToTable("Feedback");
-                });
-
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>
                 {
                     b.Property<Guid>("Item_id")
@@ -404,6 +372,12 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("TargetWeeks")
+                        .HasColumnType("integer");
+
+                    b.Property<double?>("TargetWeight")
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -541,6 +515,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<double?>("TargetCarbs")
                         .HasColumnType("double precision");
 
+                    b.Property<double?>("TargetCholesterol")
+                        .HasColumnType("double precision");
+
                     b.Property<double?>("TargetFat")
                         .HasColumnType("double precision");
 
@@ -548,6 +525,12 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<double?>("TargetProtein")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("TargetSalt")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("TargetSugar")
                         .HasColumnType("double precision");
 
                     b.HasKey("Goal_id");
@@ -637,6 +620,12 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<double?>("Cholesterol")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("EverydayUnit")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("EverydayWeight")
                         .HasColumnType("double precision");
 
                     b.Property<double?>("Fat")
@@ -843,6 +832,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -964,6 +956,9 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<Guid>("Plan_id")
                         .HasColumnType("uuid");
+
+                    b.Property<double>("PricePaid")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -1123,17 +1118,6 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("DietPlan");
 
                     b.Navigation("MedicalCondition");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.Feedback", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("Account_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.GroceryItem", b =>

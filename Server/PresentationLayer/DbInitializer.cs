@@ -1,6 +1,7 @@
-using System.Text.Json;
+    using System.Text.Json;
 using BusinessObject.Entities;
 using BusinessObject.Enums;
+using BusinessObject.Helpers;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,6 +51,9 @@ public static class DbInitializer
         // After migrations, ensure Sodium→Salt column renames are applied
         await EnsureSaltColumnsAsync(context);
 
+        // Seed subscription plans
+        await SeedPlansAsync(context);
+
         // Check for English data and clear the database if found to force a Vietnamese re-seed
         var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
         var hasEnglishTags = await context.IngredientTags.AnyAsync(t => t.Name == "VEGETABLE" || t.Name == "GRAIN");
@@ -74,7 +78,7 @@ public static class DbInitializer
         var existingAdmin = await context.Accounts.FirstOrDefaultAsync(a => a.Username == "admin");
         if (existingAdmin != null)
         {
-            existingAdmin.Email = "qdam100@gmail.com";
+            existingAdmin.Email = "maituanvyst@gmail.com";
             existingAdmin.Password = BCrypt.Net.BCrypt.HashPassword("Admin@123");
             context.Accounts.Update(existingAdmin);
             await context.SaveChangesAsync();
@@ -86,17 +90,22 @@ public static class DbInitializer
             await UpsertIngredientTagsFromJsonAsync(context);
             await UpsertRecipeTagsFromJsonAsync(context);
             await UpsertIngredientsFromJsonAsync(context);
-            // Re-seed recipes from JSON (clear and re-add)
-            await SeedRecipesFromJsonAsync(context);
+            // Only seed recipes if none exist yet — preserves IsPrimary and admin edits
+            if (!await context.Recipes.AnyAsync())
+            {
+                await SeedRecipesFromJsonAsync(context);
+            }
 
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
 
+            await SeedEverydayUnits(context);
             return;
         }
 
         // === Fresh DB: full seed from JSON ===
         await SeedAllFromJsonAsync(context);
+        await SeedEverydayUnits(context);
     }
 
     private static async Task SeedAllFromJsonAsync(AppDbContext context)
@@ -108,7 +117,7 @@ public static class DbInitializer
             Username = "admin",
             Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
             Name = "Admin",
-            Email = "qdam100@gmail.com",
+            Email = "maituanvyst@gmail.com",
             Phone = "0123456789",
             Address = "SmartMeal HQ",
             Role = RoleEnum.Admin,
@@ -240,7 +249,24 @@ public static class DbInitializer
 
         foreach (var dto in ings)
         {
-            if (existingNames.Contains(dto.Name)) continue;
+            if (existingNames.Contains(dto.Name)) 
+            {
+                var existingIng = await context.Ingredients.Include(i => i.Nutritional_value).FirstOrDefaultAsync(i => i.Name == dto.Name);
+                if (existingIng != null && existingIng.Nutritional_value != null)
+                {
+                    existingIng.Nutritional_value.Calories = dto.NutritionalValues.Calories;
+                    existingIng.Nutritional_value.Protein = dto.NutritionalValues.Protein;
+                    existingIng.Nutritional_value.Carbs = dto.NutritionalValues.Carbs;
+                    existingIng.Nutritional_value.Fat = dto.NutritionalValues.Fat;
+                    existingIng.Nutritional_value.Fiber = dto.NutritionalValues.Fiber;
+                    existingIng.Nutritional_value.Sugar = dto.NutritionalValues.Sugar;
+                    existingIng.Nutritional_value.Salt = dto.NutritionalValues.Salt;
+                    existingIng.Nutritional_value.Cholesterol = dto.NutritionalValues.Cholesterol;
+                    existingIng.Nutritional_value.ServingSize = dto.NutritionalValues.ServingSize;
+                    existingIng.Nutritional_value.ServingUnit = dto.NutritionalValues.ServingUnit;
+                }
+                continue;
+            }
 
             var ing = new Ingredient
             {
@@ -584,7 +610,14 @@ public static class DbInitializer
 
                     if (ingredient?.Nutritional_value != null)
                     {
-                        var multiplier = (log.Quantity ?? 100.0) / (ingredient.Nutritional_value.ServingSize ?? 100.0);
+                        var multiplier = UnitConverter.GetMultiplier(
+                            log.Quantity ?? 100.0,
+                            log.Unit,
+                            ingredient.Nutritional_value.ServingSize ?? 100.0,
+                            ingredient.Nutritional_value.ServingUnit,
+                            ingredient.Name,
+                            ingredient.Nutritional_value.EverydayWeight
+                        );
                         if (multiplier <= 0) multiplier = 1.0;
 
                         log.TotalCalories = ingredient.Nutritional_value.Calories * multiplier;
@@ -622,7 +655,14 @@ public static class DbInitializer
                     {
                         if (ri.Ingredient?.Nutritional_value != null)
                         {
-                            var multiplier = (ri.Quantity) / (ri.Ingredient.Nutritional_value.ServingSize ?? 100.0);
+                            var multiplier = UnitConverter.GetMultiplier(
+                                ri.Quantity,
+                                ri.UOM,
+                                ri.Ingredient.Nutritional_value.ServingSize ?? 100.0,
+                                ri.Ingredient.Nutritional_value.ServingUnit,
+                                ri.Ingredient.Name,
+                                ri.Ingredient.Nutritional_value.EverydayWeight
+                            );
                             if (multiplier <= 0) multiplier = 1.0;
 
                             totalCal += ri.Ingredient.Nutritional_value.Calories * multiplier;
@@ -662,6 +702,174 @@ public static class DbInitializer
         catch (Exception ex)
         {
             Console.WriteLine($"[DbInitializer] Error recalculating nutrition logs: {ex.Message}");
+        }
+    }
+
+    private static async Task SeedPlansAsync(AppDbContext context)
+    {
+        if (await context.Plans.AnyAsync()) return;
+
+        var plans = new List<Plan>
+        {
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                Name = "Gói Cơ Bản (Free)",
+                Price = 0,
+                Duration = 0,
+                Description = "Gói miễn phí cơ bản để theo dõi dinh dưỡng hàng ngày.",
+                Features = "[\"ai_basic\"]",
+                IsDeleted = false
+            },
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                Name = "Gói Pro Tuần",
+                Price = 19000,
+                Duration = 7,
+                Description = "Trải nghiệm đầy đủ tính năng cao cấp trong 1 tuần.",
+                Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\"]",
+                IsDeleted = false
+            },
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
+                Name = "Gói Pro Tháng",
+                Price = 49000,
+                Duration = 30,
+                Description = "Lựa chọn phổ biến nhất để duy trì thói quen ăn uống lành mạnh.",
+                Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\"]",
+                IsDeleted = false
+            },
+            new Plan
+            {
+                Plan_id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                Name = "Gói Pro Năm",
+                Price = 499000,
+                Duration = 365,
+                Description = "Gói tiết kiệm nhất dành cho người cam kết dài hạn.",
+                Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\", \"family_sharing\"]",
+                IsDeleted = false
+            }
+        };
+
+        context.Plans.AddRange(plans);
+        await context.SaveChangesAsync();
+        Console.WriteLine("[DbInitializer] Successfully seeded 4 subscription plans.");
+    }
+
+    private static async Task SeedEverydayUnits(AppDbContext context)
+    {
+        var everydayUnits = new Dictionary<string, (string Unit, double Weight)>
+        {
+            { "cà tím", ("quả", 150.0) },
+            { "ngò rí", ("bó", 30.0) },
+            { "cải bó xôi", ("bó", 100.0) },
+            { "rau muống", ("bó", 300.0) },
+            { "giá đỗ", ("nắm", 50.0) },
+            { "cà chua", ("quả", 120.0) },
+            { "cà rốt", ("củ", 100.0) },
+            { "hành tây", ("củ", 150.0) },
+            { "bông cải xanh", ("cây", 300.0) },
+            { "dưa chuột", ("quả", 150.0) },
+            { "dưa leo", ("quả", 150.0) },
+            { "bắp cải", ("cái", 800.0) },
+            { "ớt chuông", ("quả", 150.0) },
+            { "ớt tươi", ("quả", 5.0) },
+            { "hành lá", ("nhánh", 5.0) },
+            { "rau mùi", ("bó", 30.0) },
+            { "rau răm", ("bó", 30.0) },
+            { "rau", ("bó", 150.0) },
+            { "cải", ("bó", 200.0) },
+            { "xà lách", ("cây", 150.0) },
+            { "tỏi", ("tép", 3.0) },
+            { "gừng", ("củ", 20.0) },
+            { "sả", ("cây", 15.0) },
+            { "khoai tây", ("củ", 150.0) },
+            { "khoai lang", ("củ", 150.0) },
+            { "khoai", ("củ", 150.0) },
+            { "nấm", ("chén", 70.0) },
+            { "gạo", ("chén", 150.0) },
+            { "bún", ("bát", 150.0) },
+            { "phở", ("bát", 150.0) },
+            { "bánh phở", ("bát", 150.0) },
+            { "miến", ("bát", 150.0) },
+            { "mì", ("bát", 150.0) },
+            { "mì ý", ("bát", 150.0) },
+            { "đậu phộng", ("nắm", 30.0) },
+            { "mè", ("thìa canh", 10.0) },
+            { "vụn bánh mì", ("chén", 60.0) },
+            { "bột mì", ("chén", 120.0) },
+            { "bột", ("chén", 120.0) },
+            { "đậu xanh", ("nắm", 30.0) },
+            { "đậu đỏ", ("nắm", 30.0) },
+            { "đậu", ("nắm", 30.0) },
+            { "hạt", ("nắm", 30.0) },
+            { "thịt gà", ("lát", 100.0) },
+            { "thịt bò", ("lát", 100.0) },
+            { "thịt heo", ("lát", 100.0) },
+            { "thịt", ("lát", 100.0) },
+            { "cá hồi", ("phi lê", 150.0) },
+            { "cá", ("con", 200.0) },
+            { "tôm", ("con", 15.0) },
+            { "mực", ("con", 100.0) },
+            { "chanh", ("quả", 50.0) },
+            { "bơ", ("quả", 150.0) },
+            { "chuối", ("quả", 120.0) },
+            { "xoài", ("quả", 250.0) },
+            { "táo", ("quả", 150.0) },
+            { "dứa", ("quả", 500.0) },
+            { "trứng", ("quả", 50.0) },
+            { "sữa đặc có đường", ("thìa canh", 20.0) },
+            { "sữa", ("hộp", 200.0) },
+            { "phô mai", ("lát", 20.0) },
+            { "nước cốt dừa", ("lon", 400.0) },
+            { "dầu ô liu", ("thìa canh", 15.0) },
+            { "dầu mè", ("thìa canh", 15.0) },
+            { "dầu ăn", ("thìa canh", 15.0) },
+            { "bơ thực vật", ("thìa canh", 15.0) },
+            { "nước mắm", ("thìa canh", 15.0) },
+            { "nước tương", ("thìa canh", 15.0) },
+            { "tương ớt", ("thìa canh", 15.0) },
+            { "giấm", ("thìa canh", 15.0) },
+            { "nước", ("cốc", 250.0) },
+            { "mật ong", ("thìa canh", 20.0) },
+            { "muối", ("thìa cà phê", 5.0) },
+            { "đường", ("thìa cà phê", 4.0) },
+            { "tiêu", ("thìa cà phê", 2.0) },
+            { "tiêu đen", ("thìa cà phê", 2.0) },
+            { "bánh mì", ("cái", 80.0) },
+            { "đậu hủ", ("bìa", 150.0) }
+        };
+
+        var nutritionalValues = await context.NutritionalValues
+            .Include(nv => nv.Ingredient)
+            .Where(nv => string.IsNullOrEmpty(nv.EverydayUnit))
+            .ToListAsync();
+
+        bool changed = false;
+        foreach (var nv in nutritionalValues)
+        {
+            if (nv.Ingredient == null) continue;
+            var name = nv.Ingredient.Name.Trim().ToLower();
+
+            foreach (var kvp in everydayUnits)
+            {
+                if (name.Contains(kvp.Key) || kvp.Key.Contains(name))
+                {
+                    nv.EverydayUnit = kvp.Value.Unit;
+                    nv.EverydayWeight = kvp.Value.Weight;
+                    changed = true;
+                    Console.WriteLine($"[DbInitializer] Migrated everyday unit for {nv.Ingredient.Name}: {nv.EverydayUnit} ({nv.EverydayWeight}g)");
+                    break;
+                }
+            }
+        }
+
+        if (changed)
+        {
+            await context.SaveChangesAsync();
+            Console.WriteLine("[DbInitializer] Everyday unit mappings saved to DB successfully.");
         }
     }
 }

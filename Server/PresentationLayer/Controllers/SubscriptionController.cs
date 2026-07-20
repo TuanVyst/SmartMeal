@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Service.Interfaces;
 using BusinessObject.Dtos.RequestModels;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -9,6 +11,7 @@ namespace PresentationLayer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class SubscriptionController : ControllerBase
     {
         private readonly ISubscriptionService _subscriptionService;
@@ -20,12 +23,25 @@ namespace PresentationLayer.Controllers
             _logger = logger;
         }
 
+        private Guid GetAccountId()
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim == null)
+                throw new UnauthorizedAccessException("Account ID not found in token");
+            return Guid.Parse(claim.Value);
+        }
+
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] Guid? accountId = null)
         {
             try
             {
-                var items = await _subscriptionService.GetAllSubscriptions();
+                var jwtAccountId = GetAccountId();
+                var targetAccountId = accountId ?? jwtAccountId;
+                if (targetAccountId != jwtAccountId)
+                    return Forbid();
+
+                var items = await _subscriptionService.GetSubscriptionsByAccountId(targetAccountId);
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
@@ -40,9 +56,13 @@ namespace PresentationLayer.Controllers
         {
             try
             {
+                var jwtAccountId = GetAccountId();
                 var item = await _subscriptionService.GetSubscriptionById(id);
                 if (item == null)
                     return NotFound(new { success = false, message = "Subscription not found" });
+
+                if (item.Account_id != jwtAccountId)
+                    return Forbid();
 
                 return Ok(new { success = true, data = item });
             }
@@ -58,8 +78,8 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+                var jwtAccountId = GetAccountId();
+                request.Account_id = jwtAccountId;
 
                 var item = await _subscriptionService.CreateSubscription(request);
                 return Ok(new { success = true, data = item });
@@ -76,8 +96,15 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
+                var jwtAccountId = GetAccountId();
+                var existing = await _subscriptionService.GetSubscriptionById(id);
+                if (existing == null)
+                    return NotFound(new { success = false, message = "Subscription not found" });
+
+                if (existing.Account_id != jwtAccountId)
+                    return Forbid();
+
+                request.Account_id = jwtAccountId;
 
                 var item = await _subscriptionService.UpdateSubscription(id, request);
                 return Ok(new { success = true, data = item });
@@ -94,6 +121,14 @@ namespace PresentationLayer.Controllers
         {
             try
             {
+                var jwtAccountId = GetAccountId();
+                var existing = await _subscriptionService.GetSubscriptionById(id);
+                if (existing == null)
+                    return NotFound(new { success = false, message = "Subscription not found" });
+
+                if (existing.Account_id != jwtAccountId)
+                    return Forbid();
+
                 var item = await _subscriptionService.SoftDeleteSubscription(id);
                 return Ok(new { success = true, message = "Subscription deleted successfully", data = item });
             }

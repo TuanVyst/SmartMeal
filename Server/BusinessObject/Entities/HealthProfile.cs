@@ -21,6 +21,9 @@ namespace BusinessObject.Entities
         public double? Height { get; set; } // cm
         public double? Weight { get; set; } // kg
 
+        public double? TargetWeight { get; set; } // kg — mục tiêu cân nặng
+        public int? TargetWeeks { get; set; } = 12; // số tuần để đạt mục tiêu
+
         [MaxLength(50)]
         public string? ActivityLevel { get; set; }
 

@@ -1,32 +1,106 @@
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 
-export default function RecipeHealthScore({ recipe }) {
-  const { getHealthScoreForRecipe, healthProfile } = useHealthProfile();
+const BADGE_STYLES = {
+  excellent: {
+    background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+    color: 'white',
+    border: '1.5px solid #15803d',
+    icon: '✨',
+    glow: 'rgba(34,197,94,0.3)',
+  },
+  good: {
+    background: 'linear-gradient(135deg, #0284c7, #0ea5e9)',
+    color: 'white',
+    border: '1.5px solid #0369a1',
+    icon: '👌',
+    glow: 'rgba(14,165,233,0.3)',
+  },
+  fair: {
+    background: 'linear-gradient(135deg, #ca8a04, #eab308)',
+    color: 'white',
+    border: '1.5px solid #a16207',
+    icon: '🤔',
+    glow: 'rgba(234,179,8,0.3)',
+  },
+  poor: {
+    background: 'linear-gradient(135deg, #ea580c, #f97316)',
+    color: 'white',
+    border: '1.5px solid #c2410c',
+    icon: '⚠️',
+    glow: 'rgba(249,115,22,0.3)',
+  },
+  bad: {
+    background: 'linear-gradient(135deg, #b91c1c, #ef4444)',
+    color: 'white',
+    border: '1.5px solid #991b1b',
+    icon: '🚫',
+    glow: 'rgba(239,68,68,0.3)',
+  },
+};
+
+/**
+ * Badge hiển thị Health Score nổi bật.
+ * Hỗ trợ 2 variant: 'badge' (nhỏ, inline) và 'card' (trên ảnh card).
+ */
+export default function RecipeHealthScore({ recipe, variant = 'badge' }) {
+  const { getHealthScoreDetails, healthProfile } = useHealthProfile();
 
   if (!healthProfile) return null;
 
-  const score = getHealthScoreForRecipe(recipe);
+  const { score, badge } = getHealthScoreDetails(recipe);
+  const style = BADGE_STYLES[badge.level] || BADGE_STYLES.excellent;
 
-  const config = score >= 80
-    ? { icon: <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#16a34a', display: 'inline-block' }} />, text: 'Rất phù hợp', color: '#16a34a' }
-    : score >= 50
-      ? { icon: <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ca8a04', display: 'inline-block' }} />, text: 'Phù hợp vừa', color: '#ca8a04' }
-      : { icon: <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#dc2626', display: 'inline-block' }} />, text: 'Ít phù hợp', color: '#dc2626' };
+  if (variant === 'card') {
+    // Badge lớn, đặt overlay trên ảnh card
+    return (
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 5,
+          padding: '5px 10px',
+          borderRadius: 20,
+          background: style.background,
+          border: style.border,
+          boxShadow: `0 2px 8px ${style.glow}`,
+          color: style.color,
+          fontWeight: 700,
+          fontSize: 12,
+          letterSpacing: '0.02em',
+          whiteSpace: 'nowrap',
+          userSelect: 'none',
+        }}
+      >
+        <span style={{ fontSize: 11 }}>{style.icon}</span>
+        <span>{badge.percent}</span>
+        <span style={{ fontWeight: 500, opacity: 0.92 }}>{badge.label}</span>
+      </div>
+    );
+  }
 
+  // Default: badge inline nhỏ (dùng ở dưới card)
   return (
-    <span
+    <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 4,
-        fontSize: 13,
-        fontWeight: 500,
-        color: config.color,
+        gap: 5,
+        padding: '4px 10px',
+        borderRadius: 14,
+        background: style.background,
+        border: style.border,
+        boxShadow: `0 1px 6px ${style.glow}`,
+        color: style.color,
+        fontWeight: 600,
+        fontSize: 12,
+        letterSpacing: '0.01em',
+        whiteSpace: 'nowrap',
+        userSelect: 'none',
       }}
     >
-      <span>{config.icon}</span>
-      <span>{config.text}</span>
-      <span style={{ fontSize: 11, opacity: 0.7 }}>({score}/100)</span>
-    </span>
+      <span style={{ fontSize: 10 }}>{style.icon}</span>
+      <span>{badge.percent}</span>
+      <span style={{ fontWeight: 500 }}>{badge.label}</span>
+    </div>
   );
 }

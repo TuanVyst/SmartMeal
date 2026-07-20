@@ -4,6 +4,7 @@ using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PresentationLayer.Controllers
 {
@@ -54,6 +55,7 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] PlanRequest request)
         {
             try
@@ -72,6 +74,7 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] PlanRequest request)
         {
             try
@@ -90,6 +93,7 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try

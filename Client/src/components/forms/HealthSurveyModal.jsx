@@ -1,4 +1,4 @@
-import { useReducer, useMemo, useState } from 'react';
+import { useReducer, useMemo } from 'react';
 import { calculateBMI } from '../../utils/bmiCalculator';
 import { getLockedIngredientsForProfile, getDailyCalorieBudget } from '../../utils/healthRules';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
@@ -10,6 +10,7 @@ const initialState = {
   step: 1,
   formData: {
     height: '', weight: '', age: '', gender: '',
+    activityLevel: '',
     conditions: [], allergies: [], goal: '',
   },
   error: '',
@@ -93,6 +94,9 @@ function validateStep(step, formData) {
       if (isNaN(formData.age) || Number(formData.age) <= 0 || Number(formData.age) > 150) return 'Tuổi không hợp lệ';
       return '';
     }
+    case 2:
+      if (!formData.activityLevel) return 'Vui lòng chọn mức độ vận động của bạn';
+      return '';
     case 4:
       if (!formData.goal) return 'Vui lòng chọn mục tiêu dinh dưỡng';
       return '';
@@ -126,15 +130,22 @@ function StepIndicator({ current }) {
   );
 }
 
-function InputField({ label, value, onChange, type = 'text', placeholder, suffix }) {
+function InputField({ label, value, onChange, type = 'text', placeholder, suffix, min = "1" }) {
   return (
     <div style={{ flex: 1 }}>
       <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>{label}</label>
       <div style={{ position: 'relative' }}>
         <input
           type={type}
+          min={type === 'number' ? min : undefined}
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={e => {
+            let val = e.target.value;
+            if (type === 'number' && Number(val) < 0) {
+              val = '1';
+            }
+            onChange(val);
+          }}
           placeholder={placeholder}
           style={{
             width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8,
@@ -158,7 +169,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { step, formData, error, submitting } = state;
   const { height, weight, age, gender, conditions, allergies, goal } = formData;
-  const [customInput, setCustomInput] = useState('');
 
   const bmiResult = useMemo(() => {
     if (height && weight && Number(height) > 0 && Number(weight) > 0) {
@@ -168,10 +178,17 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
   }, [height, weight]);
 
   const summaryBudget = useMemo(() => {
-    if (!bmiResult) return 2000;
-    const g = ['lose', 'maintain', 'gain'].includes(goal) ? goal : 'maintain';
-    return getDailyCalorieBudget(bmiResult.level, g);
-  }, [bmiResult, goal]);
+    if (!bmiResult) return { calories: 2000, bmr: 0, tdee: 0 };
+    const mockProfile = {
+      weight: Number(formData.weight),
+      height: Number(formData.height),
+      gender: formData.gender,
+      activityLevel: formData.activityLevel || 'sedentary',
+      goal: formData.goal || 'maintain',
+      conditions: formData.conditions || [],
+    };
+    return getDailyCalorieBudget(mockProfile);
+  }, [bmiResult, formData.goal, formData.activityLevel, formData.weight, formData.height, formData.gender]);
 
   const summaryLocked = useMemo(() => {
     return getLockedIngredientsForProfile(conditions);
@@ -187,7 +204,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
     dispatch({ type: 'SET_SUBMITTING', value: true });
     dispatch({ type: 'SET_ERROR', value: '' });
     try {
-      // Auto-add BMI-derived condition (e.g., Thiếu cân / Thừa cân / Béo phì) instead of manual checkbox
       const inferred = bmiResult ? (
         bmiResult.level === 'underweight' ? 'Thiếu cân' :
         bmiResult.level === 'overweight' ? 'Thừa cân' :
@@ -195,7 +211,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
       ) : null;
 
       const nextConditions = Array.isArray(conditions) ? [...conditions] : [];
-      // remove 'none' if present
       const filtered = nextConditions.filter(c => c !== 'none');
       if (inferred && !filtered.includes(inferred)) filtered.push(inferred);
 
@@ -203,6 +218,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
         height: Number(height), weight: Number(weight), age: Number(age),
         gender, conditions: filtered, allergies, goal,
         bmiLevel: bmiResult?.level || 'normal',
+        activityLevel: formData.activityLevel || 'sedentary',
       };
       const result = await completeSurvey(payload);
       if (result.success) {
@@ -217,14 +233,36 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
     }
   };
 
-  const handleAddCustomAllergy = () => {
-    const val = customInput.trim();
-    if (!val || allergies.includes(val)) return;
-    dispatch({ type: 'TOGGLE_ALLERGY', value: val });
-    setCustomInput('');
-  };
 
-  const stepTitles = ['Thông tin cơ bản', 'Tình trạng sức khoẻ', 'Dị ứng & Không dung nạp', 'Mục tiêu dinh dưỡng', 'Tổng kết'];
+  const stepTitles = ['Thông tin cơ bản', 'Mức độ vận động', 'Tình trạng sức khoẻ', 'Mục tiêu dinh dưỡng', 'Tổng kết'];
+
+  const ACTIVITY_OPTIONS = [
+    {
+      value: 'sedentary', emoji: '🪑', label: 'Chủ yếu ngồi hoặc ít vận động',
+      factor: 1.2,
+      examples: ['Làm việc văn phòng', 'Học tập', 'Ít tập thể dục', 'Đi bộ rất ít']
+    },
+    {
+      value: 'light', emoji: '🚶', label: 'Có vận động nhẹ',
+      factor: 1.375,
+      examples: ['Đi bộ hằng ngày', 'Tập 1–3 buổi/tuần', 'Thường xuyên di chuyển']
+    },
+    {
+      value: 'moderate', emoji: '🏃', label: 'Vận động khá thường xuyên',
+      factor: 1.55,
+      examples: ['Gym / chạy bộ', 'Thể thao 3–5 buổi/tuần']
+    },
+    {
+      value: 'active', emoji: '💪', label: 'Vận động nhiều',
+      factor: 1.725,
+      examples: ['Lao động tay chân', 'Tập gần như mỗi ngày', 'Thể thao cường độ cao']
+    },
+    {
+      value: 'very_active', emoji: '🔥', label: 'Rất năng động',
+      factor: 1.9,
+      examples: ['Vận động viên', 'Lao động nặng', 'Tập luyện cường độ rất cao']
+    },
+  ];
 
   const renderStep = () => {
     switch (step) {
@@ -246,7 +284,7 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>Giới tính</label>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  {['Nam', 'Nữ', 'Khác'].map(g => (
+                  {['Nam', 'Nữ'].map(g => (
                     <button
                       key={g}
                       type="button"
@@ -287,6 +325,59 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
         return (
           <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
+              Mức độ vận động hằng ngày
+            </h3>
+            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
+              Điều này giúp SmartMeal ước tính chính xác lượng năng lượng cơ thể tiêu hao mỗi ngày.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {ACTIVITY_OPTIONS.map(opt => {
+                const isSelected = formData.activityLevel === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => dispatch({ type: 'SET_FIELD', field: 'activityLevel', value: opt.value })}
+                    style={{
+                      padding: '14px 16px', borderRadius: 12, textAlign: 'left', cursor: 'pointer',
+                      border: `2px solid ${isSelected ? '#22C55E' : '#e2e8f0'}`,
+                      background: isSelected ? '#f0fdf4' : 'white',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <span style={{ fontSize: 22 }}>{opt.emoji}</span>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: isSelected ? '#16a34a' : '#1E293B' }}>
+                        {opt.label}
+                      </span>
+                      <span style={{
+                        marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+                        padding: '2px 8px', borderRadius: 10,
+                        background: isSelected ? '#dcfce7' : '#f1f5f9',
+                        color: isSelected ? '#15803d' : '#64748b',
+                      }}>
+                        ×{opt.factor}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, paddingLeft: 32 }}>
+                      {opt.examples.map(ex => (
+                        <span key={ex} style={{
+                          fontSize: 11, padding: '2px 8px', borderRadius: 8,
+                          background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0',
+                        }}>{ex}</span>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
               Tình trạng sức khoẻ
             </h3>
             <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
@@ -316,86 +407,6 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
                 );
               })}
             </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
-              Dị ứng & Không dung nạp
-            </h3>
-            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
-              Chọn thực phẩm bạn bị dị ứng hoặc không dung nạp
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-              {allergyTags.map(tag => {
-                const selected = allergies.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => dispatch({ type: 'TOGGLE_ALLERGY', value: tag })}
-                    style={{
-                      padding: '8px 16px', borderRadius: 20, border: `2px solid ${selected ? '#ef4444' : '#e2e8f0'}`,
-                      background: selected ? '#fef2f2' : 'transparent',
-                      color: selected ? '#dc2626' : '#475569', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="text"
-                value={customInput}
-                onChange={e => setCustomInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomAllergy(); } }}
-                placeholder="Thêm nguyên liệu khác..."
-                style={{
-                  flex: 1, padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8,
-                  fontSize: 14, outline: 'none',
-                }}
-                onFocus={e => e.target.style.borderColor = '#22C55E'}
-                onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-              />
-              <button
-                type="button"
-                onClick={handleAddCustomAllergy}
-                style={{
-                  padding: '10px 20px', background: '#22C55E', color: 'white', border: 'none',
-                  borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap',
-                }}
-              >
-                Thêm
-              </button>
-            </div>
-            {allergies.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 8 }}>Đã chọn ({allergies.length}):</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {allergies.map(a => (
-                    <span key={a} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
-                      borderRadius: 16, fontSize: 12, fontWeight: 500,
-                    }}>
-                      {a}
-                      <button
-                        type="button"
-                        onClick={() => dispatch({ type: 'TOGGLE_ALLERGY', value: a })}
-                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         );
 
@@ -432,12 +443,8 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
       case 5:
         return (
           <div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>
-              Tổng kết
-            </h3>
-            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>
-              Kiểm tra lại thông tin trước khi bắt đầu
-            </p>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Tổng kết</h3>
+            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>Kiểm tra lại thông tin trước khi bắt đầu</p>
             <div style={{ background: '#f8fafc', borderRadius: 12, padding: 20, marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: '#64748b' }}>Chỉ số BMI</span>
@@ -446,51 +453,42 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 14, color: '#64748b' }}>Mức độ vận động</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>
+                  {ACTIVITY_OPTIONS.find(a => a.value === formData.activityLevel)?.emoji} {ACTIVITY_OPTIONS.find(a => a.value === formData.activityLevel)?.label || 'Chưa chọn'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: '#64748b' }}>Mục tiêu</span>
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>
                   {goalCards.find(c => c.value === goal)?.label || 'Chưa chọn'}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span style={{ fontSize: 14, color: '#64748b' }}>Khuyến nghị calo/ngày</span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#22C55E' }}>
-                  {summaryBudget} kcal
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 14, color: '#64748b' }}>TDEE (tiêu hao/ngày)</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#475569' }}>{summaryBudget.tdee} kcal</span>
               </div>
-              {conditions.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 14, color: '#64748b' }}>Mục tiêu calo/ngày</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#22C55E' }}>{summaryBudget.calories} kcal</span>
+              </div>
+              {summaryLocked.length > 0 && (
                 <div>
-                  <span style={{ fontSize: 14, color: '#64748b', display: 'block', marginBottom: 8 }}>
-                    Nguyên liệu bị khoá ({summaryLocked.length})
-                  </span>
+                  <span style={{ fontSize: 14, color: '#64748b', display: 'block', marginBottom: 8 }}>Nguyên liệu bị khoá ({summaryLocked.length})</span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {summaryLocked.map(ing => (
-                      <span key={ing} style={{
-                        padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
-                        borderRadius: 12, fontSize: 12, fontWeight: 500,
-                      }}>
+                      <span key={ing} style={{ padding: '4px 10px', background: '#fef2f2', color: '#dc2626', borderRadius: 12, fontSize: 12, fontWeight: 500 }}>
                         <FiLock size={12} /> {ing}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
-              {allergies.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                  <span style={{ fontSize: 14, color: '#64748b', display: 'block', marginBottom: 8 }}>
-                    Dị ứng ({allergies.length})
-                  </span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {allergies.map(a => (
-                      <span key={a} style={{
-                        padding: '4px 10px', background: '#fef2f2', color: '#dc2626',
-                        borderRadius: 12, fontSize: 12, fontWeight: 500,
-                      }}>
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+                <p style={{ fontSize: 12, color: '#16a34a', margin: 0 }}>
+                  💡 Bạn có thể cập nhật thông tin dị ứng thực phẩm trong <strong>Hồ sơ sức khoẻ</strong> sau khi hoàn thành.
+                </p>
+              </div>
             </div>
           </div>
         );

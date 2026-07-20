@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
-import { getLockedIngredientsForProfile, calculateDailyTargets, HEALTH_CONDITION_RULES } from '../utils/healthRules';
+import { getLockedIngredientsForProfile, calculateDailyTargets, HEALTH_CONDITION_RULES, GOAL_RULES } from '../utils/healthRules';
+import { calculateHealthScore } from '../utils/healthScoreEngine';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { useAuth } from './AuthContext';
 
@@ -33,7 +34,8 @@ export function HealthProfileProvider({ children }) {
     }
 
     const conditions = profile.conditions || [];
-    const locked = getLockedIngredientsForProfile(conditions);
+    const goal = profile.goal;
+    const locked = getLockedIngredientsForProfile(conditions, goal);
     setLockedIngredients(locked);
 
     const reducedSet = new Set();
@@ -43,6 +45,9 @@ export function HealthProfileProvider({ children }) {
         rules.reducedIngredients.forEach(ing => reducedSet.add(ing));
       }
     });
+    if (goal && GOAL_RULES[goal] && GOAL_RULES[goal].reducedIngredients) {
+      GOAL_RULES[goal].reducedIngredients.forEach(ing => reducedSet.add(ing));
+    }
     setReducedIngredients(Array.from(reducedSet));
 
     const preferredSet = new Set();
@@ -52,11 +57,12 @@ export function HealthProfileProvider({ children }) {
         rules.preferredIngredients.forEach(ing => preferredSet.add(ing));
       }
     });
+    if (goal && GOAL_RULES[goal] && GOAL_RULES[goal].preferredIngredients) {
+      GOAL_RULES[goal].preferredIngredients.forEach(ing => preferredSet.add(ing));
+    }
     setPreferredIngredients(Array.from(preferredSet));
 
-    const bmiLevel = profile.bmiLevel || 'normal';
-    const goal = profile.goal || 'maintain';
-    const budget = calculateDailyTargets(bmiLevel, goal, conditions);
+    const budget = calculateDailyTargets(profile);
     setDailyCalorieBudget(budget.calories);
     setDailyTargets(budget);
   }, []);
@@ -83,25 +89,34 @@ export function HealthProfileProvider({ children }) {
           localStorage.setItem('healthSurveyCompleted', 'true');
         }
       } catch (e) {
-        // Fallback to local storage if API fails or 404 (No profile)
-        const storedProfile = localStorage.getItem('userHealthProfile');
-        const completed = localStorage.getItem('healthSurveyCompleted') === 'true';
+        // 404 = user chưa có hồ sơ sức khoẻ → clear cache cũ (nếu có)
+        if (e.status === 404) {
+          localStorage.removeItem('userHealthProfile');
+          localStorage.removeItem('healthSurveyCompleted');
+          setHealthProfile(null);
+          setSurveyCompleted(false);
+          computeDerivedState(null);
+        } else {
+          // Lỗi mạng / server → fallback về localStorage
+          const storedProfile = localStorage.getItem('userHealthProfile');
+          const completed = localStorage.getItem('healthSurveyCompleted') === 'true';
 
-        if (storedProfile && completed) {
-          try {
-            const profile = JSON.parse(storedProfile);
-            setHealthProfile(profile);
-            setSurveyCompleted(true);
-            computeDerivedState(profile);
-          } catch (err) {
+          if (storedProfile && completed) {
+            try {
+              const profile = JSON.parse(storedProfile);
+              setHealthProfile(profile);
+              setSurveyCompleted(true);
+              computeDerivedState(profile);
+            } catch (err) {
+              setHealthProfile(null);
+              setSurveyCompleted(false);
+              computeDerivedState(null);
+            }
+          } else {
             setHealthProfile(null);
             setSurveyCompleted(false);
             computeDerivedState(null);
           }
-        } else {
-          setHealthProfile(null);
-          setSurveyCompleted(false);
-          computeDerivedState(null);
         }
       } finally {
         setLoading(false);
@@ -136,28 +151,22 @@ export function HealthProfileProvider({ children }) {
     return result;
   }, [computeDerivedState]);
 
+  /**
+   * Tính Health Score (0-100) cho một recipe.
+   * Dùng engine mới từ healthScoreEngine.js.
+   */
   const getHealthScoreForRecipe = useCallback((recipe) => {
-    if (!healthProfile) return 100;
+    const result = calculateHealthScore(recipe, healthProfile, dailyCalorieBudget);
+    return result.score;
+  }, [healthProfile, dailyCalorieBudget]);
 
-    let score = 100;
-
-    const recipeIngredients = recipe.ingredients?.map(i => i.name?.toLowerCase()) || [];
-    const lockedLower = lockedIngredients.map(i => i.toLowerCase());
-
-    lockedLower.forEach(locked => {
-      const hasLocked = recipeIngredients.some(ri => ri.includes(locked));
-      if (hasLocked) score -= 30;
-    });
-
-    const mealCalorieLimit = dailyCalorieBudget / 3;
-    const recipeCalories = recipe.nutrition?.calories || recipe.calories || 0;
-    if (recipeCalories > mealCalorieLimit) {
-      const excessRatio = (recipeCalories - mealCalorieLimit) / mealCalorieLimit;
-      score -= Math.min(40, Math.round(excessRatio * 40));
-    }
-
-    return Math.max(0, score);
-  }, [healthProfile, lockedIngredients, dailyCalorieBudget]);
+  /**
+   * Tính chi tiết Health Score: score + reasons + badge + allergyBlock.
+   * Dùng cho warning popup khi thêm vào nhật ký.
+   */
+  const getHealthScoreDetails = useCallback((recipe) => {
+    return calculateHealthScore(recipe, healthProfile, dailyCalorieBudget);
+  }, [healthProfile, dailyCalorieBudget]);
 
   return (
     <HealthProfileContext.Provider value={{
@@ -171,7 +180,8 @@ export function HealthProfileProvider({ children }) {
       loading,
       completeSurvey,
       updateProfile,
-      getHealthScoreForRecipe
+      getHealthScoreForRecipe,
+      getHealthScoreDetails,
     }}>
       {children}
     </HealthProfileContext.Provider>

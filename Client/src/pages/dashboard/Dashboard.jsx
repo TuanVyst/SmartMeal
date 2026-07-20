@@ -1,50 +1,50 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Navigate, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
-import { getRecipes } from '../../services/foodService';
+import { recipeService } from '../../services/recipeService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
-import { mockRecipesData } from '../../utils/mockData';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { getIngredients } from '../../services/foodService';
 import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart } from 'react-icons/fi';
+import HealthTipCard from '../../components/common/HealthTipCard';
+import CalorieGoalReminder from '../../components/common/CalorieGoalReminder';
 import './Dashboard.css';
 
-const SUGGESTION_TAGS = ['Lành mạnh', 'Giàu protein', 'Tốt cho tim', 'Nhiều năng lượng', 'Gợi ý hôm nay'];
+const SPEED = 0.05;
 
 function mapRecipeToSuggestion(recipe, index) {
   const id = recipe.recipe_id || recipe.Recipe_id || recipe.id || `recipe-${index}`;
   const name = recipe.recipe_name || recipe.Recipe_name || recipe.title || 'Món ăn';
+  const imageUrl = resolveRecipeImageUrl(name);
   const servings = recipe.servings || recipe.Servings || 1;
   const recipeIngredients = recipe.recipeIngredients || recipe.RecipeIngredients || [];
 
   let totalCalories = 0;
-  recipeIngredients.forEach((ingredient) => {
-    const nutritionalValue = ingredient.nutritionalValue || ingredient.NutritionalValue;
-    if (!nutritionalValue) {
-      return;
-    }
-
-    const quantity = ingredient.quantity || ingredient.Quantity || 0;
-    const servingSize = nutritionalValue.servingSize || nutritionalValue.ServingSize || 1;
+  recipeIngredients.forEach(ri => {
+    const nv = ri.nutritionalValue || ri.NutritionalValue;
+    if (!nv) return;
+    const quantity = ri.quantity || ri.Quantity || 0;
+    const servingSize = nv.servingSize || nv.ServingSize || 1;
     const multiplier = quantity / servingSize;
-    totalCalories += (nutritionalValue.calories || nutritionalValue.Calories || 0) * multiplier;
+    totalCalories += (nv.calories || nv.Calories || 0) * multiplier;
   });
 
-  const fallbackCalories = Number(recipe.nutrition?.calories) || Number(String(recipe.calories || '').replace(/[^\d.]/g, '')) || 0;
-  const calories = Math.round((servings > 0 ? totalCalories / servings : totalCalories) || fallbackCalories);
-  const imageUrl = resolveRecipeImageUrl(name);
+  const displayCalories = totalCalories > 0
+    ? Math.round(totalCalories / servings)
+    : Math.round(recipe.calories || recipe.nutrition?.calories || 0);
 
   return {
     id,
     title: name,
     name,
-    calories,
+    calories: displayCalories,
     imageUrl,
     img: imageUrl,
-    tag: SUGGESTION_TAGS[index % SUGGESTION_TAGS.length],
+    tag: index % 2 === 0 ? 'Lành mạnh' : 'Giàu protein',
   };
 }
 
@@ -62,12 +62,58 @@ function AnimatedBar({ pct, className }) {
   );
 }
 
+function deriveLogNutrients(log, recipes, ingredients) {
+  const result = { fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
+  const recipeId = log.recipe_id || log.recipe?.recipe_id;
+  const ingId = log.ingredient_id || log.ingredient?.ingredient_id;
+
+  if (recipeId) {
+    const recipe = recipes.find(r => r.recipe_id === recipeId) || log.recipe;
+    if (recipe) {
+      const riList = recipe.recipeIngredients || recipe.RecipeIngredients || [];
+      riList.forEach(ri => {
+        const nv = ri.ingredient?.nutritional_value || ri.Ingredient?.Nutritional_value
+                || ri.nutritionalValue || ri.NutritionalValue;
+        if (nv) {
+          const qty = ri.quantity || ri.Quantity || 0;
+          const sv = nv.servingSize || nv.ServingSize || 1;
+          const mult = sv > 0 ? qty / sv : 1;
+          result.fiber += (nv.fiber || nv.Fiber || 0) * mult;
+          result.sugar += (nv.sugar || nv.Sugar || 0) * mult;
+          result.sodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * mult;
+          result.cholesterol += (nv.cholesterol || nv.Cholesterol || 0) * mult;
+        }
+      });
+      const servings = recipe.servings || recipe.Servings || 1;
+      const factor = servings > 0 ? (log.quantity || 1) / servings : 1;
+      result.fiber *= factor;
+      result.sugar *= factor;
+      result.sodium *= factor;
+      result.cholesterol *= factor;
+    }
+  } else if (ingId) {
+    const ing = ingredients.find(i => i.ingredient_id === ingId) || log.ingredient;
+    if (ing && ing.nutritional_value) {
+      const nv = ing.nutritional_value;
+      const size = nv.servingSize || 100;
+      const factor = size > 0 ? (log.quantity || 100) / size : 1;
+      result.fiber = (nv.fiber || 0) * factor;
+      result.sugar = (nv.sugar || 0) * factor;
+      result.sodium = (nv.salt || nv.sodium || 0) * factor;
+      result.cholesterol = (nv.cholesterol || 0) * factor;
+    }
+  }
+  return result;
+}
+
 export default function Dashboard() {
   const { user }         = useAuth();
   const { isFavorite, toggleFavorite } = useFavorite();
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();
   const [nutritionLogs, setNutritionLogs] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [recipes, setRecipes] = useState([]);
   const [mealSuggestions, setMealSuggestions] = useState([]);
 
   const accountId = user?.accountId || user?.account_id;
@@ -76,7 +122,6 @@ export default function Dashboard() {
     if (accountId) {
       const fetchTodayLogs = async () => {
         try {
-          setLoading(true);
           const res = await nutritionLogService.getAll(accountId);
           setNutritionLogs(res.data.data || []);
         } catch (err) {
@@ -90,30 +135,73 @@ export default function Dashboard() {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchMealSuggestions = async () => {
+    const fetchData = async () => {
       try {
-        const res = await getRecipes();
-        const recipes = res.data.data || [];
-
-        if (!isMounted) {
-          return;
+        const [recRes, ingRes] = await Promise.all([
+          recipeService.getAll(),
+          getIngredients()
+        ]);
+        if (isMounted) {
+          const allRecipes = recRes.data.data || [];
+          setRecipes(allRecipes);
+          setMealSuggestions(allRecipes.slice(0, 8).map(mapRecipeToSuggestion));
+          setIngredients(ingRes.data.data || []);
         }
-
-        setMealSuggestions(recipes.slice(0, 5).map(mapRecipeToSuggestion));
       } catch (err) {
-        console.error('Lỗi khi tải danh sách món ăn:', err);
-        if (!isMounted) {
-          return;
-        }
-        setMealSuggestions(mockRecipesData.slice(0, 5).map(mapRecipeToSuggestion));
+        console.error('Lỗi khi tải dữ liệu:', err);
       }
     };
 
-    fetchMealSuggestions();
+    fetchData();
 
-    return () => {
-      isMounted = false;
+    return () => { isMounted = false; };
+  }, []);
+
+  const scrollRef = useRef(null);
+  const rafRef = useRef(null);
+  const [carouselPaused, setCarouselPaused] = useState(false);
+  const dirRef = useRef(1);
+  const lastTimeRef = useRef(0);
+
+  const startScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || carouselPaused) return;
+
+    const animate = (time) => {
+      if (carouselPaused || !el) return;
+      if (!lastTimeRef.current) lastTimeRef.current = time;
+      const delta = time - lastTimeRef.current;
+      lastTimeRef.current = time;
+      const step = SPEED * delta;
+
+      el.scrollLeft += step * dirRef.current;
+
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (dirRef.current > 0 && el.scrollLeft >= maxScroll - 1) {
+        dirRef.current = -1;
+      } else if (dirRef.current < 0 && el.scrollLeft <= 1) {
+        dirRef.current = 1;
+      }
+
+      rafRef.current = requestAnimationFrame(animate);
     };
+
+    rafRef.current = requestAnimationFrame(animate);
+  }, [carouselPaused]);
+
+  useEffect(() => {
+    lastTimeRef.current = 0;
+    startScroll();
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [startScroll]);
+
+  const handleCarouselPause = useCallback(() => {
+    setCarouselPaused(true);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const handleCarouselResume = useCallback(() => {
+    setCarouselPaused(false);
   }, []);
 
   if (user?.role === 'Admin') return <Navigate to="/admin" replace />;
@@ -130,23 +218,49 @@ export default function Dashboard() {
     acc.protein += curr.totalProtein || 0;
     acc.carbs += curr.totalCarbs || 0;
     acc.fat += curr.totalFat || 0;
+
+    const hasFiber = curr.totalFiber != null;
+    const hasSugar = curr.totalSugar != null;
+    const hasSalt = curr.totalSalt != null || curr.totalSodium != null;
+    const hasCholesterol = curr.totalCholesterol != null;
+
+    if (hasFiber && hasSugar && hasSalt && hasCholesterol) {
+      acc.fiber += curr.totalFiber || 0;
+      acc.sugar += curr.totalSugar || 0;
+      acc.sodium += curr.totalSalt || curr.totalSodium || 0;
+      acc.cholesterol += curr.totalCholesterol || 0;
+    } else {
+      const d = deriveLogNutrients(curr, recipes, ingredients);
+      acc.fiber += hasFiber ? (curr.totalFiber || 0) : d.fiber;
+      acc.sugar += hasSugar ? (curr.totalSugar || 0) : d.sugar;
+      acc.sodium += hasSalt ? (curr.totalSalt || curr.totalSodium || 0) : d.sodium;
+      acc.cholesterol += hasCholesterol ? (curr.totalCholesterol || 0) : d.cholesterol;
+    }
     return acc;
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
   const dailyTargets = healthCtx?.dailyTargets || {
-    calories: 2000, protein: 75, carbs: 250, fat: 65
+    calories: 2000, protein: 75, carbs: 250, fat: 65, fiber: 25, sugarLimit: 50, saltLimit: 5
   };
 
   const caloriesTarget = dailyTargets.calories || 2000;
   const proteinTarget = dailyTargets.protein || 75;
   const carbsTarget = dailyTargets.carbs || 250;
   const fatTarget = dailyTargets.fat || 65;
+  const fiberTarget = dailyTargets.fiber || 25;
+  const sugarTarget = dailyTargets.sugarLimit || 50;
+  const saltTarget = dailyTargets.saltLimit || 5;
 
+  const cholesterolTarget = 300;
   const nutritionData = [
     { key: 'calories',  icon: <FiZap size={20} />, label: 'Calorie nạp vào', value: Math.round(totalsToday.calories),  unit: 'kcal', target: caloriesTarget, pct: Math.min(Math.round((totalsToday.calories / caloriesTarget) * 100), 100) },
     { key: 'protein',   icon: <FiActivity size={20} />, label: 'Protein',          value: Math.round(totalsToday.protein),   unit: 'g',    target: proteinTarget,  pct: Math.min(Math.round((totalsToday.protein / proteinTarget) * 100), 100) },
     { key: 'carbs',     icon: <FiBarChart2 size={20} />, label: 'Carbs',            value: Math.round(totalsToday.carbs),     unit: 'g',    target: carbsTarget,    pct: Math.min(Math.round((totalsToday.carbs / carbsTarget) * 100), 100) },
     { key: 'fat',       icon: <FiDroplet size={20} />, label: 'Chất béo',         value: Math.round(totalsToday.fat),       unit: 'g',    target: fatTarget,      pct: Math.min(Math.round((totalsToday.fat / fatTarget) * 100), 100) },
+    { key: 'fiber',     icon: <FiZap size={20} />, label: 'Chất xơ',           value: Math.round(totalsToday.fiber),     unit: 'g',    target: fiberTarget,    pct: Math.min(Math.round((totalsToday.fiber / fiberTarget) * 100), 100) },
+    { key: 'sugar',     icon: <FiActivity size={20} />, label: 'Đường',           value: Math.round(totalsToday.sugar),     unit: 'g',    target: sugarTarget,    pct: Math.min(Math.round((totalsToday.sugar / sugarTarget) * 100), 100) },
+    { key: 'sodium',    icon: <FiDroplet size={20} />, label: 'Muối',             value: Math.round(totalsToday.sodium * 10) / 10, unit: 'g', target: saltTarget, pct: Math.min(Math.round((totalsToday.sodium / saltTarget) * 100), 100) },
+    { key: 'cholesterol', icon: <FiHeart size={20} />, label: 'Cholesterol',      value: Math.round(totalsToday.cholesterol), unit: 'mg', target: cholesterolTarget, pct: Math.min(Math.round((totalsToday.cholesterol / cholesterolTarget) * 100), 100) },
   ];
 
   return (
@@ -188,6 +302,18 @@ export default function Dashboard() {
             className="hero-food-img hero-food-img--large"
           />
         </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
+          HEALTH TIP
+         ══════════════════════════════════════════ */}
+      <section className="health-tip-section">
+        <HealthTipCard
+          totalsToday={totalsToday}
+          dailyTargets={dailyTargets}
+          healthProfile={healthCtx?.healthProfile}
+        />
+        <CalorieGoalReminder />
       </section>
 
       {/* ══════════════════════════════════════════
@@ -234,7 +360,16 @@ export default function Dashboard() {
           </NavLink>
         </div>
 
-        <div className="meal-cards-scroll">
+        <div
+          className="meal-cards-scroll"
+          ref={scrollRef}
+          onMouseEnter={handleCarouselPause}
+          onMouseLeave={handleCarouselResume}
+          onTouchStart={handleCarouselPause}
+          onTouchEnd={handleCarouselResume}
+          onMouseDown={handleCarouselPause}
+          onMouseUp={handleCarouselResume}
+        >
           {mealSuggestions.map(meal => (
             <div
               key={meal.id}
@@ -242,7 +377,7 @@ export default function Dashboard() {
               onClick={() => navigate('/meal-suggestions')}
             >
               <div className="meal-card-img-wrap">
-                <img src={meal.img} alt={meal.name} className="meal-card-img" />
+                <img src={meal.img} alt={meal.name} className="meal-card-img" loading="lazy" />
                 <button
                   className={`meal-card-fav-btn${isFavorite(meal.id) ? ' active' : ''}`}
                   onClick={e => {

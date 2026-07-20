@@ -286,7 +286,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "thịt heo",
+        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -345,11 +345,6 @@
     "Ingredients": [
       {
         "Name": "Thịt bò",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -581,7 +576,7 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "thịt heo",
+        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -650,11 +645,6 @@
       },
       {
         "Name": "Thịt heo",
-        "Quantity": 120,
-        "UOM": "g"
-      },
-      {
-        "Name": "Xương heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -1416,7 +1406,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "thịt heo",
+        "Name": "Thịt heo",
         "Quantity": 120,
         "UOM": "g"
       },
@@ -1830,7 +1820,7 @@
     "AccountUsername": "testuser",
     "Ingredients": [
       {
-        "Name": "Cơm",
+        "Name": "Gạo",
         "Quantity": 18,
         "UOM": "g"
       },
@@ -2065,6 +2055,884 @@
     "TagNames": [
       "Đồ uống",
       "Tráng miệng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "💚 Trứng Chiên Lá Mơ Lông",
+    "Description": "Món trứng chiên lá mơ lông dân dã, thơm ngon và rất bổ dưỡng cho gia đình.",
+    "Instruction": "1. Đập trứng vào tô, thêm lá mơ lông rửa sạch cắt nhỏ và gia vị rồi khuấy đều.\n2. Làm nóng chảo, cho ít dầu ăn vào rán chín vàng đều hai mặt.\n3. Rắc mè rang lên trên rồi cuộn lại và cắt miếng vừa ăn.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Lá mơ lông",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh",
+      "Lành mạnh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên cá hộp",
+    "Description": "Trứng chiên hòa quyện với vị béo ngọt của cá hộp, là món ngon nhanh gọn cho bữa cơm.",
+    "Instruction": "1. Dằm nhỏ cá nục sốt cà trong tô rồi trộn đều với trứng gà, thịt xay và hành lá cắt nhỏ.\n2. Nêm hạt nêm và tiêu xay vừa ăn.\n3. Cho dầu vào chảo chiên lửa nhỏ hai mặt chín vàng đều.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cá nục sốt cà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 100,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Burrito Trứng",
+    "Description": "Bánh cuộn Burrito kiểu Mexico thơm ngon với nhân trứng gà béo ngậy, bắp cải tím và dưa leo tươi mát.",
+    "Instruction": "1. Bắp cải tím và dưa leo cắt sợi mỏng.\n2. Trứng gà đánh tan rồi khuấy chín mềm trên chảo.\n3. Trải vỏ bánh tortilla, xếp nhân và cuộn chặt áp chảo nhẹ cho nóng giòn vỏ bánh.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Vỏ bánh tortilla",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Bắp cải tím",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Lá xà lách",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Ớt chuông",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dưa leo",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Sốt guacamole",
+        "Quantity": 1,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Lành mạnh"
+    ]
+  },
+  {
+    "Recipe_name": "Bánh Tổ Chiên Trứng Gà",
+    "Description": "Bánh tổ ngọt dẻo chiên cùng trứng gà béo bùi, mang hương vị tết ấm áp, truyền thống.",
+    "Instruction": "1. Bánh tổ cắt lát mỏng vừa ăn.\n2. Nhúng lát bánh tổ ngập vào bát trứng gà đánh tan.\n3. Cho bánh tổ vào chảo dầu nóng chiên vàng đều hai mặt rồi gắp ra đĩa.",
+    "CookTime": 15,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bánh tổ người hoa",
+        "Quantity": 200,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Tráng miệng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng gà ngâm tương",
+    "Description": "Trứng gà lòng đào ngâm nước tương ngọt thơm, dẻo bùi, ăn kèm cơm nóng cực ngon.",
+    "Instruction": "1. Luộc trứng gà lòng đào 6 phút rồi bóc vỏ.\n2. Nấu hỗn hợp nước tương, nước lọc, đường, tỏi, hành tím và ớt cắt lát.\n3. Cho trứng vào hộp, rưới nước tương ngập trứng rồi cất tủ lạnh qua đêm.",
+    "CookTime": 10,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "medium",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 6,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 100,
+        "UOM": "ml"
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 2,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Hấp dẫn"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng cuộn Hàn Quốc",
+    "Description": "Món trứng cuộn hành lá và cà rốt băm kiểu Hàn Quốc thơm ngon, đẹp mắt cho bữa sáng.",
+    "Instruction": "1. Đánh tan trứng gà với hành lá băm, cà rốt băm nhỏ và ít muối tiêu.\n2. Đổ một lớp trứng mỏng lên chảo, cuộn tròn lại khi hơi đông.\n3. Đổ tiếp lớp trứng khác nối liền rồi cuộn tiếp cho đến hết.",
+    "CookTime": 15,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Cà rốt",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Đẹp mắt"
+    ]
+  },
+  {
+    "Recipe_name": "Cá Hộp Chưng Trứng Thịt Băm",
+    "Description": "Cá hộp chưng thịt băm và trứng thơm béo, đậm đà đưa cơm cho ngày bận rộn.",
+    "Instruction": "1. Trộn đều thịt heo xay, cá hộp dằm nhỏ, trứng gà, hành tím và gia vị vào tô chịu nhiệt.\n2. Đập thêm 1 quả trứng lên mặt để tạo lòng đỏ đẹp.\n3. Hấp cách thủy 20-25 phút cho đến khi chín hoàn toàn.",
+    "CookTime": 25,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cá nục sốt cà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 2,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Đậm đà"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên lá lốt",
+    "Description": "Sự kết hợp độc đáo giữa trứng gà béo ngậy và hương thơm đặc trưng của lá lốt.",
+    "Instruction": "1. Lá lốt rửa sạch cắt sợi mỏng.\n2. Đánh trứng gà với lá lốt cắt sợi, hạt nêm, tiêu đen và hành băm.\n3. Rót hỗn hợp trứng vào chảo dầu nóng chiên chín vàng đều hai mặt.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Lá lốt",
+        "Quantity": 30,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Dân dã"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng đúc thịt hấp nồi cơm",
+    "Description": "Trứng đúc thịt băm mềm mịn, hấp chín trong nồi cơm tiện lợi, nhanh gọn và ngọt nước.",
+    "Instruction": "1. Trộn đều thịt heo xay, trứng gà băm, mộc nhĩ và hành lá cắt nhỏ vào tô chịu nhiệt.\n2. Đặt bát thịt đúc trứng vào xửng hấp của nồi cơm khi đang nấu cơm.\n3. Cơm chín thì món trứng đúc thịt cũng chín mềm ngọt nước.",
+    "CookTime": 20,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Tiện lợi"
+    ]
+  },
+  {
+    "Recipe_name": "Thịt xay rim trứng",
+    "Description": "Thịt heo xay rim đậm đà cùng trứng gà, mặn ngọt đưa cơm cho cả gia đình.",
+    "Instruction": "1. Phi thơm hành tím băm, cho thịt heo xay vào xào săn.\n2. Nêm nước mắm, đường, ít tiêu đen vừa ăn.\n3. Đập trứng gà trực tiếp vào nồi thịt rim xốt, đậy nắp lửa nhỏ cho trứng chín lòng đào.",
+    "CookTime": 15,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Đậm đà"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng sốt cay",
+    "Description": "Trứng gà chiên lòng đào quyện nước sốt ớt cay nồng, đậm đà, cực kỳ kích thích vị giác.",
+    "Instruction": "1. Chiên trứng ốp la lòng đào rồi gắp ra.\n2. Làm nước sốt: phi thơm tỏi ớt băm, thêm tương ớt, nước mắm, đường và nước lọc nấu sôi.\n3. Cho trứng ốp la vào rim nhẹ với sốt 2 phút cho ngấm gia vị.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Cay nồng"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng rim cà chua nấm",
+    "Description": "Trứng gà rim sốt cà chua chua ngọt dịu, nấm tươi thanh mát, món ngon thanh đạm mỗi ngày.",
+    "Instruction": "1. Phi thơm hành lá, cho cà chua thái hạt lựu và nấm vào xào mềm tạo sốt.\n2. Đánh tan trứng gà đổ từ từ vào nồi sốt cà chua nấm khuấy đều tay.\n3. Nêm nếm muối đường vừa vị, rắc hành lá cắt khúc lên trên dùng nóng.",
+    "CookTime": 12,
+    "PrepTime": 8,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Cà chua",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Thanh đạm"
+    ]
+  },
+  {
+    "Recipe_name": "Sườn cánh buồm kho trứng",
+    "Description": "Sườn sụn cánh buồm kho thấm vị cùng trứng cút, nước kho ngọt đậm đà, ăn hoài không ngán.",
+    "Instruction": "1. Sườn sụn luộc sơ rửa sạch, ướp với hành băm, nước mắm, nước màu.\n2. Trứng cút luộc chín bóc vỏ.\n3. Kho sườn sụn nhỏ lửa 30 phút rồi cho trứng cút vào kho cùng đến khi cạn nước sốt sệt.",
+    "CookTime": 45,
+    "PrepTime": 15,
+    "Servings": 3,
+    "Difficulty": "medium",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Sườn sụn",
+        "Quantity": 300,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 10,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 3,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Đậm đà"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng sốt nước mắm tỏi ớt",
+    "Description": "Trứng ốp la rưới sốt nước mắm tỏi ớt cay mặn, hao cơm cho ngày lười nấu nướng.",
+    "Instruction": "1. Chiên trứng gà ốp la chín lòng đào.\n2. Pha nước mắm: nước mắm, đường, nước lọc, tỏi băm, ớt băm khuấy tan.\n3. Phi thơm tỏi, rưới hỗn hợp nước mắm đun sôi nhẹ rồi trút lên trứng ốp la.",
+    "CookTime": 8,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 15,
+        "UOM": "g"
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chiên hàu",
+    "Description": "Hàu sữa tươi béo ngậy đúc trứng chiên vàng thơm hành lá, giàu dinh dưỡng cho gia đình.",
+    "Instruction": "1. Hàu sữa rửa sạch để ráo nước, ướp chút tiêu hạt nêm.\n2. Trứng gà đánh tan với hành lá cắt nhỏ.\n3. Xào sơ hàu sữa trên chảo cho săn lại rồi trút trứng vào chiên vàng đều hai mặt.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Ruột hàu sữa",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 20,
+        "UOM": "g"
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Bổ dưỡng"
+    ]
+  },
+  {
+    "Recipe_name": "Sandwich trứng phô mai",
+    "Description": "Bánh mì sandwich nướng kẹp trứng gà ốp la và phô mai lát béo ngậy, tiện lợi cho bữa sáng.",
+    "Instruction": "1. Chiên trứng ốp la chín tới.\n2. Đặt phô mai lát và trứng ốp la lên lát bánh mì sandwich.\n3. Kẹp lát bánh mì còn lại, cho vào lò nướng hoặc áp chảo nóng giòn chảy phô mai.",
+    "CookTime": 5,
+    "PrepTime": 3,
+    "Servings": 1,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bánh mì",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Phô mai",
+        "Quantity": 1,
+        "UOM": "piece"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng bọc thịt chiên xù",
+    "Description": "Trứng lòng đào bọc thịt heo xay tẩm bột chiên giòn rụm bên ngoài, béo ngậy bên trong.",
+    "Instruction": "1. Trứng cút luộc lòng đào 3 phút bóc vỏ.\n2. Bọc sườn sụn thịt heo xay dẻo mịn quanh trứng cút luộc.\n3. Lăn qua bột mì, nhúng trứng gà đánh tan rồi lăn qua bột chiên xù.\n4. Chiên ngập dầu chín vàng giòn rụm rồi vớt ra ráo dầu.",
+    "CookTime": 20,
+    "PrepTime": 15,
+    "Servings": 2,
+    "Difficulty": "medium",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 4,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g"
+      },
+      {
+        "Name": "Bột mì",
+        "Quantity": 30,
+        "UOM": "g"
+      },
+      {
+        "Name": "Vụn bánh mì",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 200,
+        "UOM": "ml"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Hấp dẫn"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng cuộn rong biển",
+    "Description": "Trứng cuộn rong biển giòn thơm, nhân dẻo bùi, món ăn vặt hoặc ăn cơm yêu thích của trẻ nhỏ.",
+    "Instruction": "1. Đánh tan trứng gà với ít hạt nêm và nước lọc.\n2. Tráng lớp trứng mỏng trên chảo, xếp lá rong biển lên trên khi trứng chưa đông hẳn.\n3. Nhẹ nhàng cuộn tròn lại chiên nhỏ lửa vàng giòn rồi cắt miếng vừa ăn.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Rong biển lá",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
+      "Trẻ em"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chưng cà chua hành tây",
+    "Description": "Món trứng chưng cà chua hành tây chua ngọt quen thuộc, chế biến nhanh và cực kỳ dễ ăn.",
+    "Instruction": "1. Phi thơm hành tây cắt hạt lựu, cho cà chua xào chín nhuyễn thành sốt sệt.\n2. Rót trứng gà đánh tan vào chảo sốt cà chua hành tây chưng chín xốp mềm mịn.\n3. Nêm nước mắm tiêu xanh vừa vị, ăn nóng cùng cơm trắng.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Cà chua",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành tây",
+        "Quantity": 50,
+        "UOM": "g"
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Nhanh"
+    ]
+  },
+  {
+    "Recipe_name": "Canh trứng cà chua",
+    "Description": "Canh trứng gà nấu cà chua và hành lá thanh mát, dễ chế biến cho bữa cơm gia đình.",
+    "Instruction": "1. Phi thơm hành tím băm nhỏ, cho cà chua cắt múi cau vào xào chín mềm.\n2. Rót nước lọc đun sôi bùng lên, sau đó rót trứng gà đánh tan từ từ khuấy nhẹ tay để tạo vân đẹp.\n3. Rắc hành lá và ngò cắt nhỏ dùng nóng.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Cà chua",
+        "Quantity": 2,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp"
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp"
+      }
+    ],
+    "TagNames": [
+      "Bữa tối",
+      "Thanh mát"
+    ]
+  },
+  {
+    "Recipe_name": "Trứng chần không dùng giấm",
+    "Description": "Trứng chần là món kết hợp giữa trứng luộc và trứng ốp la.Tuy nhiên trứng chần rất dễ fail nhất nếu như làm ko đúng cách và cẩn thận cũng như trứng không đủ tươi và mới.Trứng này ứng dụng rất nhiều món chủ yếu là món âu,dùng để ăn mì tôm đều rất ngon",
+    "Instruction": "1. Cho trứng ra bát.Chuẩn bị nồi nước thật sôi,Cho một ít dầu vào muôi to(thậm chí nhúng muôi vào dầu).Cho trứng vào\n2. Thả vào nồi nước thật sôi.Đặt đáy muôi vào nước sôi đến khi lòng trắng đông 1 phần khoảng 1-2’ sau đó thả xuống nồi nước sôi đến khi tróc ra đun thêm 1’,vớt trứng ra",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Nước sạch",
+        "Quantity": 1,
+        "UOM": "piece"
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 2,
+        "UOM": "g"
+      }
+    ],
+    "TagNames": [
+      "Bữa sáng",
       "Nhanh"
     ]
   }

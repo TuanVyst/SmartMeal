@@ -8,5 +8,6 @@ namespace BusinessObject.Dtos.RequestModels
         public Guid Ingredient_id { get; set; }
         public int Quantity { get; set; }
         public string UOM { get; set; }
+        public bool IsPrimary { get; set; }
     }
 }

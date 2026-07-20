@@ -103,7 +103,7 @@
 
 .meta-icon {
   font-size: 1.5rem;
-  color: #00a859;
+  color: #22C55E;
 }
 
 .meta-label {
@@ -117,7 +117,30 @@
   display: block;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #166534;
+}
+
+.meta-diary-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  padding: 0.6rem 1.2rem;
+  background-color: #22C55E;
+  border: 2px solid #22C55E;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.meta-diary-btn:hover {
+  background-color: #16A34A;
+  border-color: #16A34A;
+  color: #fff;
 }
 
 .detail-body {
@@ -166,7 +189,7 @@
 }
 
 .ingredients-list-detail .check-icon {
-  color: #00a859;
+  color: #22C55E;
   font-size: 1.2rem;
 }
 
@@ -186,7 +209,7 @@
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  background-color: #00a859;
+  background-color: #22C55E;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -238,13 +261,13 @@
 
 .nutri-row.main-cal strong {
   font-size: 1.3rem;
-  color: #00a859;
+  color: #22C55E;
   font-weight: 800;
 }
 
 .nutri-divider-thick {
   height: 4px;
-  background-color: #1e293b;
+  background-color: #22C55E;
   margin-bottom: 0.5rem;
   border-radius: 2px;
 }
@@ -278,7 +301,7 @@
 
 .tab-btn.active {
   background-color: #ffffff;
-  color: #00a859;
+  color: #22C55E;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
@@ -370,7 +393,7 @@
 
 .chevron-icon.rotated {
   transform: rotate(180deg);
-  color: #00a859;
+  color: #444;
 }
 
 .ing-nutri-details {

@@ -81,6 +81,30 @@ namespace Service.Implements
 
                 var result = await _ingredientRepo.CreateIngredient(newIngredient);
 
+                // Create NutritionalValue
+                if (ingredient.NutritionalValue != null)
+                {
+                    var nv = new NutritionalValue
+                    {
+                        Nv_id = Guid.NewGuid(),
+                        Ingredient_id = newIngredient.Ingredient_id,
+                        Calories = ingredient.NutritionalValue.Calories,
+                        Protein = ingredient.NutritionalValue.Protein,
+                        Carbs = ingredient.NutritionalValue.Carbohydrates,
+                        Fat = ingredient.NutritionalValue.Fat,
+                        Fiber = ingredient.NutritionalValue.Fiber,
+                        Sugar = ingredient.NutritionalValue.Sugar,
+                        Salt = ingredient.NutritionalValue.Sodium,
+                        Cholesterol = ingredient.NutritionalValue.Cholesterol,
+                        ServingSize = ingredient.NutritionalValue.ServingSize ?? 100.0,
+                        ServingUnit = ingredient.NutritionalValue.ServingUnit ?? "g",
+                        EverydayUnit = ingredient.NutritionalValue.EverydayUnit,
+                        EverydayWeight = ingredient.NutritionalValue.EverydayWeight,
+                        IsDeleted = false
+                    };
+                    await _nutritionalValueRepo.CreateNutritionalValue(nv);
+                }
+
                 // Create one IngredientLabel per provided tag
                 var createdLabels = new List<IngredientLabel>();
                 foreach (var tag in existingTags)
@@ -126,6 +150,50 @@ namespace Service.Implements
                 existingIngredient.ImageUrl = ingredient.ImageUrl;
 
                 await _ingredientRepo.UpdateIngredient(existingIngredient);
+
+                // Update NutritionalValue
+                if (ingredient.NutritionalValue != null)
+                {
+                    var nv = existingIngredient.Nutritional_value;
+                    if (nv == null)
+                    {
+                        nv = new NutritionalValue
+                        {
+                            Nv_id = Guid.NewGuid(),
+                            Ingredient_id = existingIngredient.Ingredient_id,
+                            Calories = ingredient.NutritionalValue.Calories,
+                            Protein = ingredient.NutritionalValue.Protein,
+                            Carbs = ingredient.NutritionalValue.Carbohydrates,
+                            Fat = ingredient.NutritionalValue.Fat,
+                            Fiber = ingredient.NutritionalValue.Fiber,
+                            Sugar = ingredient.NutritionalValue.Sugar,
+                            Salt = ingredient.NutritionalValue.Sodium,
+                            Cholesterol = ingredient.NutritionalValue.Cholesterol,
+                            ServingSize = ingredient.NutritionalValue.ServingSize ?? 100.0,
+                            ServingUnit = ingredient.NutritionalValue.ServingUnit ?? "g",
+                            EverydayUnit = ingredient.NutritionalValue.EverydayUnit,
+                            EverydayWeight = ingredient.NutritionalValue.EverydayWeight,
+                            IsDeleted = false
+                        };
+                        await _nutritionalValueRepo.CreateNutritionalValue(nv);
+                    }
+                    else
+                    {
+                        nv.Calories = ingredient.NutritionalValue.Calories;
+                        nv.Protein = ingredient.NutritionalValue.Protein;
+                        nv.Carbs = ingredient.NutritionalValue.Carbohydrates;
+                        nv.Fat = ingredient.NutritionalValue.Fat;
+                        nv.Fiber = ingredient.NutritionalValue.Fiber;
+                        nv.Sugar = ingredient.NutritionalValue.Sugar;
+                        nv.Salt = ingredient.NutritionalValue.Sodium;
+                        nv.Cholesterol = ingredient.NutritionalValue.Cholesterol;
+                        nv.ServingSize = ingredient.NutritionalValue.ServingSize ?? nv.ServingSize;
+                        nv.ServingUnit = ingredient.NutritionalValue.ServingUnit ?? nv.ServingUnit;
+                        nv.EverydayUnit = ingredient.NutritionalValue.EverydayUnit ?? nv.EverydayUnit;
+                        nv.EverydayWeight = ingredient.NutritionalValue.EverydayWeight ?? nv.EverydayWeight;
+                        await _nutritionalValueRepo.UpdateNutritionalValue(nv);
+                    }
+                }
 
                 if (ingredient.IngredientTagIds != null)
                 {
@@ -212,7 +280,9 @@ namespace Service.Implements
                     Salt = ingredient.Nutritional_value.Salt,
                     Cholesterol = ingredient.Nutritional_value.Cholesterol,
                     ServingSize = ingredient.Nutritional_value.ServingSize,
-                    ServingUnit = ingredient.Nutritional_value.ServingUnit
+                    ServingUnit = ingredient.Nutritional_value.ServingUnit,
+                    EverydayUnit = ingredient.Nutritional_value.EverydayUnit,
+                    EverydayWeight = ingredient.Nutritional_value.EverydayWeight
                 } : null,
                 IngredientLabels = ingredient.IngredientLabels?.Where(l => !l.IsDeleted).Select(l => new IngredientLabelSimpleDto
                 {
