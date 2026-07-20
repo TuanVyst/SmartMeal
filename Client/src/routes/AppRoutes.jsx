@@ -22,6 +22,10 @@ import AdminIngredients from '../pages/admin/AdminIngredients';
 import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
 import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
+// import AdminFeedback from '../pages/admin/AdminFeedback';
+// import AdminFeedbackDetail from '../pages/admin/AdminFeedbackDetail';
+import AdminPlans from '../pages/admin/AdminPlans';
+import AdminStatistics from '../pages/admin/AdminStatistics';
 import Nutrition from '../pages/nutrition/Nutrition';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
@@ -79,6 +83,10 @@ export default function AppRoutes() {
         <Route path="recipe-tags" element={<AdminRecipeTags />} />
         <Route path="recipes" element={<AdminRecipes />} />
         <Route path="categories" element={<AdminCategories />} />
+        {/* <Route path="feedback" element={<AdminFeedback />} /> */}
+        {/* <Route path="feedback/:id" element={<AdminFeedbackDetail />} /> */}
+        <Route path="plans" element={<AdminPlans />} />
+        <Route path="statistics" element={<AdminStatistics />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -11,6 +11,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public DateTime? EndDate { get; set; }
         public string Status { get; set; }
         public string PaymentRef { get; set; }
+        public double PricePaid { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

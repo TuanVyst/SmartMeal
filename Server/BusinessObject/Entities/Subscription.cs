@@ -33,8 +33,10 @@ namespace BusinessObject.Entities
 
         [MaxLength(255)]
         public string PaymentRef { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public double PricePaid { get; set; } = 0;
 
-                public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public virtual Account Account { get; set; }
