@@ -3,6 +3,7 @@ using System;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260720090611_AddSurveyPreferencesPhase1")]
+    partial class AddSurveyPreferencesPhase1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -482,114 +485,6 @@ namespace DataAccessLayer.Migrations
                         .IsUnique();
 
                     b.ToTable("IngredientTags");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlan", b =>
-                {
-                    b.Property<Guid>("MealPlan_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Account_id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("GeneratedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<int>("TotalDays")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MealPlan_id");
-
-                    b.HasIndex("Account_id");
-
-                    b.ToTable("MealPlan");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlanDay", b =>
-                {
-                    b.Property<Guid>("Day_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("DayDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DayIndex")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("MealPlan_id")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Day_id");
-
-                    b.HasIndex("MealPlan_id");
-
-                    b.ToTable("MealPlanDay");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlanEntry", b =>
-                {
-                    b.Property<Guid>("Entry_id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Day_id")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("MealSlot")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<Guid>("Recipe_id")
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("SlotCalories")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("SlotCarbs")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("SlotFat")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("SlotFiber")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("SlotProtein")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Entry_id");
-
-                    b.HasIndex("Day_id");
-
-                    b.HasIndex("Recipe_id");
-
-                    b.ToTable("MealPlanEntry");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.MedicalCondition", b =>
@@ -1311,47 +1206,6 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Ingredient_tag");
                 });
 
-            modelBuilder.Entity("BusinessObject.Entities.MealPlan", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("Account_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlanDay", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.MealPlan", "MealPlan")
-                        .WithMany("Days")
-                        .HasForeignKey("MealPlan_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MealPlan");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlanEntry", b =>
-                {
-                    b.HasOne("BusinessObject.Entities.MealPlanDay", "MealPlanDay")
-                        .WithMany("Entries")
-                        .HasForeignKey("Day_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BusinessObject.Entities.Recipe", "Recipe")
-                        .WithMany()
-                        .HasForeignKey("Recipe_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MealPlanDay");
-
-                    b.Navigation("Recipe");
-                });
-
             modelBuilder.Entity("BusinessObject.Entities.NutritionGoal", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Account", "Account")
@@ -1596,16 +1450,6 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("BusinessObject.Entities.IngredientTag", b =>
                 {
                     b.Navigation("IngredientLabels");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlan", b =>
-                {
-                    b.Navigation("Days");
-                });
-
-            modelBuilder.Entity("BusinessObject.Entities.MealPlanDay", b =>
-                {
-                    b.Navigation("Entries");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Partner", b =>

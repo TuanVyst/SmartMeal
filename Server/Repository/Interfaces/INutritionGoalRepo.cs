@@ -7,6 +7,7 @@ namespace Repository.Interfaces
         Task<List<NutritionGoal>> GetAllNutritionGoals();
 
         Task<NutritionGoal?> GetNutritionGoalById(Guid id);
+        Task<NutritionGoal?> GetNutritionGoalByAccountId(Guid accountId);
 
         Task<NutritionGoal> CreateNutritionGoal(NutritionGoal nutritionGoal);
 

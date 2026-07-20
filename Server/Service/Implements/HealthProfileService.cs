@@ -43,6 +43,11 @@ namespace Service.Implements
                 TargetWeeks = request.TargetWeeks ?? 12,
                 ActivityLevel = request.ActivityLevel,
                 Goal = request.Goal,
+                CookingTimeMinutes = request.CookingTimeMinutes,
+                BudgetLevel = request.BudgetLevel,
+                MealsPerDay = request.MealsPerDay,
+                DietType = request.DietType,
+                PlanCycleDays = request.PlanCycleDays,
                 UpdatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
@@ -65,6 +70,11 @@ namespace Service.Implements
             healthProfile.TargetWeeks = request.TargetWeeks;
             healthProfile.ActivityLevel = request.ActivityLevel;
             healthProfile.Goal = request.Goal;
+            healthProfile.CookingTimeMinutes = request.CookingTimeMinutes;
+            healthProfile.BudgetLevel = request.BudgetLevel;
+            healthProfile.MealsPerDay = request.MealsPerDay;
+            healthProfile.DietType = request.DietType;
+            healthProfile.PlanCycleDays = request.PlanCycleDays;
             healthProfile.UpdatedAt = DateTime.UtcNow;
 
             return await _healthProfileRepo.UpdateHealthProfile(healthProfile);

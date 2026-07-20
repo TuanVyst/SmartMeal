@@ -42,6 +42,11 @@ namespace DataAccessLayer
         public DbSet<BmiLog> BmiLogs { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
+        
+        // Meal Planning Engine
+        public DbSet<MealPlan> MealPlans { get; set; }
+        public DbSet<MealPlanDay> MealPlanDays { get; set; }
+        public DbSet<MealPlanEntry> MealPlanEntries { get; set; }
      
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

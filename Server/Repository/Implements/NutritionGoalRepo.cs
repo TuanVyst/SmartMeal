@@ -30,6 +30,14 @@ namespace Repository.Implements
                 .FirstOrDefaultAsync(x => x.Goal_id == id);
         }
 
+        public async Task<NutritionGoal?> GetNutritionGoalByAccountId(Guid accountId)
+        {
+            return await _ctx.NutritionGoals
+                .Include(x => x.Account)
+                .Where(x => x.IsDeleted == false)
+                .FirstOrDefaultAsync(x => x.Account_id == accountId);
+        }
+
         public async Task<NutritionGoal> CreateNutritionGoal(NutritionGoal nutritionGoal)
         {
             _ctx.NutritionGoals.Add(nutritionGoal);

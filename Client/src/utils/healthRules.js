@@ -428,7 +428,7 @@ export function computeCalorieDelta(currentWeight, targetWeight, weeks = 12) {
 export function getDailyCalorieBudget(profile) {
   const {
     weight, height, goal, targetWeight,
-    targetWeeks = 12, dateOfBirth, gender, activityLevel, bmiLevel
+    targetWeeks = 12, dateOfBirth, gender, activityLevel, bmiLevel, age: directAge
   } = profile || {};
 
   // ── Bước 1-2: BMR (Mifflin-St Jeor) ──────────────────────────────────────
@@ -445,6 +445,8 @@ export function getDailyCalorieBudget(profile) {
          (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
         age--;
       }
+    } else if (directAge) {
+      age = Number(directAge) || 30;
     }
 
     const g = (gender || '').toLowerCase();

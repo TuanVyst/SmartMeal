@@ -149,6 +149,60 @@ export default function Nutrition() {
 
   const [activeTab, setActiveTab] = useState('history'); // history | stats
   const [selectedDate, setSelectedDate] = useState(getTodayDateKey());
+  const [selectedWeekStart, setSelectedWeekStart] = useState(() => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(today);
+    monday.setDate(diff);
+    return toDateKey(monday);
+  });
+
+  // Week helpers
+  const getWeekDates = (mondayKey) => {
+    const dates = [];
+    const base = new Date(mondayKey + 'T12:00:00');
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      dates.push(toDateKey(d));
+    }
+    return dates;
+  };
+
+  const getWeekLabel = (mondayKey) => {
+    const dates = getWeekDates(mondayKey);
+    const first = dates[0];
+    const last = dates[6];
+    return `${first.substring(8,10)}/${first.substring(5,7)} - ${last.substring(8,10)}/${last.substring(5,7)}`;
+  };
+
+  const getAvailableWeeks = () => {
+    const weeks = new Set();
+    const todayKey = getTodayDateKey();
+    const today = new Date(todayKey + 'T12:00:00');
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const currentMonday = new Date(today);
+    currentMonday.setDate(diff);
+
+    // Always include current week
+    weeks.add(toDateKey(currentMonday));
+
+    // Add weeks from logs
+    nutritionLogs.forEach(l => {
+      if (l.logDate) {
+        const logDate = new Date(l.logDate);
+        const logDay = logDate.getDay();
+        const logDiff = logDate.getDate() - logDay + (logDay === 0 ? -6 : 1);
+        const monday = new Date(logDate);
+        monday.setDate(logDiff);
+        weeks.add(toDateKey(monday));
+      }
+    });
+
+    return Array.from(weeks).sort().reverse();
+  };
 
   // Data from backend
   const [ingredients, setIngredients] = useState([]);
@@ -513,23 +567,12 @@ export default function Nutrition() {
 
   const calProgress = Math.min(Math.round((totalsToday.calories / activeGoal.calories) * 100), 200);
 
-  // SVG Chart data preparations (Last 7 days)
-  const getLast7Days = () => {
-    const today = new Date();
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      days.push(toDateKey(d));
-    }
-    return days;
-  };
-
-  const last7Days = getLast7Days();
-  const dailyCaloriesData = last7Days.map(dateStr => {
+  // SVG Chart data preparations (Week-based)
+  const chartDays = getWeekDates(selectedWeekStart);
+  const dailyCaloriesData = chartDays.map(dateStr => {
     const dayLogs = nutritionLogs.filter(l => toDateKey(l.logDate) === dateStr);
     const cal = dayLogs.reduce((sum, l) => sum + (l.totalCalories || 0), 0);
-    const dObj = new Date(dateStr);
+    const dObj = new Date(dateStr + 'T12:00:00');
     const weekdays = ['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
     return {
       date: dateStr,
@@ -573,12 +616,22 @@ export default function Nutrition() {
           <p className="subtitle">Ghi nhận lượng thức ăn nạp vào và so sánh với mục tiêu sức khỏe của bạn</p>
         </div>
         <div className="date-picker-wrapper">
+          <button className="date-nav-btn" onClick={() => {
+            const d = new Date(selectedDate);
+            d.setDate(d.getDate() - 1);
+            setSelectedDate(toDateKey(d));
+          }} title="Ngày trước">‹</button>
           <input 
             type="date" 
             value={selectedDate} 
             onChange={(e) => setSelectedDate(e.target.value)} 
             className="header-date-input"
           />
+          <button className="date-nav-btn" onClick={() => {
+            const d = new Date(selectedDate);
+            d.setDate(d.getDate() + 1);
+            setSelectedDate(toDateKey(d));
+          }} title="Ngày sau">›</button>
         </div>
       </div>
 
@@ -882,9 +935,34 @@ export default function Nutrition() {
               
               {/* SVG Calorie Trend Chart */}
               <div className="stats-card glass-panel">
-                <h3>Xu hướng Năng lượng 7 ngày qua</h3>
+                <div className="chart-header-row">
+                  <h3>Xu hướng Năng lượng</h3>
+                  <div className="week-nav">
+                    <button className="week-nav-btn" onClick={() => {
+                      const d = new Date(selectedWeekStart + 'T12:00:00');
+                      d.setDate(d.getDate() - 7);
+                      setSelectedWeekStart(toDateKey(d));
+                    }} title="Tuần trước">‹</button>
+                    <select
+                      className="week-select"
+                      value={selectedWeekStart}
+                      onChange={e => setSelectedWeekStart(e.target.value)}
+                    >
+                      {getAvailableWeeks().map(w => (
+                        <option key={w} value={w}>Tuần {getWeekLabel(w)}</option>
+                      ))}
+                    </select>
+                    <button className="week-nav-btn" onClick={() => {
+                      const d = new Date(selectedWeekStart + 'T12:00:00');
+                      d.setDate(d.getDate() + 7);
+                      const todayKey = getTodayDateKey();
+                      const nextMonday = toDateKey(d);
+                      if (nextMonday <= todayKey) setSelectedWeekStart(nextMonday);
+                    }} title="Tuần sau">›</button>
+                  </div>
+                </div>
                 <div className="chart-wrapper">
-                  <svg viewBox="0 0 700 310" className="svg-chart">
+                  <svg viewBox="0 0 780 310" className="svg-chart" style={{ width: '100%' }}>
                     <defs>
                       <linearGradient id="grad-normal" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#22c55e" />
@@ -900,10 +978,11 @@ export default function Nutrition() {
                     {[0, 1, 2, 3].map(i => {
                       const yVal = Math.round((maxCalInChart / 3) * i);
                       const yPos = 245 - (yVal / maxCalInChart) * 210;
+                      const chartEndX = 72 + 620;
                       return (
                         <g key={`grid-${i}`}>
                           <line
-                            x1="56" y1={yPos} x2="670" y2={yPos}
+                            x1="56" y1={yPos} x2={chartEndX} y2={yPos}
                             stroke={i === 0 ? '#cbd5e1' : '#e2e8f0'}
                             strokeDasharray={i === 0 ? '0' : '5 4'}
                             strokeWidth="1"
@@ -924,17 +1003,18 @@ export default function Nutrition() {
                     {/* Goal Line */}
                     {(() => {
                       const goalY = 245 - (activeGoal.calories / maxCalInChart) * 210;
+                      const chartEndX = 72 + 620;
                       return (
                         <>
                           <line
-                            x1="56" y1={goalY} x2="670" y2={goalY}
+                            x1="56" y1={goalY} x2={chartEndX} y2={goalY}
                             stroke="#f59e0b"
                             strokeWidth="2"
                             strokeDasharray="8 4"
                             opacity="0.85"
                           />
                           <rect
-                            x="598" y={goalY - 13}
+                            x={chartEndX - 72} y={goalY - 13}
                             width="70" height="16"
                             rx="4"
                             fill="#fef3c7"
@@ -942,7 +1022,7 @@ export default function Nutrition() {
                             strokeWidth="1"
                           />
                           <text
-                            x="633" y={goalY - 2}
+                            x={chartEndX - 37} y={goalY - 2}
                             textAnchor="middle"
                             fill="#b45309"
                             fontSize="9.5"
@@ -957,15 +1037,17 @@ export default function Nutrition() {
 
                     {/* Bars */}
                     {dailyCaloriesData.map((d, index) => {
-                      const COL_W = 42;
-                      const COL_SPACING = 85;
+                      const numDays = 7;
+                      const chartWidth = 620;
+                      const COL_W = Math.min(42, chartWidth / numDays - 4);
+                      const COL_SPACING = chartWidth / numDays;
                       const x = 72 + index * COL_SPACING;
                       const barHeight = d.calories > 0
                         ? Math.max((d.calories / maxCalInChart) * 210, 3)
                         : 0;
                       const y = 245 - barHeight;
                       const isOver = d.calories >= activeGoal.calories;
-                      const isToday = index === 6;
+                      const isToday = d.date === getTodayDateKey();
 
                       return (
                         <g key={d.date} className="bar-group">

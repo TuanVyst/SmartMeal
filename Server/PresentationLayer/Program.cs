@@ -142,6 +142,12 @@ builder.Services.AddScoped<Service.Interfaces.IAccountService, Service.Implement
 builder.Services.AddScoped<Repository.Interfaces.IHealthProfileRepo, Repository.Implements.HealthProfileRepo>();
 builder.Services.AddScoped<Service.Interfaces.IHealthProfileService, Service.Implements.HealthProfileService>();
 
+// Meal Planning Engine
+builder.Services.AddScoped<Repository.Interfaces.IMealPlanRepository, Repository.Implements.MealPlanRepository>();
+builder.Services.AddScoped<Service.Interfaces.IMealPlanningService, Service.Implements.MealPlanningService>();
+builder.Services.AddScoped<Service.Interfaces.IHealthReportService, Service.Implements.HealthReportService>();
+
+
 // UserCondition
 builder.Services.AddScoped<Repository.Interfaces.IUserConditionRepo, Repository.Implements.UserConditionRepo>();
 builder.Services.AddScoped<Service.Interfaces.IUserConditionService, Service.Implements.UserConditionService>();
