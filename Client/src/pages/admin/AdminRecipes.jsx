@@ -3,6 +3,7 @@ import { FiPlus, FiEdit, FiTrash2, FiX, FiMinus, FiSearch } from 'react-icons/fi
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
 import { useAuth } from '../../context/AuthContext';
+import ImageUpload from '../../components/common/ImageUpload';
 
 export default function AdminRecipes() {
   const dialog = useDialog();
@@ -337,13 +338,11 @@ export default function AdminRecipes() {
                   </div>
                   
                   <div className="form-group">
-                    <label className="form-label">Image URL</label>
-                    <input
-                      type="url"
-                      className="form-control"
+                    <label className="form-label">Hình ảnh</label>
+                    <ImageUpload
                       value={recipeFormData.imageUrl}
-                      onChange={(e) => setRecipeFormData({ ...recipeFormData, imageUrl: e.target.value })}
-                      placeholder="https://..."
+                      onChange={(url) => setRecipeFormData({ ...recipeFormData, imageUrl: url })}
+                      label="Tải ảnh công thức"
                     />
                   </div>
                   

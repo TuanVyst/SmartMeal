@@ -3,6 +3,7 @@ import { FiPlus, FiEdit, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
 import { resolveIngredientImageUrl } from '../../utils/ingredientImages';
+import ImageUpload from '../../components/common/ImageUpload';
 
 export default function AdminIngredients() {
   const dialog = useDialog();
@@ -268,12 +269,11 @@ export default function AdminIngredients() {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Hình ảnh (URL)</label>
-                <input
-                  type="url"
-                  className="form-control"
+                <label className="form-label">Hình ảnh</label>
+                <ImageUpload
                   value={ingredientFormData.imageUrl}
-                  onChange={(e) => setIngredientFormData({ ...ingredientFormData, imageUrl: e.target.value })}
+                  onChange={(url) => setIngredientFormData({ ...ingredientFormData, imageUrl: url })}
+                  label="Tải ảnh nguyên liệu"
                 />
               </div>
 
