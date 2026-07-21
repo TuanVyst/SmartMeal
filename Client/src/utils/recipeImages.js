@@ -83,7 +83,10 @@ const filenameByLowerTitle = RECIPE_IMAGE_FILES.reduce((map, filename) => {
 }, new Map());
 
 function buildRecipeImageUrl(filename) {
-  return `${RECIPE_IMAGE_BASE}/${encodeURIComponent(filename)}`;
+  // encodeURIComponent breaks Vietnamese filenames on some servers.
+  // Use a manual encode that only encodes '#', '?', '%' but keeps Unicode + spaces.
+  const safe = filename.replace(/%/g, '%25').replace(/#/g, '%23').replace(/\?/g, '%3F');
+  return `${RECIPE_IMAGE_BASE}/${safe}`;
 }
 
 export function resolveRecipeImageUrl(recipeName) {

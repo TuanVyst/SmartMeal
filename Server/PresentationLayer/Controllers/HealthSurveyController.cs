@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Service.Interfaces;
 using System.Security.Claims;
+using BusinessObject.Helpers;
 
 namespace PresentationLayer.Controllers
 {
@@ -162,6 +163,11 @@ namespace PresentationLayer.Controllers
                         : DateTime.UtcNow,
                     Gender = request.Gender ?? "Khác",
                     ActivityLevel = request.ActivityLevel ?? "sedentary",
+                    CookingTimeMinutes = request.CookingTimeMinutes,
+                    BudgetLevel = request.BudgetLevel,
+                    MealsPerDay = request.MealsPerDay,
+                    DietType = request.DietType,
+                    PlanCycleDays = request.PlanCycleDays,
                 };
 
                 var existing = await _healthProfileService.GetHealthProfileByAccountId(accountId);
@@ -230,6 +236,35 @@ namespace PresentationLayer.Controllers
                 var conditionNames = await GetUserConditionNames(accountId);
                 var allergyNames = await GetUserAllergyNames(accountId);
 
+                var targets = HealthRulesHelper.CalculateDailyTargets(profile, conditionNames);
+                var existingGoal = await _ctx.NutritionGoals.FirstOrDefaultAsync(g => g.Account_id == accountId && !g.IsDeleted);
+                if (existingGoal != null)
+                {
+                    existingGoal.TargetCalories = targets.Calories;
+                    existingGoal.TargetProtein = targets.Protein;
+                    existingGoal.TargetCarbs = targets.Carbs;
+                    existingGoal.TargetFat = targets.Fat;
+                    existingGoal.TargetFiber = targets.Fiber;
+                    existingGoal.TargetSugar = targets.SugarLimit;
+                    existingGoal.TargetSalt = targets.SaltLimit;
+                    _ctx.NutritionGoals.Update(existingGoal);
+                }
+                else
+                {
+                    _ctx.NutritionGoals.Add(new NutritionGoal
+                    {
+                        Account_id = accountId,
+                        TargetCalories = targets.Calories,
+                        TargetProtein = targets.Protein,
+                        TargetCarbs = targets.Carbs,
+                        TargetFat = targets.Fat,
+                        TargetFiber = targets.Fiber,
+                        TargetSugar = targets.SugarLimit,
+                        TargetSalt = targets.SaltLimit
+                    });
+                }
+                await _ctx.SaveChangesAsync();
+
                 return Ok(new
                 {
                     success = true,
@@ -246,7 +281,22 @@ namespace PresentationLayer.Controllers
                         profile.ActivityLevel,
                         bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
                         conditions = conditionNames,
-                        allergies = allergyNames
+                        allergies = allergyNames,
+                        cookingTimeMinutes = profile.CookingTimeMinutes,
+                        budgetLevel = profile.BudgetLevel,
+                        mealsPerDay = profile.MealsPerDay,
+                        dietType = profile.DietType,
+                        planCycleDays = profile.PlanCycleDays,
+                        dailyTargets = new
+                        {
+                            calories = targets.Calories,
+                            protein = targets.Protein,
+                            carbs = targets.Carbs,
+                            fat = targets.Fat,
+                            fiber = targets.Fiber,
+                            sugarLimit = targets.SugarLimit,
+                            saltLimit = targets.SaltLimit
+                        }
                     }
                 });
             }
@@ -269,6 +319,8 @@ namespace PresentationLayer.Controllers
                 var conditionNames = await GetUserConditionNames(accountId);
                 var allergyNames = await GetUserAllergyNames(accountId);
 
+                var targets = HealthRulesHelper.CalculateDailyTargets(profile, conditionNames);
+
                 return Ok(new
                 {
                     success = true,
@@ -285,7 +337,22 @@ namespace PresentationLayer.Controllers
                         profile.ActivityLevel,
                         bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
                         conditions = conditionNames,
-                        allergies = allergyNames
+                        allergies = allergyNames,
+                        cookingTimeMinutes = profile.CookingTimeMinutes,
+                        budgetLevel = profile.BudgetLevel,
+                        mealsPerDay = profile.MealsPerDay,
+                        dietType = profile.DietType,
+                        planCycleDays = profile.PlanCycleDays,
+                        dailyTargets = new
+                        {
+                            calories = targets.Calories,
+                            protein = targets.Protein,
+                            carbs = targets.Carbs,
+                            fat = targets.Fat,
+                            fiber = targets.Fiber,
+                            sugarLimit = targets.SugarLimit,
+                            saltLimit = targets.SaltLimit
+                        }
                     }
                 });
             }
@@ -318,6 +385,11 @@ namespace PresentationLayer.Controllers
                         : existing.DateOfBirth ?? DateTime.UtcNow,
                     Gender = request.Gender ?? existing.Gender ?? "Khác",
                     ActivityLevel = request.ActivityLevel ?? existing.ActivityLevel ?? "sedentary",
+                    CookingTimeMinutes = request.CookingTimeMinutes ?? existing.CookingTimeMinutes,
+                    BudgetLevel = request.BudgetLevel ?? existing.BudgetLevel,
+                    MealsPerDay = request.MealsPerDay ?? existing.MealsPerDay,
+                    DietType = request.DietType ?? existing.DietType,
+                    PlanCycleDays = request.PlanCycleDays ?? existing.PlanCycleDays,
                 };
 
                 var profile = await _healthProfileService.UpdateHealthProfile(existing.Profile_id, profileRequest);
@@ -427,6 +499,35 @@ namespace PresentationLayer.Controllers
                 var conditionNames = await GetUserConditionNames(accountId);
                 var allergyNames = await GetUserAllergyNames(accountId);
 
+                var targets = HealthRulesHelper.CalculateDailyTargets(profile, conditionNames);
+                var existingGoal = await _ctx.NutritionGoals.FirstOrDefaultAsync(g => g.Account_id == accountId && !g.IsDeleted);
+                if (existingGoal != null)
+                {
+                    existingGoal.TargetCalories = targets.Calories;
+                    existingGoal.TargetProtein = targets.Protein;
+                    existingGoal.TargetCarbs = targets.Carbs;
+                    existingGoal.TargetFat = targets.Fat;
+                    existingGoal.TargetFiber = targets.Fiber;
+                    existingGoal.TargetSugar = targets.SugarLimit;
+                    existingGoal.TargetSalt = targets.SaltLimit;
+                    _ctx.NutritionGoals.Update(existingGoal);
+                }
+                else
+                {
+                    _ctx.NutritionGoals.Add(new NutritionGoal
+                    {
+                        Account_id = accountId,
+                        TargetCalories = targets.Calories,
+                        TargetProtein = targets.Protein,
+                        TargetCarbs = targets.Carbs,
+                        TargetFat = targets.Fat,
+                        TargetFiber = targets.Fiber,
+                        TargetSugar = targets.SugarLimit,
+                        TargetSalt = targets.SaltLimit
+                    });
+                }
+                await _ctx.SaveChangesAsync();
+
                 return Ok(new
                 {
                     success = true,
@@ -443,7 +544,22 @@ namespace PresentationLayer.Controllers
                         profile.ActivityLevel,
                         bmiLevel = CalculateBmiLevel(profile.Height, profile.Weight),
                         conditions = conditionNames,
-                        allergies = allergyNames
+                        allergies = allergyNames,
+                        cookingTimeMinutes = profile.CookingTimeMinutes,
+                        budgetLevel = profile.BudgetLevel,
+                        mealsPerDay = profile.MealsPerDay,
+                        dietType = profile.DietType,
+                        planCycleDays = profile.PlanCycleDays,
+                        dailyTargets = new
+                        {
+                            calories = targets.Calories,
+                            protein = targets.Protein,
+                            carbs = targets.Carbs,
+                            fat = targets.Fat,
+                            fiber = targets.Fiber,
+                            sugarLimit = targets.SugarLimit,
+                            saltLimit = targets.SaltLimit
+                        }
                     }
                 });
             }
@@ -504,5 +620,10 @@ namespace PresentationLayer.Controllers
         public string? Goal { get; set; }
         public string? BmiLevel { get; set; }
         public string? ActivityLevel { get; set; }
+        public int? CookingTimeMinutes { get; set; }
+        public string? BudgetLevel { get; set; }
+        public int? MealsPerDay { get; set; }
+        public string? DietType { get; set; }
+        public int? PlanCycleDays { get; set; }
     }
 }

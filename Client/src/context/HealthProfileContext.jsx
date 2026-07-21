@@ -18,6 +18,10 @@ export function HealthProfileProvider({ children }) {
     calories: 2000, protein: 75, carbs: 250, fat: 65,
     fiber: 25, sugarLimit: 50, saltLimit: 5,
   });
+  // Phase 1 — survey preference fields
+  const [planCycleDays, setPlanCycleDays] = useState(7);
+  const [mealsPerDay, setMealsPerDay] = useState(3);
+  const [dietType, setDietType] = useState('omnivore');
   const [loading, setLoading] = useState(true);
 
   const computeDerivedState = useCallback((profile) => {
@@ -62,9 +66,14 @@ export function HealthProfileProvider({ children }) {
     }
     setPreferredIngredients(Array.from(preferredSet));
 
-    const budget = calculateDailyTargets(profile);
+    const budget = profile.dailyTargets || calculateDailyTargets(profile);
     setDailyCalorieBudget(budget.calories);
     setDailyTargets(budget);
+
+    // Sync Phase 1 preference fields
+    setPlanCycleDays(profile.planCycleDays || 7);
+    setMealsPerDay(profile.mealsPerDay || 3);
+    setDietType(profile.dietType || 'omnivore');
   }, []);
 
   useEffect(() => {
@@ -177,6 +186,9 @@ export function HealthProfileProvider({ children }) {
       preferredIngredients,
       dailyCalorieBudget,
       dailyTargets,
+      planCycleDays,
+      mealsPerDay,
+      dietType,
       loading,
       completeSurvey,
       updateProfile,

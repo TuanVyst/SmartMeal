@@ -25,9 +25,20 @@ namespace Repository.Implements
         }
 
         public async Task<Pantry?> GetPantryById(Guid id)
-            => await _ctx.Pantries
-             
-                .FirstOrDefaultAsync(i => i.Pantry_id == id);
+        {
+            return await _ctx.Pantries
+                .Include(p => p.Ingredient)
+                .Include(p => p.Account)
+                .FirstOrDefaultAsync(p => p.Pantry_id == id);
+        }
+
+        public async Task<List<Pantry>> GetPantryByAccountId(Guid accountId)
+        {
+            return await _ctx.Pantries
+                .Include(p => p.Ingredient)
+                .Where(p => p.Account_id == accountId)
+                .ToListAsync();
+        }
 
         public async Task<Pantry> CreatePantry(Pantry pantry)
         {

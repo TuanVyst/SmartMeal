@@ -32,6 +32,11 @@ import Payment from '../pages/subscription/Payment';
 import PaymentSuccess from '../pages/subscription/PaymentSuccess';
 import PaymentCancel from '../pages/subscription/PaymentCancel';
 
+import HealthReport from '../pages/meal-plan/HealthReport';
+import MealPlanPreview from '../pages/meal-plan/MealPlanPreview';
+import MealPlanPage from '../pages/meal-plan/MealPlanPage';
+import MealPlanSuggestion from '../pages/meal-plan/MealPlanSuggestion';
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -54,6 +59,7 @@ export default function AppRoutes() {
         <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
+        <Route path="/meal-suggestion" element={<MealPlanSuggestion />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/recipes/new" element={<RecipeForm />} />
         <Route path="/recipes/:id/edit" element={<RecipeForm />} />
@@ -64,8 +70,40 @@ export default function AppRoutes() {
         <Route path="/ingredients/:id/edit" element={<IngredientForm />} />
         <Route path="/nutrition" element={<Nutrition />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/health-survey" element={<SurveyPage />} />
       </Route>
+      {/* Protected routes without MainLayout (no sidebar) */}
+      <Route
+        path="/health-survey"
+        element={
+          <ProtectedRoute>
+            <SurveyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/meal-plan/report"
+        element={
+          <ProtectedRoute>
+            <HealthReport />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/meal-plan/preview"
+        element={
+          <ProtectedRoute>
+            <MealPlanPreview />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/meal-plan"
+        element={
+          <ProtectedRoute>
+            <MealPlanPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin"
         element={

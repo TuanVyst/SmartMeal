@@ -30,6 +30,18 @@ namespace BusinessObject.Entities
         [MaxLength(50)]
         public string? Goal { get; set; }
 
+        public int? CookingTimeMinutes { get; set; }
+
+        [MaxLength(20)]
+        public string? BudgetLevel { get; set; }
+
+        public int? MealsPerDay { get; set; }
+
+        [MaxLength(30)]
+        public string? DietType { get; set; }
+
+        public int? PlanCycleDays { get; set; }
+
         public DateTime? UpdatedAt { get; set; }
 
                 public bool IsDeleted { get; set; } = false;

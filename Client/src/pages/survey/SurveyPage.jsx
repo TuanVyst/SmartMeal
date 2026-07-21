@@ -1,5 +1,5 @@
 import { Navigate, useNavigate } from 'react-router-dom';
-import HealthSurveyModal from '../../components/forms/HealthSurveyModal';
+import OnboardingSurvey from '../../components/forms/OnboardingSurvey';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 
 export default function SurveyPage() {
@@ -7,11 +7,11 @@ export default function SurveyPage() {
   const { surveyCompleted, loading } = useHealthProfile();
 
   if (loading) return <div className="loading">Loading...</div>;
-  if (surveyCompleted) return <Navigate to="/dashboard" replace />;
+  if (surveyCompleted) return <Navigate to="/meal-plan/report" replace />;
 
   const handleComplete = () => {
-    navigate('/dashboard', { replace: true });
+    navigate('/meal-plan/report', { replace: true });
   };
 
-  return <HealthSurveyModal mode="page" onComplete={handleComplete} />;
+  return <OnboardingSurvey onComplete={handleComplete} />;
 }
