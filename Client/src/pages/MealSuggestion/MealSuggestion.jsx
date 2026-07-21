@@ -15,10 +15,11 @@ import { nutritionLogService } from '../../services/nutritionLogService';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import './MealSuggestion.css';
 import {
-  MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning,
+  MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning, MdLocalFireDepartment,
 } from 'react-icons/md';
 import { FiFilter, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
 import AdvancedRecipeFilter from '../../components/RecipeFilter/AdvancedRecipeFilter';
+import CalorieSuggester from './CalorieSuggester';
 
 export default function MealSuggestion() {
   const { user } = useAuth();
@@ -58,6 +59,7 @@ export default function MealSuggestion() {
   const [difficultyFilter, setDifficultyFilter] = useState([]);
   const [caloriesRange, setCaloriesRange] = useState([0, 1000]);
   const [minHealthScore, setMinHealthScore] = useState(0);
+  const [calorieTarget, setCalorieTarget] = useState(null);
 
   const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
 
@@ -456,7 +458,7 @@ export default function MealSuggestion() {
   }, [baseFilteredRecipes]);
 
   const suggestedRecipes = useMemo(() => {
-    return baseFilteredRecipes
+    let filtered = baseFilteredRecipes
       .filter(recipe => {
         // 2. Filter by Cooking Method
         if (selectedCookingMethod && recipe.cookingMethod !== selectedCookingMethod) {
@@ -480,8 +482,19 @@ export default function MealSuggestion() {
         if (rScore < minHealthScore) return false;
 
         return true;
-      })
-      .sort((a, b) => {
+      });
+
+    if (calorieTarget) {
+      // Sort by closest match to target calorie when calorieTarget is active
+      filtered = filtered.sort((a, b) => {
+        const cA = a.healthDetails?.calories || a.nutrition?.calories || 0;
+        const cB = b.healthDetails?.calories || b.nutrition?.calories || 0;
+        const diffA = Math.abs(cA - calorieTarget);
+        const diffB = Math.abs(cB - calorieTarget);
+        return diffA - diffB;
+      });
+    } else {
+      filtered = filtered.sort((a, b) => {
         if (sortBy === 'difficulty') {
           const diffMap = { 'Dễ': 1, 'Trung bình': 2, 'Khó': 3 };
           const dA = diffMap[a.difficulty] || 99;
@@ -501,7 +514,10 @@ export default function MealSuggestion() {
         const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
         return scoreB - scoreA;
       });
-  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery, sortBy, timeRange, difficultyFilter, caloriesRange, minHealthScore]);
+    }
+
+    return filtered;
+  }, [baseFilteredRecipes, selectedCookingMethod, searchQuery, sortBy, timeRange, difficultyFilter, caloriesRange, minHealthScore, calorieTarget]);
 
 
   const handleAddToDiaryClick = (recipe) => {
@@ -829,6 +845,15 @@ export default function MealSuggestion() {
             totalResults={suggestedRecipes.length}
           />
         )}
+
+        <CalorieSuggester
+          dailyBudget={dailyTargets?.calories || 2000}
+          todayCalories={todayTotals?.calories || 0}
+          onTargetChange={setCalorieTarget}
+          currentTarget={calorieTarget}
+          totalRecipes={calorieTarget ? baseFilteredRecipes.length : suggestedRecipes.length}
+          matchedRecipes={suggestedRecipes.length}
+        />
 
         {suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">

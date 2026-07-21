@@ -1,7 +1,6 @@
     using System.Text.Json;
 using BusinessObject.Entities;
 using BusinessObject.Enums;
-using BusinessObject.Helpers;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,79 +53,8 @@ public static class DbInitializer
         // Seed subscription plans
         await SeedPlansAsync(context);
 
-        // One-time data migration to merge "Dưa chuột" into "Dưa leo"
-        var duaChuot = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Dưa chuột");
-        var duaLeo = await context.Ingredients.FirstOrDefaultAsync(i => i.Name == "Dưa leo");
-        if (duaChuot != null && duaLeo != null)
-        {
-            // 1. Merge RecipeIngredients
-            var riDuaChuot = await context.RecipeIngredients.Where(ri => ri.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
-            foreach (var ri in riDuaChuot)
-            {
-                var exists = await context.RecipeIngredients.AnyAsync(r => r.Recipe_id == ri.Recipe_id && r.Ingredient_id == duaLeo.Ingredient_id);
-                if (!exists)
-                {
-                    ri.Ingredient_id = duaLeo.Ingredient_id;
-                    context.RecipeIngredients.Update(ri);
-                }
-                else
-                {
-                    context.RecipeIngredients.Remove(ri);
-                }
-            }
-
-            // 2. Merge IngredientLabels (Categories)
-            var labelsDuaChuot = await context.IngredientLabels.Where(il => il.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
-            foreach (var label in labelsDuaChuot)
-            {
-                var exists = await context.IngredientLabels.AnyAsync(il => il.Ingredient_id == duaLeo.Ingredient_id && il.It_id == label.It_id);
-                if (!exists)
-                {
-                    label.Ingredient_id = duaLeo.Ingredient_id;
-                    context.IngredientLabels.Update(label);
-                }
-                else
-                {
-                    context.IngredientLabels.Remove(label);
-                }
-            }
-
-            // 3. Merge GroceryItems
-            var groceryItems = await context.GroceryItems.Where(gi => gi.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
-            foreach (var gi in groceryItems)
-            {
-                gi.Ingredient_id = duaLeo.Ingredient_id;
-                context.GroceryItems.Update(gi);
-            }
-
-            // 4. Merge Pantries
-            var pantries = await context.Pantries.Where(p => p.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
-            foreach (var p in pantries)
-            {
-                p.Ingredient_id = duaLeo.Ingredient_id;
-                context.Pantries.Update(p);
-            }
-
-            // 5. Merge Allergies
-            var allergies = await context.Allergies.Where(a => a.Ingredient_id == duaChuot.Ingredient_id).ToListAsync();
-            foreach (var a in allergies)
-            {
-                a.Ingredient_id = duaLeo.Ingredient_id;
-                context.Allergies.Update(a);
-            }
-
-            // 6. Delete Nutritional Value of Dưa chuột
-            var nvDuaChuot = await context.NutritionalValues.FirstOrDefaultAsync(nv => nv.Ingredient_id == duaChuot.Ingredient_id);
-            if (nvDuaChuot != null)
-            {
-                context.NutritionalValues.Remove(nvDuaChuot);
-            }
-
-            // 7. Delete Dưa chuột Ingredient
-            context.Ingredients.Remove(duaChuot);
-
-            await context.SaveChangesAsync();
-        }
+        // Seed DietPlans and Recommendations
+        await SeedDietPlansAsync(context);
 
         // Check for English data and clear the database if found to force a Vietnamese re-seed
         var hasEnglishIngredients = await context.Ingredients.AnyAsync(i => i.Name == "Tomato" || i.Name == "Garlic");
@@ -173,13 +101,11 @@ public static class DbInitializer
             // Recalculate existing nutrition logs to sync nutrition values
             await RecalculateNutritionLogsAsync(context);
 
-            await SeedEverydayUnits(context);
             return;
         }
 
         // === Fresh DB: full seed from JSON ===
         await SeedAllFromJsonAsync(context);
-        await SeedEverydayUnits(context);
     }
 
     private static async Task SeedAllFromJsonAsync(AppDbContext context)
@@ -684,14 +610,7 @@ public static class DbInitializer
 
                     if (ingredient?.Nutritional_value != null)
                     {
-                        var multiplier = UnitConverter.GetMultiplier(
-                            log.Quantity ?? 100.0,
-                            log.Unit,
-                            ingredient.Nutritional_value.ServingSize ?? 100.0,
-                            ingredient.Nutritional_value.ServingUnit,
-                            ingredient.Name,
-                            ingredient.Nutritional_value.EverydayWeight
-                        );
+                        var multiplier = (log.Quantity ?? 100.0) / (ingredient.Nutritional_value.ServingSize ?? 100.0);
                         if (multiplier <= 0) multiplier = 1.0;
 
                         log.TotalCalories = ingredient.Nutritional_value.Calories * multiplier;
@@ -729,14 +648,7 @@ public static class DbInitializer
                     {
                         if (ri.Ingredient?.Nutritional_value != null)
                         {
-                            var multiplier = UnitConverter.GetMultiplier(
-                                ri.Quantity,
-                                ri.UOM,
-                                ri.Ingredient.Nutritional_value.ServingSize ?? 100.0,
-                                ri.Ingredient.Nutritional_value.ServingUnit,
-                                ri.Ingredient.Name,
-                                ri.Ingredient.Nutritional_value.EverydayWeight
-                            );
+                            var multiplier = (ri.Quantity) / (ri.Ingredient.Nutritional_value.ServingSize ?? 100.0);
                             if (multiplier <= 0) multiplier = 1.0;
 
                             totalCal += ri.Ingredient.Nutritional_value.Calories * multiplier;
@@ -832,117 +744,119 @@ public static class DbInitializer
         Console.WriteLine("[DbInitializer] Successfully seeded 4 subscription plans.");
     }
 
-    private static async Task SeedEverydayUnits(AppDbContext context)
+    private static async Task SeedDietPlansAsync(AppDbContext context)
     {
-        var everydayUnits = new Dictionary<string, (string Unit, double Weight)>
+        if (await context.DietPlans.AnyAsync()) return;
+
+        var dietPlans = new List<DietPlan>
         {
-            { "cà tím", ("quả", 150.0) },
-            { "ngò rí", ("bó", 30.0) },
-            { "cải bó xôi", ("bó", 100.0) },
-            { "rau muống", ("bó", 300.0) },
-            { "giá đỗ", ("nắm", 50.0) },
-            { "cà chua", ("quả", 120.0) },
-            { "cà rốt", ("củ", 100.0) },
-            { "hành tây", ("củ", 150.0) },
-            { "bông cải xanh", ("cây", 300.0) },
-            { "dưa leo", ("quả", 150.0) },
-            { "bắp cải", ("cái", 800.0) },
-            { "ớt chuông", ("quả", 150.0) },
-            { "ớt tươi", ("quả", 5.0) },
-            { "hành lá", ("nhánh", 5.0) },
-            { "rau mùi", ("bó", 30.0) },
-            { "rau răm", ("bó", 30.0) },
-            { "rau", ("bó", 150.0) },
-            { "cải", ("bó", 200.0) },
-            { "xà lách", ("cây", 150.0) },
-            { "tỏi", ("tép", 3.0) },
-            { "gừng", ("củ", 20.0) },
-            { "sả", ("cây", 15.0) },
-            { "khoai tây", ("củ", 150.0) },
-            { "khoai lang", ("củ", 150.0) },
-            { "khoai", ("củ", 150.0) },
-            { "nấm", ("chén", 70.0) },
-            { "gạo", ("chén", 150.0) },
-            { "bún", ("bát", 150.0) },
-            { "phở", ("bát", 150.0) },
-            { "bánh phở", ("bát", 150.0) },
-            { "miến", ("bát", 150.0) },
-            { "mì", ("bát", 150.0) },
-            { "mì ý", ("bát", 150.0) },
-            { "đậu phộng", ("nắm", 30.0) },
-            { "mè", ("thìa canh", 10.0) },
-            { "vụn bánh mì", ("chén", 60.0) },
-            { "bột mì", ("chén", 120.0) },
-            { "bột", ("chén", 120.0) },
-            { "đậu xanh", ("nắm", 30.0) },
-            { "đậu đỏ", ("nắm", 30.0) },
-            { "đậu", ("nắm", 30.0) },
-            { "hạt", ("nắm", 30.0) },
-            { "thịt gà", ("lát", 100.0) },
-            { "thịt bò", ("lát", 100.0) },
-            { "thịt heo", ("lát", 100.0) },
-            { "thịt", ("lát", 100.0) },
-            { "cá hồi", ("phi lê", 150.0) },
-            { "cá", ("con", 200.0) },
-            { "tôm", ("con", 15.0) },
-            { "mực", ("con", 100.0) },
-            { "chanh", ("quả", 50.0) },
-            { "bơ", ("quả", 150.0) },
-            { "chuối", ("quả", 120.0) },
-            { "xoài", ("quả", 250.0) },
-            { "táo", ("quả", 150.0) },
-            { "dứa", ("quả", 500.0) },
-            { "trứng", ("quả", 50.0) },
-            { "sữa đặc có đường", ("thìa canh", 20.0) },
-            { "sữa", ("hộp", 200.0) },
-            { "phô mai", ("lát", 20.0) },
-            { "nước cốt dừa", ("lon", 400.0) },
-            { "dầu ô liu", ("thìa canh", 15.0) },
-            { "dầu mè", ("thìa canh", 15.0) },
-            { "dầu ăn", ("thìa canh", 15.0) },
-            { "bơ thực vật", ("thìa canh", 15.0) },
-            { "nước mắm", ("thìa canh", 15.0) },
-            { "nước tương", ("thìa canh", 15.0) },
-            { "tương ớt", ("thìa canh", 15.0) },
-            { "giấm", ("thìa canh", 15.0) },
-            { "nước", ("cốc", 250.0) },
-            { "mật ong", ("thìa canh", 20.0) },
-            { "muối", ("thìa cà phê", 5.0) },
-            { "đường", ("thìa cà phê", 4.0) },
-            { "tiêu", ("thìa cà phê", 2.0) },
-            { "tiêu đen", ("thìa cà phê", 2.0) },
-            { "bánh mì", ("cái", 80.0) },
-            { "đậu hủ", ("bìa", 150.0) }
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                Name = "Chế độ ăn cho người Tiểu đường",
+                Description = "Chế độ ăn kiểm soát lượng carbohydrate, tập trung vào carbohydrate phức hợp và giàu chất xơ giúp ổn định đường huyết.",
+                MaxCarbs = 130, // example
+                TargetCalories = 1800,
+                MinProtein = 60,
+                MaxFat = 60
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                Name = "Chế độ ăn Huyết áp cao (DASH)",
+                Description = "Chế độ ăn giảm natri, giàu kali, canxi và magie giúp kiểm soát huyết áp.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 90,
+                MaxFat = 60
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                Name = "Chế độ ăn giảm mỡ máu (Cholesterol cao)",
+                Description = "Chế độ ăn hạn chế chất béo bão hòa, tránh chất béo chuyển hóa, giàu chất xơ hòa tan.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 75,
+                MaxFat = 50
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                Name = "Chế độ ăn cho người Bệnh tim mạch",
+                Description = "Chế độ ăn lành mạnh cho tim mạch, ít chất béo bão hòa và muối, nhiều rau củ quả.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 80,
+                MaxFat = 55
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                Name = "Chế độ ăn thân thiện với Dạ dày (GERD)",
+                Description = "Chế độ ăn nhạt, tránh thực phẩm cay nóng, chua, nhiều dầu mỡ và thức uống có ga.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 75,
+                MaxFat = 65
+            },
+            new DietPlan
+            {
+                Diet_id = Guid.Parse("66666666-6666-6666-6666-666666666666"),
+                Name = "Chế độ ăn cho người Gout",
+                Description = "Chế độ ăn giảm purine, hạn chế thịt đỏ, hải sản và rượu bia, tăng cường rau củ quả.",
+                TargetCalories = 2000,
+                MaxCarbs = 250,
+                MinProtein = 60,
+                MaxFat = 65
+            }
         };
 
-        var nutritionalValues = await context.NutritionalValues
-            .Include(nv => nv.Ingredient)
-            .Where(nv => string.IsNullOrEmpty(nv.EverydayUnit))
-            .ToListAsync();
-
-        bool changed = false;
-        foreach (var nv in nutritionalValues)
+        context.DietPlans.AddRange(dietPlans);
+        await context.SaveChangesAsync();
+        
+        // Also map to MedicalConditions
+        var allConditions = await context.MedicalConditions.ToListAsync();
+        if (allConditions.Any())
         {
-            if (nv.Ingredient == null) continue;
-            var name = nv.Ingredient.Name.Trim().ToLower();
-
-            foreach (var kvp in everydayUnits)
+            var recommendations = new List<ConditionDietRecommendation>();
+            foreach (var cond in allConditions)
             {
-                if (name.Contains(kvp.Key) || kvp.Key.Contains(name))
+                if (cond.Name == null) continue;
+                
+                Guid? matchedDietId = null;
+                if (cond.Name.Contains("Tiểu đường", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                else if (cond.Name.Contains("Huyết áp", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                else if (cond.Name.Contains("Cholesterol", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+                else if (cond.Name.Contains("tim mạch", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+                else if (cond.Name.Contains("Dạ dày", StringComparison.OrdinalIgnoreCase) || cond.Name.Contains("Trào ngược", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+                else if (cond.Name.Contains("Gout", StringComparison.OrdinalIgnoreCase))
+                    matchedDietId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
+                if (matchedDietId.HasValue)
                 {
-                    nv.EverydayUnit = kvp.Value.Unit;
-                    nv.EverydayWeight = kvp.Value.Weight;
-                    changed = true;
-                    Console.WriteLine($"[DbInitializer] Migrated everyday unit for {nv.Ingredient.Name}: {nv.EverydayUnit} ({nv.EverydayWeight}g)");
-                    break;
+                    recommendations.Add(new ConditionDietRecommendation
+                    {
+                        Rec_id = Guid.NewGuid(),
+                        Condition_id = cond.Condition_id,
+                        Diet_id = matchedDietId.Value,
+                        Priority = 1,
+                        Notes = "Hệ thống tự động đề xuất dựa trên bệnh lý."
+                    });
                 }
+            }
+            if (recommendations.Any())
+            {
+                context.ConditionDietRecommendations.AddRange(recommendations);
+                await context.SaveChangesAsync();
             }
         }
 
-        if (changed)
-        {
-            await context.SaveChangesAsync();
-            Console.WriteLine("[DbInitializer] Everyday unit mappings saved to DB successfully.");
-        }
+        Console.WriteLine("[DbInitializer] Successfully seeded Diet Plans and Recommendations.");
     }
 }

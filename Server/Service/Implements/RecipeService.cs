@@ -201,6 +201,104 @@ namespace Service.Implements
             return MapToDto(result);
         }
         
+        public async Task<List<CalorieSuggestionResponseDto>> SuggestRecipesByCalories(double targetCalories, double tolerancePercent = 20)
+        {
+            try
+            {
+                var allRecipes = await _recipeRepo.GetAllRecipes();
+
+                var suggestions = new List<CalorieSuggestionResponseDto>();
+                double tolerance = tolerancePercent / 100.0;
+                double lowerBound = targetCalories * (1 - tolerance);
+                double upperBound = targetCalories * (1 + tolerance);
+
+                foreach (var recipe in allRecipes)
+                {
+                    var recipeIngs = recipe.RecipeIngredients?
+                        .Where(ri => !ri.IsDeleted)
+                        .ToList();
+
+                    if (recipeIngs == null || !recipeIngs.Any()) continue;
+
+                    double totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+                    double totalFib = 0, totalSug = 0, totalSod = 0, totalChol = 0;
+
+                    foreach (var ri in recipeIngs)
+                    {
+                        var nv = ri.Ingredient?.Nutritional_value;
+                        if (nv == null) continue;
+
+                        var servingSize = nv.ServingSize ?? 100.0;
+                        if (servingSize <= 0) servingSize = 100.0;
+                        var multiplier = ri.Quantity / servingSize;
+
+                        totalCal += nv.Calories * multiplier;
+                        totalPro += (nv.Protein ?? 0) * multiplier;
+                        totalCarb += (nv.Carbs ?? 0) * multiplier;
+                        totalFat += (nv.Fat ?? 0) * multiplier;
+                        totalFib += (nv.Fiber ?? 0) * multiplier;
+                        totalSug += (nv.Sugar ?? 0) * multiplier;
+                        totalSod += (nv.Salt ?? 0) * multiplier;
+                        totalChol += (nv.Cholesterol ?? 0) * multiplier;
+                    }
+
+                    int servings = recipe.Servings > 0 ? recipe.Servings : 1;
+                    double calPerServing = totalCal / servings;
+
+                    double deviation = targetCalories > 0
+                        ? Math.Abs(calPerServing - targetCalories) / targetCalories * 100
+                        : 0;
+                    double matchPercent = Math.Max(0, 100 - deviation);
+
+                    suggestions.Add(new CalorieSuggestionResponseDto
+                    {
+                        Recipe_id = recipe.Recipe_id,
+                        Account_id = recipe.Account_id,
+                        Recipe_name = recipe.Recipe_name,
+                        Description = recipe.Description,
+                        Instruction = recipe.Instruction,
+                        CookTime = recipe.CookTime,
+                        PrepTime = recipe.PrepTime,
+                        Servings = recipe.Servings,
+                        Difficulty = recipe.Difficulty,
+                        TotalCalories = Math.Round(totalCal, 1),
+                        CaloriesPerServing = Math.Round(calPerServing, 1),
+                        TotalProtein = Math.Round(totalPro, 1),
+                        TotalCarbs = Math.Round(totalCarb, 1),
+                        TotalFat = Math.Round(totalFat, 1),
+                        TotalFiber = Math.Round(totalFib, 1),
+                        TotalSugar = Math.Round(totalSug, 1),
+                        TotalSalt = Math.Round(totalSod, 1),
+                        TotalCholesterol = Math.Round(totalChol, 1),
+                        TargetCalories = targetCalories,
+                        CalorieDeviation = Math.Round(deviation, 1),
+                        CalorieMatchPercent = Math.Round(matchPercent, 1)
+                    });
+                }
+
+                var filtered = suggestions
+                    .Where(s => s.CaloriesPerServing >= lowerBound && s.CaloriesPerServing <= upperBound)
+                    .OrderBy(s => s.CalorieDeviation)
+                    .ThenByDescending(s => s.CalorieMatchPercent)
+                    .ToList();
+
+                if (!filtered.Any())
+                {
+                    filtered = suggestions
+                        .OrderBy(s => s.CalorieDeviation)
+                        .Take(10)
+                        .ToList();
+                }
+
+                return filtered;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error suggesting recipes by calories");
+                throw;
+            }
+        }
+
         public async Task<List<RecipeSuggestionResponseDto>> SuggestRecipesBasedOnPantry(Guid accountId)
         {
             try
