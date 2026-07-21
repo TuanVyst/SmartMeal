@@ -1,15 +1,23 @@
 using System;
-using System.Reflection;
-using PayOS.Models.V2.PaymentRequests;
+using Npgsql;
 
-class Program
+namespace scratch_payos
 {
-    static void Main()
+    class Program
     {
-        var enumType = typeof(PaymentLinkStatus);
-        foreach(var name in Enum.GetNames(enumType))
+        static void Main(string[] args)
         {
-            Console.WriteLine("Value: " + name);
+            var connectionString = "Host=localhost;Port=5432;Database=SmartMealDb;Username=postgres;Password=12345678;Trust Server Certificate=true";
+            using var conn = new NpgsqlConnection(connectionString);
+            conn.Open();
+
+            using var cmd = new NpgsqlCommand("SELECT \"Username\", \"Email\", \"Role\" FROM \"Account\"", conn);
+            using var reader = cmd.ExecuteReader();
+            Console.WriteLine("Accounts in DB:");
+            while (reader.Read())
+            {
+                Console.WriteLine($"Username: {reader.GetString(0)}, Email: {reader.GetString(1)}, Role: {reader.GetInt32(2)}");
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using BusinessObject.Entities;
+using BusinessObject.Entities;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
@@ -23,6 +23,7 @@ namespace Repository.Implements
             return await _ctx.IngredientTags
                 .Include(i => i.IngredientLabels)
                 .Where(i => i.IsDeleted == false)
+                .OrderBy(i => i.Name)
                 .ToListAsync();
         }
 

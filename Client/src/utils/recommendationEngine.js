@@ -92,7 +92,7 @@ const DATABASE = {
     'Nước ấm với chanh vào buổi sáng giúp detox tự nhiên cho cơ thể.',
     'Đặt bình nước trên bàn làm việc giúp bạn uống đủ nước trong ngày.',
     'Khi cảm thấy đói, hãy uống nước trước — đôi khi cơ thể chỉ đang khát.',
-    'Ăn nhiều trái cây mọng nước như dưa hấu, cam, dưa chuột giúp bổ sung nước.',
+    'Ăn nhiều trái cây mọng nước như dưa hấu, cam, dưa leo giúp bổ sung nước.',
     'Uống nước từ từ, từng ngụm nhỏ giúp cơ thể hấp thụ tốt hơn.',
     'Trà xanh không đường là lựa chọn tốt để bổ sung nước và chất chống oxy hóa.',
     'Hạn chế đồ uống có ga — chúng gây đầy bụng và không tốt cho răng.',

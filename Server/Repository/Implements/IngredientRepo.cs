@@ -28,6 +28,7 @@ namespace Repository.Implements
                 .Include(i => i.Pantries)
                 .Include(i => i.Allergy)
                 .Where(i => i.IsDeleted == false)
+                .OrderBy(i => i.Name)
                 .ToListAsync();
         }
 

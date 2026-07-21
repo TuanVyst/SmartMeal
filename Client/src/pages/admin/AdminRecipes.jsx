@@ -3,6 +3,7 @@ import { FiPlus, FiEdit, FiTrash2, FiX, FiMinus, FiSearch } from 'react-icons/fi
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
 import { useAuth } from '../../context/AuthContext';
+import ImageUpload from '../../components/common/ImageUpload';
 
 export default function AdminRecipes() {
   const dialog = useDialog();
@@ -32,12 +33,12 @@ export default function AdminRecipes() {
   const [availableIngredients, setAvailableIngredients] = useState([]);
 
   useEffect(() => {
-    fetchAllData();
+    fetchAllData(true);
   }, []);
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const [recipesData, recipeIngredientsData, tagsData, ingredientsData] = await Promise.all([
         adminService.getAllRecipes(),
         adminService.getAllRecipeIngredients(),
@@ -51,7 +52,7 @@ export default function AdminRecipes() {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
@@ -227,9 +228,9 @@ export default function AdminRecipes() {
     });
   };
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.recipe_name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRecipes = recipes
+    .filter((recipe) => recipe.recipe_name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (loading) return <div className="admin-loading">Loading recipes...</div>;
 
@@ -337,13 +338,11 @@ export default function AdminRecipes() {
                   </div>
                   
                   <div className="form-group">
-                    <label className="form-label">Image URL</label>
-                    <input
-                      type="url"
-                      className="form-control"
+                    <label className="form-label">Hình ảnh</label>
+                    <ImageUpload
                       value={recipeFormData.imageUrl}
-                      onChange={(e) => setRecipeFormData({ ...recipeFormData, imageUrl: e.target.value })}
-                      placeholder="https://..."
+                      onChange={(url) => setRecipeFormData({ ...recipeFormData, imageUrl: url })}
+                      label="Tải ảnh công thức"
                     />
                   </div>
                   
@@ -500,7 +499,7 @@ export default function AdminRecipes() {
                             value={ing.quantity}
                             onChange={(e) => handleIngredientChange(index, 'quantity', parseFloat(e.target.value) || 0)}
                             min="0"
-                            step="0.1"
+                            step="any"
                             required
                           />
                         </div>

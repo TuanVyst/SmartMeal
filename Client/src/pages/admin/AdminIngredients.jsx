@@ -3,6 +3,7 @@ import { FiPlus, FiEdit, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
 import { resolveIngredientImageUrl } from '../../utils/ingredientImages';
+import ImageUpload from '../../components/common/ImageUpload';
 
 export default function AdminIngredients() {
   const dialog = useDialog();
@@ -22,18 +23,22 @@ export default function AdminIngredients() {
     sugar: 0,
     sodium: 0,
     cholesterol: 0,
+    servingSize: 100,
+    servingUnit: 'g',
+    everydayUnit: '',
+    everydayWeight: '',
     ingredientTagIds: []
   });
   const [editingIngredient, setEditingIngredient] = useState(null);
   const [availableIngredientTags, setAvailableIngredientTags] = useState([]);
 
   useEffect(() => {
-    fetchAllData();
+    fetchAllData(true);
   }, []);
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const [ingredientsData, tagsData] = await Promise.all([
         adminService.getAllIngredients(),
         adminService.getAllIngredientTags()
@@ -43,7 +48,7 @@ export default function AdminIngredients() {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
@@ -63,7 +68,11 @@ export default function AdminIngredients() {
           fiber: ingredientFormData.fiber,
           sugar: ingredientFormData.sugar,
           sodium: ingredientFormData.sodium,
-          cholesterol: ingredientFormData.cholesterol
+          cholesterol: ingredientFormData.cholesterol,
+          servingSize: ingredientFormData.servingSize,
+          servingUnit: ingredientFormData.servingUnit,
+          everydayUnit: ingredientFormData.everydayUnit || null,
+          everydayWeight: ingredientFormData.everydayWeight ? parseFloat(ingredientFormData.everydayWeight) : null
         }
       };
 
@@ -101,6 +110,10 @@ export default function AdminIngredients() {
       sugar: ingredient.nutritional_value?.sugar || 0,
       sodium: ingredient.nutritional_value?.salt || ingredient.nutritional_value?.sodium || 0,
       cholesterol: ingredient.nutritional_value?.cholesterol || 0,
+      servingSize: ingredient.nutritional_value?.servingSize || 100,
+      servingUnit: ingredient.nutritional_value?.servingUnit || 'g',
+      everydayUnit: ingredient.nutritional_value?.everydayUnit || '',
+      everydayWeight: ingredient.nutritional_value?.everydayWeight || '',
       ingredientTagIds: tagIds
     });
     setIsIngredientModalOpen(true);
@@ -132,6 +145,10 @@ export default function AdminIngredients() {
       sugar: 0,
       sodium: 0,
       cholesterol: 0,
+      servingSize: 100,
+      servingUnit: 'g',
+      everydayUnit: '',
+      everydayWeight: '',
       ingredientTagIds: []
     });
   };
@@ -141,9 +158,9 @@ export default function AdminIngredients() {
     setEditingIngredient(null);
   };
 
-  const filteredIngredients = ingredients.filter((ing) =>
-    (ing.name || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredIngredients = ingredients
+    .filter((ing) => (ing.name || '').toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
   if (loading) return <div className="admin-loading">Loading ingredients...</div>;
 
@@ -252,12 +269,11 @@ export default function AdminIngredients() {
               </div>
               
               <div className="form-group">
-                <label className="form-label">Hình ảnh (URL)</label>
-                <input
-                  type="url"
-                  className="form-control"
+                <label className="form-label">Hình ảnh</label>
+                <ImageUpload
                   value={ingredientFormData.imageUrl}
-                  onChange={(e) => setIngredientFormData({ ...ingredientFormData, imageUrl: e.target.value })}
+                  onChange={(url) => setIngredientFormData({ ...ingredientFormData, imageUrl: url })}
+                  label="Tải ảnh nguyên liệu"
                 />
               </div>
 
@@ -300,7 +316,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.calories}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, calories: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, calories: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -308,7 +324,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.protein}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, protein: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, protein: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -316,7 +332,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.carbohydrates}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, carbohydrates: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, carbohydrates: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -324,7 +340,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.fat}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fat: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fat: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -332,7 +348,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.fiber}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fiber: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, fiber: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -340,7 +356,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.sugar}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sugar: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sugar: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -348,7 +364,7 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.sodium}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sodium: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, sodium: parseFloat(e.target.value) || 0 })} min="0" step="any"
                   />
                 </div>
                 <div className="form-group">
@@ -356,7 +372,48 @@ export default function AdminIngredients() {
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.cholesterol}
-                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, cholesterol: parseFloat(e.target.value) || 0 })} min="0" step="0.1"
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, cholesterol: parseFloat(e.target.value) || 0 })} min="0" step="any"
+                  />
+                </div>
+              </div>
+
+              <hr />
+              <h4 style={{ marginBottom: '1rem', marginTop: '1rem' }}>Cấu hình Quy đổi Đơn vị Thường ngày & Khẩu phần</h4>
+              <div className="form-grid-3" style={{ marginBottom: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Cỡ khẩu phần (Serving Size)</label>
+                  <input
+                    type="number" className="form-control"
+                    value={ingredientFormData.servingSize}
+                    placeholder="Ví dụ: 100, 1, 3..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingSize: parseFloat(e.target.value) || 0 })} min="0" step="any"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Đơn vị khẩu phần (Serving Unit)</label>
+                  <input
+                    type="text" className="form-control"
+                    value={ingredientFormData.servingUnit}
+                    placeholder="Ví dụ: g, ml, quả, tép..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, servingUnit: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Đơn vị thường ngày (Everyday Unit)</label>
+                  <input
+                    type="text" className="form-control"
+                    value={ingredientFormData.everydayUnit}
+                    placeholder="Ví dụ: quả, chén, bó..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayUnit: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Trọng lượng quy đổi tương đương (g)</label>
+                  <input
+                    type="number" className="form-control"
+                    value={ingredientFormData.everydayWeight}
+                    placeholder="Ví dụ: 50, 150, 3..."
+                    onChange={(e) => setIngredientFormData({ ...ingredientFormData, everydayWeight: e.target.value ? parseFloat(e.target.value) : '' })} min="0" step="any"
                   />
                 </div>
               </div>

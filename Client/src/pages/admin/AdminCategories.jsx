@@ -18,7 +18,12 @@ export default function AdminCategories() {
   const fetchCategories = async () => {
     try {
       const data = await adminService.getAllCategories();
-      setCategories(data || []);
+      const sorted = (data || []).sort((a, b) => {
+        const nameA = a.labelName || a.ingredient_tag?.name || '';
+        const nameB = b.labelName || b.ingredient_tag?.name || '';
+        return nameA.localeCompare(nameB);
+      });
+      setCategories(sorted);
     } catch (error) {
       console.error(error);
     } finally {

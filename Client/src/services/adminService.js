@@ -200,4 +200,48 @@ export const adminService = {
     const res = await api.delete(`/RecipeIngredient/${id}`);
     return res.data;
   },
+
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post('/Upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
+  // Plan operations
+  getAllPlans: async () => {
+    const res = await api.get('/Plan');
+    return res.data.data || [];
+  },
+
+  createPlan: async (data) => {
+    const res = await api.post('/Plan', data);
+    return res.data;
+  },
+
+  updatePlan: async (id, data) => {
+    const res = await api.put(`/Plan/${id}`, data);
+    return res.data;
+  },
+
+  deletePlan: async (id) => {
+    const res = await api.delete(`/Plan/${id}`);
+    return res.data;
+  },
+
+  // Statistics
+  getSubscriptionStatistics: async (startDate, endDate) => {
+    let url = '/Statistic/subscriptions';
+    const params = [];
+    if (startDate) params.push(`startDate=${startDate}`);
+    if (endDate) params.push(`endDate=${endDate}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    
+    const res = await api.get(url);
+    return res.data.data;
+  },
 };
+

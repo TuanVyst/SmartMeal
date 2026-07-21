@@ -1,4 +1,4 @@
-﻿
+
 using BusinessObject.Entities;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +20,7 @@ namespace Repository.Implements
                 .Include(i => i.Ingredient_tag)
                 .Include(i => i.Ingredient)
                 .Where(i => i.IsDeleted == false)
+                .OrderBy(i => i.Ingredient_tag.Name)
                 .ToListAsync();
         }
 

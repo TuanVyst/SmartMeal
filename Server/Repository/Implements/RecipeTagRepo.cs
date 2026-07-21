@@ -21,6 +21,7 @@ namespace Repository.Implements
         {
             return await _ctx.RecipeTags
                 .Where(i => i.IsDeleted == false)
+                .OrderBy(i => i.Name)
                 .ToListAsync();
         }
 
