@@ -4,6 +4,7 @@ import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import Header from '../../components/layout/Header';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 
 const s = {
   page: { minHeight: '100vh', background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%)', color: '#1E293B', fontFamily: "'Inter', sans-serif" },
@@ -71,6 +72,44 @@ const MealPlanPage = () => {
     fetchPlan();
   }, [navigate]);
 
+  const handleLogMeal = async (entry, date) => {
+    try {
+      const payload = {
+        recipeId: entry.recipe_id,
+        recipeName: entry.recipeName,
+        mealType: entry.mealSlot,
+        servings: 1,
+        calories: entry.slotCalories,
+        carbs: entry.slotCarbs || 0,
+        protein: entry.slotProtein || 0,
+        fat: entry.slotFat || 0,
+        date: date,
+      };
+
+      await api.post('/nutrition-diary', payload);
+      toast.success('Đã lưu vào nhật ký ăn uống!');
+
+      setPlan((prevPlan) => {
+        if (!prevPlan) return prevPlan;
+        return {
+          ...prevPlan,
+          days: prevPlan.days.map((day) => ({
+            ...day,
+            entries: day.entries.map((e) => {
+              if (e.entry_id === entry.entry_id) {
+                return { ...e, isLogged: true };
+              }
+              return e;
+            }),
+          })),
+        };
+      });
+    } catch (error) {
+      console.error('Error logging meal:', error);
+      toast.error(error.response?.data?.message || 'Không thể lưu vào nhật ký.');
+    }
+  };
+
   if (loading) {
     return (
       <div style={s.loadingBox}>
@@ -122,32 +161,89 @@ const MealPlanPage = () => {
                 </div>
 
                 <div style={s.entriesGrid}>
-                  {day.entries?.map((entry) => (
-                    <div
-                      key={entry.entry_id}
-                      style={s.entryCard}
-                      onMouseOver={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                      onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.transform = 'none'; }}
-                      onClick={() => entry.recipe_id && navigate(`/recipe/${entry.recipe_id}`)}
-                    >
-                      <div style={s.entryImage}>
-                        <img 
-                          src={resolveRecipeImageUrl(entry.recipeName)} 
-                          alt={entry.recipeName}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop'; }}
-                        />
-                        <div style={s.slotTag}>{entry.mealSlot}</div>
-                      </div>
-                      <div style={s.entryBody}>
-                        <div style={s.entryName} title={entry.recipeName}>{entry.recipeName}</div>
-                        <div style={s.entryMeta}>
-                          <span style={s.entryKcal}>{entry.slotCalories} kcal</span>
-                          {entry.cookTime > 0 && <span style={s.entryTime}>⏱ {entry.cookTime}p</span>}
+                  {day.entries?.map((entry) => {
+                    const isToday = toDateKey(day.dayDate) === getTodayDateKey();
+                    return (
+                      <div
+                        key={entry.entry_id}
+                        style={s.entryCard}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.transform = 'none'; }}
+                        onClick={() => entry.recipe_id && navigate(`/recipe/${entry.recipe_id}`)}
+                      >
+                        <div style={s.entryImage}>
+                          <img 
+                            src={resolveRecipeImageUrl(entry.recipeName)} 
+                            alt={entry.recipeName}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop'; }}
+                          />
+                          <div style={s.slotTag}>{entry.mealSlot}</div>
+                        </div>
+                        <div style={s.entryBody}>
+                          <div style={s.entryName} title={entry.recipeName}>{entry.recipeName}</div>
+                          <div style={s.entryMeta}>
+                            <span style={s.entryKcal}>{entry.slotCalories} kcal</span>
+                            {entry.cookTime > 0 && <span style={s.entryTime}>⏱ {entry.cookTime}p</span>}
+                          </div>
+                          {isToday && (
+                            <div style={{ marginTop: 12, borderTop: '1px solid #f1f5f9', paddingTop: 10 }}>
+                              {entry.isLogged ? (
+                                <button
+                                  disabled
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    borderRadius: 10,
+                                    border: '1px solid #bbf7d0',
+                                    background: '#f0fdf4',
+                                    color: '#16a34a',
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                    cursor: 'not-allowed',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 6
+                                  }}
+                                >
+                                  ✓ Đã ghi nhận nhật ký
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLogMeal(entry, day.dayDate);
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    borderRadius: 10,
+                                    border: 'none',
+                                    background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                    color: 'white',
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 6,
+                                    boxShadow: '0 2px 4px rgba(34,197,94,0.2)',
+                                    transition: 'all 0.2s'
+                                  }}
+                                  onMouseOver={btn => btn.currentTarget.style.opacity = 0.9}
+                                  onMouseOut={btn => btn.currentTarget.style.opacity = 1}
+                                >
+                                  🍽️ Xác nhận đã ăn
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}

@@ -4,6 +4,8 @@ import api from '../../services/api';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import SuggestNextPlanPopup from '../../components/forms/SuggestNextPlanPopup';
 import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronDown, FiClock, FiZap } from 'react-icons/fi';
+import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { toast } from 'react-hot-toast';
 import './MealPlanSuggestion.css';
 
 const SLOT_LABELS = { breakfast: 'Bữa Sáng', lunch: 'Bữa Trưa', dinner: 'Bữa Tối' };
@@ -60,6 +62,47 @@ export default function MealPlanSuggestion() {
       setTimeout(() => setAlertMsg(null), 3000);
     }
     fetchAllPlans();
+  };
+
+  const handleLogMeal = async (entry, date) => {
+    try {
+      const payload = {
+        recipeId: entry.recipe_id,
+        recipeName: entry.recipeName,
+        mealType: entry.mealSlot,
+        servings: 1,
+        calories: entry.slotCalories,
+        carbs: entry.slotCarbs || 0,
+        protein: entry.slotProtein || 0,
+        fat: entry.slotFat || 0,
+        date: date,
+      };
+
+      await api.post('/nutrition-diary', payload);
+      toast.success('Đã lưu vào nhật ký ăn uống!');
+
+      setAllPlans((prevPlans) => {
+        return prevPlans.map((plan) => {
+          return {
+            ...plan,
+            days: plan.days.map((day) => {
+              return {
+                ...day,
+                entries: day.entries.map((e) => {
+                  if (e.entry_id === entry.entry_id) {
+                    return { ...e, isLogged: true };
+                  }
+                  return e;
+                }),
+              };
+            }),
+          };
+        });
+      });
+    } catch (error) {
+      console.error('Error logging meal:', error);
+      toast.error(error.response?.data?.message || 'Không thể lưu vào nhật ký.');
+    }
   };
 
   // Derived: currently selected plan & day
@@ -142,7 +185,15 @@ export default function MealPlanSuggestion() {
           <div className="mps-header-right">
             {/* Plan selector dropdown */}
             {allPlans.length > 1 && (
-              <div className="mps-dropdown-wrap" onBlur={() => setPlanDropdownOpen(false)} tabIndex={-1}>
+              <div
+                className="mps-dropdown-wrap"
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setPlanDropdownOpen(false);
+                  }
+                }}
+                tabIndex={-1}
+              >
                 <button
                   className="mps-dropdown-btn"
                   onClick={() => setPlanDropdownOpen(v => !v)}
@@ -243,6 +294,7 @@ export default function MealPlanSuggestion() {
                 const slotKey = meal.slotKey;
                 const colors  = SLOT_COLORS[slotKey] || SLOT_COLORS.lunch;
                 const imgSrc  = meal._resolvedImg || resolveRecipeImageUrl(meal.recipeName || meal.recipe_name || '');
+                const isToday = toDateKey(selectedDay?.dayDate) === getTodayDateKey();
 
                 return (
                   <div
@@ -299,6 +351,61 @@ export default function MealPlanSuggestion() {
                         </span>
                       )}
                     </div>
+
+                    {isToday && (
+                      <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 12, width: '100%' }}>
+                        {meal.isLogged ? (
+                          <button
+                            disabled
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              borderRadius: 12,
+                              border: '1px solid #bbf7d0',
+                              background: '#f0fdf4',
+                              color: '#16a34a',
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: 'not-allowed',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6
+                            }}
+                          >
+                            ✓ Đã ghi nhận nhật ký
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLogMeal(meal, selectedDay.dayDate);
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              borderRadius: 12,
+                              border: 'none',
+                              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                              color: 'white',
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6,
+                              boxShadow: '0 4px 6px rgba(34,197,94,0.15)',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseOver={btn => btn.currentTarget.style.opacity = 0.9}
+                            onMouseOut={btn => btn.currentTarget.style.opacity = 1}
+                          >
+                            🍽️ Xác nhận đã ăn
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

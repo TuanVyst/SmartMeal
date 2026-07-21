@@ -321,6 +321,23 @@ namespace PresentationLayer.Controllers
 
                 var targets = HealthRulesHelper.CalculateDailyTargets(profile, conditionNames);
 
+                var existingGoal = await _ctx.NutritionGoals.FirstOrDefaultAsync(g => g.Account_id == accountId && !g.IsDeleted);
+                if (existingGoal == null)
+                {
+                    _ctx.NutritionGoals.Add(new NutritionGoal
+                    {
+                        Account_id = accountId,
+                        TargetCalories = targets.Calories,
+                        TargetProtein = targets.Protein,
+                        TargetCarbs = targets.Carbs,
+                        TargetFat = targets.Fat,
+                        TargetFiber = targets.Fiber,
+                        TargetSugar = targets.SugarLimit,
+                        TargetSalt = targets.SaltLimit
+                    });
+                    await _ctx.SaveChangesAsync();
+                }
+
                 return Ok(new
                 {
                     success = true,

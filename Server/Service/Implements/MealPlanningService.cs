@@ -158,35 +158,6 @@ namespace Service.Implements
             plan.Status = "active";
             await _mealPlanRepo.UpdatePlan(plan);
 
-            // Auto-save meal plan entries to nutrition diary
-            if (plan.Days != null)
-            {
-                foreach (var day in plan.Days)
-                {
-                    if (day.Entries == null) continue;
-                    foreach (var entry in day.Entries)
-                    {
-                        var recipe = await _recipeRepo.GetRecipeById(entry.Recipe_id);
-                        var nut = recipe != null ? CalculateRecipeNutrition(recipe) : (0, 0, 0, 0, 0);
-                        var logRequest = new NutritionLogRequest
-                        {
-                            Account_id = plan.Account_id,
-                            LogDate = day.DayDate,
-                            MealType = entry.MealSlot,
-                            Recipe_id = entry.Recipe_id,
-                            Quantity = 1,
-                            Unit = "phần",
-                            TotalCalories = nut.calories,
-                            TotalProtein = nut.protein,
-                            TotalCarbs = nut.carbs,
-                            TotalFat = nut.fat,
-                            TotalFiber = nut.fiber
-                        };
-                        await _nutritionLogService.CreateNutritionLog(logRequest);
-                    }
-                }
-            }
-
             return await BuildPlanDto(plan, plan.Account_id);
         }
 
@@ -267,28 +238,6 @@ namespace Service.Implements
             existingPlan.TotalDays = nextDayIndex;
             existingPlan.EndDate = nextDayDate;
             await _mealPlanRepo.UpdatePlan(existingPlan);
-
-            // Auto-save to nutrition diary (consistent with ConfirmPlanAsync pattern)
-            foreach (var entry in newDay.Entries)
-            {
-                var recipe = await _recipeRepo.GetRecipeById(entry.Recipe_id);
-                var nut = recipe != null ? CalculateRecipeNutrition(recipe) : (0, 0, 0, 0, 0);
-                var logRequest = new NutritionLogRequest
-                {
-                    Account_id = accountId,
-                    LogDate = newDay.DayDate,
-                    MealType = entry.MealSlot,
-                    Recipe_id = entry.Recipe_id,
-                    Quantity = 1,
-                    Unit = "phần",
-                    TotalCalories = nut.calories,
-                    TotalProtein = nut.protein,
-                    TotalCarbs = nut.carbs,
-                    TotalFat = nut.fat,
-                    TotalFiber = nut.fiber
-                };
-                await _nutritionLogService.CreateNutritionLog(logRequest);
-            }
 
             return await BuildPlanDto(existingPlan, accountId);
         }
@@ -413,6 +362,12 @@ namespace Service.Implements
             var userPantry = await _pantryRepo.GetPantryByAccountId(accountId);
             var pantryIngredients = userPantry.Select(p => p.Ingredient_id).ToHashSet();
 
+            var loggedEntries = new List<NutritionLog>();
+            if (plan.StartDate.HasValue && plan.EndDate.HasValue)
+            {
+                loggedEntries = await _nutritionLogService.GetNutritionLogsByAccountAndDateRange(accountId, plan.StartDate.Value, plan.EndDate.Value);
+            }
+
             var reqIngredients = new Dictionary<Guid, RequiredIngredientDto>();
 
             var dto = new MealPlanResponseDto
@@ -454,6 +409,13 @@ namespace Service.Implements
                             }
                         }
 
+                        bool isLogged = loggedEntries.Any(log =>
+                            !log.IsDeleted &&
+                            log.LogDate.Date == d.DayDate.Date &&
+                            log.MealType != null &&
+                            log.MealType.Equals(e.MealSlot, StringComparison.OrdinalIgnoreCase) &&
+                            log.Recipe_id == e.Recipe_id);
+
                         return new MealPlanEntryResponseDto
                         {
                             Entry_id = e.Entry_id,
@@ -462,8 +424,13 @@ namespace Service.Implements
                             RecipeImage = e.Recipe?.Recipe_name, // client resolve this
                             MealSlot = e.MealSlot,
                             SlotCalories = Math.Round(e.SlotCalories),
+                            SlotProtein = Math.Round(e.SlotProtein),
+                            SlotCarbs = Math.Round(e.SlotCarbs),
+                            SlotFat = Math.Round(e.SlotFat),
+                            SlotFiber = Math.Round(e.SlotFiber),
                             CookTime = e.Recipe?.CookTime ?? 0,
-                            Difficulty = e.Recipe?.Difficulty ?? "easy"
+                            Difficulty = e.Recipe?.Difficulty ?? "easy",
+                            IsLogged = isLogged
                         };
                     }).ToList();
 
@@ -658,28 +625,6 @@ namespace Service.Implements
                 existingPlan.TotalDays = existingPlan.Days.Count;
                 existingPlan.EndDate = existingPlan.Days.Max(d => d.DayDate);
                 await _mealPlanRepo.UpdatePlan(existingPlan);
-            }
-
-            // Auto-save to nutrition diary
-            foreach (var entry in existingDay.Entries.Where(e => !existingSlots.Contains(e.MealSlot)))
-            {
-                var recipe = await _recipeRepo.GetRecipeById(entry.Recipe_id);
-                var nut = recipe != null ? CalculateRecipeNutrition(recipe) : (0, 0, 0, 0, 0);
-                var logRequest = new NutritionLogRequest
-                {
-                    Account_id = accountId,
-                    LogDate = existingDay.DayDate,
-                    MealType = entry.MealSlot,
-                    Recipe_id = entry.Recipe_id,
-                    Quantity = 1,
-                    Unit = "phần",
-                    TotalCalories = nut.calories,
-                    TotalProtein = nut.protein,
-                    TotalCarbs = nut.carbs,
-                    TotalFat = nut.fat,
-                    TotalFiber = nut.fiber
-                };
-                await _nutritionLogService.CreateNutritionLog(logRequest);
             }
 
             return await BuildPlanDto(existingPlan, accountId);

@@ -18,6 +18,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public int SortOrder { get; set; }
         public int CookTime { get; set; }
         public string Difficulty { get; set; }
+        public bool IsLogged { get; set; }
     }
 
     public class MealPlanDayResponseDto
