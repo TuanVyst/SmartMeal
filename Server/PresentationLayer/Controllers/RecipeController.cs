@@ -182,6 +182,25 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("suggest-by-calories")]
+        [Authorize]
+        public async Task<IActionResult> SuggestByCalories([FromQuery] double targetCalories, [FromQuery] double tolerancePercent = 20)
+        {
+            try
+            {
+                if (targetCalories <= 0)
+                    return BadRequest(new { success = false, message = "Target calories must be greater than 0" });
+
+                var suggestions = await _recipeService.SuggestRecipesByCalories(targetCalories, tolerancePercent);
+                return Ok(new { success = true, data = suggestions, targetCalories, tolerancePercent });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error suggesting recipes by calories");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("suggest/pantry/{accountId}")]
         public async Task<IActionResult> SuggestRecipesBasedOnPantry(Guid accountId)
         {
