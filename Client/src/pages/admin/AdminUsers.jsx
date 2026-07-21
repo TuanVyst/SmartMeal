@@ -58,7 +58,6 @@ export default function AdminUsers() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Tên</th>
               <th>Email</th>
               <th>Vai trò</th>
@@ -68,13 +67,10 @@ export default function AdminUsers() {
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={6} className="empty-state"><p>Không tìm thấy người dùng</p></td></tr>
+              <tr><td colSpan={5} className="empty-state"><p>Không tìm thấy người dùng</p></td></tr>
             )}
             {filtered.map((user) => (
               <tr key={user.account_id || user.id}>
-                <td style={{ fontFamily: 'monospace', fontSize: 12, color: '#64748b' }}>
-                  {(user.account_id || user.id || '').slice(0, 8)}...
-                </td>
                 <td>{user.name || '-'}</td>
                 <td>{user.email || '-'}</td>
                 <td><span className="status-badge active">{user.role === 'Admin' ? 'Quản trị viên' : 'Người dùng'}</span></td>

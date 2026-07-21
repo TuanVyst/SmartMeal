@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FiUsers, FiTag, FiShoppingBag, FiAward, FiHeart } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 
@@ -16,11 +17,11 @@ export default function AdminDashboard() {
   if (loading) return <div className="admin-loading">Đang tải bảng điều khiển...</div>;
 
   const cards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green' },
-    { label: 'Total Recipes', value: stats.totalRecipes, icon: <FiHeart />, color: 'blue' },
-    { label: 'Categories', value: stats.totalCategories, icon: <FiTag />, color: 'orange' },
-    { label: 'Total Ingredients', value: stats.totalIngredients, icon: <FiShoppingBag />, color: 'teal' },
-    { label: 'Total Tags', value: stats.totalTags, icon: <FiAward />, color: 'red' },
+    { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green', to: '/admin/users' },
+    { label: 'Total Recipes', value: stats.totalRecipes, icon: <FiHeart />, color: 'blue', to: '/admin/recipes' },
+    { label: 'Categories', value: stats.totalCategories, icon: <FiTag />, color: 'orange', to: '/admin/categories' },
+    { label: 'Total Ingredients', value: stats.totalIngredients, icon: <FiShoppingBag />, color: 'teal', to: '/admin/ingredients' },
+    { label: 'Total Tags', value: stats.totalTags, icon: <FiAward />, color: 'red', to: '/admin/recipe-tags' },
   ];
 
   return (
@@ -30,13 +31,13 @@ export default function AdminDashboard() {
       </div>
       <div className="stats-grid">
         {cards.map((card) => (
-          <div className="stat-card" key={card.label}>
+          <Link className="stat-card" key={card.label} to={card.to}>
             <div className={`stat-icon ${card.color}`}>{card.icon}</div>
             <div className="stat-info">
               <h3>{card.value}</h3>
               <p>{card.label}</p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
