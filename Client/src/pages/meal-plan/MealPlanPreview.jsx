@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import Header from '../../components/layout/Header';
@@ -39,6 +39,7 @@ const s = {
 
 const MealPlanPreview = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { planCycleDays } = useHealthProfile();
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,12 +48,15 @@ const MealPlanPreview = () => {
   const [availableRecipes, setAvailableRecipes] = useState([]);
   const [loadingRecipes, setLoadingRecipes] = useState(false);
 
+  // Read days from URL params first, fallback to planCycleDays
+  const days = Number(searchParams.get('days')) || planCycleDays || 7;
+
   useEffect(() => { generatePlan(); }, []);
 
   const generatePlan = async () => {
     setLoading(true);
     try {
-      const response = await api.post(`/MealPlan/generate?days=${planCycleDays || 7}`);
+      const response = await api.post(`/MealPlan/generate?days=${days}`);
       setPlan(response.data.data);
     } catch (error) {
       console.error('Error generating plan:', error);
@@ -132,7 +136,7 @@ const MealPlanPreview = () => {
       <div style={s.container}>
         <div style={s.topBar}>
           <div>
-            <h1 style={s.title}>Bản Xem Trước Thực Đơn {planCycleDays || 7} Ngày</h1>
+            <h1 style={s.title}>Bản Xem Trước Thực Đơn {days} Ngày</h1>
             <p style={s.subtitle}>Được tạo riêng dựa trên mục tiêu và tình trạng sức khỏe của bạn</p>
           </div>
           <div style={s.btnGroup}>

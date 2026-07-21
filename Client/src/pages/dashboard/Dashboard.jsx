@@ -5,7 +5,6 @@ import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { recipeService } from '../../services/recipeService';
-import api from '../../services/api';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
@@ -116,9 +115,6 @@ export default function Dashboard() {
   const [ingredients, setIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [mealSuggestions, setMealSuggestions] = useState([]);
-  const [activePlan, setActivePlan] = useState(null);
-  const [suggesting, setSuggesting] = useState(false);
-  const [suggestHistory, setSuggestHistory] = useState([]);
 
   const accountId = user?.accountId || user?.account_id;
 
@@ -133,14 +129,6 @@ export default function Dashboard() {
         }
       };
       fetchTodayLogs();
-
-      const fetchPlan = async () => {
-        try {
-          const res = await api.get('/MealPlan/active');
-          if (res.data.data) setActivePlan(res.data.data);
-        } catch {}
-      };
-      fetchPlan();
     }
   }, [accountId]);
 
@@ -215,33 +203,6 @@ export default function Dashboard() {
   const handleCarouselResume = useCallback(() => {
     setCarouselPaused(false);
   }, []);
-
-  const handleSuggestNextDay = async () => {
-    setSuggesting(true);
-    try {
-      const res = await api.post('/MealPlan/suggest-next');
-      if (res.data.data) {
-        setActivePlan(res.data.data);
-        // Add to history
-        setSuggestHistory(prev => [res.data.data, ...prev]);
-      }
-    } catch (err) {
-      console.error('Lỗi tạo gợi ý:', err);
-    } finally {
-      setSuggesting(false);
-    }
-  };
-
-  // Fetch history from active/complete plans
-  const fetchSuggestHistory = async () => {
-    try {
-      // For now, just show the current active plan
-      const res = await api.get('/MealPlan/active');
-      if (res.data.data) {
-        setSuggestHistory([res.data.data]);
-      }
-    } catch {}
-  };
 
   if (user?.role === 'Admin') return <Navigate to="/admin" replace />;
 
@@ -441,92 +402,6 @@ export default function Dashboard() {
           ))}
         </div>
       </section>
-
-      {/* Gợi ý bữa ăn */}
-      <div className="meal-suggestions-section">
-        <div className="section-header">
-          <h2>🍽️ Gợi ý bữa ăn</h2>
-          <div className="section-actions">
-            <button
-              className="suggest-btn"
-              onClick={handleSuggestNextDay}
-              disabled={suggesting}
-            >
-              {suggesting ? '⏳ Đang tạo...' : '✨ Tạo gợi ý tiếp theo'}
-            </button>
-          </div>
-        </div>
-
-        {activePlan ? (
-          <div className="suggest-plan-card">
-            <div className="suggest-plan-info">
-              <span className="suggest-plan-badge">Thực đơn đang hoạt động</span>
-              <span className="suggest-plan-dates">
-                {activePlan.startDate && new Date(activePlan.startDate).toLocaleDateString('vi-VN')} 
-                {' – '} 
-                {activePlan.endDate && new Date(activePlan.endDate).toLocaleDateString('vi-VN')}
-                {' • '}{activePlan.totalDays || 0} ngày
-              </span>
-            </div>
-            <div className="suggest-days-preview">
-              {activePlan.days?.slice(-3).map(day => (
-                <div key={day.day_id || day.dayIndex} className="suggest-day-card">
-                  <div className="suggest-day-header">
-                    <span className="suggest-day-label">Ngày {day.dayIndex}</span>
-                    <span className="suggest-day-date">
-                      {day.dayDate && new Date(day.dayDate).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' })}
-                    </span>
-                  </div>
-                  <div className="suggest-day-entries">
-                    {day.entries?.map(entry => (
-                      <div key={entry.entry_id} className="suggest-entry-row">
-                        <img
-                          src={resolveRecipeImageUrl(entry.recipeName)}
-                          alt={entry.recipeName}
-                          className="suggest-entry-img"
-                          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=100&auto=format&fit=crop'; }}
-                        />
-                        <div className="suggest-entry-info">
-                          <span className="suggest-entry-name">{entry.recipeName}</span>
-                          <span className="suggest-entry-kcal">{Math.round(entry.slotCalories)} kcal</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="suggest-day-total">
-                    Tổng: <strong>{Math.round(day.totalCalories)}</strong> kcal
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="suggest-empty">
-            <p>Chưa có thực đơn nào. Hãy tạo thực đơn trước để nhận gợi ý.</p>
-            <button className="suggest-btn" onClick={() => navigate('/meal-plan/report')}>
-              Tạo thực đơn
-            </button>
-          </div>
-        )}
-
-        {suggestHistory.length > 1 && (
-          <div className="suggest-history">
-            <h3>📜 Lịch sử gợi ý</h3>
-            {suggestHistory.slice(1).map((plan, idx) => (
-              <div key={idx} className="suggest-history-item">
-                <span>Thực đơn #{idx + 1}</span>
-                <span>{plan.totalDays || 0} ngày</span>
-                <span>
-                  {plan.startDate && new Date(plan.startDate).toLocaleDateString('vi-VN')} 
-                  {' – '} 
-                  {plan.endDate && new Date(plan.endDate).toLocaleDateString('vi-VN')}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
     </div>
   );
 }

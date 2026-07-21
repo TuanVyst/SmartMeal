@@ -64,6 +64,54 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllPlans()
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var plans = await _mealPlanningService.GetAllPlansAsync(accountId);
+                return Ok(new { data = plans });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("check-date")]
+        public async Task<IActionResult> CheckDateMeals([FromQuery] DateTime date)
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var result = await _mealPlanningService.CheckDateMealsAsync(accountId, date);
+                return Ok(new { data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("suggest-for-date")]
+        public async Task<IActionResult> SuggestForDate([FromQuery] DateTime date, [FromQuery] string meals = null)
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var mealList = !string.IsNullOrEmpty(meals)
+                    ? meals.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                    : null;
+                var plan = await _mealPlanningService.SuggestForDateAsync(accountId, date, mealList);
+                return Ok(new { data = plan });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         public class SwapRecipeDto
         {
             public Guid EntryId { get; set; }

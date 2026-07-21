@@ -51,6 +51,17 @@ namespace Repository.Implements
                 .FirstOrDefaultAsync(mp => mp.MealPlan_id == planId && !mp.IsDeleted);
         }
 
+        public async Task<List<MealPlan>> GetAllPlansByAccountId(Guid accountId)
+        {
+            return await _context.MealPlans
+                .Include(mp => mp.Days)
+                    .ThenInclude(d => d.Entries)
+                        .ThenInclude(e => e.Recipe)
+                .Where(mp => mp.Account_id == accountId && mp.Status == "active" && !mp.IsDeleted)
+                .OrderByDescending(mp => mp.GeneratedAt)
+                .ToListAsync();
+        }
+
         public async Task<MealPlan> AddPlan(MealPlan plan)
         {
             await _context.MealPlans.AddAsync(plan);

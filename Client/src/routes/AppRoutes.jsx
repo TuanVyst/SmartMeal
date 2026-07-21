@@ -37,6 +37,7 @@ import PaymentCancel from '../pages/subscription/PaymentCancel';
 import HealthReport from '../pages/meal-plan/HealthReport';
 import MealPlanPreview from '../pages/meal-plan/MealPlanPreview';
 import MealPlanPage from '../pages/meal-plan/MealPlanPage';
+import MealPlanSuggestion from '../pages/meal-plan/MealPlanSuggestion';
 
 export default function AppRoutes() {
   return (
@@ -60,6 +61,7 @@ export default function AppRoutes() {
         <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/meal-suggestions" element={<MealSuggestions />} />
+        <Route path="/meal-suggestion" element={<MealPlanSuggestion />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/recipes/new" element={<RecipeForm />} />
         <Route path="/recipes/:id/edit" element={<RecipeForm />} />

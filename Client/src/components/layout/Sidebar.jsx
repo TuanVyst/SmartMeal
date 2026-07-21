@@ -6,7 +6,7 @@ import api from '../../services/api';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { getRecommendation } from '../../utils/recommendationEngine';
 import avocadoMascot from '../../assets/avocado_mascot.png';
-import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward, FiBookOpen } from 'react-icons/fi';
+import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward, FiBookOpen, FiCalendar } from 'react-icons/fi';
 import SidebarProgressAvatar from '../common/SidebarProgressAvatar';
 import { useTodayCalorieProgress } from '../../hooks/useTodayCalorieProgress';
 import './Sidebar.css';
@@ -81,6 +81,7 @@ export default function Sidebar() {
 
   const navItems = [
     { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',        end: true  },
+    { to: '/meal-suggestion',   icon: <FiCalendar size={20} />, label: 'Gợi ý bữa ăn'                },
     { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn'              },
     { to: '/ingredients',       icon: <FiBookOpen size={20} />, label: 'Tra cứu nguyên liệu'        },
     { to: '/nutrition',         icon: <FiClipboard size={20} />, label: 'Nhật ký ăn uống'            },

@@ -46,6 +46,21 @@ namespace Service.Implements
                 throw new Exception("Vui lòng hoàn thành bài khảo sát sức khỏe trước khi tạo thực đơn.");
             }
 
+            // Collect dates that already have meals
+            var allPlans = await _mealPlanRepo.GetAllPlansByAccountId(accountId);
+            var existingDates = new HashSet<DateTime>();
+            foreach (var p in allPlans)
+            {
+                if (p.Days == null) continue;
+                foreach (var d in p.Days)
+                {
+                    if (d.Entries != null && d.Entries.Any())
+                    {
+                        existingDates.Add(d.DayDate.Date);
+                    }
+                }
+            }
+
             // 2. Meal distribution (Default 3 meals: Breakfast 25%, Lunch 40%, Dinner 35%)
             double targetCalories = goal.TargetCalories ?? 0;
             double breakfastCal = targetCalories * 0.25;
@@ -69,15 +84,22 @@ namespace Service.Implements
 
             var usedRecipeIds = new HashSet<Guid>();
             var random = new Random();
+            int dayIndex = 0;
 
             for (int i = 1; i <= days; i++)
             {
                 var dayDate = plan.StartDate.Value.AddDays(i - 1);
+
+                // Skip dates that already have meals
+                if (existingDates.Contains(dayDate.Date))
+                    continue;
+
+                dayIndex++;
                 var day = new MealPlanDay
                 {
                     Day_id = Guid.NewGuid(),
                     MealPlan_id = plan.MealPlan_id,
-                    DayIndex = i,
+                    DayIndex = dayIndex,
                     DayDate = dayDate,
                     Entries = new List<MealPlanEntry>()
                 };
@@ -107,6 +129,18 @@ namespace Service.Implements
                 }
 
                 plan.Days.Add(day);
+            }
+
+            if (plan.Days.Count == 0)
+            {
+                throw new Exception("Tất cả các ngày trong khoảng đã có thực đơn.");
+            }
+
+            plan.TotalDays = plan.Days.Count;
+            if (plan.Days.Any())
+            {
+                plan.StartDate = plan.Days.Min(d => d.DayDate);
+                plan.EndDate = plan.Days.Max(d => d.DayDate);
             }
 
             // 4. Save Preview Plan
@@ -446,6 +480,209 @@ namespace Service.Implements
             };
 
             return dto;
+        }
+
+        public async Task<List<MealPlanResponseDto>> GetAllPlansAsync(Guid accountId)
+        {
+            var plans = await _mealPlanRepo.GetAllPlansByAccountId(accountId);
+            var result = new List<MealPlanResponseDto>();
+            foreach (var plan in plans)
+            {
+                result.Add(await BuildPlanDto(plan, accountId));
+            }
+            return result;
+        }
+
+        public async Task<Dictionary<string, bool>> CheckDateMealsAsync(Guid accountId, DateTime date)
+        {
+            var dateOnly = date.Date;
+            var plans = await _mealPlanRepo.GetAllPlansByAccountId(accountId);
+            
+            var result = new Dictionary<string, bool>
+            {
+                { "breakfast", false },
+                { "lunch", false },
+                { "dinner", false },
+                { "hasAllMeals", false }
+            };
+
+            foreach (var plan in plans)
+            {
+                if (plan.Days == null) continue;
+                var day = plan.Days.FirstOrDefault(d => d.DayDate.Date == dateOnly);
+                if (day?.Entries == null) continue;
+
+                foreach (var entry in day.Entries)
+                {
+                    if (entry.MealSlot == "breakfast") result["breakfast"] = true;
+                    else if (entry.MealSlot == "lunch") result["lunch"] = true;
+                    else if (entry.MealSlot == "dinner") result["dinner"] = true;
+                }
+            }
+
+            result["hasAllMeals"] = result["breakfast"] && result["lunch"] && result["dinner"];
+            return result;
+        }
+
+        public async Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null)
+        {
+            // Check if date already has any meals
+            var dateCheck = await CheckDateMealsAsync(accountId, targetDate);
+            if (dateCheck["breakfast"] || dateCheck["lunch"] || dateCheck["dinner"])
+            {
+                throw new Exception("Ngày này đã có bữa ăn rồi");
+            }
+
+            var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
+            var profile = await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
+            if (goal == null || profile == null)
+            {
+                throw new Exception("Vui lòng hoàn thành bài khảo sát sức khỏe trước.");
+            }
+
+            var allRecipes = await _recipeRepo.GetAllRecipes();
+            var validRecipes = allRecipes.Where(r => !r.IsDeleted && r.RecipeIngredients != null && r.RecipeIngredients.Any()).ToList();
+
+            double targetCalories = goal.TargetCalories ?? 0;
+            double breakfastCal = targetCalories * 0.25;
+            double lunchCal = targetCalories * 0.40;
+            double dinnerCal = targetCalories * 0.35;
+
+            // Find or create a plan for this date range
+            var existingPlan = await _mealPlanRepo.GetActivePlanByAccountId(accountId);
+            
+            // Collect already used recipe ids for this date
+            var usedRecipeIds = new HashSet<Guid>();
+            if (existingPlan?.Days != null)
+            {
+                foreach (var d in existingPlan.Days)
+                {
+                    if (d.Entries != null)
+                    {
+                        foreach (var e in d.Entries)
+                        {
+                            usedRecipeIds.Add(e.Recipe_id);
+                        }
+                    }
+                }
+            }
+
+            var random = new Random();
+            var dateOnly = targetDate.Date;
+            
+            // Check if there's already a day for this date in the existing plan
+            MealPlanDay existingDay = null;
+            if (existingPlan?.Days != null)
+            {
+                existingDay = existingPlan.Days.FirstOrDefault(d => d.DayDate.Date == dateOnly);
+            }
+
+            bool isNewPlan = false;
+            if (existingDay == null)
+            {
+                // Create new day
+                int nextDayIndex = (existingPlan?.Days?.Max(d => d.DayIndex) ?? 0) + 1;
+                DateTime dayDate = DateTime.SpecifyKind(dateOnly, DateTimeKind.Utc);
+
+                existingDay = new MealPlanDay
+                {
+                    Day_id = Guid.NewGuid(),
+                    MealPlan_id = existingPlan?.MealPlan_id ?? Guid.NewGuid(),
+                    DayIndex = nextDayIndex,
+                    DayDate = dayDate,
+                    Entries = new List<MealPlanEntry>()
+                };
+
+                if (existingPlan == null)
+                {
+                    // Create a new plan
+                    isNewPlan = true;
+                    existingPlan = new MealPlan
+                    {
+                        MealPlan_id = existingDay.MealPlan_id,
+                        Account_id = accountId,
+                        Status = "active",
+                        StartDate = dayDate,
+                        EndDate = dayDate,
+                        TotalDays = 1,
+                        Days = new List<MealPlanDay> { existingDay }
+                    };
+                }
+                else
+                {
+                    existingPlan.Days.Add(existingDay);
+                }
+            }
+
+            // Add missing meals
+            var selectedMeals = meals?.Select(m => m.ToLower()).ToHashSet() ?? new HashSet<string> { "breakfast", "lunch", "dinner" };
+            var existingSlots = existingDay.Entries?.Select(e => e.MealSlot).ToHashSet() ?? new HashSet<string>();
+
+            if (selectedMeals.Contains("breakfast") && !existingSlots.Contains("breakfast"))
+            {
+                var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random);
+                if (bRecipe != null)
+                {
+                    existingDay.Entries.Add(CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1));
+                    usedRecipeIds.Add(bRecipe.Recipe_id);
+                }
+            }
+
+            if (selectedMeals.Contains("lunch") && !existingSlots.Contains("lunch"))
+            {
+                var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random);
+                if (lRecipe != null)
+                {
+                    existingDay.Entries.Add(CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2));
+                    usedRecipeIds.Add(lRecipe.Recipe_id);
+                }
+            }
+
+            if (selectedMeals.Contains("dinner") && !existingSlots.Contains("dinner"))
+            {
+                var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random);
+                if (dRecipe != null)
+                {
+                    existingDay.Entries.Add(CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3));
+                    usedRecipeIds.Add(dRecipe.Recipe_id);
+                }
+            }
+
+            // Save once after all meals are added
+            if (isNewPlan)
+            {
+                await _mealPlanRepo.AddPlan(existingPlan);
+            }
+            else
+            {
+                existingPlan.TotalDays = existingPlan.Days.Count;
+                existingPlan.EndDate = existingPlan.Days.Max(d => d.DayDate);
+                await _mealPlanRepo.UpdatePlan(existingPlan);
+            }
+
+            // Auto-save to nutrition diary
+            foreach (var entry in existingDay.Entries.Where(e => !existingSlots.Contains(e.MealSlot)))
+            {
+                var recipe = await _recipeRepo.GetRecipeById(entry.Recipe_id);
+                var nut = recipe != null ? CalculateRecipeNutrition(recipe) : (0, 0, 0, 0, 0);
+                var logRequest = new NutritionLogRequest
+                {
+                    Account_id = accountId,
+                    LogDate = existingDay.DayDate,
+                    MealType = entry.MealSlot,
+                    Recipe_id = entry.Recipe_id,
+                    Quantity = 1,
+                    Unit = "phần",
+                    TotalCalories = nut.calories,
+                    TotalProtein = nut.protein,
+                    TotalCarbs = nut.carbs,
+                    TotalFat = nut.fat,
+                    TotalFiber = nut.fiber
+                };
+                await _nutritionLogService.CreateNutritionLog(logRequest);
+            }
+
+            return await BuildPlanDto(existingPlan, accountId);
         }
     }
 }
