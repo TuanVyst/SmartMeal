@@ -23,12 +23,12 @@ namespace BusinessObject.Helpers
             return 1.2;
         }
 
-        public static double ComputeCalorieDelta(double currentWeight, double targetWeight, int weeks)
+        public static double ComputeCalorieDelta(double currentWeight, double targetWeight, int days)
         {
-            if (currentWeight <= 0 || targetWeight <= 0 || weeks <= 0) return 0;
+            if (currentWeight <= 0 || targetWeight <= 0 || days <= 0) return 0;
             double weightDiff = targetWeight - currentWeight;
             double totalKcal = weightDiff * 7700;
-            double dailyDelta = totalKcal / (weeks * 7);
+            double dailyDelta = totalKcal / days;
             return Math.Max(-SAFE_DEFICIT_MAX, Math.Min(SAFE_DEFICIT_MAX, dailyDelta));
         }
 
@@ -96,8 +96,8 @@ namespace BusinessObject.Helpers
             {
                 if (profile.Weight > 0 && profile.TargetWeight > 0)
                 {
-                    int weeks = Math.Max(1, profile.TargetWeeks ?? 12);
-                    rawDeficit = ComputeCalorieDelta(profile.Weight.Value, profile.TargetWeight.Value, weeks);
+                    int days = Math.Max(1, profile.TargetDays ?? 84);
+                    rawDeficit = ComputeCalorieDelta(profile.Weight.Value, profile.TargetWeight.Value, days);
                 }
                 else
                 {

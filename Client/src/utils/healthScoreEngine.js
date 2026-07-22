@@ -324,7 +324,7 @@ export function checkAllergyBlock(ingredientNames = [], userAllergies = []) {
  * @param {Object} healthProfile
  *   @param {string[]} healthProfile.conditions - danh sách bệnh lý (e.g., ['diabetes', 'gout'])
  *   @param {string[]} healthProfile.allergies - danh sách dị ứng text (e.g., ['Hải sản', 'Gluten'])
- *   @param {string}   healthProfile.goal - mục tiêu (lose/gain/maintain/heart/diabetes)
+ *   @param {string}   healthProfile.goal - mục tiêu (lose/gain/maintain)
  *
  * @param {number} dailyCalorieBudget - ngân sách calo mỗi ngày
  *
@@ -406,32 +406,6 @@ export function calculateHealthScore(recipe, healthProfile, dailyCalorieBudget =
       if (protein > 25) {
         score += rules.highProteinBonus || 15;
         matchReasons.push('💪 Giàu protein — hỗ trợ tăng cơ');
-      }
-    } else if (goal === 'heart') {
-      if (sodium > 600) {
-        score -= rules.highSodiumPenalty || 20;
-        reasons.push('Nhiều muối — không phù hợp mục tiêu tim mạch');
-      }
-      if (fat > 20) {
-        score -= rules.highFatPenalty || 15;
-        reasons.push('Chất béo cao — ảnh hưởng tim mạch');
-      }
-      if (ingredientsContainAny(ingredientNames, ['rau', 'cải', 'xà lách', 'bí', 'cà chua', 'cà rốt'])) {
-        score += rules.vegetableBonus || 10;
-        matchReasons.push('🥗 Nhiều rau củ — rất tốt cho tim mạch');
-      }
-    } else if (goal === 'diabetes') {
-      if (sugar > 10) {
-        score -= rules.highSugarPenalty || 20;
-        reasons.push('Nhiều đường — không tốt cho đường huyết');
-      }
-      if (carbs > 60) {
-        score -= rules.highCarbsPenalty || 15;
-        reasons.push('Nhiều tinh bột — dễ tăng đường huyết');
-      }
-      if (fat > 25) {
-        score -= rules.highFatPenalty || 10;
-        reasons.push('Dầu mỡ cao — hạn chế cho kiểm soát đường huyết');
       }
     }
     

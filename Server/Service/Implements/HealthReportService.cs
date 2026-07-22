@@ -48,13 +48,13 @@ namespace Service.Implements
                 DailySugarLimit = 50, // default
                 DailySaltLimit = 5, // default
                 Goal = profile.Goal,
-                EstimatedWeeks = profile.TargetWeeks ?? 12
+                EstimatedDays = profile.TargetDays ?? 84
             };
 
             // Generate Narrative
             report.CalorieExplanation = $"Dựa trên chỉ số BMR và mức độ vận động, để đạt mục tiêu {GetGoalText(profile.Goal)}, bạn cần tiêu thụ khoảng {Math.Round(goal.TargetCalories ?? 0)} kcal mỗi ngày.";
             report.TimelineExplanation = profile.Goal == "lose" || profile.Goal == "gain"
-                ? $"Nếu duy trì chế độ này, dự kiến bạn sẽ đạt mục tiêu {profile.TargetWeight}kg trong khoảng {report.EstimatedWeeks} tuần."
+                ? $"Nếu duy trì chế độ này, dự kiến bạn sẽ đạt mục tiêu {profile.TargetWeight}kg trong khoảng {report.EstimatedDays} ngày."
                 : "Duy trì chế độ ăn này sẽ giúp bạn giữ được cân nặng và sức khỏe ổn định lâu dài.";
             report.GeneralAdvice = "Đừng quên uống đủ nước (khoảng 2-3 lít mỗi ngày) và duy trì vận động nhẹ nhàng để có kết quả tốt nhất.";
 

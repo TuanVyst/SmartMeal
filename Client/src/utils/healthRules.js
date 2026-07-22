@@ -299,50 +299,6 @@ export const GOAL_RULES = {
       friedPenalty: 15
     }
   },
-  heart: {
-    reducedIngredients: [
-      "Muối",
-      "Nước mắm",
-      "Thịt mỡ",
-      "Nội tạng",
-      "Đồ chiên",
-      "Mỡ heo"
-    ],
-    preferredIngredients: [
-      "Rau xanh",
-      "Trái cây",
-      "Cá hồi",
-      "Cá thu",
-      "Dầu olive",
-      "Yến mạch"
-    ],
-    scoreRules: {
-      highSodiumPenalty: 25,
-      highFatPenalty: 20,
-      vegetableBonus: 15
-    }
-  },
-  diabetes: {
-    reducedIngredients: [
-      "Đường trắng",
-      "Mật ong",
-      "Bánh ngọt",
-      "Cơm trắng",
-      "Đồ chiên",
-      "Dầu mỡ"
-    ],
-    preferredIngredients: [
-      "Gạo lứt",
-      "Yến mạch",
-      "Rau xanh lá",
-      "Đậu các loại"
-    ],
-    scoreRules: {
-      highSugarPenalty: 25,
-      highCarbsPenalty: 20,
-      highFatPenalty: 15
-    }
-  },
   maintain: {}
 };
 
@@ -405,12 +361,12 @@ export function getActivityFactor(activityLevel) {
 }
 
 // ─── Calorie Delta (for lose/gain goals) ──────────────────────────────────
-export function computeCalorieDelta(currentWeight, targetWeight, weeks = 12) {
-  if (!currentWeight || !targetWeight || weeks <= 0) return 0;
+export function computeCalorieDelta(currentWeight, targetWeight, days = 84) {
+  if (!currentWeight || !targetWeight || days <= 0) return 0;
   const weightDiff = targetWeight - currentWeight; // âm = giảm cân, dương = tăng cân
   // 1 kg mỡ ≈ 7700 kcal
   const totalKcal = weightDiff * 7700;
-  const dailyDelta = totalKcal / (weeks * 7);
+  const dailyDelta = totalKcal / days;
   // Clamp về giới hạn an toàn ±SAFE_DEFICIT_MAX
   return Math.max(-SAFE_DEFICIT_MAX, Math.min(SAFE_DEFICIT_MAX, dailyDelta));
 }
@@ -421,14 +377,14 @@ export function computeCalorieDelta(currentWeight, targetWeight, weeks = 12) {
  *   Health Profile → BMR → TDEE → Goal Adjustment → Safety Validation
  *
  * Trả về object:
- *   { calories, bmr, tdee, maintenance, deficit, goalTooAggressive, estimatedWeeks, safeMinCalories }
+ *   { calories, bmr, tdee, maintenance, deficit, goalTooAggressive, estimatedDays, safeMinCalories }
  *
  * Bệnh lý nền KHÔNG thay đổi calories — chỉ thay đổi cơ cấu dinh dưỡng (xem calculateDailyTargets).
  */
 export function getDailyCalorieBudget(profile) {
   const {
     weight, height, goal, targetWeight,
-    targetWeeks = 12, dateOfBirth, gender, activityLevel, bmiLevel, age: directAge
+    targetDays = 84, dateOfBirth, gender, activityLevel, bmiLevel, age: directAge
   } = profile || {};
 
   // ── Bước 1-2: BMR (Mifflin-St Jeor) ──────────────────────────────────────
@@ -482,13 +438,13 @@ export function getDailyCalorieBudget(profile) {
   let rawTargetCalories = maintenance;
   let rawDeficit = 0;
   let goalTooAggressive = false;
-  let estimatedWeeks = null;
+  let estimatedDays = null;
 
   if (goal === 'lose' || goal === 'gain') {
     if (weight && targetWeight) {
       // Tính dựa trên cân nặng mục tiêu cụ thể
-      const weeks = Math.max(1, targetWeeks || 12);
-      rawDeficit = computeCalorieDelta(weight, targetWeight, weeks);
+      const days = Math.max(1, targetDays || 84);
+      rawDeficit = computeCalorieDelta(weight, targetWeight, days);
     } else {
       // Không có targetWeight → áp dụng deficit/surplus mặc định an toàn (tăng cơ không nhất thiết tăng calo)
       rawDeficit = goal === 'lose' ? -500 : 0;
@@ -509,7 +465,7 @@ export function getDailyCalorieBudget(profile) {
       const actualDeficit = Math.abs(maintenance - finalCalories);
       if (actualDeficit > 0) {
         const totalKcal = Math.abs(targetWeight - weight) * 7700;
-        estimatedWeeks = Math.ceil(totalKcal / (actualDeficit * 7));
+        estimatedDays = Math.ceil(totalKcal / actualDeficit);
       }
     }
   }
@@ -528,7 +484,7 @@ export function getDailyCalorieBudget(profile) {
     maintenance: Math.round(maintenance),
     deficit: Math.round(actualDeficit),
     goalTooAggressive,
-    estimatedWeeks,
+    estimatedDays,
     safeMinCalories,
   };
 }
@@ -598,6 +554,6 @@ export function calculateDailyTargets(profile) {
     maintenance: budgetResult.maintenance,
     deficit:  budgetResult.deficit,
     goalTooAggressive: budgetResult.goalTooAggressive,
-    estimatedWeeks:    budgetResult.estimatedWeeks,
+    estimatedDays:    budgetResult.estimatedDays,
   };
 }

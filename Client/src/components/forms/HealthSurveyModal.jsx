@@ -73,8 +73,6 @@ const goalCards = [
   { value: 'lose', icon: <FiTrendingDown size={28} />, label: 'Giảm cân', desc: 'Giảm mỡ và kiểm soát cân nặng' },
   { value: 'gain', icon: <FiActivity size={28} />, label: 'Tăng cơ', desc: 'Xây dựng cơ bắp và sức mạnh' },
   { value: 'maintain', icon: <FiMinimize2 size={28} />, label: 'Duy trì', desc: 'Giữ vóc dáng hiện tại' },
-  { value: 'heart', icon: <FiHeart size={28} />, label: 'Cải thiện tim mạch', desc: 'Tốt cho sức khoẻ tim' },
-  { value: 'diabetes', icon: <FiDroplet size={28} />, label: 'Kiểm soát đường huyết', desc: 'Ổn định đường trong máu' },
 ];
 
 const bmiColors = {

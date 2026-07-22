@@ -20,14 +20,12 @@ export default function CalorieGoalReminder() {
     const goal = healthProfile.goal;
     const currentWeight = healthProfile.weight;
     const targetWeight = healthProfile.targetWeight;
-    const targetWeeks = healthProfile.targetWeeks || 12;
-    const { goalTooAggressive, estimatedWeeks, deficit, maintenance } = dailyTargets || {};
+    const targetDays = healthProfile.targetDays || 84;
+    const { goalTooAggressive, estimatedDays, deficit, maintenance } = dailyTargets || {};
 
-    if (goal === 'maintain' || goal === 'heart' || goal === 'diabetes') {
+    if (goal === 'maintain') {
       const goalNames = {
         maintain: 'Duy trì cân nặng',
-        heart: 'Cải thiện tim mạch',
-        diabetes: 'Kiểm soát đường huyết'
       };
       return {
         type: 'health_goal',
@@ -53,7 +51,7 @@ export default function CalorieGoalReminder() {
     }
 
     const diff = Math.abs(currentWeight - targetWeight);
-    const dailyDeltaAbs = Math.abs(deficit || computeCalorieDelta(currentWeight, targetWeight, targetWeeks));
+    const dailyDeltaAbs = Math.abs(deficit || computeCalorieDelta(currentWeight, targetWeight, targetDays));
 
     const calRemaining = Math.max(0, targetCalories - caloriesToday);
     
@@ -61,13 +59,13 @@ export default function CalorieGoalReminder() {
       type: 'weight_goal',
       goalText: goal === 'lose' ? 'Giảm cân' : 'Tăng cơ',
       diffStr: diff.toFixed(1),
-      targetWeeks,
+      targetDays,
       dailyDeltaAbs,
       calRemaining,
       targetCalories,
       isLose: goal === 'lose',
       goalTooAggressive,
-      estimatedWeeks,
+      estimatedDays,
     };
   }, [healthProfile, dailyTargets, caloriesToday, targetCalories]);
 
@@ -180,7 +178,7 @@ export default function CalorieGoalReminder() {
       </div>
       
       <p style={{ margin: 0, fontSize: '14px', color: '#1e40af', lineHeight: 1.5 }}>
-        Để đạt được mục tiêu trong {reminderInfo.targetWeeks} tuần tới, bạn cần {reminderInfo.isLose ? 'giảm bớt' : 'nạp thêm'} khoảng <strong>{reminderInfo.dailyDeltaAbs} kcal/ngày</strong> so với mức giữ cân.
+        Để đạt được mục tiêu trong {reminderInfo.targetDays} ngày tới, bạn cần {reminderInfo.isLose ? 'giảm bớt' : 'nạp thêm'} khoảng <strong>{reminderInfo.dailyDeltaAbs} kcal/ngày</strong> so với mức giữ cân.
         Mức calo mục tiêu của bạn là <strong>{reminderInfo.targetCalories} kcal</strong>.
       </p>
 
@@ -191,7 +189,7 @@ export default function CalorieGoalReminder() {
         }}>
           <FiInfo size={16} color="#ea580c" style={{ flexShrink: 0, marginTop: '2px' }} />
           <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}>
-            Mục tiêu <strong>{reminderInfo.targetWeeks} tuần</strong> quá khắc nghiệt và không an toàn. Hệ thống đã tự động điều chỉnh calo về ngưỡng an toàn. Thời gian dự kiến mới: <strong>~{reminderInfo.estimatedWeeks} tuần</strong>.
+            Mục tiêu <strong>{reminderInfo.targetDays} ngày</strong> quá khắc nghiệt và không an toàn. Hệ thống đã tự động điều chỉnh calo về ngưỡng an toàn. Thời gian dự kiến mới: <strong>~{reminderInfo.estimatedDays || ''} ngày</strong>.
           </span>
         </div>
       )}
