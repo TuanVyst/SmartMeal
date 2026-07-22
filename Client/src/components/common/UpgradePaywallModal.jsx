@@ -63,7 +63,7 @@ const UpgradePaywallModal = ({ isOpen, onClose, featureName = "Tính năng này"
             className="paywall-upgrade-btn"
             onClick={() => {
               onClose();
-              navigate('/pricing');
+              navigate('/subscription');
             }}
           >
             Xem Các Gói Pro Ngay
