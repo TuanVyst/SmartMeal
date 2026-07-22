@@ -4,23 +4,12 @@ import { getLockedIngredientsForProfile, getActivityFactor, calculateDailyTarget
 import { useHealthProfile } from '../hooks/useHealthProfile';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { formatDateVi } from '../utils/dateTime';
-import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiFileText, FiLock, FiEdit2, FiSave, FiInfo, FiZap, FiAlertTriangle } from 'react-icons/fi';
-
-const conditionsList = [
-  { value: 'diabetes', label: 'Tiểu đường type 2' },
-  { value: 'hypertension', label: 'Huyết áp cao' },
-  { value: 'cholesterol', label: 'Cholesterol cao' },
-  { value: 'heartDisease', label: 'Bệnh tim mạch' },
-  { value: 'gerd', label: 'Dạ dày / Trào ngược' },
-  { value: 'gout', label: 'Gout' },
-];
+import { FiTrendingDown, FiActivity, FiMinimize2, FiFileText, FiLock, FiEdit2, FiSave, FiInfo, FiZap, FiAlertTriangle } from 'react-icons/fi';
 
 const goalLabels = {
   lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
   gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
   maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
-  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
-  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColors = {
@@ -55,7 +44,7 @@ export default function HealthProfileEditor() {
         height: healthProfile.height || '',
         weight: healthProfile.weight || '',
         targetWeight: healthProfile.targetWeight || '',
-        targetWeeks: healthProfile.targetWeeks || '',
+        targetDays: healthProfile.targetDays || 84,
         goal: healthProfile.goal || '',
         activityLevel: healthProfile.activityLevel || 'sedentary',
         conditions: healthProfile.conditions || [],
@@ -68,7 +57,7 @@ export default function HealthProfileEditor() {
       setFormData(prev => ({
         ...prev,
         targetWeight: '',
-        targetWeeks: ''
+        targetDays: ''
       }));
     }
   }, [formData.goal]);
@@ -89,7 +78,7 @@ export default function HealthProfileEditor() {
       activityLevel: formData.activityLevel || 'sedentary',
       goal: formData.goal || 'maintain',
       targetWeight: Number(formData.targetWeight),
-      targetWeeks: Number(formData.targetWeeks) || 12,
+      targetDays: Number(formData.targetDays) || 84,
       conditions: formData.conditions || [],
     };
     return calculateDailyTargets(mockProfile);
@@ -123,14 +112,16 @@ export default function HealthProfileEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const finalTargetDays = formData.targetDays ? Number(formData.targetDays) : null;
+
       const payload = {
         height: Number(formData.height) || null,
         weight: Number(formData.weight) || null,
         targetWeight: formData.targetWeight ? Number(formData.targetWeight) : null,
-        targetWeeks: formData.targetWeeks ? Number(formData.targetWeeks) : null,
+        targetDays: finalTargetDays,
         goal: formData.goal || 'maintain',
         activityLevel: formData.activityLevel || 'sedentary',
-        conditions: formData.conditions,
+        conditions: formData.conditions || [],
       };
       const result = await updateProfile(payload);
       if (result.success) {
@@ -143,17 +134,6 @@ export default function HealthProfileEditor() {
       setSaving(false);
     }
   };
-
-  const toggleCondition = (value) => {
-    setFormData(prev => ({
-      ...prev,
-      conditions: prev.conditions.includes(value)
-        ? prev.conditions.filter(c => c !== value)
-        : [...prev.conditions, value],
-    }));
-  };
-
-
 
   if (!healthProfile) return null;
 
@@ -245,18 +225,6 @@ export default function HealthProfileEditor() {
                           {log.weight}kg / {log.height}cm
                         </span>
                       </div>
-                      {(healthProfile?.conditions || []).length > 0 && (
-                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                          {healthProfile.conditions.map(c => (
-                            <span key={c} style={{
-                              padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 500,
-                              background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
-                            }}>
-                              {conditionsList.find(cl => cl.value === c)?.label || c}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontWeight: 600, color: '#1E293B' }}>{log.bmi}</span>
@@ -349,19 +317,19 @@ export default function HealthProfileEditor() {
               </div>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 4 }}>
-                  Thời gian (tuần)
+                  Thời gian (ngày)
                 </label>
                 <input
                   type="number"
-                  value={formData.targetWeeks}
+                  value={formData.targetDays}
                   onChange={e => {
                     let val = e.target.value;
                     if (Number(val) < 0) val = '1';
-                    setFormData(prev => ({ ...prev, targetWeeks: val }));
+                    setFormData(prev => ({ ...prev, targetDays: val }));
                   }}
-                  placeholder="Ví dụ: 12"
+                  placeholder="Ví dụ: 84"
                   min="1"
-                  max="52"
+                  max="365"
                   disabled={!['lose', 'gain'].includes(formData.goal)}
                   style={{
                     width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
@@ -382,9 +350,9 @@ export default function HealthProfileEditor() {
                 <FiInfo size={16} color="#3b82f6" style={{ flexShrink: 0 }} />
                 <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.4 }}>
                   {formData.goal === 'lose' && formData.weight > formData.targetWeight ? (
-                    <>Mục tiêu giảm <strong>{(formData.weight - formData.targetWeight).toFixed(1)}kg</strong> trong {formData.targetWeeks || 12} tuần tới. Cần giảm ~<strong>{Math.abs(Math.round(computeCalorieDelta(formData.weight, formData.targetWeight, formData.targetWeeks || 12)))} kcal/ngày</strong>.</>
+                    <>Mục tiêu giảm <strong>{(formData.weight - formData.targetWeight).toFixed(1)}kg</strong> trong {formData.targetDays || 84} ngày tới. Cần giảm ~<strong>{Math.abs(Math.round(computeCalorieDelta(formData.weight, formData.targetWeight, Number(formData.targetDays) || 84)))} kcal/ngày</strong>.</>
                   ) : formData.goal === 'gain' && formData.targetWeight > formData.weight ? (
-                    <>Mục tiêu tăng <strong>{(formData.targetWeight - formData.weight).toFixed(1)}kg</strong> trong {formData.targetWeeks || 12} tuần tới. Cần nạp thêm ~<strong>{Math.abs(Math.round(computeCalorieDelta(formData.weight, formData.targetWeight, formData.targetWeeks || 12)))} kcal/ngày</strong>.</>
+                    <>Mục tiêu tăng <strong>{(formData.targetWeight - formData.weight).toFixed(1)}kg</strong> trong {formData.targetDays || 84} ngày tới. Cần nạp thêm ~<strong>{Math.abs(Math.round(computeCalorieDelta(formData.weight, formData.targetWeight, Number(formData.targetDays) || 84)))} kcal/ngày</strong>.</>
                   ) : (
                     <span style={{ color: '#ef4444' }}>Vui lòng điều chỉnh lại cân nặng mục tiêu cho hợp lý với mục tiêu {formData.goal === 'lose' ? 'giảm cân' : 'tăng cơ'}.</span>
                   )}
@@ -414,11 +382,17 @@ export default function HealthProfileEditor() {
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#16a34a' }}>{editPreviewBudget.calories} kcal</div>
                 </div>
               </div>
-              {editPreviewBudget.goalTooAggressive && (
-                <div style={{ fontSize: 11, color: '#92400e', marginTop: 8, padding: '6px 8px', background: '#fff7ed', borderRadius: 6, border: '1px solid #fed7aa' }}>
-                  <strong>Cảnh báo:</strong> Mục tiêu vượt ngưỡng an toàn. Đã tự động điều chỉnh calo. Thời gian dự kiến mới: ~{editPreviewBudget.estimatedWeeks} tuần.
-                </div>
-              )}
+              {editPreviewBudget.goalTooAggressive && formData.weight && formData.targetWeight && (() => {
+                const diffKg = Math.abs(Number(formData.targetWeight) - Number(formData.weight));
+                const safeDays = Math.max(14, Math.ceil(diffKg / 0.5) * 7);
+                return (
+                  <div style={{ fontSize: 11, color: '#92400e', marginTop: 8, padding: '8px 10px', background: '#fff7ed', borderRadius: 6, border: '1px solid #fed7aa' }}>
+                    <strong>⚠ Mục tiêu quá khắc nghiệt:</strong> Giảm {diffKg.toFixed(1)}kg trong {formData.targetDays} ngày yêu cầu thâm hụt ~{Math.round(diffKg * 7700 / Number(formData.targetDays))} kcal/ngày — vượt ngưỡng an toàn tối đa 1000 kcal/ngày.
+                    Mức calo đã được điều chỉnh về <strong>{editPreviewBudget.calories} kcal/ngày</strong>.
+                    {safeDays && safeDays > Number(formData.targetDays) && <> Khuyến nghị tối thiểu <strong>{safeDays} ngày</strong> để đạt mục tiêu an toàn.</>}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Live BMI preview */}
@@ -491,37 +465,6 @@ export default function HealthProfileEditor() {
               </p>
             </div>
 
-            {/* Conditions */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
-                Bệnh lý nền
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {conditionsList.map(c => {
-                  const isSelected = formData.conditions.includes(c.value);
-                  return (
-                    <label
-                      key={c.value}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
-                        borderRadius: 8, border: `2px solid ${isSelected ? '#22C55E' : '#e2e8f0'}`,
-                        background: isSelected ? '#f0fdf4' : 'white', cursor: 'pointer',
-                        transition: 'all 0.2s', fontSize: 13,
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleCondition(c.value)}
-                        style={{ width: 16, height: 16, accentColor: '#22C55E' }}
-                      />
-                      <span style={{ color: '#1E293B', fontWeight: isSelected ? 600 : 400 }}>{c.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Save/Cancel */}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
@@ -532,7 +475,7 @@ export default function HealthProfileEditor() {
                     height: healthProfile.height || '',
                     weight: healthProfile.weight || '',
                     targetWeight: healthProfile.targetWeight || '',
-                    targetWeeks: healthProfile.targetWeeks || '',
+                    targetDays: healthProfile.targetDays || 84,
                     goal: healthProfile.goal || '',
                     activityLevel: healthProfile.activityLevel || 'sedentary',
                     conditions: healthProfile.conditions || [],
@@ -633,26 +576,10 @@ export default function HealthProfileEditor() {
                     <FiAlertTriangle size={13} color="#ea580c" style={{ flexShrink: 0, marginTop: 1 }} />
                     <div style={{ fontSize: 11, color: '#92400e', lineHeight: 1.4 }}>
                       <strong>Mục tiêu hiện tại vượt ngưỡng an toàn.</strong> SmartMeal đã tự động điều chỉnh về {nutritionAnalysis.calories} kcal/ngày.
-                      {nutritionAnalysis.estimatedWeeks && <> Thời gian thực tế dự kiến: <strong>~{nutritionAnalysis.estimatedWeeks} tuần</strong>.</>}
+                      {nutritionAnalysis.estimatedDays && <> Thời gian thực tế dự kiến: <strong>~{nutritionAnalysis.estimatedDays} ngày</strong>.</>}
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-
-            {(healthProfile.conditions || []).length > 0 && (
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Bệnh lý nền</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {healthProfile.conditions.map(c => (
-                    <span key={c} style={{
-                      padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 500,
-                      background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa',
-                    }}>
-                      {conditionsList.find(cl => cl.value === c)?.label || c}
-                    </span>
-                  ))}
-                </div>
               </div>
             )}
 

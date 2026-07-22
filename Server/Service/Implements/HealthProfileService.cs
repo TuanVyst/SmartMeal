@@ -40,7 +40,7 @@ namespace Service.Implements
                 Height = request.Height,
                 Weight = request.Weight,
                 TargetWeight = request.TargetWeight,
-                TargetWeeks = request.TargetWeeks ?? 12,
+                TargetDays = request.TargetDays ?? 84,
                 ActivityLevel = request.ActivityLevel,
                 Goal = request.Goal,
                 CookingTimeMinutes = request.CookingTimeMinutes,
@@ -67,7 +67,7 @@ namespace Service.Implements
             healthProfile.Height = request.Height;
             healthProfile.Weight = request.Weight;
             healthProfile.TargetWeight = request.TargetWeight;
-            healthProfile.TargetWeeks = request.TargetWeeks;
+            healthProfile.TargetDays = request.TargetDays;
             healthProfile.ActivityLevel = request.ActivityLevel;
             healthProfile.Goal = request.Goal;
             healthProfile.CookingTimeMinutes = request.CookingTimeMinutes;

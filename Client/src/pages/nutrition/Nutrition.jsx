@@ -53,8 +53,6 @@ const goalLabels = {
   lose: { icon: <FiTrendingDown size={16} />, label: 'Giảm cân' },
   gain: { icon: <FiActivity size={16} />, label: 'Tăng cơ' },
   maintain: { icon: <FiMinimize2 size={16} />, label: 'Duy trì' },
-  heart: { icon: <FiHeart size={16} />, label: 'Cải thiện tim mạch' },
-  diabetes: { icon: <FiDroplet size={16} />, label: 'Kiểm soát đường huyết' },
 };
 
 const bmiColorMap = {

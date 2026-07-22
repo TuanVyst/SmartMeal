@@ -12,7 +12,7 @@ public class HealthProfileRequest
     
     public double? TargetWeight { get; set; }
     
-    public int? TargetWeeks { get; set; }
+    public int? TargetDays { get; set; }
 
     public string ActivityLevel { get; set; }
 

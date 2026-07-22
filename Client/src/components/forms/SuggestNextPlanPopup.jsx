@@ -67,7 +67,7 @@ export default function SuggestNextPlanPopup({ onClose }) {
             updateData.targetWeight = Number(targetWeight);
             const currentW = healthProfile?.weight || 0;
             const diffKg = Math.abs(Number(targetWeight) - currentW);
-            updateData.targetWeeks = Math.max(2, Math.ceil(diffKg / 0.5));
+            updateData.targetDays = Math.max(14, Math.ceil(diffKg / 0.5) * 7);
           }
         }
         if (isStep2Changed) {

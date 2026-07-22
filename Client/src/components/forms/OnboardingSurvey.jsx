@@ -117,6 +117,17 @@ export default function OnboardingSurvey({ onComplete }) {
     return null;
   }, [formData.height, formData.weight]);
 
+  const autoTargetDays = useMemo(() => {
+    const w = Number(formData.weight);
+    const tw = Number(formData.targetWeight);
+    if ((formData.goal === 'lose' || formData.goal === 'gain') && w > 0 && tw > 0) {
+      return Math.max(14, Math.ceil(Math.abs(tw - w) / 0.5) * 7);
+    }
+    return 84;
+  }, [formData.weight, formData.targetWeight, formData.goal]);
+
+  const effectiveTargetDays = formData.planCycleDays || autoTargetDays;
+
   const validateStep = () => {
     switch (step) {
       case 1:
@@ -146,7 +157,7 @@ export default function OnboardingSurvey({ onComplete }) {
     const err = validateStep();
     if (err) { dispatch({ type: 'SET_ERROR', value: err }); return; }
 
-    if (step === 3 && formData.goal === 'lose') {
+    if (step === 3 && (formData.goal === 'lose' || formData.goal === 'gain')) {
       setShowSafetyCheck(true);
       return;
     }
@@ -155,8 +166,6 @@ export default function OnboardingSurvey({ onComplete }) {
   };
 
   const handleSafetyAccept = () => {
-    // Tự động điều chỉnh targetWeeks? Logic được xử lý ẩn ở phía dưới (budget calculator luôn clamp về safeMinCalories)
-    // Thực tế chỉ cần ghi nhận người dùng đã đọc
     setShowSafetyCheck(false);
     dispatch({ type: 'NEXT' });
   };
@@ -175,16 +184,7 @@ export default function OnboardingSurvey({ onComplete }) {
         gender: formData.gender, conditions: [], allergies: [], 
         goal: formData.goal, bmiLevel: bmiResult?.level || 'normal', activityLevel: formData.activityLevel || 'sedentary',
         targetWeight: formData.targetWeight ? Number(formData.targetWeight) : null,
-        targetWeeks: (() => {
-          const w = Number(formData.weight);
-          const tw = Number(formData.targetWeight);
-          if ((formData.goal === 'lose' || formData.goal === 'gain') && w > 0 && tw > 0) {
-            const diffKg = Math.abs(tw - w);
-            // Tốc độ lành mạnh: 0.5 kg/tuần → số tuần = diffKg / 0.5
-            return Math.max(2, Math.ceil(diffKg / 0.5));
-          }
-          return 12;
-        })(),
+        targetDays: Number(effectiveTargetDays),
         cookingTimeMinutes: formData.cookingTimeMinutes,
         mealsPerDay: formData.mealsPerDay,
         dietType: formData.dietType,
@@ -276,13 +276,13 @@ export default function OnboardingSurvey({ onComplete }) {
                 ))}
               </div>
             </div>
-            {formData.goal === 'lose' && (
+            {(formData.goal === 'lose' || formData.goal === 'gain') && (
               <div style={{ padding: 16, background: '#f8fafc', borderRadius: 12 }}>
                 <InputField 
-                  label="Cân nặng mục tiêu của bạn" 
+                  label="Cân nặng mục tiêu" 
                   value={formData.targetWeight} 
                   onChange={v => dispatch({ type: 'SET_FIELD', field: 'targetWeight', value: v })} 
-                  type="number" placeholder="Ví dụ: 60" suffix="kg" 
+                  type="number" placeholder={formData.goal === 'lose' ? 'Ví dụ: 60' : 'Ví dụ: 80'} suffix="kg" 
                 />
               </div>
             )}
@@ -313,20 +313,13 @@ export default function OnboardingSurvey({ onComplete }) {
             </div>
             {showSafetyCheck && (
               <SafetyValidation 
-                profile={{ 
-                  ...formData, 
-                  weight: Number(formData.weight), 
-                  targetWeight: Number(formData.targetWeight), 
-                  bmiLevel: bmiResult?.level,
-                  targetWeeks: (() => {
-                    const w = Number(formData.weight);
-                    const tw = Number(formData.targetWeight);
-                    if ((formData.goal === 'lose' || formData.goal === 'gain') && w > 0 && tw > 0) {
-                      return Math.max(2, Math.ceil(Math.abs(tw - w) / 0.5));
-                    }
-                    return 12;
-                  })()
-                }} 
+                  profile={{ 
+                    ...formData, 
+                    weight: Number(formData.weight), 
+                    targetWeight: Number(formData.targetWeight), 
+                    bmiLevel: bmiResult?.level,
+                    targetDays: Number(effectiveTargetDays)
+                  }} 
                 onAccept={handleSafetyAccept}
                 onContinue={handleSafetyContinue}
               />
@@ -409,13 +402,8 @@ export default function OnboardingSurvey({ onComplete }) {
               <ul style={{ fontSize: 13, color: '#475569', paddingLeft: 20, margin: 0, lineHeight: 1.8 }}>
                 <li>Mục tiêu: <strong>{goalCards.find(c => c.value === formData.goal)?.label}</strong></li>
                 <li>Năng lượng ước tính: <strong>~{(() => {
-                  const w = Number(formData.weight);
-                  const tw = Number(formData.targetWeight);
-                  let weeks = 12;
-                  if ((formData.goal === 'lose' || formData.goal === 'gain') && w > 0 && tw > 0) {
-                    weeks = Math.max(2, Math.ceil(Math.abs(tw - w) / 0.5));
-                  }
-                  return getDailyCalorieBudget({ ...formData, targetWeeks: weeks }).calories;
+                  const days = Number(effectiveTargetDays);
+                  return getDailyCalorieBudget({ ...formData, targetDays: days }).calories;
                 })()} kcal/ngày</strong></li>
                 <li>Chế độ: <strong>{SURVEY_DIET_TYPES.find(d => d.value === formData.dietType)?.label}</strong>, <strong>{formData.mealsPerDay} bữa/ngày</strong></li>
               </ul>
