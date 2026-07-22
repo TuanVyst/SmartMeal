@@ -9,8 +9,7 @@ import bgImage from '../../assets/dark_healthy_meal_party_bg.png';
 import {
   SURVEY_DIET_TYPES,
   SURVEY_MEALS_PER_DAY,
-  SURVEY_COOKING_TIMES,
-  SURVEY_PLAN_CYCLES
+  SURVEY_COOKING_TIMES
 } from '../../utils/surveyUtils';
 
 const TOTAL_STEPS = 7;
@@ -23,8 +22,7 @@ const initialState = {
     activityLevel: '',
     cookingTimeMinutes: 30,
     mealsPerDay: 3,
-    dietType: 'normal',
-    planCycleDays: 7
+    dietType: 'normal'
   },
   error: '',
   submitting: false,
@@ -126,7 +124,7 @@ export default function OnboardingSurvey({ onComplete }) {
     return 84;
   }, [formData.weight, formData.targetWeight, formData.goal]);
 
-  const effectiveTargetDays = formData.planCycleDays || autoTargetDays;
+  const effectiveTargetDays = autoTargetDays;
 
   const validateStep = () => {
     switch (step) {
@@ -187,8 +185,7 @@ export default function OnboardingSurvey({ onComplete }) {
         targetDays: Number(effectiveTargetDays),
         cookingTimeMinutes: formData.cookingTimeMinutes,
         mealsPerDay: formData.mealsPerDay,
-        dietType: formData.dietType,
-        planCycleDays: formData.planCycleDays
+        dietType: formData.dietType
       };
       const result = await completeSurvey(payload);
       if (result.success) {
@@ -259,22 +256,6 @@ export default function OnboardingSurvey({ onComplete }) {
               ))}
             </div>
             <div style={{ marginBottom: 24, marginTop: 20 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Chu kỳ kế hoạch dinh dưỡng</label>
-              <div style={{ display: 'flex', gap: 12 }}>
-                {SURVEY_PLAN_CYCLES.map(opt => (
-                  <button
-                    key={opt.value} type="button" onClick={() => dispatch({ type: 'SET_FIELD', field: 'planCycleDays', value: opt.value })}
-                    style={{
-                      flex: 1, padding: '16px 8px', borderRadius: 12, border: `2px solid ${formData.planCycleDays === opt.value ? '#22C55E' : '#e2e8f0'}`,
-                      background: formData.planCycleDays === opt.value ? '#f0fdf4' : 'white', cursor: 'pointer'
-                    }}
-                  >
-                    <div style={{ fontSize: 16, fontWeight: 700, color: formData.planCycleDays === opt.value ? '#16a34a' : '#1E293B', marginBottom: 4 }}>{opt.label}</div>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>{opt.desc}</div>
-                    {opt.recommended && <div style={{ fontSize: 10, background: '#dcfce7', color: '#16a34a', padding: '2px 4px', borderRadius: 4, marginTop: 8, display: 'inline-block' }}>Khuyên dùng</div>}
-                  </button>
-                ))}
-              </div>
             </div>
             {(formData.goal === 'lose' || formData.goal === 'gain') && (
               <div style={{ padding: 16, background: '#f8fafc', borderRadius: 12 }}>

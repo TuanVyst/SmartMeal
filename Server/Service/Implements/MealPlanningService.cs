@@ -19,6 +19,7 @@ namespace Service.Implements
         private readonly IHealthProfileRepo _healthProfileRepo;
         private readonly IPantryRepo _pantryRepo;
         private readonly INutritionLogService _nutritionLogService;
+        private readonly ISubscriptionService _subscriptionService;
 
         public MealPlanningService(
             IMealPlanRepository mealPlanRepo,
@@ -26,7 +27,8 @@ namespace Service.Implements
             INutritionGoalRepo nutritionGoalRepo,
             IHealthProfileRepo healthProfileRepo,
             IPantryRepo pantryRepo,
-            INutritionLogService nutritionLogService)
+            INutritionLogService nutritionLogService,
+            ISubscriptionService subscriptionService)
         {
             _mealPlanRepo = mealPlanRepo;
             _recipeRepo = recipeRepo;
@@ -34,10 +36,14 @@ namespace Service.Implements
             _healthProfileRepo = healthProfileRepo;
             _pantryRepo = pantryRepo;
             _nutritionLogService = nutritionLogService;
+            _subscriptionService = subscriptionService;
         }
 
         public async Task<MealPlanResponseDto> GeneratePlanPreviewAsync(Guid accountId, int days = 7)
         {
+            if (!await _subscriptionService.HasFeatureAsync(accountId, "meal_plan"))
+                throw new UnauthorizedAccessException("Chức năng tạo thực đơn chỉ dành cho tài khoản Pro. Vui lòng nâng cấp gói để sử dụng.");
+
             // 1. Get Nutrition Goal & Profile
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
             var profile = await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
@@ -170,6 +176,9 @@ namespace Service.Implements
 
         public async Task<MealPlanResponseDto> SuggestNextDayAsync(Guid accountId)
         {
+            if (!await _subscriptionService.HasFeatureAsync(accountId, "meal_plan"))
+                throw new UnauthorizedAccessException("Chức năng gợi ý thực đơn chỉ dành cho tài khoản Pro. Vui lòng nâng cấp gói để sử dụng.");
+
             // Find existing active plan and add a new day to it
             var existingPlan = await _mealPlanRepo.GetActivePlanByAccountId(accountId);
             if (existingPlan == null)
@@ -268,6 +277,22 @@ namespace Service.Implements
             await _mealPlanRepo.UpdateEntry(entry);
 
             // Fetch the updated plan to return fresh DTO
+            var updatedPlan = await _mealPlanRepo.GetPlanById(planId);
+            return await BuildPlanDto(updatedPlan, updatedPlan.Account_id);
+        }
+
+        public async Task<MealPlanResponseDto> RemoveEntryAsync(Guid planId, Guid entryId)
+        {
+            var plan = await _mealPlanRepo.GetPlanById(planId);
+            if (plan == null) throw new Exception("Không tìm thấy thực đơn.");
+
+            var entry = await _mealPlanRepo.GetEntryById(entryId);
+            if (entry == null || entry.MealPlanDay.MealPlan_id != planId) throw new Exception("Entry không hợp lệ.");
+
+            await _mealPlanRepo.RemoveEntry(entry);
+
+            // Check if day is empty, if so we could remove the day, but leaving it empty is also fine or we can delete it.
+            // For now, let's just return the updated plan.
             var updatedPlan = await _mealPlanRepo.GetPlanById(planId);
             return await BuildPlanDto(updatedPlan, updatedPlan.Account_id);
         }
@@ -493,11 +518,27 @@ namespace Service.Implements
 
         public async Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null)
         {
+            if (!await _subscriptionService.HasFeatureAsync(accountId, "meal_plan"))
+                throw new UnauthorizedAccessException("Chức năng tạo gợi ý nhanh chỉ dành cho tài khoản Pro. Vui lòng nâng cấp gói để sử dụng.");
+
+            var selectedMealsForCheck = meals?.Select(m => m.ToLower()).ToHashSet() ?? new HashSet<string> { "breakfast", "lunch", "dinner" };
+            
             // Check if date already has any meals
             var dateCheck = await CheckDateMealsAsync(accountId, targetDate);
-            if (dateCheck["breakfast"] || dateCheck["lunch"] || dateCheck["dinner"])
+            
+            bool hasAllRequested = true;
+            foreach (var m in selectedMealsForCheck)
             {
-                throw new Exception("Ngày này đã có bữa ăn rồi");
+                if (dateCheck.ContainsKey(m) && !dateCheck[m])
+                {
+                    hasAllRequested = false;
+                    break;
+                }
+            }
+            
+            if (hasAllRequested)
+            {
+                throw new Exception("Ngày này đã có đầy đủ các bữa ăn bạn yêu cầu.");
             }
 
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
@@ -590,7 +631,9 @@ namespace Service.Implements
                 var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random);
                 if (bRecipe != null)
                 {
-                    existingDay.Entries.Add(CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1));
+                    var entry = CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1);
+                    existingDay.Entries.Add(entry);
+                    if (!isNewPlan) await _mealPlanRepo.AddEntry(entry);
                     usedRecipeIds.Add(bRecipe.Recipe_id);
                 }
             }
@@ -600,7 +643,9 @@ namespace Service.Implements
                 var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random);
                 if (lRecipe != null)
                 {
-                    existingDay.Entries.Add(CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2));
+                    var entry = CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2);
+                    existingDay.Entries.Add(entry);
+                    if (!isNewPlan) await _mealPlanRepo.AddEntry(entry);
                     usedRecipeIds.Add(lRecipe.Recipe_id);
                 }
             }
@@ -610,7 +655,9 @@ namespace Service.Implements
                 var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random);
                 if (dRecipe != null)
                 {
-                    existingDay.Entries.Add(CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3));
+                    var entry = CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3);
+                    existingDay.Entries.Add(entry);
+                    if (!isNewPlan) await _mealPlanRepo.AddEntry(entry);
                     usedRecipeIds.Add(dRecipe.Recipe_id);
                 }
             }
@@ -622,9 +669,30 @@ namespace Service.Implements
             }
             else
             {
-                existingPlan.TotalDays = existingPlan.Days.Count;
-                existingPlan.EndDate = existingPlan.Days.Max(d => d.DayDate);
-                await _mealPlanRepo.UpdatePlan(existingPlan);
+                var newTotalDays = existingPlan.Days.Count;
+                var newEndDate = existingPlan.Days.Max(d => d.DayDate);
+                
+                bool needsUpdate = false;
+                if (existingPlan.TotalDays != newTotalDays)
+                {
+                    existingPlan.TotalDays = newTotalDays;
+                    needsUpdate = true;
+                }
+                if (existingPlan.EndDate != newEndDate)
+                {
+                    existingPlan.EndDate = newEndDate;
+                    needsUpdate = true;
+                }
+                
+                if (needsUpdate)
+                {
+                    await _mealPlanRepo.UpdatePlan(existingPlan);
+                }
+                else
+                {
+                    // Just save the new entries
+                    await _mealPlanRepo.UpdatePlan(existingPlan); // which just calls SaveChangesAsync
+                }
             }
 
             return await BuildPlanDto(existingPlan, accountId);

@@ -9,7 +9,7 @@ import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { getIngredients } from '../../services/foodService';
-import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart } from 'react-icons/fi';
+import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart, FiLock } from 'react-icons/fi';
 import HealthTipCard from '../../components/common/HealthTipCard';
 import CalorieGoalReminder from '../../components/common/CalorieGoalReminder';
 import './Dashboard.css';
@@ -107,7 +107,7 @@ function deriveLogNutrients(log, recipes, ingredients) {
 }
 
 export default function Dashboard() {
-  const { user }         = useAuth();
+  const { user, isPremium }         = useAuth();
   const { isFavorite, toggleFavorite } = useFavorite();
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();

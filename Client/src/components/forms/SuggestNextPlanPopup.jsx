@@ -149,6 +149,7 @@ export default function SuggestNextPlanPopup({ onClose }) {
                 <input
                   type="date"
                   value={selectedDate}
+                  min={getTodayDateKey()}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="popup-date-input"
                 />

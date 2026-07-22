@@ -138,5 +138,23 @@ namespace PresentationLayer.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet("check-feature")]
+        public async Task<IActionResult> CheckFeature([FromQuery] string featureKey)
+        {
+            try
+            {
+                var jwtAccountId = GetAccountId();
+                if (string.IsNullOrEmpty(featureKey)) return BadRequest(new { message = "featureKey is required" });
+
+                bool hasFeature = await _subscriptionService.HasFeatureAsync(jwtAccountId, featureKey);
+                return Ok(new { success = true, data = hasFeature });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking feature");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

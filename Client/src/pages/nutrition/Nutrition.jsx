@@ -885,7 +885,26 @@ export default function Nutrition() {
 
               {/* Logs history list */}
               <div className="logs-list-card">
-                <h3>Bữa ăn ngày {formatDateVi(selectedDate)}</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0 }}>Bữa ăn ngày {formatDateVi(selectedDate)}</h3>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button onClick={() => {
+                      const d = new Date(selectedDate);
+                      d.setDate(d.getDate() - 1);
+                      setSelectedDate(toDateKey(d));
+                    }} style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#475569', fontSize: '18px' }} title="Ngày trước">‹</button>
+                    
+                    <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} max={getTodayDateKey()} style={{ padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', outline: 'none', color: '#334155' }} />
+
+                    <button onClick={() => {
+                      const d = new Date(selectedDate);
+                      d.setDate(d.getDate() + 1);
+                      setSelectedDate(toDateKey(d));
+                    }} 
+                    disabled={selectedDate >= getTodayDateKey()}
+                    style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedDate >= getTodayDateKey() ? '#e2e8f0' : '#f1f5f9', border: 'none', borderRadius: '8px', cursor: selectedDate >= getTodayDateKey() ? 'not-allowed' : 'pointer', color: selectedDate >= getTodayDateKey() ? '#94a3b8' : '#475569', fontSize: '18px' }} title="Ngày sau">›</button>
+                  </div>
+                </div>
                 <div className="logs-list-container">
                   {logsToday.length === 0 ? (
                     <div className="empty-logs-placeholder">
@@ -913,9 +932,11 @@ export default function Nutrition() {
                             <span>Carb: {Math.round(log.totalCarbs || 0)}g</span>
                             <span>Béo: {Math.round(log.totalFat || 0)}g</span>
                           </div>
-                          <button className="btn-delete-log" onClick={(e) => { e.stopPropagation(); handleDeleteLog(log.log_id); }}>
-                            <MdDeleteOutline />
-                          </button>
+                          {selectedDate === getTodayDateKey() && (
+                            <button className="btn-delete-log" onClick={(e) => { e.stopPropagation(); handleDeleteLog(log.log_id); }}>
+                              <MdDeleteOutline />
+                            </button>
+                          )}
                         </div>
                       );
                     })

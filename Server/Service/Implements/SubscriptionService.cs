@@ -98,6 +98,27 @@ namespace Service.Implements
             return MapToDto(result);
         }
 
+        public async Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
+        {
+            var subs = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
+            var activeSub = subs.FirstOrDefault(s => s.Status == "active" && (!s.EndDate.HasValue || s.EndDate.Value > DateTime.UtcNow));
+            if (activeSub == null) return false;
+
+            var plan = await _planRepo.GetPlanById(activeSub.Plan_id);
+            if (plan == null || string.IsNullOrEmpty(plan.Features)) return false;
+
+            try
+            {
+                var features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(plan.Features);
+                return features != null && features.Contains(featureKey);
+            }
+            catch
+            {
+                // In case the Features string is not a valid JSON array
+                return false;
+            }
+        }
+
         public async Task<SubscriptionResponseDto> SoftDeleteSubscription(Guid id)
         {
             var result = await _subscriptionRepo.SoftDeleteSubscription(id);

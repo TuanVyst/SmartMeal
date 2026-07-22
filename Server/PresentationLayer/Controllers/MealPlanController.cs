@@ -106,6 +106,15 @@ namespace PresentationLayer.Controllers
                 var plan = await _mealPlanningService.SuggestForDateAsync(accountId, date, mealList);
                 return Ok(new { data = plan });
             }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+            {
+                var entry = ex.Entries.FirstOrDefault();
+                string entityName = entry?.Entity?.GetType().Name ?? "Unknown";
+                string state = entry?.State.ToString() ?? "Unknown";
+                string details = $"Concurrency Exception on {entityName} (State: {state}). Message: {ex.Message}";
+                Console.WriteLine($"[DB ERROR] {details}");
+                return BadRequest(new { message = details });
+            }
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
@@ -141,6 +150,20 @@ namespace PresentationLayer.Controllers
                 var accountId = GetAccountId();
                 var plan = await _mealPlanningService.SwapRecipeAsync(id, dto.EntryId, dto.NewRecipeId);
                 return Ok(new { data = plan, message = "Đã đổi món thành công." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}/entry/{entryId}")]
+        public async Task<IActionResult> RemoveEntry(Guid id, Guid entryId)
+        {
+            try
+            {
+                var plan = await _mealPlanningService.RemoveEntryAsync(id, entryId);
+                return Ok(new { data = plan, message = "Đã huỷ món thành công." });
             }
             catch (Exception ex)
             {
