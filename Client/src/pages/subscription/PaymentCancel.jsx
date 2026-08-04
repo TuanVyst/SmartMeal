@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoChevronBackOutline } from 'react-icons/io5';
+import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import './SubscriptionPlans.css';
 
 export default function PaymentCancel() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    pendingPaymentStorage.clearPendingPayment();
+  }, []);
 
   return (
     <div className="payment-success-container">
@@ -24,3 +29,4 @@ export default function PaymentCancel() {
     </div>
   );
 }
+

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
+import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import { IoChevronBackOutline } from 'react-icons/io5';
 import { QRCodeSVG } from 'qrcode.react';
 import './SubscriptionPlans.css';
@@ -9,9 +10,10 @@ import './SubscriptionPlans.css';
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, checkPremiumStatus } = useAuth();
-  const plan = location.state?.plan;
+  const { user, isPremium, checkPremiumStatus } = useAuth();
+  const accountId = user?.accountId || user?.account_id;
 
+  const [currentPlan, setCurrentPlan] = useState(() => location.state?.plan || null);
   const [step, setStep] = useState('idle');
   const [qrImage, setQrImage] = useState('');
   const [orderCode, setOrderCode] = useState(null);
@@ -20,12 +22,57 @@ export default function Payment() {
   const [errorMsg, setErrorMsg] = useState('');
   const [copied, setCopied] = useState(null);
   const pollingRef = useRef(null);
-  const orderCodeRef = useRef(null);
-  const planIdRef = useRef(null);
 
+  const startPolling = useCallback((accId, currentOrderCode) => {
+    if (pollingRef.current) clearInterval(pollingRef.current);
+    if (currentOrderCode == null || currentOrderCode === undefined) return;
+    const orderCodeStr = currentOrderCode.toString();
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const { data } = await subscriptionService.checkPaymentStatus(orderCodeStr);
+        if (data && data.success && data.isPaid) {
+          clearInterval(pollingRef.current);
+          pendingPaymentStorage.clearPendingPayment();
+          if (accId) await checkPremiumStatus(accId);
+          setStep('success');
+        }
+      } catch {
+        /* ignore polling errors */
+      }
+    }, 3000);
+  }, [checkPremiumStatus]);
+
+  // Restore pending payment session on mount
   useEffect(() => {
-    if (!plan) navigate('/subscription');
-  }, [plan, navigate]);
+    if (isPremium) {
+      setStep('success');
+      return;
+    }
+
+    const savedPayment = pendingPaymentStorage.getPendingPayment(accountId);
+    if (savedPayment) {
+      const activePlan = location.state?.plan || savedPayment.plan;
+      setCurrentPlan(activePlan);
+      setOrderCode(savedPayment.orderCode);
+      setQrImage(savedPayment.qrImage);
+      setTransferContent(savedPayment.transferContent);
+      setStep('pending');
+
+      const remainingSec = Math.max(0, Math.floor((savedPayment.expiresAt - Date.now()) / 1000));
+      setTimeLeft(remainingSec);
+      if (remainingSec > 0) {
+        startPolling(accountId, savedPayment.orderCode);
+      } else {
+        pendingPaymentStorage.clearPendingPayment();
+        setStep('idle');
+      }
+    } else if (location.state?.plan) {
+      setCurrentPlan(location.state.plan);
+    } else {
+      navigate('/subscription');
+    }
+  }, [accountId, isPremium, location.state, navigate, startPolling]);
 
   useEffect(() => {
     return () => {
@@ -33,32 +80,26 @@ export default function Payment() {
     };
   }, []);
 
-  const startPolling = useCallback((accountId, currentOrderCode) => {
-    if (pollingRef.current) clearInterval(pollingRef.current);
-    if (currentOrderCode == null || currentOrderCode === undefined) return;
-    const orderCodeStr = currentOrderCode.toString();
-    orderCodeRef.current = orderCodeStr;
-    pollingRef.current = setInterval(async () => {
-      try {
-        const { data } = await subscriptionService.checkPaymentStatus(orderCodeStr);
-        if (data && data.success && data.isPaid) {
-          clearInterval(pollingRef.current);
-          await checkPremiumStatus(accountId);
-          setStep('success');
-        }
-      } catch {
-        /* ignore polling errors */
-      }
-    }, 3000); // Polling every 3 seconds for better responsiveness
-  }, [checkPremiumStatus]);
-
+  // Countdown timer effect
   useEffect(() => {
     if (step !== 'pending' || timeLeft <= 0) return;
-    const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+
+    const timer = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(timer);
+          pendingPaymentStorage.clearPendingPayment();
+          setStep('idle');
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [step, timeLeft]);
 
-  if (!plan) return null;
+  if (!currentPlan) return null;
 
   const formatTime = (s) => {
     const m = Math.floor(s / 60);
@@ -71,20 +112,32 @@ export default function Payment() {
     setStep('loading');
 
     try {
-      const accountId = user?.accountId || user?.account_id;
       const { data } = await subscriptionService.createPayment({
         account_id: accountId,
-        plan_id: plan.plan_id,
+        plan_id: currentPlan.plan_id,
       });
 
       if (data.success && data.data) {
         const resp = data.data;
-        setOrderCode(resp.orderCode);
-        setQrImage(resp.qrCode || '');
-        setTransferContent(resp.transferContent || resp.qrCode || '');
+        const newOrderCode = resp.orderCode;
+        const newQrImage = resp.qrCode || '';
+        const newTransferContent = resp.transferContent || resp.qrCode || '';
+
+        setOrderCode(newOrderCode);
+        setQrImage(newQrImage);
+        setTransferContent(newTransferContent);
         setStep('pending');
-        planIdRef.current = plan.plan_id;
-        startPolling(accountId, resp.orderCode);
+        setTimeLeft(900);
+
+        pendingPaymentStorage.savePendingPayment({
+          accountId,
+          plan: currentPlan,
+          orderCode: newOrderCode,
+          qrImage: newQrImage,
+          transferContent: newTransferContent,
+        });
+
+        startPolling(accountId, newOrderCode);
       } else {
         setErrorMsg(data.message || 'Không thể tạo thanh toán. Vui lòng thử lại.');
         setStep('idle');
@@ -93,6 +146,19 @@ export default function Payment() {
       const msg = err.response?.data?.message || err.message || 'Lỗi kết nối mạng.';
       setErrorMsg(msg);
       setStep('idle');
+    }
+  };
+
+  const handleCancelPayment = () => {
+    if (pollingRef.current) clearInterval(pollingRef.current);
+    pendingPaymentStorage.clearPendingPayment();
+    if (step === 'pending') {
+      setStep('idle');
+      setOrderCode(null);
+      setQrImage('');
+      setTransferContent('');
+    } else {
+      navigate('/subscription');
     }
   };
 
@@ -107,11 +173,11 @@ export default function Payment() {
           <h2 className="payment-title">Thanh Toán Đăng Ký</h2>
           <div className="selected-plan-summary">
             <div>
-              <h3>Gói Premium: <strong>{plan.name}</strong></h3>
-              <p>{plan.description}</p>
+              <h3>Gói Premium: <strong>{currentPlan.name}</strong></h3>
+              <p>{currentPlan.description}</p>
             </div>
             <div className="checkout-price">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(plan.price)}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPlan.price)}
             </div>
           </div>
 
@@ -140,7 +206,7 @@ export default function Payment() {
                 <span className="item-label">Số tiền:</span>
                 <div className="item-value-row">
                   <span className="item-value font-bold">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(plan.price)}
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPlan.price)}
                   </span>
                 </div>
               </div>
@@ -183,7 +249,7 @@ export default function Payment() {
                   <span className="item-label">Số tiền</span>
                   <div className="item-value-row">
                     <span className="item-value font-bold">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(plan.price)}
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPlan.price)}
                     </span>
                   </div>
                 </div>
@@ -276,7 +342,7 @@ export default function Payment() {
               )}
               <button
                 type="button"
-                onClick={() => navigate('/subscription')}
+                onClick={handleCancelPayment}
                 className="btn-cancel-payment"
                 style={{
                   marginTop: '0.75rem',
@@ -299,3 +365,4 @@ export default function Payment() {
     </div>
   );
 }
+

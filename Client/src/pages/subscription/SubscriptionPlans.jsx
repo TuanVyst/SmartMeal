@@ -2,15 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
+import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import './SubscriptionPlans.css';
 
 export default function SubscriptionPlans() {
   const navigate = useNavigate();
   const { user, isPremium, subscription } = useAuth();
+  const accountId = user?.accountId || user?.account_id;
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [pendingPayment, setPendingPayment] = useState(null);
+
+  useEffect(() => {
+    if (accountId) {
+      setPendingPayment(pendingPaymentStorage.getPendingPayment(accountId));
+    }
+  }, [accountId]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -34,7 +43,22 @@ export default function SubscriptionPlans() {
       // Free plan selected, usually do nothing or show info
       return;
     }
+
+    if (pendingPayment && pendingPayment.plan?.plan_id !== plan.plan_id) {
+      const confirmChange = window.confirm(
+        `Bạn đang có mã QR thanh toán chưa hoàn tất cho gói "${pendingPayment.plan?.name}". Bạn có muốn hủy mã cũ để chọn gói "${plan.name}" không?`
+      );
+      if (!confirmChange) return;
+      pendingPaymentStorage.clearPendingPayment();
+      setPendingPayment(null);
+    }
+
     navigate('/subscription/payment', { state: { plan } });
+  };
+
+  const handleCancelPending = () => {
+    pendingPaymentStorage.clearPendingPayment();
+    setPendingPayment(null);
   };
 
   const getFeaturesList = (featuresJson) => {
@@ -83,6 +107,32 @@ export default function SubscriptionPlans() {
           Mở khóa những tính năng phân tích và gợi ý thực đơn chuyên sâu hỗ trợ bởi trí tuệ nhân tạo (AI).
         </p>
       </div>
+
+      {pendingPayment && !isPremium && (
+        <div className="pending-payment-banner">
+          <div className="pending-banner-text">
+            <p>
+              ⚠️ Bạn đang có giao dịch thanh toán cho gói <strong>{pendingPayment.plan?.name || 'Premium'}</strong> đang chờ xử lý.
+            </p>
+          </div>
+          <div className="pending-banner-actions">
+            <button
+              type="button"
+              className="btn-resume-payment"
+              onClick={() => navigate('/subscription/payment', { state: { plan: pendingPayment.plan } })}
+            >
+              Tiếp tục thanh toán (Mã QR)
+            </button>
+            <button
+              type="button"
+              className="btn-cancel-pending"
+              onClick={handleCancelPending}
+            >
+              Hủy giao dịch
+            </button>
+          </div>
+        </div>
+      )}
 
       {isPremium && subscription && (
         <div className="active-sub-banner">
@@ -199,3 +249,4 @@ export default function SubscriptionPlans() {
     </div>
   );
 }
+

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { subscriptionService } from '../../services/subscriptionService';
+import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import './SubscriptionPlans.css';
 
 export default function PaymentSuccess() {
@@ -12,6 +12,7 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     const activateSubscription = async () => {
+      pendingPaymentStorage.clearPendingPayment();
       const orderCode = searchParams.get('orderCode');
       if (!orderCode) {
         setLoading(false);
@@ -55,3 +56,4 @@ export default function PaymentSuccess() {
     </div>
   );
 }
+

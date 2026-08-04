@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
 import { subscriptionService } from '../services/subscriptionService';
+import { pendingPaymentStorage } from '../utils/pendingPaymentStorage';
+import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
@@ -23,13 +25,7 @@ export function AuthProvider({ children }) {
   const [subscription, setSubscription] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
 
-  useEffect(() => {
-    const storedUser = readStoredUser();
-    const accId = storedUser?.accountId || storedUser?.account_id;
-    if (accId) checkPremiumStatus(accId);
-  }, []);
-
-  const checkPremiumStatus = async (accountId) => {
+  const checkPremiumStatus = useCallback(async (accountId) => {
     if (!accountId) {
       setSubscription(null);
       setIsPremium(false);
@@ -51,6 +47,7 @@ export function AuthProvider({ children }) {
       if (activeSub) {
         setSubscription(activeSub);
         setIsPremium(true);
+        pendingPaymentStorage.clearPendingPayment();
       } else {
         setSubscription(null);
         setIsPremium(false);
@@ -60,7 +57,69 @@ export function AuthProvider({ children }) {
       setSubscription(null);
       setIsPremium(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const storedUser = readStoredUser();
+    const accId = storedUser?.accountId || storedUser?.account_id;
+    if (accId) checkPremiumStatus(accId);
+  }, [checkPremiumStatus]);
+
+  const accountId = user?.accountId || user?.account_id;
+
+  const checkPendingPaymentStatus = useCallback(async () => {
+    const accId = user?.accountId || user?.account_id;
+    if (!accId) return false;
+    const pending = pendingPaymentStorage.getPendingPayment(accId);
+    if (!pending || !pending.orderCode) return false;
+
+    try {
+      const { data } = await subscriptionService.checkPaymentStatus(pending.orderCode);
+      if (data && data.success && data.isPaid) {
+        pendingPaymentStorage.clearPendingPayment();
+        await checkPremiumStatus(accId);
+        toast.success('🎉 Thanh toán thành công! Tài khoản của bạn đã được nâng cấp lên Premium.');
+        return true;
+      }
+    } catch {
+      /* ignore polling errors */
+    }
+    return false;
+  }, [user, checkPremiumStatus]);
+
+  useEffect(() => {
+    if (!accountId || isPremium) return;
+
+    // Initial check
+    checkPendingPaymentStatus();
+
+    // Interval polling every 4 seconds if pending payment exists
+    const interval = setInterval(() => {
+      const pending = pendingPaymentStorage.getPendingPayment(accountId);
+      if (pending) {
+        checkPendingPaymentStatus();
+      }
+    }, 4000);
+
+    // Visibility change handler (switching back to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const pending = pendingPaymentStorage.getPendingPayment(accountId);
+        if (pending) {
+          checkPendingPaymentStatus();
+        } else {
+          checkPremiumStatus(accountId);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [accountId, isPremium, checkPendingPaymentStatus, checkPremiumStatus]);
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials);
@@ -119,6 +178,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user');
     localStorage.removeItem('userHealthProfile');
     localStorage.removeItem('healthSurveyCompleted');
+    pendingPaymentStorage.clearPendingPayment();
     setUser(null);
     setSubscription(null);
     setIsPremium(false);
@@ -133,10 +193,11 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar, subscription, isPremium, checkPremiumStatus }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar, subscription, isPremium, checkPremiumStatus, checkPendingPaymentStatus }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export const useAuth = () => useContext(AuthContext);
+

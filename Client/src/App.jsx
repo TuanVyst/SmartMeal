@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { FavoriteProvider } from './context/FavoriteContext';
 import { HealthProfileProvider } from './context/HealthProfileContext';
 import { DialogProvider } from './context/DialogContext';
+import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 import './App.css';
 import './assets/styles/landing.css';
@@ -12,6 +13,7 @@ function AppContent() {
 
   return (
     <FavoriteProvider>
+      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
       <AppRoutes />
     </FavoriteProvider>
   );
@@ -29,4 +31,4 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
   );
-}
+}
