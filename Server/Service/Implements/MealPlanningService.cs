@@ -633,7 +633,6 @@ namespace Service.Implements
                 {
                     var entry = CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1);
                     existingDay.Entries.Add(entry);
-                    if (!isNewPlan) await _mealPlanRepo.AddEntry(entry);
                     usedRecipeIds.Add(bRecipe.Recipe_id);
                 }
             }
@@ -645,7 +644,6 @@ namespace Service.Implements
                 {
                     var entry = CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2);
                     existingDay.Entries.Add(entry);
-                    if (!isNewPlan) await _mealPlanRepo.AddEntry(entry);
                     usedRecipeIds.Add(lRecipe.Recipe_id);
                 }
             }
@@ -657,7 +655,6 @@ namespace Service.Implements
                 {
                     var entry = CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3);
                     existingDay.Entries.Add(entry);
-                    if (!isNewPlan) await _mealPlanRepo.AddEntry(entry);
                     usedRecipeIds.Add(dRecipe.Recipe_id);
                 }
             }
