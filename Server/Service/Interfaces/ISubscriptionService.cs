@@ -14,5 +14,6 @@ namespace Service.Interfaces
         Task<SubscriptionResponseDto> CreateSubscription(SubscriptionRequest subscription);
         Task<SubscriptionResponseDto> UpdateSubscription(Guid id, SubscriptionRequest subscription);
         Task<SubscriptionResponseDto> SoftDeleteSubscription(Guid id);
+        Task<bool> HasFeatureAsync(Guid accountId, string featureKey);
     }
 }

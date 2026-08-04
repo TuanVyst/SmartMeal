@@ -15,6 +15,7 @@ namespace Service.Interfaces
         
         // Swap capability for preview
         Task<MealPlanResponseDto> SwapRecipeAsync(Guid planId, Guid entryId, Guid newRecipeId);
+        Task<MealPlanResponseDto> RemoveEntryAsync(Guid planId, Guid entryId);
 
         Task<MealPlanResponseDto> SuggestNextDayAsync(Guid accountId);
         Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null);

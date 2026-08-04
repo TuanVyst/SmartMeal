@@ -14,5 +14,7 @@ namespace Repository.Interfaces
         Task UpdatePlan(MealPlan plan);
         Task UpdateEntry(MealPlanEntry entry);
         Task<MealPlanEntry> GetEntryById(Guid entryId);
+        Task RemoveEntry(MealPlanEntry entry);
+        Task AddEntry(MealPlanEntry entry);
     }
 }

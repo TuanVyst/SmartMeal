@@ -271,12 +271,12 @@ const HealthReport = () => {
               style={styles.ctaBtn}
               onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-              onClick={() => navigate('/meal-plan/preview')}
+              onClick={() => navigate('/dashboard')}
             >
-              Tạo Thực Đơn Cho Tôi →
+              Khám Phá SmartMeal →
             </button>
             <p style={{ ...styles.smallText, marginTop: 12 }}>
-              Hệ thống sẽ tạo thực đơn cá nhân dựa trên chỉ số của bạn
+              Đến bảng điều khiển để xem chi tiết dinh dưỡng của bạn
             </p>
           </div>
         </div>

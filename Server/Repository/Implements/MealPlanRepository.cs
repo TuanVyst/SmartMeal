@@ -71,7 +71,13 @@ namespace Repository.Implements
 
         public async Task UpdatePlan(MealPlan plan)
         {
-            _context.MealPlans.Update(plan);
+            foreach (var entry in _context.ChangeTracker.Entries())
+            {
+                if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+                {
+                    Console.WriteLine($"[DEBUG EF] Entity: {entry.Entity.GetType().Name}, State: {entry.State}");
+                }
+            }
             await _context.SaveChangesAsync();
         }
 
@@ -84,8 +90,19 @@ namespace Repository.Implements
 
         public async Task UpdateEntry(MealPlanEntry entry)
         {
-            _context.MealPlanEntries.Update(entry);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveEntry(MealPlanEntry entry)
+        {
+            _context.MealPlanEntries.Remove(entry);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddEntry(MealPlanEntry entry)
+        {
+            await _context.MealPlanEntries.AddAsync(entry);
+            // Don't call SaveChangesAsync here because MealPlanningService handles it
         }
     }
 }

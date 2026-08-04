@@ -19,7 +19,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public double DailySugarLimit { get; set; }
         public double DailySaltLimit { get; set; }
 
-        public int EstimatedWeeks { get; set; }
+        public int EstimatedDays { get; set; }
         public string Goal { get; set; }
         
         // Narrative explanations for UI

@@ -3,9 +3,11 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import SuggestNextPlanPopup from '../../components/forms/SuggestNextPlanPopup';
-import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronDown, FiClock, FiZap } from 'react-icons/fi';
+import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronDown, FiClock, FiZap, FiLock } from 'react-icons/fi';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
+import { subscriptionService } from '../../services/subscriptionService';
+import UpgradePaywallModal from '../../components/common/UpgradePaywallModal';
 import './MealPlanSuggestion.css';
 
 const SLOT_LABELS = { breakfast: 'Bữa Sáng', lunch: 'Bữa Trưa', dinner: 'Bữa Tối' };
@@ -27,11 +29,27 @@ export default function MealPlanSuggestion() {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [showPopup, setShowPopup]     = useState(false);
   const [alertMsg, setAlertMsg]       = useState(null);
+  const [mealToDelete, setMealToDelete] = useState(null);
 
   // For day selector: which plan and which day index is selected
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
+
+  // Pro features
+  const [hasPro, setHasPro] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const fetchHasPro = useCallback(async () => {
+    try {
+      const res = await subscriptionService.checkFeature('meal_plan');
+      if (res.data && res.data.success) {
+        setHasPro(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to check pro status:', err);
+    }
+  }, []);
 
   const fetchAllPlans = useCallback(async () => {
     if (!accountId) return;
@@ -53,7 +71,8 @@ export default function MealPlanSuggestion() {
 
   useEffect(() => {
     fetchAllPlans();
-  }, [fetchAllPlans]);
+    fetchHasPro();
+  }, [fetchAllPlans, fetchHasPro]);
 
   const handlePopupClose = (msg) => {
     setShowPopup(false);
@@ -105,6 +124,41 @@ export default function MealPlanSuggestion() {
     }
   };
 
+  const handleRemoveMeal = async () => {
+    if (!mealToDelete) return;
+    try {
+      await api.delete(`/MealPlan/${selectedPlanId}/entry/${mealToDelete.entry_id}`);
+      toast.success('Đã huỷ món thành công!');
+      fetchAllPlans();
+      setMealToDelete(null);
+    } catch (err) {
+      console.error('Error removing meal:', err);
+      toast.error(err.response?.data?.message || 'Không thể huỷ món.');
+    }
+  };
+
+  const [quickGenerating, setQuickGenerating] = useState(null);
+
+  const handleQuickGenerate = async (slotKey, date) => {
+    if (!hasPro) {
+      setShowPaywall(true);
+      return;
+    }
+    try {
+      setQuickGenerating(slotKey);
+      const dateParam = new Date(date).toISOString().split('T')[0];
+      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
+      toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
+      fetchAllPlans();
+    } catch (err) {
+      console.error('Error quick generate:', err);
+      toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
+    } finally {
+      setQuickGenerating(null);
+    }
+  };
+
+
   // Derived: currently selected plan & day
   const selectedPlan = allPlans.find(p => p.mealPlan_id === selectedPlanId) || allPlans[0] || null;
   const days = selectedPlan?.days || [];
@@ -122,7 +176,7 @@ export default function MealPlanSuggestion() {
         : resolveRecipeImageUrl(e.recipeName || e.recipe_name || rawImg);
       slotMap[key] = { ...e, _resolvedImg: resolvedImg };
     });
-    return SLOT_ORDER.map(slot => slotMap[slot] ? { ...slotMap[slot], slotKey: slot } : null).filter(Boolean);
+    return SLOT_ORDER.map(slot => slotMap[slot] ? { ...slotMap[slot], slotKey: slot } : { isMissing: true, slotKey: slot });
   };
 
   const meals = getMealsForDay(selectedDay);
@@ -145,6 +199,24 @@ export default function MealPlanSuggestion() {
     if (!day) return '';
     const date = day.dayDate ? new Date(day.dayDate).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' }) : '';
     return `Ngày ${day.dayIndex}${date ? ' · ' + date : ''}`;
+  };
+  const renderRightHeaderActions = () => {
+    return (
+      <button 
+        className="mps-btn-create"
+        onClick={() => {
+          if (!hasPro) {
+            setShowPaywall(true);
+            return;
+          }
+          setShowPopup(true);
+        }}
+        style={{ padding: '8px 16px', fontSize: '14px', height: '40px' }}
+      >
+        {!hasPro && <FiLock size={16} style={{ marginRight: '6px' }} />}
+        <FiPlus size={16} /> Tạo gợi ý
+      </button>
+    );
   };
 
   return (
@@ -222,10 +294,7 @@ export default function MealPlanSuggestion() {
               </div>
             )}
 
-            <button className="mps-btn-create" onClick={() => setShowPopup(true)}>
-              <FiPlus size={17} />
-              Tạo gợi ý
-            </button>
+            {renderRightHeaderActions()}
           </div>
         </div>
 
@@ -240,7 +309,14 @@ export default function MealPlanSuggestion() {
             <div className="mps-empty-icon">🍽️</div>
             <h2>Chưa có thực đơn nào</h2>
             <p>Nhấn <strong>Tạo gợi ý</strong> để tạo thực đơn dinh dưỡng đầu tiên của bạn.</p>
-            <button className="mps-btn-create mps-btn-lg" onClick={() => setShowPopup(true)}>
+            <button className="mps-btn-create mps-btn-lg" onClick={() => {
+              if (!hasPro) {
+                setShowPaywall(true);
+                return;
+              }
+              setShowPopup(true);
+            }}>
+              {!hasPro && <FiLock size={18} style={{ marginRight: '8px' }} />}
               <FiPlus size={18} /> Tạo thực đơn ngay
             </button>
           </div>
@@ -293,8 +369,62 @@ export default function MealPlanSuggestion() {
               {meals.map((meal, i) => {
                 const slotKey = meal.slotKey;
                 const colors  = SLOT_COLORS[slotKey] || SLOT_COLORS.lunch;
-                const imgSrc  = meal._resolvedImg || resolveRecipeImageUrl(meal.recipeName || meal.recipe_name || '');
                 const isToday = toDateKey(selectedDay?.dayDate) === getTodayDateKey();
+                const isQuickGenerating = quickGenerating === slotKey;
+
+                if (meal.isMissing) {
+                  return (
+                    <div
+                      key={slotKey}
+                      className="mps-meal-card"
+                      style={{
+                        '--card-bg':     '#f8fafc',
+                        '--card-border': '#e2e8f0',
+                        '--badge-bg':    '#f1f5f9',
+                        '--badge-color': '#64748b',
+                        animation: `slideInRight 0.35s ease ${i * 0.08}s both`,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '16px',
+                        minHeight: '300px',
+                        borderStyle: 'dashed'
+                      }}
+                    >
+                      <div style={{ fontSize: '48px', opacity: 0.4 }}>{SLOT_ICONS[slotKey]}</div>
+                      <div style={{ color: '#64748b', fontSize: '15px', fontWeight: 500 }}>Chưa có {SLOT_LABELS[slotKey].toLowerCase()}</div>
+                      <button
+                        onClick={() => handleQuickGenerate(slotKey, selectedDay.dayDate)}
+                        disabled={isQuickGenerating}
+                        style={{
+                          marginTop: '8px',
+                          padding: '10px 20px',
+                          borderRadius: '12px',
+                          border: 'none',
+                          background: 'white',
+                          color: '#22c55e',
+                          fontSize: '14px',
+                          fontWeight: 600,
+                          cursor: isQuickGenerating ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0',
+                          transition: 'all 0.2s',
+                          opacity: isQuickGenerating ? 0.7 : 1
+                        }}
+                        onMouseOver={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05), 0 0 0 1px #cbd5e1' }}
+                        onMouseOut={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0' }}
+                      >
+                        {isQuickGenerating ? <div className="mps-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <FiPlus />}
+                        {isQuickGenerating ? 'Đang tạo...' : 'Tạo gợi ý nhanh'}
+                      </button>
+                    </div>
+                  );
+                }
+
+                const imgSrc  = meal._resolvedImg || resolveRecipeImageUrl(meal.recipeName || meal.recipe_name || '');
 
                 return (
                   <div
@@ -352,9 +482,9 @@ export default function MealPlanSuggestion() {
                       )}
                     </div>
 
-                    {isToday && (
-                      <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 12, width: '100%' }}>
-                        {meal.isLogged ? (
+                    <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 12, width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {isToday && (
+                        meal.isLogged ? (
                           <button
                             disabled
                             style={{
@@ -403,9 +533,38 @@ export default function MealPlanSuggestion() {
                           >
                             🍽️ Xác nhận đã ăn
                           </button>
-                        )}
-                      </div>
-                    )}
+                        )
+                      )}
+
+                      {!meal.isLogged && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMealToDelete(meal);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: 12,
+                            border: '1px solid #fee2e2',
+                            background: '#fef2f2',
+                            color: '#ef4444',
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseOver={btn => btn.currentTarget.style.background = '#fee2e2'}
+                          onMouseOut={btn => btn.currentTarget.style.background = '#fef2f2'}
+                        >
+                          ❌ Huỷ bữa ăn này
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -415,6 +574,45 @@ export default function MealPlanSuggestion() {
       </div>
 
       {showPopup && <SuggestNextPlanPopup onClose={handlePopupClose} />}
+
+      {/* Delete Confirmation Modal */}
+      {mealToDelete && (
+        <div className="popup-overlay" onClick={() => setMealToDelete(null)}>
+          <div className="popup-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', padding: '24px' }}>
+            <div className="popup-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+              <h2 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
+                <FiAlertTriangle /> Xác nhận huỷ món
+              </h2>
+            </div>
+            <div className="popup-body" style={{ padding: '16px 0 24px 0' }}>
+              <p style={{ fontSize: '15px', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                Bạn có chắc chắn muốn huỷ <strong>{SLOT_LABELS[mealToDelete.slotKey]}</strong> ({mealToDelete.recipeName}) này không? Hành động này không thể hoàn tác.
+              </p>
+            </div>
+            <div className="popup-actions" style={{ marginTop: 0 }}>
+              <button 
+                className="popup-btn-cancel" 
+                onClick={() => setMealToDelete(null)}
+              >
+                Trở lại
+              </button>
+              <button 
+                className="popup-btn-primary" 
+                style={{ background: '#ef4444', color: 'white' }}
+                onClick={handleRemoveMeal}
+              >
+                Xác nhận huỷ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <UpgradePaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        featureName="Chức năng gợi ý thực đơn"
+      />
     </div>
   );
 }

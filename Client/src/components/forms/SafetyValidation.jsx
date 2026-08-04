@@ -25,22 +25,16 @@ export default function SafetyValidation({ profile, onAccept, onContinue }) {
           </h4>
           <p style={{ margin: '0 0 12px 0', fontSize: 14, color: isAggressive ? '#9a3412' : '#15803d', lineHeight: 1.5 }}>
             {isAggressive 
-              ? `Để đảm bảo sức khỏe và không bị mệt mỏi, hệ thống khuyến nghị bạn giảm cân với tốc độ an toàn hơn. Lịch trình mới dự kiến là khoảng ${assessment.estimatedWeeks} tuần.`
+              ? 'Để đảm bảo sức khỏe và không bị mệt mỏi, hệ thống khuyến nghị bạn giảm cân với tốc độ an toàn hơn.'
               : 'Mục tiêu của bạn nằm trong giới hạn an toàn, có thể đạt được một cách khỏe mạnh mà không ảnh hưởng tới sức khỏe.'}
           </p>
           
-          <div style={{ background: 'white', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 14, color: '#64748b' }}>Năng lượng mục tiêu (an toàn):</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>{assessment.calories} kcal/ngày</span>
-            </div>
-            {assessment.estimatedWeeks && (
+            <div style={{ background: 'white', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 14, color: '#64748b' }}>Thời gian dự kiến:</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>{assessment.estimatedWeeks} tuần</span>
+                <span style={{ fontSize: 14, color: '#64748b' }}>Năng lượng mục tiêu (an toàn):</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>{assessment.calories} kcal/ngày</span>
               </div>
-            )}
-          </div>
+            </div>
 
           <button
             type="button"
