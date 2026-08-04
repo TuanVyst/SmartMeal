@@ -104,5 +104,41 @@ namespace Repository.Implements
             await _context.MealPlanEntries.AddAsync(entry);
             // Don't call SaveChangesAsync here because MealPlanningService handles it
         }
+
+        public async Task<List<MealPlanDay>> GetDaysByDateRange(Guid accountId, DateTime startDate, DateTime endDate)
+        {
+            var startOnly = startDate.Date;
+            var endOnly = endDate.Date;
+            return await _context.MealPlanDays
+                .Include(d => d.MealPlan)
+                .Include(d => d.Entries)
+                    .ThenInclude(e => e.Recipe)
+                        .ThenInclude(r => r.RecipeIngredients)
+                            .ThenInclude(ri => ri.Ingredient)
+                .Include(d => d.Entries)
+                    .ThenInclude(e => e.Recipe)
+                        .ThenInclude(r => r.RecipeLabels)
+                            .ThenInclude(rl => rl.RecipeTag)
+                .Where(d => !d.IsDeleted
+                         && !d.MealPlan.IsDeleted
+                         && d.MealPlan.Status == "active"
+                         && d.MealPlan.Account_id == accountId
+                         && d.DayDate.Date >= startOnly
+                         && d.DayDate.Date <= endOnly)
+                .OrderBy(d => d.DayDate)
+                .ToListAsync();
+        }
+
+        public async Task SaveEntryDirectly(MealPlanEntry entry)
+        {
+            await _context.MealPlanEntries.AddAsync(entry);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddDay(MealPlanDay day)
+        {
+            await _context.MealPlanDays.AddAsync(day);
+            await _context.SaveChangesAsync();
+        }
     }
 }

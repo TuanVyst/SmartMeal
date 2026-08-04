@@ -16,5 +16,8 @@ namespace Repository.Interfaces
         Task<MealPlanEntry> GetEntryById(Guid entryId);
         Task RemoveEntry(MealPlanEntry entry);
         Task AddEntry(MealPlanEntry entry);
+        Task<List<MealPlanDay>> GetDaysByDateRange(Guid accountId, DateTime startDate, DateTime endDate);
+        Task SaveEntryDirectly(MealPlanEntry entry);
+        Task AddDay(MealPlanDay day);
     }
 }

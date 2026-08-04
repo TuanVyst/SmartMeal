@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import SuggestNextPlanPopup from '../../components/forms/SuggestNextPlanPopup';
-import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronDown, FiClock, FiZap, FiLock } from 'react-icons/fi';
+import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronLeft, FiChevronRight, FiClock, FiZap, FiLock } from 'react-icons/fi';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 import { subscriptionService } from '../../services/subscriptionService';
@@ -13,6 +13,7 @@ import './MealPlanSuggestion.css';
 const SLOT_LABELS = { breakfast: 'Bữa Sáng', lunch: 'Bữa Trưa', dinner: 'Bữa Tối' };
 const SLOT_ICONS  = { breakfast: '🌅', lunch: '☀️', dinner: '🌙' };
 const SLOT_ORDER  = ['breakfast', 'lunch', 'dinner'];
+const WEEKDAY_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
 
 const SLOT_COLORS = {
   breakfast: { bg: '#fef9ec', border: '#fde68a', badge: '#f59e0b', text: '#92400e', soft: '#fef3c7' },
@@ -24,17 +25,14 @@ export default function MealPlanSuggestion() {
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
 
-  // allPlans: list of MealPlanResponseDto
-  const [allPlans, setAllPlans]       = useState([]);
+  const [weekPlan, setWeekPlan] = useState(null);
+  const [currentWeekDate, setCurrentWeekDate] = useState(() => new Date());
   const [loadingPlans, setLoadingPlans] = useState(true);
-  const [showPopup, setShowPopup]     = useState(false);
-  const [alertMsg, setAlertMsg]       = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [alertMsg, setAlertMsg] = useState(null);
   const [mealToDelete, setMealToDelete] = useState(null);
 
-  // For day selector: which plan and which day index is selected
-  const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
-  const [planDropdownOpen, setPlanDropdownOpen] = useState(false);
 
   // Pro features
   const [hasPro, setHasPro] = useState(false);
@@ -51,28 +49,44 @@ export default function MealPlanSuggestion() {
     }
   }, []);
 
-  const fetchAllPlans = useCallback(async () => {
+  const isTodayDate = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    return d.getDate() === today.getDate() &&
+           d.getMonth() === today.getMonth() &&
+           d.getFullYear() === today.getFullYear();
+  };
+
+  const fetchWeekPlan = useCallback(async (dateToFetch, targetDateStr = null) => {
     if (!accountId) return;
     setLoadingPlans(true);
     try {
-      const res = await api.get('/MealPlan/all');
-      const plans = res.data.data || [];
-      setAllPlans(plans);
-      if (plans.length > 0) {
-        setSelectedPlanId(plans[0].mealPlan_id);
-        setSelectedDayIdx(0);
+      const dateStr = new Date(dateToFetch || new Date()).toISOString().split('T')[0];
+      const res = await api.get(`/MealPlan/week?date=${dateStr}`);
+      const plan = res.data.data;
+      setWeekPlan(plan);
+
+      if (plan?.days?.length === 7) {
+        if (targetDateStr) {
+          const idx = plan.days.findIndex(d => d.dayDate && d.dayDate.split('T')[0] === targetDateStr);
+          setSelectedDayIdx(idx >= 0 ? idx : 0);
+        } else {
+          const todayIdx = plan.days.findIndex(d => isTodayDate(d.dayDate));
+          setSelectedDayIdx(todayIdx >= 0 ? todayIdx : 0);
+        }
       }
     } catch (err) {
-      console.error('Lỗi tải lịch sử:', err);
+      console.error('Lỗi tải thực đơn tuần:', err);
     } finally {
       setLoadingPlans(false);
     }
   }, [accountId]);
 
   useEffect(() => {
-    fetchAllPlans();
+    fetchWeekPlan(new Date());
     fetchHasPro();
-  }, [fetchAllPlans, fetchHasPro]);
+  }, [fetchWeekPlan, fetchHasPro]);
 
   const handlePopupClose = (msg) => {
     setShowPopup(false);
@@ -80,7 +94,35 @@ export default function MealPlanSuggestion() {
       setAlertMsg(msg);
       setTimeout(() => setAlertMsg(null), 3000);
     }
-    fetchAllPlans();
+    fetchWeekPlan(currentWeekDate);
+  };
+
+  const handlePrevWeek = () => {
+    const prev = new Date(currentWeekDate);
+    prev.setDate(prev.getDate() - 7);
+    setCurrentWeekDate(prev);
+    fetchWeekPlan(prev);
+  };
+
+  const handleNextWeek = () => {
+    const next = new Date(currentWeekDate);
+    next.setDate(next.getDate() + 7);
+    setCurrentWeekDate(next);
+    fetchWeekPlan(next);
+  };
+
+  const handleGoToday = () => {
+    const now = new Date();
+    setCurrentWeekDate(now);
+    fetchWeekPlan(now);
+  };
+
+  const handleDateChange = (e) => {
+    if (!e.target.value) return;
+    const picked = new Date(e.target.value);
+    const dateStr = picked.toISOString().split('T')[0];
+    setCurrentWeekDate(picked);
+    fetchWeekPlan(picked, dateStr);
   };
 
   const handleLogMeal = async (entry, date) => {
@@ -100,23 +142,22 @@ export default function MealPlanSuggestion() {
       await api.post('/nutrition-diary', payload);
       toast.success('Đã lưu vào nhật ký ăn uống!');
 
-      setAllPlans((prevPlans) => {
-        return prevPlans.map((plan) => {
-          return {
-            ...plan,
-            days: plan.days.map((day) => {
-              return {
-                ...day,
-                entries: day.entries.map((e) => {
-                  if (e.entry_id === entry.entry_id) {
-                    return { ...e, isLogged: true };
-                  }
-                  return e;
-                }),
-              };
-            }),
-          };
-        });
+      setWeekPlan((prevPlan) => {
+        if (!prevPlan) return prevPlan;
+        return {
+          ...prevPlan,
+          days: prevPlan.days.map((day) => {
+            return {
+              ...day,
+              entries: day.entries.map((e) => {
+                if (e.entry_id === entry.entry_id) {
+                  return { ...e, isLogged: true };
+                }
+                return e;
+              }),
+            };
+          }),
+        };
       });
     } catch (error) {
       console.error('Error logging meal:', error);
@@ -127,9 +168,10 @@ export default function MealPlanSuggestion() {
   const handleRemoveMeal = async () => {
     if (!mealToDelete) return;
     try {
-      await api.delete(`/MealPlan/${selectedPlanId}/entry/${mealToDelete.entry_id}`);
+      const planId = weekPlan?.mealPlan_id || '00000000-0000-0000-0000-000000000000';
+      await api.delete(`/MealPlan/${planId}/entry/${mealToDelete.entry_id}`);
       toast.success('Đã huỷ món thành công!');
-      fetchAllPlans();
+      fetchWeekPlan(currentWeekDate);
       setMealToDelete(null);
     } catch (err) {
       console.error('Error removing meal:', err);
@@ -147,9 +189,13 @@ export default function MealPlanSuggestion() {
     try {
       setQuickGenerating(slotKey);
       const dateParam = new Date(date).toISOString().split('T')[0];
-      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
       toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
-      fetchAllPlans();
+      if (res.data && res.data.data) {
+        setWeekPlan(res.data.data);
+      } else {
+        fetchWeekPlan(currentWeekDate);
+      }
     } catch (err) {
       console.error('Error quick generate:', err);
       toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
@@ -158,13 +204,32 @@ export default function MealPlanSuggestion() {
     }
   };
 
+  const handleQuickGenerateAll = async (date) => {
+    if (!hasPro) {
+      setShowPaywall(true);
+      return;
+    }
+    try {
+      setQuickGenerating('all');
+      const dateParam = new Date(date).toISOString().split('T')[0];
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}`);
+      toast.success('Đã tạo gợi ý các bữa cho ngày này!');
+      if (res.data && res.data.data) {
+        setWeekPlan(res.data.data);
+      } else {
+        fetchWeekPlan(currentWeekDate);
+      }
+    } catch (err) {
+      console.error('Error quick generate all:', err);
+      toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
+    } finally {
+      setQuickGenerating(null);
+    }
+  };
 
-  // Derived: currently selected plan & day
-  const selectedPlan = allPlans.find(p => p.mealPlan_id === selectedPlanId) || allPlans[0] || null;
-  const days = selectedPlan?.days || [];
+  const days = weekPlan?.days || [];
   const selectedDay = days[selectedDayIdx] || null;
 
-  // Build ordered meal slots for selected day
   const getMealsForDay = (day) => {
     if (!day?.entries) return [];
     const slotMap = {};
@@ -181,26 +246,18 @@ export default function MealPlanSuggestion() {
 
   const meals = getMealsForDay(selectedDay);
 
-  const formatPlanLabel = (plan, index) => {
-    if (!plan) return 'Chọn thực đơn';
-    const start = plan.startDate ? new Date(plan.startDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : '';
-    const end   = plan.endDate   ? new Date(plan.endDate).toLocaleDateString('vi-VN',   { day: '2-digit', month: '2-digit' }) : '';
-    const totalDays = plan.totalDays || (plan.days?.length) || '?';
-    const genAt = plan.generatedAt
-      ? new Date(plan.generatedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
-      : '';
-    const prefix = index !== undefined ? `#${index + 1} · ` : '';
-    const dateRange = (start && end) ? `${start} – ${end}` : '';
-    const suffix = genAt ? ` (tạo ${genAt})` : ` (${totalDays} ngày)`;
-    return `${prefix}${dateRange}${suffix}`;
+  const formatDateShort = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
   };
 
-  const formatDayLabel = (day) => {
-    if (!day) return '';
-    const date = day.dayDate ? new Date(day.dayDate).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' }) : '';
-    return `Ngày ${day.dayIndex}${date ? ' · ' + date : ''}`;
+  const formatDateInput = (dateObj) => {
+    if (!dateObj) return '';
+    return new Date(dateObj).toISOString().split('T')[0];
   };
-  const renderRightHeaderActions = () => {
+
+  const renderRightHeaderActions = () => {
     return (
       <button 
         className="mps-btn-create"
@@ -214,7 +271,7 @@ export default function MealPlanSuggestion() {
         style={{ padding: '8px 16px', fontSize: '14px', height: '40px' }}
       >
         {!hasPro && <FiLock size={16} style={{ marginRight: '6px' }} />}
-        <FiPlus size={16} /> Tạo gợi ý
+        <FiPlus size={16} /> Tạo thực đơn tuần mới
       </button>
     );
   };
@@ -230,15 +287,9 @@ export default function MealPlanSuggestion() {
           from { opacity: 0; transform: translateX(40px); }
           to   { opacity: 1; transform: translateX(0); }
         }
-        @keyframes pulse-ring {
-          0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.35); }
-          70%  { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
-          100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-        }
       `}</style>
 
       <div className="mps-container">
-
         {/* ── Alert banner ── */}
         {alertMsg && (
           <div className={`mps-alert mps-alert-${alertMsg.type}`}>
@@ -251,50 +302,37 @@ export default function MealPlanSuggestion() {
         <div className="mps-header">
           <div className="mps-header-left">
             <h1 className="mps-title">Gợi ý món ăn</h1>
-            <p className="mps-subtitle">Thực đơn cá nhân hoá theo dinh dưỡng của bạn</p>
+            <p className="mps-subtitle">Lịch ăn uống cá nhân hoá theo tuần (Thứ 2 – Chủ Nhật)</p>
           </div>
 
           <div className="mps-header-right">
-            {/* Plan selector dropdown */}
-            {allPlans.length > 1 && (
-              <div
-                className="mps-dropdown-wrap"
-                onBlur={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget)) {
-                    setPlanDropdownOpen(false);
-                  }
-                }}
-                tabIndex={-1}
-              >
-                <button
-                  className="mps-dropdown-btn"
-                  onClick={() => setPlanDropdownOpen(v => !v)}
-                >
-                  <FiCalendar size={15} />
-                  <span>{formatPlanLabel(selectedPlan, allPlans.findIndex(p => p.mealPlan_id === selectedPlanId))}</span>
-                  <FiChevronDown size={14} className={planDropdownOpen ? 'rot180' : ''} />
-                </button>
-                {planDropdownOpen && (
-                  <div className="mps-dropdown-menu">
-                    {allPlans.map((p, i) => (
-                      <button
-                        key={p.mealPlan_id}
-                        className={`mps-dropdown-item ${p.mealPlan_id === selectedPlanId ? 'active' : ''}`}
-                        onClick={() => {
-                          setSelectedPlanId(p.mealPlan_id);
-                          setSelectedDayIdx(0);
-                          setPlanDropdownOpen(false);
-                        }}
-                      >
-                        {formatPlanLabel(p, i)}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
             {renderRightHeaderActions()}
+          </div>
+        </div>
+
+        {/* ── Week Navigator ── */}
+        <div className="mps-week-nav">
+          <button className="mps-week-btn" onClick={handlePrevWeek} title="Xem tuần trước">
+            <FiChevronLeft size={16} /> Tuần trước
+          </button>
+
+          <div className="mps-week-title">
+            <FiCalendar size={18} />
+            <span>Tuần từ {formatDateShort(weekPlan?.startDate)} – {formatDateShort(weekPlan?.endDate)}</span>
+            <button className="mps-today-btn" onClick={handleGoToday}>Hôm nay</button>
+          </div>
+
+          <div className="mps-week-actions">
+            <input
+              type="date"
+              className="mps-date-picker"
+              value={formatDateInput(currentWeekDate)}
+              onChange={handleDateChange}
+              title="Chọn ngày để xem tuần chứa ngày đó"
+            />
+            <button className="mps-week-btn" onClick={handleNextWeek} title="Xem tuần sau">
+              Tuần sau <FiChevronRight size={16} />
+            </button>
           </div>
         </div>
 
@@ -302,13 +340,13 @@ export default function MealPlanSuggestion() {
         {loadingPlans ? (
           <div className="mps-loading">
             <div className="mps-spinner" />
-            <p>Đang tải thực đơn...</p>
+            <p>Đang tải lịch ăn trong tuần...</p>
           </div>
-        ) : allPlans.length === 0 ? (
+        ) : !weekPlan || days.length === 0 ? (
           <div className="mps-empty">
-            <div className="mps-empty-icon">🍽️</div>
-            <h2>Chưa có thực đơn nào</h2>
-            <p>Nhấn <strong>Tạo gợi ý</strong> để tạo thực đơn dinh dưỡng đầu tiên của bạn.</p>
+            <div className="mps-empty-icon">📅</div>
+            <h2>Chưa có thực đơn cho tuần này</h2>
+            <p>Nhấn <strong>Tạo thực đơn tuần mới</strong> hoặc chọn một ngày bên dưới để bắt đầu gợi ý món ăn.</p>
             <button className="mps-btn-create mps-btn-lg" onClick={() => {
               if (!hasPro) {
                 setShowPaywall(true);
@@ -327,19 +365,23 @@ export default function MealPlanSuggestion() {
             <div className="mps-day-tabs">
               {days.map((day, i) => {
                 const isActive = i === selectedDayIdx;
-                const date = day.dayDate
-                  ? new Date(day.dayDate).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' })
-                  : '';
+                const isToday = isTodayDate(day.dayDate);
+                const dateShort = formatDateShort(day.dayDate);
+                const weekdayName = WEEKDAY_LABELS[i] || `Thứ ${i + 2}`;
+
                 return (
                   <button
                     key={day.day_id || i}
                     className={`mps-day-tab ${isActive ? 'active' : ''}`}
                     onClick={() => setSelectedDayIdx(i)}
                   >
-                    <span className="mps-day-num">Ngày {day.dayIndex}</span>
-                    {date && <span className="mps-day-date">{date}</span>}
-                    {isActive && (
+                    <span className="mps-day-num">{weekdayName}</span>
+                    {dateShort && <span className="mps-day-date">{dateShort}</span>}
+                    {isToday && <span className="mps-day-today-badge">Hôm nay</span>}
+                    {day.totalCalories > 0 ? (
                       <span className="mps-day-kcal">{Math.round(day.totalCalories)} kcal</span>
+                    ) : (
+                      <span className="mps-day-date" style={{ opacity: 0.7 }}>Trống</span>
                     )}
                   </button>
                 );
@@ -350,13 +392,25 @@ export default function MealPlanSuggestion() {
             {selectedDay && (
               <div className="mps-day-summary">
                 <div className="mps-day-summary-title">
-                  {formatDayLabel(selectedDay)}
+                  {WEEKDAY_LABELS[selectedDayIdx]} · {new Date(selectedDay.dayDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                 </div>
-                <div className="mps-day-summary-stats">
-                  <span><FiZap size={13}/> {Math.round(selectedDay.totalCalories)} kcal</span>
-                  {selectedDay.totalProtein > 0 && <span>🥩 {Math.round(selectedDay.totalProtein)}g đạm</span>}
-                  {selectedDay.totalCarbs   > 0 && <span>🍚 {Math.round(selectedDay.totalCarbs)}g tinh bột</span>}
-                  {selectedDay.totalFat     > 0 && <span>🫒 {Math.round(selectedDay.totalFat)}g chất béo</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                  <div className="mps-day-summary-stats">
+                    <span><FiZap size={13}/> {Math.round(selectedDay.totalCalories)} kcal</span>
+                    {selectedDay.totalProtein > 0 && <span>🥩 {Math.round(selectedDay.totalProtein)}g đạm</span>}
+                    {selectedDay.totalCarbs   > 0 && <span>🍚 {Math.round(selectedDay.totalCarbs)}g tinh bột</span>}
+                    {selectedDay.totalFat     > 0 && <span>🫒 {Math.round(selectedDay.totalFat)}g chất béo</span>}
+                  </div>
+                  {meals.some(m => m.isMissing) && (
+                    <button
+                      onClick={() => handleQuickGenerateAll(selectedDay.dayDate)}
+                      disabled={quickGenerating === 'all'}
+                      className="mps-btn-create"
+                      style={{ padding: '7px 14px', fontSize: '13px', height: '34px' }}
+                    >
+                      {quickGenerating === 'all' ? 'Đang tạo...' : '+ Gợi ý các bữa còn lại'}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -424,7 +478,7 @@ export default function MealPlanSuggestion() {
                   );
                 }
 
-                const imgSrc  = meal._resolvedImg || resolveRecipeImageUrl(meal.recipeName || meal.recipe_name || '');
+                const imgSrc = meal._resolvedImg || resolveRecipeImageUrl(meal.recipeName || meal.recipe_name || '');
 
                 return (
                   <div
