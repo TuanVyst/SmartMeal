@@ -1044,4 +1044,116 @@
   color: #334155;
 }
 
+/* ── Scenario Badges & Notice Cards ── */
+.badge-scenario {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.badge-upgrade {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #f59e0b;
+}
+
+.badge-renew {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #38bdf8;
+}
+
+.badge-new {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #4ade80;
+}
+
+.scenario-notice-card {
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.scenario-notice-card .notice-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.scenario-notice-card .notice-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.scenario-notice-card .notice-content p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.notice-upgrade {
+  background: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%);
+  border: 1px solid #fcd34d;
+}
+.notice-upgrade .notice-content h4 { color: #92400e; }
+.notice-upgrade .notice-content p { color: #b45309; }
+
+.notice-renew {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #7dd3fc;
+}
+.notice-renew .notice-content h4 { color: #075985; }
+.notice-renew .notice-content p { color: #0369a1; }
+
+.notice-new {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+}
+.notice-new .notice-content h4 { color: #166534; }
+.notice-new .notice-content p { color: #15803d; }
+
+.plan-card-subtext {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.btn-plan-lower {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border: 1px solid #e2e8f0 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.btn-plan-renew {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+.btn-plan-renew:hover {
+  background: #0369a1 !important;
+}
+
+.btn-plan-upgrade {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #ffffff !important;
+}
+
+.btn-plan-upgrade:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+}
+
+
 

@@ -703,6 +703,7 @@ public static class DbInitializer
                 Name = "Gói Cơ Bản (Free)",
                 Price = 0,
                 Duration = 0,
+                Tier = 0,
                 Description = "Gói miễn phí cơ bản để theo dõi dinh dưỡng hàng ngày.",
                 Features = "[\"ai_basic\"]",
                 IsDeleted = false
@@ -713,6 +714,7 @@ public static class DbInitializer
                 Name = "Gói Pro Tuần",
                 Price = 19000,
                 Duration = 7,
+                Tier = 1,
                 Description = "Trải nghiệm đầy đủ tính năng cao cấp trong 1 tuần.",
                 Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\"]",
                 IsDeleted = false
@@ -723,6 +725,7 @@ public static class DbInitializer
                 Name = "Gói Pro Tháng",
                 Price = 49000,
                 Duration = 30,
+                Tier = 2,
                 Description = "Lựa chọn phổ biến nhất để duy trì thói quen ăn uống lành mạnh.",
                 Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\"]",
                 IsDeleted = false
@@ -733,6 +736,7 @@ public static class DbInitializer
                 Name = "Gói Pro Năm",
                 Price = 499000,
                 Duration = 365,
+                Tier = 3,
                 Description = "Gói tiết kiệm nhất dành cho người cam kết dài hạn.",
                 Features = "[\"ai_advanced\", \"meal_plan\", \"calorie_tracking\", \"no_ads\", \"priority_support\", \"family_sharing\"]",
                 IsDeleted = false

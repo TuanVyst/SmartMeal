@@ -94,6 +94,22 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("week")]
+        public async Task<IActionResult> GetWeekPlan([FromQuery] DateTime? date = null)
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var targetDate = date ?? DateTime.UtcNow;
+                var plan = await _mealPlanningService.GetWeekPlanAsync(accountId, targetDate);
+                return Ok(new { data = plan });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("suggest-for-date")]
         public async Task<IActionResult> SuggestForDate([FromQuery] DateTime date, [FromQuery] string meals = null)
         {

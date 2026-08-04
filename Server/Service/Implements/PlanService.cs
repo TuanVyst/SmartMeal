@@ -44,6 +44,7 @@ namespace Service.Implements
                     Name = request.Name,
                     Price = request.Price,
                     Duration = request.Duration,
+                    Tier = request.Tier > 0 ? request.Tier : (request.Price == 0 ? 0 : (request.Duration >= 365 ? 3 : (request.Duration >= 30 ? 2 : 1))),
                     Description = request.Description,
                     Features = request.Features,
                     IsDeleted = false
@@ -71,6 +72,7 @@ namespace Service.Implements
                 existingItem.Name = request.Name;
                 existingItem.Price = request.Price;
                 existingItem.Duration = request.Duration;
+                if (request.Tier > 0) existingItem.Tier = request.Tier;
                 existingItem.Description = request.Description;
                 existingItem.Features = request.Features;
 
@@ -94,12 +96,17 @@ namespace Service.Implements
         private PlanResponseDto MapToDto(Plan entity)
         {
             if (entity == null) return null;
+            int effectiveTier = entity.Tier > 0 
+                ? entity.Tier 
+                : (entity.Price == 0 ? 0 : (entity.Duration >= 365 ? 3 : (entity.Duration >= 30 ? 2 : 1)));
+
             return new PlanResponseDto
             {
                 Plan_id = entity.Plan_id,
                 Name = entity.Name,
                 Price = entity.Price,
                 Duration = entity.Duration,
+                Tier = effectiveTier,
                 Description = entity.Description,
                 Features = entity.Features,
                 IsDeleted = entity.IsDeleted
