@@ -26,6 +26,11 @@ namespace BusinessObject.Entities
         /// </summary>
         public int Duration { get; set; }
 
+        /// <summary>
+        /// Tier level: 0 = Free, 1 = Weekly, 2 = Monthly, 3 = Yearly
+        /// </summary>
+        public int Tier { get; set; } = 1;
+
         [MaxLength(500)]
         public string Description { get; set; }
 

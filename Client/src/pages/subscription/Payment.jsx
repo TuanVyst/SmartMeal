@@ -162,6 +162,21 @@ export default function Payment() {
     }
   };
 
+  const activePlan = location.state?.activePlan;
+
+  const remainingDays = subscription?.endDate
+    ? Math.max(0, Math.ceil((new Date(subscription.endDate) - new Date()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  let scenario = location.state?.scenario || 'new';
+  if (!location.state?.scenario && isPremium && subscription) {
+    if (currentPlan?.plan_id === subscription.plan_id) {
+      scenario = 'renew';
+    } else {
+      scenario = 'upgrade';
+    }
+  }
+
   return (
     <div className="payment-page-container">
       <button onClick={() => navigate('/subscription')} className="btn-back-plans">
@@ -170,7 +185,23 @@ export default function Payment() {
 
       <div className="payment-wrapper">
         <div className="payment-left-card">
-          <h2 className="payment-title">Thanh Toán Đăng Ký</h2>
+          {scenario === 'upgrade' ? (
+            <>
+              <span className="badge-scenario badge-upgrade">🚀 Nâng cấp gói dịch vụ</span>
+              <h2 className="payment-title">Nâng Cấp Gói Service</h2>
+            </>
+          ) : scenario === 'renew' ? (
+            <>
+              <span className="badge-scenario badge-renew">🔄 Gia hạn gói dịch vụ</span>
+              <h2 className="payment-title">Gia Hạn Gói Service</h2>
+            </>
+          ) : (
+            <>
+              <span className="badge-scenario badge-new">✨ Đăng ký mới</span>
+              <h2 className="payment-title">Thanh Toán Đăng Ký</h2>
+            </>
+          )}
+
           <div className="selected-plan-summary">
             <div>
               <h3>Gói Premium: <strong>{currentPlan.name}</strong></h3>
@@ -181,25 +212,79 @@ export default function Payment() {
             </div>
           </div>
 
+          {scenario === 'upgrade' && (
+            <div className="scenario-notice-card notice-upgrade">
+              <div className="notice-icon">🚀</div>
+              <div className="notice-content">
+                <h4>Đặc quyền Nâng Cấp Tự Động</h4>
+                <p>
+                  Bạn đang nâng cấp từ gói <strong>{activePlan?.name || 'hiện tại'}</strong> sang <strong>{currentPlan.name}</strong>.
+                  {remainingDays > 0 ? (
+                    <> Toàn bộ <strong>{remainingDays} ngày</strong> còn lại của gói cũ sẽ được <strong>tự động cộng dồn</strong> vào hạn dùng của gói mới ngay sau khi thanh toán thành công!</>
+                  ) : (
+                    <> Gói mới sẽ có hiệu lực ngay sau khi thanh toán thành công.</>
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {scenario === 'renew' && (
+            <div className="scenario-notice-card notice-renew">
+              <div className="notice-icon">🔄</div>
+              <div className="notice-content">
+                <h4>Gia Hạn Nối Tiếp Thời Gian</h4>
+                <p>
+                  Bạn đang gia hạn gói <strong>{currentPlan.name}</strong>.
+                  Thời hạn sử dụng sẽ được <strong>nối tiếp thêm {currentPlan.duration} ngày</strong> vào thời gian còn lại của gói hiện tại.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {scenario === 'new' && (
+            <div className="scenario-notice-card notice-new">
+              <div className="notice-icon">💡</div>
+              <div className="notice-content">
+                <h4>Trải Nghiệm Premium Trọn Vẹn</h4>
+                <p>
+                  Đăng ký gói <strong>{currentPlan.name}</strong> để mở khóa gợi ý bữa ăn AI cá nhân hóa và phân tích dinh dưỡng chuyên sâu.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="instructions-card">
-            <h3>Hướng dẫn thanh toán:</h3>
+            <h3>
+              {scenario === 'upgrade'
+                ? 'Hướng dẫn nâng cấp gói:'
+                : scenario === 'renew'
+                ? 'Hướng dẫn gia hạn gói:'
+                : 'Hướng dẫn thanh toán:'}
+            </h3>
             <div className="detail-rows">
               <div className="detail-item">
                 <span className="item-label">Bước 1:</span>
                 <div className="item-value-row">
-                  <span className="item-value">Mở app ngân hàng hoặc MoMo</span>
+                  <span className="item-value">Mở app ngân hàng hoặc ví MoMo</span>
                 </div>
               </div>
               <div className="detail-item">
                 <span className="item-label">Bước 2:</span>
                 <div className="item-value-row">
-                  <span className="item-value">Quét mã QR bên phải</span>
+                  <span className="item-value">Quét mã QR thanh toán bên phải</span>
                 </div>
               </div>
               <div className="detail-item">
                 <span className="item-label">Bước 3:</span>
                 <div className="item-value-row">
-                  <span className="item-value">Xác nhận thanh toán trên app</span>
+                  <span className="item-value">
+                    {scenario === 'upgrade'
+                      ? `Xác nhận chuyển khoản - Gói mới & ${remainingDays > 0 ? remainingDays + ' ngày cộng dồn' : 'quyền lợi'} sẽ tự động kích hoạt`
+                      : scenario === 'renew'
+                      ? `Xác nhận chuyển khoản - Hạn sử dụng sẽ nối tiếp thêm ${currentPlan.duration} ngày`
+                      : 'Xác nhận thanh toán thành công trên ứng dụng'}
+                  </span>
                 </div>
               </div>
               <div className="detail-item">

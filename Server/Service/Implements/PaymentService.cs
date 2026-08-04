@@ -128,31 +128,8 @@ namespace Service.Implements
                     return;
                 }
 
-                if (subscription.Status == "active")
-                {
-                    _logger.LogInformation("Subscription {SubId} already active", subscription.Sub_id);
-                    return;
-                }
-
-                var plan = await _planRepo.GetPlanById(subscription.Plan_id);
-                if (plan == null)
-                {
-                    _logger.LogWarning("Plan not found for subscription {SubId}", subscription.Sub_id);
-                    return;
-                }
-
-                var startDate = DateTime.UtcNow;
-                DateTime? endDate = null;
-                if (plan.Duration > 0)
-                    endDate = startDate.AddDays(plan.Duration);
-
-                subscription.Status = "active";
-                subscription.StartDate = startDate;
-                subscription.EndDate = endDate;
-
-                await _subscriptionRepo.UpdateSubscription(subscription);
-
-                _logger.LogInformation("Subscription {SubId} activated via PayOS webhook", subscription.Sub_id);
+                await ActivateSubscriptionAsync(subscription);
+                _logger.LogInformation("Subscription {SubId} processed via PayOS webhook", subscription.Sub_id);
             }
             catch (Exception ex)
             {
@@ -192,26 +169,8 @@ namespace Service.Implements
                     return true; // Already paid on PayOS side, but we don't have it (maybe deleted)
                 }
 
-                if (subscription.Status == "active")
-                {
-                    return true;
-                }
-
-                var plan = await _planRepo.GetPlanById(subscription.Plan_id);
-                if (plan == null) return true;
-
-                var startDate = DateTime.UtcNow;
-                DateTime? endDate = null;
-                if (plan.Duration > 0)
-                    endDate = startDate.AddDays(plan.Duration);
-
-                subscription.Status = "active";
-                subscription.StartDate = startDate;
-                subscription.EndDate = endDate;
-
-                await _subscriptionRepo.UpdateSubscription(subscription);
-
-                _logger.LogInformation("Subscription {SubId} activated via polling CheckPaymentStatusAsync", subscription.Sub_id);
+                await ActivateSubscriptionAsync(subscription);
+                _logger.LogInformation("Subscription {SubId} processed via polling CheckPaymentStatusAsync", subscription.Sub_id);
                 return true;
             }
             catch (Exception ex)
@@ -219,6 +178,47 @@ namespace Service.Implements
                 _logger.LogError(ex, "Failed to check payment status for orderCode: {OrderCode}", orderCode);
                 return false;
             }
+        }
+
+        private async Task ActivateSubscriptionAsync(Subscription subscription)
+        {
+            if (subscription.Status == "active") return;
+
+            var plan = await _planRepo.GetPlanById(subscription.Plan_id);
+            if (plan == null) return;
+
+            var now = DateTime.UtcNow;
+            var startDate = now;
+            int rolloverDays = 0;
+
+            var userSubs = await _subscriptionRepo.GetSubscriptionsByAccountId(subscription.Account_id);
+            var activeSub = userSubs.FirstOrDefault(s => s.Status == "active" && s.Sub_id != subscription.Sub_id && s.EndDate.HasValue && s.EndDate.Value > now);
+
+            if (activeSub != null)
+            {
+                double remaining = (activeSub.EndDate.Value - now).TotalDays;
+                if (remaining > 0)
+                {
+                    rolloverDays = (int)Math.Ceiling(remaining);
+                }
+                activeSub.Status = "superseded";
+                await _subscriptionRepo.UpdateSubscription(activeSub);
+                _logger.LogInformation("Superseded existing subscription {OldSubId} for account {AccountId}", activeSub.Sub_id, subscription.Account_id);
+            }
+
+            DateTime? endDate = null;
+            if (plan.Duration > 0)
+            {
+                endDate = startDate.AddDays(plan.Duration + rolloverDays);
+            }
+
+            subscription.Status = "active";
+            subscription.StartDate = startDate;
+            subscription.EndDate = endDate;
+
+            await _subscriptionRepo.UpdateSubscription(subscription);
+            _logger.LogInformation("Subscription {SubId} activated for account {AccountId}. Duration={Duration} days, Rollover={RolloverDays} days, EndDate={EndDate}",
+                subscription.Sub_id, subscription.Account_id, plan.Duration, rolloverDays, endDate);
         }
 
         /// <summary>

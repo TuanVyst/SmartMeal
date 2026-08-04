@@ -38,11 +38,10 @@ export default function SubscriptionPlans() {
     fetchPlans();
   }, []);
 
-  const handleSelectPlan = (plan) => {
-    if (plan.price === 0) {
-      // Free plan selected, usually do nothing or show info
-      return;
-    }
+  const activePlan = plans.find((p) => p.plan_id === subscription?.plan_id);
+
+  const handleSelectPlan = (plan, scenarioType = 'new') => {
+    if (plan.price === 0) return;
 
     if (pendingPayment && pendingPayment.plan?.plan_id !== plan.plan_id) {
       const confirmChange = window.confirm(
@@ -53,7 +52,13 @@ export default function SubscriptionPlans() {
       setPendingPayment(null);
     }
 
-    navigate('/subscription/payment', { state: { plan } });
+    navigate('/subscription/payment', {
+      state: {
+        plan,
+        scenario: scenarioType,
+        activePlan,
+      },
+    });
   };
 
   const handleCancelPending = () => {
@@ -98,6 +103,17 @@ export default function SubscriptionPlans() {
     );
   }
 
+  const getEffectiveTier = (p) => {
+    if (!p) return 0;
+    if (p.tier !== undefined && p.tier !== null && p.tier > 0) return p.tier;
+    if (p.price === 0) return 0;
+    if (p.duration >= 365) return 3;
+    if (p.duration >= 30) return 2;
+    return 1;
+  };
+
+  const activeTier = getEffectiveTier(activePlan);
+
   return (
     <div className="plans-container">
       <div className="plans-header">
@@ -138,7 +154,7 @@ export default function SubscriptionPlans() {
         <div className="active-sub-banner">
           <div className="sub-banner-icon"><FiCheckCircle size={24} /></div>
           <div className="sub-banner-text">
-            <h3>Bạn đang sử dụng gói Premium: <strong>{plans.find(p => p.plan_id === subscription.plan_id)?.name || 'Pro'}</strong></h3>
+            <h3>Bạn đang sử dụng gói Premium: <strong>{activePlan?.name || 'Pro'}</strong></h3>
             <p>
               Hạn dùng đến hết ngày:{' '}
               <strong>
@@ -162,6 +178,10 @@ export default function SubscriptionPlans() {
           const isCurrent = subscription && subscription.plan_id === plan.plan_id;
           const isFree = plan.price === 0;
           const features = getFeaturesList(plan.features);
+
+          const planTier = getEffectiveTier(plan);
+          const isLowerTier = isPremium && subscription && !isCurrent && (planTier < activeTier || plan.price < (activePlan?.price || 0));
+          const isHigherTier = isPremium && subscription && !isCurrent && (planTier > activeTier || plan.price > (activePlan?.price || 0));
 
           return (
             <div
@@ -205,20 +225,41 @@ export default function SubscriptionPlans() {
               </div>
 
               <div className="plan-card-footer">
-                {isCurrent ? (
-                  <button className="btn-plan btn-active-sub" disabled>
-                    Gói hiện tại của bạn
-                  </button>
-                ) : isFree ? (
+                {isFree ? (
                   <button className="btn-plan btn-free-tier" disabled>
                     Mặc định tài khoản
                   </button>
+                ) : isCurrent ? (
+                  <>
+                    <button
+                      onClick={() => handleSelectPlan(plan, 'renew')}
+                      className="btn-plan btn-plan-renew"
+                    >
+                      🔄 Gia hạn gói ngay
+                    </button>
+                    <div className="plan-card-subtext">Cộng tiếp {plan.duration} ngày vào thời hạn hiện tại</div>
+                  </>
+                ) : isLowerTier ? (
+                  <>
+                    <button className="btn-plan btn-plan-lower" disabled title="Gói hiện tại của bạn có đặc quyền cao hơn">
+                      Gói hiện tại cao hơn
+                    </button>
+                    <div className="plan-card-subtext">Bạn đang sở hữu đặc quyền cao hơn gói này</div>
+                  </>
+                ) : isHigherTier ? (
+                  <>
+                    <button
+                      onClick={() => handleSelectPlan(plan, 'upgrade')}
+                      className="btn-plan btn-plan-upgrade"
+                    >
+                      🚀 Nâng cấp ngay
+                    </button>
+                    <div className="plan-card-subtext">Tự động cộng dồn số ngày chưa dùng của gói cũ</div>
+                  </>
                 ) : (
                   <button
-                    onClick={() => handleSelectPlan(plan)}
-                    className={`btn-plan ${
-                      plan.duration === 30 ? 'btn-featured' : 'btn-regular'
-                    }`}
+                    onClick={() => handleSelectPlan(plan, 'new')}
+                    className={`btn-plan ${plan.duration === 30 ? 'btn-featured' : 'btn-regular'}`}
                   >
                     Đăng ký ngay
                   </button>
@@ -249,4 +290,5 @@ export default function SubscriptionPlans() {
     </div>
   );
 }
+
 
