@@ -307,9 +307,15 @@ export default function Profile() {
                     const now = new Date();
                     const isExpired = sub.endDate && new Date(sub.endDate) < now;
                     let displayStatus = sub.status === 'pending' ? 'Đang tiến hành'
-                      : sub.status === 'active' ? (isExpired ? 'Hết hạn' : 'Hoàn thành')
-                      : sub.status === 'cancelled' ? 'Đã huỷ'
+                      : sub.status === 'active' ? (isExpired ? 'Hết hạn' : 'Đang hoạt động')
+                      : (sub.status === 'cancelled' || sub.status === 'canceled' || sub.status === 'suspend' || sub.status === 'suspended') ? 'Đã hủy'
                       : sub.status === 'expired' ? 'Hết hạn'
+                      : sub.status === 'superseded' ? 'Đã nâng cấp'
+                      : sub.status === 'failed' ? 'Thất bại'
+                      : sub.status;
+
+                    const statusClass = sub.status === 'active' ? (isExpired ? 'expired' : 'active')
+                      : (sub.status === 'cancelled' || sub.status === 'canceled' || sub.status === 'suspend' || sub.status === 'suspended') ? 'cancelled'
                       : sub.status;
 
                     return (
@@ -319,7 +325,7 @@ export default function Profile() {
                         <td>{sub.endDate ? new Date(sub.endDate).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Vĩnh viễn'}</td>
                         <td><code style={{background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.85rem'}}>{sub.paymentRef || 'N/A'}</code></td>
                         <td>
-                          <span className={`status-badge ${sub.status === 'active' ? (isExpired ? 'expired' : 'active') : sub.status}`}>
+                          <span className={`status-badge ${statusClass}`}>
                             {displayStatus}
                           </span>
                         </td>

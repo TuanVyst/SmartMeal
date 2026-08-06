@@ -40,7 +40,7 @@ export default function SubscriptionPlans() {
 
   const activePlan = plans.find((p) => p.plan_id === subscription?.plan_id);
 
-  const handleSelectPlan = (plan, scenarioType = 'new') => {
+  const handleSelectPlan = async (plan, scenarioType = 'new') => {
     if (plan.price === 0) return;
 
     if (pendingPayment && pendingPayment.plan?.plan_id !== plan.plan_id) {
@@ -48,6 +48,13 @@ export default function SubscriptionPlans() {
         `Bạn đang có mã QR thanh toán chưa hoàn tất cho gói "${pendingPayment.plan?.name}". Bạn có muốn hủy mã cũ để chọn gói "${plan.name}" không?`
       );
       if (!confirmChange) return;
+      if (pendingPayment.orderCode) {
+        try {
+          await subscriptionService.cancelPayment(pendingPayment.orderCode);
+        } catch (err) {
+          console.error('Error cancelling old payment:', err);
+        }
+      }
       pendingPaymentStorage.clearPendingPayment();
       setPendingPayment(null);
     }
@@ -61,7 +68,14 @@ export default function SubscriptionPlans() {
     });
   };
 
-  const handleCancelPending = () => {
+  const handleCancelPending = async () => {
+    if (pendingPayment?.orderCode) {
+      try {
+        await subscriptionService.cancelPayment(pendingPayment.orderCode);
+      } catch (err) {
+        console.error('Error cancelling pending payment:', err);
+      }
+    }
     pendingPaymentStorage.clearPendingPayment();
     setPendingPayment(null);
   };

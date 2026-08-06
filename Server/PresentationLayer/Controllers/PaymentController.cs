@@ -114,14 +114,34 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpPost("cancel/{orderCode}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CancelPayment(long orderCode)
+        {
+            try
+            {
+                var result = await _paymentService.CancelPaymentAsync(orderCode);
+                return Ok(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling payment for orderCode: {OrderCode}", orderCode);
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("return")]
         [AllowAnonymous]
-        public IActionResult Return([FromQuery] string id, [FromQuery] string orderCode, [FromQuery] string cancel)
+        public async Task<IActionResult> Return([FromQuery] string id, [FromQuery] string orderCode, [FromQuery] string cancel)
         {
             var frontendUrl = "https://smart-meal-three.vercel.app";
 
             if (!string.IsNullOrEmpty(cancel) && cancel == "true")
             {
+                if (!string.IsNullOrEmpty(orderCode) && long.TryParse(orderCode, out var code))
+                {
+                    await _paymentService.CancelPaymentAsync(code);
+                }
                 return Redirect($"{frontendUrl}/payment/cancel");
             }
 

@@ -6,5 +6,6 @@ export const subscriptionService = {
   createSubscription: (data) => api.post('/subscription', data),
   createPayment: (data) => api.post('/payment/create', data),
   checkPaymentStatus: (orderCode) => api.get(`/payment/check-status/${orderCode}`),
+  cancelPayment: (orderCode) => api.post(`/payment/cancel/${orderCode}`),
   checkFeature: (featureKey) => api.get(`/Subscription/check-feature?featureKey=${featureKey}`),
 };
