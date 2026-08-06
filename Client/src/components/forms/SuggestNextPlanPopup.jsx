@@ -153,6 +153,14 @@ export default function SuggestNextPlanPopup({ onClose }) {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="popup-date-input"
                 />
+                {selectedDate && (
+                  <div style={{ fontSize: 13, color: '#64748b', marginTop: 6 }}>
+                    📅 Ngày đã chọn:{' '}
+                    <strong style={{ color: '#15803d' }}>
+                      {new Date(selectedDate + 'T12:00:00').toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </strong>
+                  </div>
+                )}
               </div>
 
               <div className="popup-form-group">

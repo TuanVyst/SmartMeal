@@ -414,16 +414,6 @@ export default function MealPlanSuggestion() {
                     {selectedDay.totalCarbs   > 0 && <span>🍚 {Math.round(selectedDay.totalCarbs)}g tinh bột</span>}
                     {selectedDay.totalFat     > 0 && <span>🫒 {Math.round(selectedDay.totalFat)}g chất béo</span>}
                   </div>
-                  {meals.some(m => m.isMissing) && (
-                    <button
-                      onClick={() => handleQuickGenerateAll(selectedDay.dayDate)}
-                      disabled={quickGenerating === 'all'}
-                      className="mps-btn-create"
-                      style={{ padding: '7px 14px', fontSize: '13px', height: '34px' }}
-                    >
-                      {quickGenerating === 'all' ? 'Đang tạo...' : '+ Gợi ý các bữa còn lại'}
-                    </button>
-                  )}
                 </div>
               </div>
             )}
@@ -437,6 +427,9 @@ export default function MealPlanSuggestion() {
                 const slotKey = meal.slotKey;
                 const colors  = SLOT_COLORS[slotKey] || SLOT_COLORS.lunch;
                 const isToday = toDateKey(selectedDay?.dayDate) === getTodayDateKey();
+                const isPastDay = selectedDay?.dayDate
+                  ? new Date(selectedDay.dayDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)
+                  : false;
                 const isQuickGenerating = quickGenerating === slotKey;
 
                 if (meal.isMissing) {
@@ -461,32 +454,39 @@ export default function MealPlanSuggestion() {
                     >
                       <div style={{ fontSize: '48px', opacity: 0.4 }}>{SLOT_ICONS[slotKey]}</div>
                       <div style={{ color: '#64748b', fontSize: '15px', fontWeight: 500 }}>Chưa có {SLOT_LABELS[slotKey].toLowerCase()}</div>
-                      <button
-                        onClick={() => handleQuickGenerate(slotKey, selectedDay.dayDate)}
-                        disabled={isQuickGenerating}
-                        style={{
-                          marginTop: '8px',
-                          padding: '10px 20px',
-                          borderRadius: '12px',
-                          border: 'none',
-                          background: 'white',
-                          color: '#22c55e',
-                          fontSize: '14px',
-                          fontWeight: 600,
-                          cursor: isQuickGenerating ? 'not-allowed' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0',
-                          transition: 'all 0.2s',
-                          opacity: isQuickGenerating ? 0.7 : 1
-                        }}
-                        onMouseOver={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05), 0 0 0 1px #cbd5e1' }}
-                        onMouseOut={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0' }}
-                      >
-                        {isQuickGenerating ? <div className="mps-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <FiPlus />}
-                        {isQuickGenerating ? 'Đang tạo...' : 'Tạo gợi ý nhanh'}
-                      </button>
+                      {!isPastDay && (
+                        <button
+                          onClick={() => handleQuickGenerate(slotKey, selectedDay.dayDate)}
+                          disabled={isQuickGenerating}
+                          style={{
+                            marginTop: '8px',
+                            padding: '10px 20px',
+                            borderRadius: '12px',
+                            border: 'none',
+                            background: 'white',
+                            color: '#22c55e',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            cursor: isQuickGenerating ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0',
+                            transition: 'all 0.2s',
+                            opacity: isQuickGenerating ? 0.7 : 1
+                          }}
+                          onMouseOver={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05), 0 0 0 1px #cbd5e1' }}
+                          onMouseOut={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0' }}
+                        >
+                          {isQuickGenerating ? <div className="mps-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <FiPlus />}
+                          {isQuickGenerating ? 'Đang tạo...' : 'Tạo gợi ý nhanh'}
+                        </button>
+                      )}
+                      {isPastDay && (
+                        <div style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic' }}>
+                          Ngày đã qua, không thể thêm gợi ý
+                        </div>
+                      )}
                     </div>
                   );
                 }
