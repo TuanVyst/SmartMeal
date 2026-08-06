@@ -179,54 +179,6 @@ export default function MealPlanSuggestion() {
     }
   };
 
-  const [quickGenerating, setQuickGenerating] = useState(null);
-
-  const handleQuickGenerate = async (slotKey, date) => {
-    if (!hasPro) {
-      setShowPaywall(true);
-      return;
-    }
-    try {
-      setQuickGenerating(slotKey);
-      const dateParam = new Date(date).toISOString().split('T')[0];
-      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
-      toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
-      if (res.data && res.data.data) {
-        setWeekPlan(res.data.data);
-      } else {
-        fetchWeekPlan(currentWeekDate);
-      }
-    } catch (err) {
-      console.error('Error quick generate:', err);
-      toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
-    } finally {
-      setQuickGenerating(null);
-    }
-  };
-
-  const handleQuickGenerateAll = async (date) => {
-    if (!hasPro) {
-      setShowPaywall(true);
-      return;
-    }
-    try {
-      setQuickGenerating('all');
-      const dateParam = new Date(date).toISOString().split('T')[0];
-      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}`);
-      toast.success('Đã tạo gợi ý các bữa cho ngày này!');
-      if (res.data && res.data.data) {
-        setWeekPlan(res.data.data);
-      } else {
-        fetchWeekPlan(currentWeekDate);
-      }
-    } catch (err) {
-      console.error('Error quick generate all:', err);
-      toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
-    } finally {
-      setQuickGenerating(null);
-    }
-  };
-
   const days = weekPlan?.days || [];
   const selectedDay = days[selectedDayIdx] || null;
 
@@ -242,6 +194,67 @@ export default function MealPlanSuggestion() {
       slotMap[key] = { ...e, _resolvedImg: resolvedImg };
     });
     return SLOT_ORDER.map(slot => slotMap[slot] ? { ...slotMap[slot], slotKey: slot } : { isMissing: true, slotKey: slot });
+  };
+
+  const [quickGenerating, setQuickGenerating] = useState(null);
+
+  const handleQuickGenerate = async (slotKey, date) => {
+    if (!hasPro) {
+      setShowPaywall(true);
+      return;
+    }
+    try {
+      setQuickGenerating(slotKey);
+      const dateParam = new Date(date).toISOString().split('T')[0];
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
+      toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
+      if (res.data && res.data.data) {
+        const newPlan = res.data.data;
+        setWeekPlan(newPlan);
+        const idx = newPlan.days?.findIndex(d => d.dayDate && d.dayDate.split('T')[0] === dateParam);
+        if (idx !== undefined && idx >= 0) setSelectedDayIdx(idx);
+      } else {
+        await fetchWeekPlan(currentWeekDate, dateParam);
+      }
+    } catch (err) {
+      console.error('Error quick generate:', err);
+      toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
+    } finally {
+      setQuickGenerating(null);
+    }
+  };
+
+  const handleQuickGenerateAll = async (date) => {
+    if (!hasPro) {
+      setShowPaywall(true);
+      return;
+    }
+    const dayEntries = getMealsForDay(selectedDay);
+    const missingSlots = dayEntries.filter(m => m.isMissing).map(m => m.slotKey);
+    if (missingSlots.length === 0) {
+      toast.success('Ngày này đã có đủ 3 bữa ăn!');
+      return;
+    }
+    try {
+      setQuickGenerating('all');
+      const dateParam = new Date(date).toISOString().split('T')[0];
+      const mealsParam = missingSlots.join(',');
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}`);
+      toast.success(`Đã tạo gợi ý ${missingSlots.length} bữa còn thiếu cho ngày này!`);
+      if (res.data && res.data.data) {
+        const newPlan = res.data.data;
+        setWeekPlan(newPlan);
+        const idx = newPlan.days?.findIndex(d => d.dayDate && d.dayDate.split('T')[0] === dateParam);
+        if (idx !== undefined && idx >= 0) setSelectedDayIdx(idx);
+      } else {
+        await fetchWeekPlan(currentWeekDate, dateParam);
+      }
+    } catch (err) {
+      console.error('Error quick generate all:', err);
+      toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
+    } finally {
+      setQuickGenerating(null);
+    }
   };
 
   const meals = getMealsForDay(selectedDay);
@@ -319,7 +332,7 @@ export default function MealPlanSuggestion() {
           <div className="mps-week-title">
             <FiCalendar size={18} />
             <span>Tuần từ {formatDateShort(weekPlan?.startDate)} – {formatDateShort(weekPlan?.endDate)}</span>
-            <button className="mps-today-btn" onClick={handleGoToday}>Hôm nay</button>
+            <button className="mps-today-btn" onClick={handleGoToday}>Trở về ngày hiện tại</button>
           </div>
 
           <div className="mps-week-actions">
