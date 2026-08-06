@@ -199,7 +199,7 @@ export default function Payment() {
 
           <div className="selected-plan-summary">
             <div>
-              <h3>Gói Premium: <strong>{currentPlan.name}</strong></h3>
+              <h3>Gói Pro: <strong>{currentPlan.name}</strong></h3>
               <p>{currentPlan.description}</p>
             </div>
             <div className="checkout-price">
@@ -241,7 +241,7 @@ export default function Payment() {
             <div className="scenario-notice-card notice-new">
               <div className="notice-icon">💡</div>
               <div className="notice-content">
-                <h4>Trải Nghiệm Premium Trọn Vẹn</h4>
+                <h4>Trải Nghiệm Pro Trọn Vẹn</h4>
                 <p>
                   Đăng ký gói <strong>{currentPlan.name}</strong> để mở khóa gợi ý bữa ăn AI cá nhân hóa và phân tích dinh dưỡng chuyên sâu.
                 </p>
@@ -364,7 +364,7 @@ export default function Payment() {
                 <span className="success-checkmark">&#10003;</span>
               </div>
               <h3>Thanh toán thành công!</h3>
-              <p>Tài khoản đã được nâng cấp lên Premium.</p>
+              <p>Tài khoản đã được nâng cấp lên Pro.</p>
               <button onClick={() => navigate('/dashboard')} className="btn-confirm-payment">
                 Đi tới Bảng điều khiển
               </button>

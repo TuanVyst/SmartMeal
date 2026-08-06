@@ -85,7 +85,7 @@ export default function Sidebar() {
     { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn' },
     { to: '/ingredients',       icon: <FiBookOpen size={20} />, label: 'Tra cứu nguyên liệu'        },
     { to: '/nutrition',         icon: <FiClipboard size={20} />, label: 'Nhật ký ăn uống'            },
-    { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Premium' : 'Nâng cấp Premium' },
+    { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Pro' : 'Nâng cấp Pro' },
     { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
   ];
 

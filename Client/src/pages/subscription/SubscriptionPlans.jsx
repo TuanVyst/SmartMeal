@@ -117,7 +117,7 @@ export default function SubscriptionPlans() {
   return (
     <div className="plans-container">
       <div className="plans-header">
-        <span className="badge-premium">SMARTMEAL PREMIUM</span>
+        <span className="badge-premium">SMARTMEAL PRO</span>
         <h1 className="plans-title">Nâng Cấp Sức Khỏe Toàn Diện</h1>
         <p className="plans-subtitle">
           Mở khóa những tính năng phân tích và gợi ý thực đơn chuyên sâu hỗ trợ bởi trí tuệ nhân tạo (AI).
@@ -128,7 +128,7 @@ export default function SubscriptionPlans() {
         <div className="pending-payment-banner">
           <div className="pending-banner-text">
             <p>
-              ⚠️ Bạn đang có giao dịch thanh toán cho gói <strong>{pendingPayment.plan?.name || 'Premium'}</strong> đang chờ xử lý.
+              ⚠️ Bạn đang có giao dịch thanh toán cho gói <strong>{pendingPayment.plan?.name || 'Pro'}</strong> đang chờ xử lý.
             </p>
           </div>
           <div className="pending-banner-actions">
@@ -154,7 +154,7 @@ export default function SubscriptionPlans() {
         <div className="active-sub-banner">
           <div className="sub-banner-icon"><FiCheckCircle size={24} /></div>
           <div className="sub-banner-text">
-            <h3>Bạn đang sử dụng gói Premium: <strong>{activePlan?.name || 'Pro'}</strong></h3>
+            <h3>Bạn đang sử dụng gói Pro: <strong>{activePlan?.name || 'Pro'}</strong></h3>
             <p>
               Hạn dùng đến hết ngày:{' '}
               <strong>

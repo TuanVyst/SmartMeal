@@ -143,7 +143,7 @@ export default function Profile() {
           className={`profile-tab-btn ${activeTab === 'subscription' ? 'active' : ''}`}
           onClick={() => setActiveTab('subscription')}
         >
-          <FiAward size={16} /> Gói Premium & Lịch sử
+          <FiAward size={16} /> Gói Pro & Lịch sử
         </button>
       </div>
 
@@ -258,20 +258,20 @@ export default function Profile() {
         </div>
       ) : (
         <div className="profile-card">
-          <h2 className="profile-title">Gói Premium & Lịch sử</h2>
+          <h2 className="profile-title">Gói Pro & Lịch sử</h2>
           <p className="profile-subtitle">Xem trạng thái dịch vụ và lịch sử giao dịch của bạn</p>
 
           <div className={`premium-status-section ${isPremium ? 'active-premium' : ''}`}>
             <div className="status-info">
               {isPremium && subscription ? (
                 <>
-                  <h3>Trạng thái: <strong style={{color: '#16a34a'}}>Đã đăng ký (Premium PRO)</strong></h3>
+                  <h3>Trạng thái: <strong style={{color: '#16a34a'}}>Đã đăng ký (Gói Pro)</strong></h3>
                   <p>Hạn dùng đến hết: <strong>{subscription.endDate ? new Date(subscription.endDate).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Vĩnh viễn'}</strong></p>
                 </>
               ) : (
                 <>
                   <h3>Trạng thái: <strong>Gói Cơ Bản (Miễn phí)</strong></h3>
-                  <p>Nâng cấp lên gói Premium để sử dụng tính năng thực đơn AI nâng cao.</p>
+                  <p>Nâng cấp lên gói Pro để sử dụng tính năng thực đơn AI nâng cao.</p>
                 </>
               )}
             </div>
@@ -279,7 +279,7 @@ export default function Profile() {
               onClick={() => navigate('/subscription')}
               className="btn-renew-premium"
             >
-              {isPremium ? 'Gia hạn gói Premium' : 'Nâng cấp ngay'}
+              {isPremium ? 'Gia hạn gói Pro' : 'Nâng cấp ngay'}
             </button>
           </div>
 
@@ -288,7 +288,7 @@ export default function Profile() {
           {loadingHistory ? (
             <div style={{textAlign: 'center', padding: '2rem', color: '#64748b'}}>Đang tải lịch sử đăng ký...</div>
           ) : history.length === 0 ? (
-            <div className="empty-history">Bạn chưa đăng ký gói Premium nào trước đây.</div>
+            <div className="empty-history">Bạn chưa đăng ký gói Pro nào trước đây.</div>
           ) : (
             <div className="table-responsive">
               <table className="history-table">

@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
       if (data && data.success && data.isPaid) {
         pendingPaymentStorage.clearPendingPayment();
         await checkPremiumStatus(accId);
-        toast.success('🎉 Thanh toán thành công! Tài khoản của bạn đã được nâng cấp lên Premium.');
+        toast.success('🎉 Thanh toán thành công! Tài khoản của bạn đã được nâng cấp lên Pro.');
         return true;
       }
     } catch {

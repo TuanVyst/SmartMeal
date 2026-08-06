@@ -44,7 +44,7 @@ export default function PaymentSuccess() {
         <p className="success-desc">
           {loading
             ? 'Đang xác nhận thanh toán...'
-            : 'Tài khoản của bạn đã được nâng cấp lên Premium.'}
+            : 'Tài khoản của bạn đã được nâng cấp lên Pro.'}
         </p>
 
         {!loading && (
