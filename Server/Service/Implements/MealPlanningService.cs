@@ -283,17 +283,26 @@ namespace Service.Implements
 
         public async Task<MealPlanResponseDto> RemoveEntryAsync(Guid planId, Guid entryId)
         {
-            var plan = await _mealPlanRepo.GetPlanById(planId);
-            if (plan == null) throw new Exception("Không tìm thấy thực đơn.");
-
             var entry = await _mealPlanRepo.GetEntryById(entryId);
-            if (entry == null || entry.MealPlanDay.MealPlan_id != planId) throw new Exception("Entry không hợp lệ.");
+            if (entry == null) throw new Exception("Không tìm thấy bữa ăn.");
+
+            // Allow planId == Guid.Empty (caller doesn't have a valid planId) - resolve from entry
+            var resolvedPlanId = planId == Guid.Empty
+                ? entry.MealPlanDay?.MealPlan_id ?? Guid.Empty
+                : planId;
+
+            if (resolvedPlanId == Guid.Empty)
+                throw new Exception("Không xác định được thực đơn chứa bữa ăn này.");
+
+            if (planId != Guid.Empty && entry.MealPlanDay?.MealPlan_id != planId)
+                throw new Exception("Entry không hợp lệ hoặc không thuộc thực đơn này.");
+
+            var plan = await _mealPlanRepo.GetPlanById(resolvedPlanId);
+            if (plan == null) throw new Exception("Không tìm thấy thực đơn.");
 
             await _mealPlanRepo.RemoveEntry(entry);
 
-            // Check if day is empty, if so we could remove the day, but leaving it empty is also fine or we can delete it.
-            // For now, let's just return the updated plan.
-            var updatedPlan = await _mealPlanRepo.GetPlanById(planId);
+            var updatedPlan = await _mealPlanRepo.GetPlanById(resolvedPlanId);
             return await BuildPlanDto(updatedPlan, updatedPlan.Account_id);
         }
 
@@ -504,7 +513,8 @@ namespace Service.Implements
                 var day = plan.Days.FirstOrDefault(d => d.DayDate.Date == dateOnly);
                 if (day?.Entries == null) continue;
 
-                foreach (var entry in day.Entries)
+                // Only count non-deleted entries
+                foreach (var entry in day.Entries.Where(e => !e.IsDeleted))
                 {
                     if (entry.MealSlot == "breakfast") result["breakfast"] = true;
                     else if (entry.MealSlot == "lunch") result["lunch"] = true;
@@ -538,7 +548,8 @@ namespace Service.Implements
             
             if (hasAllRequested)
             {
-                throw new Exception("Ngày này đã có đầy đủ các bữa ăn bạn yêu cầu.");
+                // All requested meals already exist — just return the current week plan instead of throwing
+                return await GetWeekPlanAsync(accountId, targetDate);
             }
 
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
@@ -720,70 +731,74 @@ namespace Service.Implements
                 var curDate = monday.AddDays(i).Date;
                 var matchingDays = daysInRange.Where(d => d.DayDate.Date == curDate).ToList();
 
+                // Collect all non-deleted entries from all matching days, then deduplicate by MealSlot
+                // (keep the latest entry per slot to avoid showing duplicates when multiple MealPlanDay rows
+                // exist for the same date, which can happen if the user generated suggestions multiple times)
+                var allRawEntries = matchingDays
+                    .SelectMany(d => d.Entries ?? new List<MealPlanEntry>())
+                    .Where(e => !e.IsDeleted)
+                    .GroupBy(e => (e.MealSlot ?? "").ToLower())
+                    .Select(g => g.OrderByDescending(e => e.Entry_id).First()) // keep newest per slot
+                    .OrderBy(e => e.SortOrder)
+                    .ToList();
+
                 var entriesDto = new List<MealPlanEntryResponseDto>();
                 double dayCal = 0, dayPro = 0, dayCarbs = 0, dayFat = 0, dayFiber = 0;
 
-                foreach (var dbDay in matchingDays)
+                foreach (var e in allRawEntries)
                 {
-                    if (dbDay.Entries != null)
+                    dayCal += e.SlotCalories;
+                    dayPro += e.SlotProtein;
+                    dayCarbs += e.SlotCarbs;
+                    dayFat += e.SlotFat;
+                    dayFiber += e.SlotFiber;
+
+                    if (e.Recipe?.RecipeIngredients != null)
                     {
-                        foreach (var e in dbDay.Entries.OrderBy(e => e.SortOrder))
+                        foreach (var ri in e.Recipe.RecipeIngredients)
                         {
-                            if (e.IsDeleted) continue;
-                            dayCal += e.SlotCalories;
-                            dayPro += e.SlotProtein;
-                            dayCarbs += e.SlotCarbs;
-                            dayFat += e.SlotFat;
-                            dayFiber += e.SlotFiber;
-
-                            if (e.Recipe?.RecipeIngredients != null)
+                            if (ri.Ingredient != null)
                             {
-                                foreach (var ri in e.Recipe.RecipeIngredients)
+                                if (!reqIngredients.ContainsKey(ri.Ingredient_id))
                                 {
-                                    if (ri.Ingredient != null)
+                                    reqIngredients[ri.Ingredient_id] = new RequiredIngredientDto
                                     {
-                                        if (!reqIngredients.ContainsKey(ri.Ingredient_id))
-                                        {
-                                            reqIngredients[ri.Ingredient_id] = new RequiredIngredientDto
-                                            {
-                                                Ingredient_id = ri.Ingredient_id,
-                                                Name = ri.Ingredient.Name,
-                                                ImageUrl = ri.Ingredient.ImageUrl,
-                                                Quantity = 0,
-                                                Uom = ri.UOM,
-                                                IsPossessed = pantryIngredients.Contains(ri.Ingredient_id)
-                                            };
-                                        }
-                                        reqIngredients[ri.Ingredient_id].Quantity += ri.Quantity;
-                                    }
+                                        Ingredient_id = ri.Ingredient_id,
+                                        Name = ri.Ingredient.Name,
+                                        ImageUrl = ri.Ingredient.ImageUrl,
+                                        Quantity = 0,
+                                        Uom = ri.UOM,
+                                        IsPossessed = pantryIngredients.Contains(ri.Ingredient_id)
+                                    };
                                 }
+                                reqIngredients[ri.Ingredient_id].Quantity += ri.Quantity;
                             }
-
-                            bool isLogged = loggedEntries.Any(log =>
-                                !log.IsDeleted &&
-                                log.LogDate.Date == curDate &&
-                                log.MealType != null &&
-                                log.MealType.Equals(e.MealSlot, StringComparison.OrdinalIgnoreCase) &&
-                                log.Recipe_id == e.Recipe_id);
-
-                            entriesDto.Add(new MealPlanEntryResponseDto
-                            {
-                                Entry_id = e.Entry_id,
-                                Recipe_id = e.Recipe_id,
-                                RecipeName = e.Recipe?.Recipe_name ?? "Unknown",
-                                RecipeImage = e.Recipe?.Recipe_name,
-                                MealSlot = e.MealSlot,
-                                SlotCalories = Math.Round(e.SlotCalories),
-                                SlotProtein = Math.Round(e.SlotProtein),
-                                SlotCarbs = Math.Round(e.SlotCarbs),
-                                SlotFat = Math.Round(e.SlotFat),
-                                SlotFiber = Math.Round(e.SlotFiber),
-                                CookTime = e.Recipe?.CookTime ?? 0,
-                                Difficulty = e.Recipe?.Difficulty ?? "easy",
-                                IsLogged = isLogged
-                            });
                         }
                     }
+
+                    bool isLogged = loggedEntries.Any(log =>
+                        !log.IsDeleted &&
+                        log.LogDate.Date == curDate &&
+                        log.MealType != null &&
+                        log.MealType.Equals(e.MealSlot, StringComparison.OrdinalIgnoreCase) &&
+                        log.Recipe_id == e.Recipe_id);
+
+                    entriesDto.Add(new MealPlanEntryResponseDto
+                    {
+                        Entry_id = e.Entry_id,
+                        Recipe_id = e.Recipe_id,
+                        RecipeName = e.Recipe?.Recipe_name ?? "Unknown",
+                        RecipeImage = e.Recipe?.Recipe_name,
+                        MealSlot = e.MealSlot,
+                        SlotCalories = Math.Round(e.SlotCalories),
+                        SlotProtein = Math.Round(e.SlotProtein),
+                        SlotCarbs = Math.Round(e.SlotCarbs),
+                        SlotFat = Math.Round(e.SlotFat),
+                        SlotFiber = Math.Round(e.SlotFiber),
+                        CookTime = e.Recipe?.CookTime ?? 0,
+                        Difficulty = e.Recipe?.Difficulty ?? "easy",
+                        IsLogged = isLogged
+                    });
                 }
 
                 weekDays.Add(new MealPlanDayResponseDto
