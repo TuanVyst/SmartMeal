@@ -10,7 +10,7 @@ import './SubscriptionPlans.css';
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isPremium, checkPremiumStatus } = useAuth();
+  const { user, subscription, isPremium, checkPremiumStatus } = useAuth();
   const accountId = user?.accountId || user?.account_id;
 
   const [currentPlan, setCurrentPlan] = useState(() => location.state?.plan || null);
@@ -45,11 +45,6 @@ export default function Payment() {
 
   // Restore pending payment session on mount
   useEffect(() => {
-    if (isPremium) {
-      setStep('success');
-      return;
-    }
-
     const savedPayment = pendingPaymentStorage.getPendingPayment(accountId);
     if (savedPayment) {
       const activePlan = location.state?.plan || savedPayment.plan;
@@ -72,7 +67,7 @@ export default function Payment() {
     } else {
       navigate('/subscription');
     }
-  }, [accountId, isPremium, location.state, navigate, startPolling]);
+  }, [accountId, location.state, navigate, startPolling]);
 
   useEffect(() => {
     return () => {
