@@ -12,7 +12,7 @@ import {
   SURVEY_COOKING_TIMES
 } from '../../utils/surveyUtils';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 5;
 
 const initialState = {
   step: 1,
@@ -142,9 +142,6 @@ export default function OnboardingSurvey({ onComplete }) {
         return '';
       case 3:
         if (!formData.activityLevel) return 'Vui lòng chọn mức độ vận động';
-        return '';
-      case 4:
-        if (!formData.cookingTimeMinutes) return 'Vui lòng chọn thời gian nấu ăn';
         return '';
       default:
         return '';
@@ -310,50 +307,6 @@ export default function OnboardingSurvey({ onComplete }) {
       case 4:
         return (
           <div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Sở thích nấu nướng</h3>
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Thời gian nấu ăn mỗi bữa</label>
-              <div style={{ display: 'flex', gap: 10 }}>
-                {SURVEY_COOKING_TIMES.map(opt => (
-                  <button
-                    key={opt.value} type="button" onClick={() => dispatch({ type: 'SET_FIELD', field: 'cookingTimeMinutes', value: opt.value })}
-                    style={{
-                      flex: 1, padding: '12px 8px', borderRadius: 8, border: `2px solid ${formData.cookingTimeMinutes === opt.value ? '#22C55E' : '#e2e8f0'}`,
-                      background: formData.cookingTimeMinutes === opt.value ? '#f0fdf4' : 'white', cursor: 'pointer',
-                      fontSize: 13, fontWeight: 500, color: formData.cookingTimeMinutes === opt.value ? '#16a34a' : '#475569'
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      case 5:
-        return (
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Thói quen ăn uống</h3>
-            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>Bạn thường ăn bao nhiêu bữa mỗi ngày?</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {SURVEY_MEALS_PER_DAY.map(opt => (
-                <button
-                  key={opt.value} type="button" onClick={() => dispatch({ type: 'SET_FIELD', field: 'mealsPerDay', value: opt.value })}
-                  style={{
-                    padding: 16, borderRadius: 12, border: `2px solid ${formData.mealsPerDay === opt.value ? '#22C55E' : '#e2e8f0'}`,
-                    background: formData.mealsPerDay === opt.value ? '#f0fdf4' : 'white', cursor: 'pointer', textAlign: 'left'
-                  }}
-                >
-                  <div style={{ fontSize: 16, fontWeight: 600, color: '#1E293B' }}>{opt.label} {opt.recommended && <span style={{ fontSize: 12, background: '#dcfce7', color: '#16a34a', padding: '2px 8px', borderRadius: 12, marginLeft: 8 }}>Khuyên dùng</span>}</div>
-                  <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{opt.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      case 6:
-        return (
-          <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Chế độ ăn</h3>
             <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>Lựa chọn phù hợp nhất với bạn</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -373,7 +326,7 @@ export default function OnboardingSurvey({ onComplete }) {
             </div>
           </div>
         );
-      case 7:
+      case 5:
         return (
           <div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Hoàn tất</h3>
@@ -386,11 +339,13 @@ export default function OnboardingSurvey({ onComplete }) {
                   const days = Number(effectiveTargetDays);
                   return getDailyCalorieBudget({ ...formData, targetDays: days }).calories;
                 })()} kcal/ngày</strong></li>
-                <li>Chế độ: <strong>{SURVEY_DIET_TYPES.find(d => d.value === formData.dietType)?.label}</strong>, <strong>{formData.mealsPerDay} bữa/ngày</strong></li>
+                <li>Chế độ: <strong>{SURVEY_DIET_TYPES.find(d => d.value === formData.dietType)?.label}</strong></li>
               </ul>
             </div>
           </div>
         );
+      default:
+        return null;
     }
   };
 
