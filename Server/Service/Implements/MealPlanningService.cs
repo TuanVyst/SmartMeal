@@ -728,7 +728,10 @@ namespace Service.Implements
 
             for (int i = 0; i < 7; i++)
             {
-                var curDate = monday.AddDays(i).Date;
+                // IMPORTANT: .Date strips DateTimeKind, causing JSON to serialize without Z.
+                // JS then parses as local time (UTC+7), and toISOString shifts back 7h to previous day.
+                // Re-apply Utc kind to ensure "Z" suffix in JSON output.
+                var curDate = DateTime.SpecifyKind(monday.AddDays(i).Date, DateTimeKind.Utc);
                 var matchingDays = daysInRange.Where(d => d.DayDate.Date == curDate).ToList();
 
                 // Collect all non-deleted entries from all matching days, then deduplicate by MealSlot

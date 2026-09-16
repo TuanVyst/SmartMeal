@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { healthSurveyService } from '../../services/healthSurveyService';
 import api from '../../services/api';
@@ -18,15 +18,81 @@ const MEAL_OPTIONS = [
   { value: 'dinner', label: 'Tối', icon: <FiMoon size={18} /> },
 ];
 
+const VIET_MONTHS = [
+  'Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'
+];
+
+// Helper: parse YYYY-MM-DD into {day, month, year} as numbers
+function parseDateStr(str) {
+  const [y, m, d] = (str || '').split('-').map(Number);
+  return { year: y || new Date().getFullYear(), month: m || new Date().getMonth() + 1, day: d || new Date().getDate() };
+}
+// Helper: days in a month
+function daysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+// Helper: zero-pad
+function pad2(n) { return String(n).padStart(2, '0'); }
+
 export default function SuggestNextPlanPopup({ onClose }) {
   const { healthProfile } = useHealthProfile();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Step 0: Date + meals
-  const [selectedDate, setSelectedDate] = useState(getTodayDateKey());
+  const today = getTodayDateKey(); // YYYY-MM-DD
+  const todayParsed = parseDateStr(today);
+
+  // Step 0: Date parts stored separately for DD/MM/YYYY dropdowns
+  const [selDay,   setSelDay]   = useState(todayParsed.day);
+  const [selMonth, setSelMonth] = useState(todayParsed.month);
+  const [selYear,  setSelYear]  = useState(todayParsed.year);
+
+  // Derived YYYY-MM-DD for API — always in sync
+  const selectedDate = `${selYear}-${pad2(selMonth)}-${pad2(selDay)}`;
+
   const [selectedMeals, setSelectedMeals] = useState(['breakfast', 'lunch', 'dinner']);
+
+  // Clamp day to valid range when month/year change
+  const maxDay = daysInMonth(selYear, selMonth);
+  const clampedDay = Math.min(selDay, maxDay);
+  if (clampedDay !== selDay) setSelDay(clampedDay);
+
+  // Min date = today — prevent past dates
+  const todayStr = today;
+
+  // Year options: current year + next 2 years
+  const yearOptions = useMemo(() => {
+    const y = todayParsed.year;
+    return [y, y + 1, y + 2];
+  }, [todayParsed.year]);
+
+  // Change handlers — validate min date
+  const handleDayChange = (d) => {
+    const newDate = `${selYear}-${pad2(selMonth)}-${pad2(d)}`;
+    if (newDate >= todayStr) setSelDay(d);
+  };
+  const handleMonthChange = (m) => {
+    const maxD = daysInMonth(selYear, m);
+    const newD = Math.min(selDay, maxD);
+    const newDate = `${selYear}-${pad2(m)}-${pad2(newD)}`;
+    if (newDate >= todayStr) { setSelMonth(m); setSelDay(newD); }
+  };
+  const handleYearChange = (y) => {
+    const maxD = daysInMonth(y, selMonth);
+    const newD = Math.min(selDay, maxD);
+    const newDate = `${y}-${pad2(selMonth)}-${pad2(newD)}`;
+    if (newDate >= todayStr) { setSelYear(y); setSelDay(newD); }
+  };
+
+  const selectStyle = {
+    padding: '8px 10px', border: '1.5px solid #e2e8f0', borderRadius: 8,
+    fontSize: 14, background: 'white', color: '#1e293b', cursor: 'pointer',
+    outline: 'none', appearance: 'none', WebkitAppearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', paddingRight: 28,
+  };
 
   // Step 1: Weight goal
   const [goal, setGoal] = useState(healthProfile?.goal || 'maintain');
@@ -80,7 +146,8 @@ export default function SuggestNextPlanPopup({ onClose }) {
       const res = await api.post(`/MealPlan/suggest-for-date?date=${selectedDate}&meals=${mealsParam}`);
 
       if (res.data.data) {
-        onClose({ type: 'success', text: 'Đã tạo gợi ý thành công!' });
+        // Pass selectedDate so the parent can navigate to the correct week
+        onClose({ type: 'success', text: 'Đã tạo gợi ý thành công!', date: selectedDate });
       }
     } catch (err) {
       console.error('Lỗi tạo thực đơn:', err);
@@ -146,22 +213,44 @@ export default function SuggestNextPlanPopup({ onClose }) {
 
               <div className="popup-form-group">
                 <label className="popup-label">Ngày</label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  min={getTodayDateKey()}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="popup-date-input"
-                />
-                {selectedDate && (
-                  <div style={{ fontSize: 13, color: '#64748b', marginTop: 6 }}>
-                    📅 Ngày đã chọn:{' '}
-                    <strong style={{ color: '#15803d' }}>
-                      {new Date(selectedDate + 'T12:00:00').toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
-                    </strong>
-                  </div>
-                )}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {/* Day input */}
+                  <input
+                    type="number"
+                    value={selDay}
+                    min={1}
+                    max={maxDay}
+                    onChange={e => handleDayChange(Number(e.target.value))}
+                    style={{ ...selectStyle, width: 70, textAlign: 'center' }}
+                  />
+                  <span style={{ color: '#94a3b8', fontWeight: 600 }}>/</span>
+                  {/* Month dropdown */}
+                  <select
+                    value={selMonth}
+                    onChange={e => handleMonthChange(Number(e.target.value))}
+                    style={{ ...selectStyle, flex: 1 }}
+                  >
+                    {VIET_MONTHS.map((label, idx) => (
+                      <option key={idx + 1} value={idx + 1}>{label}</option>
+                    ))}
+                  </select>
+                  <span style={{ color: '#94a3b8', fontWeight: 600 }}>/</span>
+                  {/* Year input */}
+                  <input
+                    type="number"
+                    value={selYear}
+                    min={yearOptions[0]}
+                    max={yearOptions[yearOptions.length - 1]}
+                    onChange={e => handleYearChange(Number(e.target.value))}
+                    style={{ ...selectStyle, width: 80, textAlign: 'center' }}
+                  />
+                </div>
+                {/* Weekday confirmation */}
+                <div style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>
+                  📅 {new Date(selectedDate + 'T12:00:00').toLocaleDateString('vi-VN', { weekday: 'long' })}, ngày {pad2(selDay)}/{pad2(selMonth)}/{selYear}
+                </div>
               </div>
+
 
               <div className="popup-form-group">
                 <label className="popup-label">Bữa ăn</label>

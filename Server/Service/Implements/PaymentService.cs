@@ -154,8 +154,21 @@ namespace Service.Implements
                 var payOS = new PayOSClient(clientId?.Trim(), apiKey?.Trim(), checksumKey?.Trim());
 
                 var paymentInfo = await payOS.PaymentRequests.GetAsync(orderCode);
+                var paymentInfoStr = paymentInfo.Status.ToString();
                 
-                if (!paymentInfo.Status.ToString().Equals("PAID", StringComparison.OrdinalIgnoreCase))
+                if (paymentInfoStr.Equals("CANCELLED", StringComparison.OrdinalIgnoreCase) || paymentInfoStr.Equals("EXPIRED", StringComparison.OrdinalIgnoreCase))
+                {
+                    var subs = await _subscriptionRepo.GetAllSubscriptions();
+                    var sub = subs.Find(s => s.PaymentRef == orderCode.ToString());
+                    if (sub != null && sub.Status == "pending")
+                    {
+                        sub.Status = "cancelled";
+                        await _subscriptionRepo.UpdateSubscription(sub);
+                    }
+                    return false;
+                }
+
+                if (!paymentInfoStr.Equals("PAID", StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -176,6 +189,29 @@ namespace Service.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to check payment status for orderCode: {OrderCode}", orderCode);
+                return false;
+            }
+        }
+
+        public async Task<bool> CancelPaymentAsync(long orderCode)
+        {
+            try
+            {
+                var subscriptions = await _subscriptionRepo.GetAllSubscriptions();
+                var subscription = subscriptions.Find(s => s.PaymentRef == orderCode.ToString());
+
+                if (subscription != null && subscription.Status == "pending")
+                {
+                    subscription.Status = "cancelled";
+                    await _subscriptionRepo.UpdateSubscription(subscription);
+                    _logger.LogInformation("Subscription {SubId} cancelled for OrderCode {OrderCode}", subscription.Sub_id, orderCode);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to cancel payment for orderCode: {OrderCode}", orderCode);
                 return false;
             }
         }

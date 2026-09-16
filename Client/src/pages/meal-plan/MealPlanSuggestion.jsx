@@ -49,27 +49,48 @@ export default function MealPlanSuggestion() {
     }
   }, []);
 
+  // ── Safe date helpers (no UTC shift) ────────────────────────────────────
+  // Backend may serialize DateTime without Z → JS parses as LOCAL → toISOString shifts back 7h.
+  // Always extract YYYY-MM-DD by splitting the string directly, never via new Date().toISOString().
+  const safeDate = (dateVal) => {
+    if (!dateVal) return '';
+    if (typeof dateVal === 'string') {
+      // "2026-08-08T00:00:00" or "2026-08-08T00:00:00Z" → "2026-08-08"
+      return dateVal.split('T')[0];
+    }
+    // JS Date object → use LOCAL date components to avoid UTC shift
+    const d = dateVal instanceof Date ? dateVal : new Date(dateVal);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const todayStr = safeDate(new Date()); // local YYYY-MM-DD for today
+
   const isTodayDate = (dateStr) => {
     if (!dateStr) return false;
-    const d = new Date(dateStr);
-    const today = new Date();
-    return d.getDate() === today.getDate() &&
-           d.getMonth() === today.getMonth() &&
-           d.getFullYear() === today.getFullYear();
+    return safeDate(dateStr) === todayStr;
+  };
+
+  const isPastDateStr = (dateStr) => {
+    if (!dateStr) return false;
+    return safeDate(dateStr) < todayStr;
   };
 
   const fetchWeekPlan = useCallback(async (dateToFetch, targetDateStr = null) => {
     if (!accountId) return;
     setLoadingPlans(true);
     try {
-      const dateStr = new Date(dateToFetch || new Date()).toISOString().split('T')[0];
+      // Use safeDate() to avoid UTC shift when dateToFetch is a JS Date object
+      const dateStr = safeDate(dateToFetch || new Date());
       const res = await api.get(`/MealPlan/week?date=${dateStr}`);
       const plan = res.data.data;
       setWeekPlan(plan);
 
-      if (plan?.days?.length === 7) {
+      if (plan?.days?.length > 0) {
         if (targetDateStr) {
-          const idx = plan.days.findIndex(d => d.dayDate && d.dayDate.split('T')[0] === targetDateStr);
+          const idx = plan.days.findIndex(d => d.dayDate && safeDate(d.dayDate) === targetDateStr);
           setSelectedDayIdx(idx >= 0 ? idx : 0);
         } else {
           const todayIdx = plan.days.findIndex(d => isTodayDate(d.dayDate));
@@ -81,7 +102,7 @@ export default function MealPlanSuggestion() {
     } finally {
       setLoadingPlans(false);
     }
-  }, [accountId]);
+  }, [accountId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchWeekPlan(new Date());
@@ -93,8 +114,17 @@ export default function MealPlanSuggestion() {
     if (msg) {
       setAlertMsg(msg);
       setTimeout(() => setAlertMsg(null), 3000);
+      // Navigate to the week/day that was generated
+      if (msg.date) {
+        const pickedDate = new Date(msg.date + 'T12:00:00');
+        setCurrentWeekDate(pickedDate);
+        fetchWeekPlan(pickedDate, msg.date);
+        return;
+      }
     }
-    fetchWeekPlan(currentWeekDate);
+    // Re-fetch current week but keep the currently selected day
+    const keepDate = selectedDay?.dayDate ? safeDate(selectedDay.dayDate) : null;
+    fetchWeekPlan(currentWeekDate, keepDate);
   };
 
   const handlePrevWeek = () => {
@@ -119,8 +149,9 @@ export default function MealPlanSuggestion() {
 
   const handleDateChange = (e) => {
     if (!e.target.value) return;
-    const picked = new Date(e.target.value);
-    const dateStr = picked.toISOString().split('T')[0];
+    // e.target.value is always YYYY-MM-DD (the input's internal format)
+    const dateStr = e.target.value; // safe - no conversion needed
+    const picked = new Date(dateStr + 'T12:00:00'); // add noon to avoid timezone shift
     setCurrentWeekDate(picked);
     fetchWeekPlan(picked, dateStr);
   };
@@ -171,7 +202,9 @@ export default function MealPlanSuggestion() {
       const planId = weekPlan?.mealPlan_id || '00000000-0000-0000-0000-000000000000';
       await api.delete(`/MealPlan/${planId}/entry/${mealToDelete.entry_id}`);
       toast.success('Đã huỷ món thành công!');
-      fetchWeekPlan(currentWeekDate);
+      // Keep the currently selected day after deletion
+      const keepDate = selectedDay?.dayDate ? safeDate(selectedDay.dayDate) : null;
+      fetchWeekPlan(currentWeekDate, keepDate);
       setMealToDelete(null);
     } catch (err) {
       console.error('Error removing meal:', err);
@@ -205,17 +238,13 @@ export default function MealPlanSuggestion() {
     }
     try {
       setQuickGenerating(slotKey);
-      const dateParam = new Date(date).toISOString().split('T')[0];
-      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
+      // Use safeDate() to avoid UTC timezone shift on backend date strings
+      const dateParam = safeDate(date);
+      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
       toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
-      if (res.data && res.data.data) {
-        const newPlan = res.data.data;
-        setWeekPlan(newPlan);
-        const idx = newPlan.days?.findIndex(d => d.dayDate && d.dayDate.split('T')[0] === dateParam);
-        if (idx !== undefined && idx >= 0) setSelectedDayIdx(idx);
-      } else {
-        await fetchWeekPlan(currentWeekDate, dateParam);
-      }
+      // Always re-fetch the CURRENT displayed week — never use the response body to set weekPlan
+      // because the response could be for a different week (timezone mismatch)
+      await fetchWeekPlan(currentWeekDate, dateParam);
     } catch (err) {
       console.error('Error quick generate:', err);
       toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
@@ -237,18 +266,11 @@ export default function MealPlanSuggestion() {
     }
     try {
       setQuickGenerating('all');
-      const dateParam = new Date(date).toISOString().split('T')[0];
+      const dateParam = safeDate(date);
       const mealsParam = missingSlots.join(',');
-      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}`);
+      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}`);
       toast.success(`Đã tạo gợi ý ${missingSlots.length} bữa còn thiếu cho ngày này!`);
-      if (res.data && res.data.data) {
-        const newPlan = res.data.data;
-        setWeekPlan(newPlan);
-        const idx = newPlan.days?.findIndex(d => d.dayDate && d.dayDate.split('T')[0] === dateParam);
-        if (idx !== undefined && idx >= 0) setSelectedDayIdx(idx);
-      } else {
-        await fetchWeekPlan(currentWeekDate, dateParam);
-      }
+      await fetchWeekPlan(currentWeekDate, dateParam);
     } catch (err) {
       console.error('Error quick generate all:', err);
       toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
@@ -261,13 +283,15 @@ export default function MealPlanSuggestion() {
 
   const formatDateShort = (dateStr) => {
     if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    // Split string directly to avoid UTC shift: "2026-08-08T00:00:00" → ["2026","08","08"]
+    const datePart = safeDate(dateStr);
+    const [, month, day] = datePart.split('-');
+    return `${day}/${month}`;
   };
 
   const formatDateInput = (dateObj) => {
     if (!dateObj) return '';
-    return new Date(dateObj).toISOString().split('T')[0];
+    return safeDate(dateObj);
   };
 
   const renderRightHeaderActions = () => {
@@ -284,7 +308,7 @@ export default function MealPlanSuggestion() {
         style={{ padding: '8px 16px', fontSize: '14px', height: '40px' }}
       >
         {!hasPro && <FiLock size={16} style={{ marginRight: '6px' }} />}
-        <FiPlus size={16} /> Tạo thực đơn tuần mới
+        <FiPlus size={16} /> Tạo thực đơn
       </button>
     );
   };
@@ -336,13 +360,8 @@ export default function MealPlanSuggestion() {
           </div>
 
           <div className="mps-week-actions">
-            <input
-              type="date"
-              className="mps-date-picker"
-              value={formatDateInput(currentWeekDate)}
-              onChange={handleDateChange}
-              title="Chọn ngày để xem tuần chứa ngày đó"
-            />
+
+
             <button className="mps-week-btn" onClick={handleNextWeek} title="Xem tuần sau">
               Tuần sau <FiChevronRight size={16} />
             </button>
@@ -426,10 +445,8 @@ export default function MealPlanSuggestion() {
               {meals.map((meal, i) => {
                 const slotKey = meal.slotKey;
                 const colors  = SLOT_COLORS[slotKey] || SLOT_COLORS.lunch;
-                const isToday = toDateKey(selectedDay?.dayDate) === getTodayDateKey();
-                const isPastDay = selectedDay?.dayDate
-                  ? new Date(selectedDay.dayDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)
-                  : false;
+                const isToday = isTodayDate(selectedDay?.dayDate);
+                const isPastDay = isPastDateStr(selectedDay?.dayDate);
                 const isQuickGenerating = quickGenerating === slotKey;
 
                 if (meal.isMissing) {

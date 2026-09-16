@@ -144,8 +144,15 @@ export default function Payment() {
     }
   };
 
-  const handleCancelPayment = () => {
+  const handleCancelPayment = async () => {
     if (pollingRef.current) clearInterval(pollingRef.current);
+    if (orderCode) {
+      try {
+        await subscriptionService.cancelPayment(orderCode);
+      } catch (err) {
+        console.error('Error cancelling payment:', err);
+      }
+    }
     pendingPaymentStorage.clearPendingPayment();
     if (step === 'pending') {
       setStep('idle');

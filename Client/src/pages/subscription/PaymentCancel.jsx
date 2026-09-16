@@ -1,15 +1,23 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoChevronBackOutline } from 'react-icons/io5';
+import { useAuth } from '../../context/AuthContext';
+import { subscriptionService } from '../../services/subscriptionService';
 import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import './SubscriptionPlans.css';
 
 export default function PaymentCancel() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
+    const accId = user?.accountId || user?.account_id;
+    const pending = pendingPaymentStorage.getPendingPayment(accId);
+    if (pending?.orderCode) {
+      subscriptionService.cancelPayment(pending.orderCode).catch(() => {});
+    }
     pendingPaymentStorage.clearPendingPayment();
-  }, []);
+  }, [user]);
 
   return (
     <div className="payment-success-container">
