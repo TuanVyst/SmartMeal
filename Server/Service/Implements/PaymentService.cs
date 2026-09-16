@@ -56,8 +56,10 @@ namespace Service.Implements
             var amount = (int)plan.Price;
             var description = orderCode.ToString();
 
-            var returnUrl = _configuration["PayOS:ReturnUrl"] ?? "https://smart-meal-three.vercel.app/payment/success";
-            var cancelUrl = _configuration["PayOS:CancelUrl"] ?? "https://smart-meal-three.vercel.app/payment/cancel";
+            // Prefer configuration key PayOS:ReturnUrl (or environment key PayOS__ReturnUrl),
+            // fall back to legacy PAYOS_RETURN_URL env var, then to the production default.
+            var returnUrl = _configuration["PayOS:ReturnUrl"] ?? _configuration["PAYOS_RETURN_URL"] ?? "https://smart-meal-orcin.vercel.app/payment/success";
+            var cancelUrl = _configuration["PayOS:CancelUrl"] ?? _configuration["PAYOS_CANCEL_URL"] ?? "https://smart-meal-orcin.vercel.app/payment/cancel";
 
             var paymentData = new CreatePaymentLinkRequest
             {
