@@ -1,12 +1,7 @@
-using MailKit;
-
-using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.Extensions.Caching.Memory;
-using MimeKit;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using Service.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace Service.Implements
 {
@@ -21,58 +16,41 @@ namespace Service.Implements
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            var emailHost = Environment.GetEnvironmentVariable("EMAIL_HOST");
-            var emailPort = int.Parse(Environment.GetEnvironmentVariable("EMAIL_PORT") ?? "587");
+            // Thay vì Host và Port, ta chỉ cần API Key và Email đã xác thực
+            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
             var emailUser = Environment.GetEnvironmentVariable("EMAIL_USER");
-            var emailPass = Environment.GetEnvironmentVariable("EMAIL_PASS");
 
-
-            bool isDebugEnabled = Environment.GetEnvironmentVariable("SMTP_DEBUG") == "true";
-
-            if (string.IsNullOrWhiteSpace(emailUser) || string.IsNullOrWhiteSpace(emailHost) || string.IsNullOrWhiteSpace(emailPass))
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(emailUser))
             {
-                Console.WriteLine("\n==================================================");
-                Console.WriteLine("⚠️ WARNING: Email environment variables (EMAIL_USER, EMAIL_HOST, EMAIL_PASS) are not configured.");
-                Console.WriteLine($"[EMAIL MOCK] To: {toEmail}");
-                Console.WriteLine($"[EMAIL MOCK] Subject: {subject}");
-                Console.WriteLine($"[EMAIL MOCK] Body: {body}");
-                Console.WriteLine("==================================================\n");
+                Console.WriteLine("\n⚠️ WARNING: SENDGRID_API_KEY or EMAIL_USER is missing.");
                 return;
             }
 
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Smart Meal", emailUser));
-            message.To.Add(new MailboxAddress("", toEmail));
-            message.Subject = subject;
+            var client = new SendGridClient(apiKey);
+            var from = new EmailAddress(emailUser, "Smart Meal");
+            var to = new EmailAddress(toEmail);
 
-            var bodyBuilder = new BodyBuilder
-            {
-                HtmlBody = body,
-                TextBody = body
-            };
-            message.Body = bodyBuilder.ToMessageBody();
-
-        
-            using var client = isDebugEnabled
-                ? new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()))
-                : new SmtpClient();
-            client.CheckCertificateRevocation = false;
+            // Tạo email message
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
 
             try
             {
-                await client.ConnectAsync(emailHost, emailPort, SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync(emailUser, emailPass);
-                await client.SendAsync(message);
+                // Giao tiếp qua HTTP/REST API (cổng 443) - Không bao giờ bị chặn
+                var response = await client.SendEmailAsync(msg);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"[EMAIL SUCCESS] Sent via SendGrid API to {toEmail}");
+                }
+                else
+                {
+                    var errorBody = await response.Body.ReadAsStringAsync();
+                    Console.WriteLine($"[EMAIL API ERROR] Status: {response.StatusCode}. Details: {errorBody}");
+                }
             }
             catch (Exception ex)
             {
-    
-                Console.WriteLine($"[EMAIL ERROR] Thất bại khi gửi tới {toEmail}. Chi tiết: {ex.Message}");
-                throw;
-            }
-            finally
-            {
-                await client.DisconnectAsync(true);
+                Console.WriteLine($"[EMAIL FATAL ERROR] Thất bại khi gọi API: {ex.Message}");
             }
         }
 
@@ -93,14 +71,14 @@ namespace Service.Implements
                     <p><i>Mã này sẽ hết hạn trong 5 phút. Vui lòng không chia sẻ cho người khác.</i></p>
                 </div>";
 
-            Console.WriteLine("Pushing email to background task...");
+            Console.WriteLine("Pushing email to background task via SendGrid API...");
 
             _ = Task.Run(async () =>
             {
                 try
                 {
                     await SendEmailAsync(email, subject, htmlBody);
-                    Console.WriteLine($"Background email sent successfully to {email}.");
+                    Console.WriteLine($"Background API request completed for {email}.");
                 }
                 catch (Exception ex)
                 {
