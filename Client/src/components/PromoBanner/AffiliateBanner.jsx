@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { FiExternalLink, FiShoppingBag, FiStar } from 'react-icons/fi';
 
 export default function AffiliateBanner() {
@@ -9,7 +9,7 @@ export default function AffiliateBanner() {
   useEffect(() => {
     const fetchAffiliateProduct = async () => {
       try {
-        const res = await axios.get('http://localhost:5267/api/AffiliateProduct');
+        const res = await api.get('/AffiliateProduct');
         if (res.data.success && res.data.data && res.data.data.length > 0) {
           // Select a random product or the first one
           setProduct(res.data.data[0]);
