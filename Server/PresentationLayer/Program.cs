@@ -232,8 +232,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors("AllowClient");
+
 app.UseRouting();
+app.UseCors("AllowClient");
 
 if (!app.Environment.IsDevelopment())
 {
