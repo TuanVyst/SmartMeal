@@ -56,6 +56,7 @@ namespace Service.Implements
             using var client = isDebugEnabled
                 ? new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()))
                 : new SmtpClient();
+            client.CheckCertificateRevocation = false;
 
             try
             {
