@@ -221,18 +221,14 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.Initialize(dbContext);
 }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "RAG Chatbot API v1");
-        c.RoutePrefix = string.Empty;
-    });
-}
-
-
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "RAG Chatbot API v1");
+    c.RoutePrefix = string.Empty;
+});
 app.UseRouting();
 app.UseCors("AllowClient");
 
