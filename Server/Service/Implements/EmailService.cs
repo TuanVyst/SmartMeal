@@ -86,8 +86,9 @@ namespace Service.Implements
                     <p>Mã OTP của bạn là: <strong style='font-size: 24px; color: #2e6c80;'>{otpCode}</strong></p>
                     <p><i>Mã này sẽ hết hạn trong 5 phút. Vui lòng không chia sẻ cho người khác.</i></p>
                 </div>";
-
+            Console.WriteLine("Begin sending email...");
             await SendEmailAsync(email, subject, htmlBody);
+            Console.WriteLine("Email sent successfully.");
 
             return otp;
         }
