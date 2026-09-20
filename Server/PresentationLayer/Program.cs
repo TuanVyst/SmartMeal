@@ -205,7 +205,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7272", "https://smart-meal-three.vercel.app")
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7272", "https://smart-meal-orcin.vercel.app/")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
