@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
 
 /// Animated progress bar matching web's Dashboard.css .nutrition-progress-bar
 class AnimatedProgressBar extends StatefulWidget {

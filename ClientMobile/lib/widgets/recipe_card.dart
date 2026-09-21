@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../core/constants/app_colors.dart';
-import '../core/constants/app_text_styles.dart';
-import '../models/recipe.dart';
+import 'package:smart_meal/core/theme/app_colors.dart';
+import 'package:smart_meal/core/theme/app_typography.dart';
+import 'package:smart_meal/features/recipes/domain/recipe_model.dart';
 
 /// Meal/recipe card – matching web's Dashboard .meal-card
 class RecipeCard extends StatelessWidget {
@@ -86,7 +86,7 @@ class RecipeCard extends StatelessWidget {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: isFavorite ? AppColors.favActiveBg : Colors.white.withOpacity(0.9),
+                          color: isFavorite ? AppColors.favActiveBg : Colors.white.withValues(alpha: 0.9),
                           shape: BoxShape.circle,
                           boxShadow: const [
                             BoxShadow(
@@ -114,8 +114,8 @@ class RecipeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    recipe.recipeName ?? 'Món ăn',
-                    style: AppTextStyles.mealCardName,
+                    recipe.recipeName,
+                    style: AppTypography.mealCardName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -137,7 +137,7 @@ class RecipeCard extends StatelessWidget {
                         const SizedBox(width: 3),
                         Text(
                           '${recipe.displayCalories} kcal',
-                          style: AppTextStyles.mealCardCalories,
+                          style: AppTypography.mealCardCalories,
                         ),
                       ],
                     ),
@@ -150,7 +150,7 @@ class RecipeCard extends StatelessWidget {
                         color: AppColors.tagBg,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(tag!, style: AppTextStyles.mealCardTag),
+                      child: Text(tag!, style: AppTypography.mealCardTag),
                     ),
                   ],
                 ],

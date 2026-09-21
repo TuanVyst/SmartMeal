@@ -205,7 +205,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:7272", "https://smart-meal-orcin.vercel.app")
+        policy.SetIsOriginAllowed(origin =>
+              {
+                  if (string.IsNullOrWhiteSpace(origin)) return false;
+                  if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
+                  if (uri.Host is "localhost" or "127.0.0.1") return true;
+                  return origin == "https://smart-meal-orcin.vercel.app";
+              })
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
-import '../core/constants/app_text_styles.dart';
+import 'package:smart_meal/core/theme/app_colors.dart';
+import 'package:smart_meal/core/theme/app_typography.dart';
 import 'animated_progress_bar.dart';
 
 /// Single nutrition stat card – matching web's Dashboard .nutrition-card
@@ -68,18 +68,18 @@ class NutritionCard extends StatelessWidget {
                   children: [
                     Text(
                       label.toUpperCase(),
-                      style: AppTextStyles.nutritionLabel,
+                      style: AppTypography.nutritionLabel,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     RichText(
                       text: TextSpan(
                         text: value.round().toString(),
-                        style: AppTextStyles.nutritionValue,
+                        style: AppTypography.nutritionValue,
                         children: [
                           TextSpan(
                             text: ' $unit',
-                            style: AppTextStyles.nutritionUnit,
+                            style: AppTypography.nutritionUnit,
                           ),
                         ],
                       ),
@@ -101,7 +101,7 @@ class NutritionCard extends StatelessWidget {
           // Target text
           Text(
             'Mục tiêu: ${target.round()} $unit',
-            style: AppTextStyles.nutritionTarget,
+            style: AppTypography.nutritionTarget,
           ),
         ],
       ),

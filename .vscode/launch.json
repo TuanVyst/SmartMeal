@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ClientMobile (web-server)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}/ClientMobile",
+      "args": [
+        "-d",
+        "web-server",
+        "--web-hostname",
+        "localhost",
+        "--web-port",
+        "8080"
+      ]
+    },
+    {
+      "name": "ClientMobile (Windows)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}/ClientMobile",
+      "deviceId": "windows"
+    },
+    {
+      "name": "ClientMobile (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}/ClientMobile",
+      "deviceId": "chrome"
+    },
+    {
+      "name": "ClientMobile (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}/ClientMobile",
+      "deviceId": "edge"
+    }
+  ]
+}

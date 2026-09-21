@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'core/theme/app_theme.dart';
-import 'providers/auth_provider.dart';
-import 'providers/recipe_provider.dart';
-import 'providers/nutrition_provider.dart';
-import 'providers/health_profile_provider.dart';
-import 'providers/favorite_provider.dart';
+import 'package:smart_meal/core/theme/app_theme.dart';
+import 'core/router/app_router.dart';
 
-import 'screens/auth/login_screen.dart';
-import 'screens/auth/register_screen.dart';
-import 'screens/main_shell.dart';
-import 'screens/meal_detail/meal_detail_screen.dart';
+import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
+import 'package:smart_meal/features/recipes/presentation/providers/recipe_provider.dart';
+import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
+import 'package:smart_meal/features/onboarding/presentation/providers/health_profile_provider.dart';
+import 'package:smart_meal/features/favorites/presentation/providers/favorite_provider.dart';
+import 'package:smart_meal/features/meal_plan/presentation/providers/meal_plan_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,42 +36,25 @@ class SmartMealApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NutritionProvider()),
         ChangeNotifierProvider(create: (_) => HealthProfileProvider()),
         ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+        ChangeNotifierProvider(create: (_) => MealPlanProvider()),
       ],
-      child: MaterialApp(
-        title: 'SmartMeal',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-
-        // Initial route based on auth state
-        home: Consumer<AuthProvider>(
-          builder: (context, auth, _) {
-            if (auth.loading) {
-              return const _SplashScreen();
-            }
-            if (auth.isLoggedIn) {
-              return const MainShell();
-            }
-            return const LoginScreen();
-          },
-        ),
-
-        // Named routes
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
-            case '/login':
-              return MaterialPageRoute(builder: (_) => const LoginScreen());
-            case '/register':
-              return MaterialPageRoute(builder: (_) => const RegisterScreen());
-            case '/main':
-              return MaterialPageRoute(builder: (_) => const MainShell());
-            case '/recipe-detail':
-              final recipeId = settings.arguments as String;
-              return MaterialPageRoute(
-                builder: (_) => MealDetailScreen(recipeId: recipeId),
-              );
-            default:
-              return MaterialPageRoute(builder: (_) => const MainShell());
+      child: Consumer2<AuthProvider, HealthProfileProvider>(
+        builder: (context, auth, health, child) {
+          // While loading stored user, show a splash screen
+          if (auth.loading || health.loading) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: const _SplashScreen(),
+            );
           }
+
+          // Once auth is loaded, we pass it to the GoRouter refreshListenable
+          return MaterialApp.router(
+            title: 'SmartMeal',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            routerConfig: createAppRouter(auth, health),
+          );
         },
       ),
     );
@@ -103,9 +84,9 @@ class _SplashScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF22C55E).withOpacity(0.3),
+                    color: Color(0xFF22C55E),
                     blurRadius: 24,
-                    offset: const Offset(0, 8),
+                    offset: Offset(0, 8),
                   ),
                 ],
               ),

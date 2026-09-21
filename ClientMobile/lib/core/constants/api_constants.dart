@@ -4,8 +4,14 @@ import 'package:flutter/foundation.dart';
 class ApiConstants {
   ApiConstants._();
 
-  /// Use localhost for web, 10.0.2.2 for Android emulator
-  static const String baseUrl = kIsWeb ? 'http://localhost:5000/api' : 'http://10.0.2.2:5000/api';
+  /// Web/Windows/iOS: host machine. Android emulator: 10.0.2.2 maps to host localhost.
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:5000/api';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:5000/api';
+    }
+    return 'http://localhost:5000/api';
+  }
 
 
   /// Request timeout in milliseconds (matching web's 15s)
@@ -22,8 +28,10 @@ class ApiConstants {
 
   // ── Recipe endpoints ──
   static const String recipes = '/recipe';
+  static const String recipesRecommended = '/recipe/recommended-for-me';
   static const String recipeTags = '/RecipeTag';
   static const String suggestByCalories = '/recipe/suggest-by-calories';
+  static const String mealPlan = '/MealPlan';
 
   // ── Ingredient endpoints ──
   static const String ingredients = '/ingredient';
