@@ -3,6 +3,7 @@ using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
 using Repository.Interfaces;
 using Service.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,18 @@ namespace Service.Implements
     {
         private readonly ISubscriptionRepo _subscriptionRepo;
         private readonly IPlanRepo _planRepo;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<SubscriptionService> _logger;
 
-        public SubscriptionService(ISubscriptionRepo subscriptionRepo, IPlanRepo planRepo, ILogger<SubscriptionService> logger)
+        public SubscriptionService(
+            ISubscriptionRepo subscriptionRepo,
+            IPlanRepo planRepo,
+            IConfiguration configuration,
+            ILogger<SubscriptionService> logger)
         {
             _subscriptionRepo = subscriptionRepo;
             _planRepo = planRepo;
+            _configuration = configuration;
             _logger = logger;
         }
 
@@ -33,7 +40,34 @@ namespace Service.Implements
         public async Task<List<SubscriptionResponseDto>> GetSubscriptionsByAccountId(Guid accountId)
         {
             var items = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
-            return items.Select(MapToDto).ToList();
+            var dtos = items.Select(MapToDto).ToList();
+
+            if (_configuration.GetValue<bool>("FeatureFlags:BypassPremium", false))
+            {
+                var now = DateTime.UtcNow;
+                bool hasActive = items.Any(s => s.Status == "active" && (!s.EndDate.HasValue || s.EndDate.Value > now));
+                if (!hasActive)
+                {
+                    var plans = await _planRepo.GetAllPlans();
+                    var proPlan = plans.FirstOrDefault(p => p.Features != null && p.Features.Contains("meal_plan"))
+                                  ?? plans.OrderByDescending(p => p.Price).FirstOrDefault();
+
+                    dtos.Insert(0, new SubscriptionResponseDto
+                    {
+                        Sub_id = Guid.NewGuid(),
+                        Account_id = accountId,
+                        Plan_id = proPlan?.Plan_id ?? Guid.Empty,
+                        StartDate = now,
+                        EndDate = now.AddYears(1),
+                        Status = "active",
+                        PaymentRef = "TRIAL_BYPASS",
+                        PricePaid = 0,
+                        IsDeleted = false
+                    });
+                }
+            }
+
+            return dtos;
         }
 
         public async Task<SubscriptionResponseDto?> GetSubscriptionById(Guid id)
@@ -100,6 +134,11 @@ namespace Service.Implements
 
         public async Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
         {
+            if (_configuration.GetValue<bool>("FeatureFlags:BypassPremium", false))
+            {
+                return true;
+            }
+
             var subs = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
             var activeSub = subs.FirstOrDefault(s => s.Status == "active" && (!s.EndDate.HasValue || s.EndDate.Value > DateTime.UtcNow));
             if (activeSub == null) return false;
