@@ -271,7 +271,7 @@ const HealthReport = () => {
               style={styles.ctaBtn}
               onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/home')}
             >
               Khám Phá SmartMeal →
             </button>

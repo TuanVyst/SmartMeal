@@ -1,0 +1,118 @@
+/* ============================================
+   SMARTMEAL JOURNAL PAGE - Single Scroll Layout
+   ============================================ */
+
+.journal-page {
+  background: #F8FBF7;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Sticky Anchor Nav ── */
+.journal-anchor-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.12);
+  box-shadow: 0 2px 16px rgba(108, 203, 99, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.journal-anchor-nav::-webkit-scrollbar { display: none; }
+
+.journal-anchor-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border: 1.5px solid transparent;
+  border-radius: 99px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.journal-anchor-btn:hover {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.journal-anchor-btn.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 3px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* ── Section Divider ── */
+.journal-section-divider {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%);
+  border-top: 1.5px solid #bbf7d0;
+  border-bottom: 1.5px solid #bbf7d0;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.journal-divider-icon {
+  width: 42px;
+  height: 42px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.15);
+  border: 1.5px solid #bbf7d0;
+  flex-shrink: 0;
+}
+
+.journal-divider-text h2 {
+  margin: 0 0 3px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #1a2e1a;
+  letter-spacing: -0.3px;
+}
+
+.journal-divider-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ── Sections ── */
+.journal-section {
+  scroll-margin-top: 50px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .journal-anchor-nav {
+    padding: 8px 12px;
+    gap: 4px;
+  }
+  .journal-anchor-btn {
+    padding: 6px 12px;
+    font-size: 12.5px;
+  }
+  .journal-section-divider {
+    padding: 16px 16px;
+  }
+}

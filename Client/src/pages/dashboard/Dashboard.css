@@ -258,6 +258,79 @@
 }
 
 /* ============================================
+   NUTRITION CIRCLES
+   ============================================ */
+.dashboard-nutrition-circles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 24px;
+  padding: 24px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.03);
+  animation: card-fade-up 0.5s ease both;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nutrient-circle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.nutrient-circle-svg-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+.nutrient-circle-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nutrient-circle-val-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.nutrient-circle-val-text .val {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a2e1a;
+  line-height: 1;
+}
+
+.nutrient-circle-val-text .unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.nutrient-circle-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  max-width: 90px;
+  line-height: 1.3;
+}
+
+/* ============================================
    HEALTH TIP SECTION
    ============================================ */
 .health-tip-section {

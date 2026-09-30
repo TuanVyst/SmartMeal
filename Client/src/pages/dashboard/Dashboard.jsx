@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { Navigate, useNavigate, NavLink } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
@@ -48,7 +48,6 @@ function mapRecipeToSuggestion(recipe, index) {
   };
 }
 
-/* ── Animated progress bar that fires after mount ── */
 function AnimatedBar({ pct, className }) {
   const [width, setWidth] = useState(0);
   useEffect(() => {
@@ -58,6 +57,41 @@ function AnimatedBar({ pct, className }) {
   return (
     <div className="nutrition-progress-bar-wrap">
       <div className={`nutrition-progress-bar ${className}`} style={{ width: `${width}%` }} />
+    </div>
+  );
+}
+
+/* ── Circular progress for nutrients ── */
+function NutrientCircle({ label, value, unit, pct, color }) {
+  const [animatedPct, setAnimatedPct] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimatedPct(pct), 300);
+    return () => clearTimeout(t);
+  }, [pct]);
+
+  const radius = 30;
+  const circumference = 2 * Math.PI * radius;
+  const displayPct = Math.min(Math.max(animatedPct, 0), 100);
+  const strokeDash = `${(displayPct / 100) * circumference} ${circumference}`;
+
+  return (
+    <div className="nutrient-circle-container">
+      <div className="nutrient-circle-svg-wrapper">
+        <svg className="nutrient-circle-svg" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r={radius} fill="none" stroke="#f1f5f9" strokeWidth="6" />
+          <circle
+            cx="36" cy="36" r={radius} fill="none" stroke={color}
+            strokeWidth="6" strokeLinecap="round" strokeDasharray={strokeDash}
+            transform="rotate(-90 36 36)"
+            style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+          />
+        </svg>
+        <div className="nutrient-circle-val-text">
+          <span className="val">{value}</span>
+          <span className="unit">{unit}</span>
+        </div>
+      </div>
+      <div className="nutrient-circle-label">{label}</div>
     </div>
   );
 }
@@ -111,6 +145,7 @@ export default function Dashboard() {
   const { isFavorite, toggleFavorite } = useFavorite();
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const [nutritionLogs, setNutritionLogs] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
@@ -119,17 +154,48 @@ export default function Dashboard() {
   const accountId = user?.accountId || user?.account_id;
 
   useEffect(() => {
-    if (accountId) {
-      const fetchTodayLogs = async () => {
-        try {
-          const res = await nutritionLogService.getAll(accountId);
-          setNutritionLogs(res.data.data || []);
-        } catch (err) {
-          console.error("Lỗi khi tải nhật ký dinh dưỡng:", err);
-        }
-      };
-      fetchTodayLogs();
-    }
+    if (!accountId) return;
+
+    const fetchTodayLogs = async () => {
+      try {
+        const res = await nutritionLogService.getAll(accountId);
+        setNutritionLogs(res.data.data || []);
+      } catch (err) {
+        console.error("Lỗi khi tải nhật ký dinh dưỡng:", err);
+      }
+    };
+
+    fetchTodayLogs();
+
+    let debounceTimer;
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fetchTodayLogs();
+      }, 1500);
+    };
+
+    const handleUpdate = () => {
+      debouncedFetch();
+    };
+
+    const handleFocus = () => fetchTodayLogs();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchTodayLogs();
+      }
+    };
+
+    window.addEventListener('smartmeal:nutrition-updated', handleUpdate);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('smartmeal:nutrition-updated', handleUpdate);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
   }, [accountId]);
 
   useEffect(() => {
@@ -263,6 +329,16 @@ export default function Dashboard() {
     { key: 'cholesterol', icon: <FiHeart size={20} />, label: 'Cholesterol',      value: Math.round(totalsToday.cholesterol), unit: 'mg', target: cholesterolTarget, pct: Math.min(Math.round((totalsToday.cholesterol / cholesterolTarget) * 100), 100) },
   ];
 
+  const circleNutrients = [
+    { key: 'protein', label: 'Đạm', color: '#3b82f6' },
+    { key: 'sugar', label: 'Đường', color: '#eab308' },
+    { key: 'sodium', label: 'Muối', color: '#94a3b8' },
+    { key: 'fat', label: 'Chất béo', color: '#f97316' },
+    { key: 'carbs', label: 'Chất bột đường (carb)', color: '#8b5cf6' },
+    { key: 'fiber', label: 'Chất xơ', color: '#22c55e' },
+    { key: 'cholesterol', label: 'Cholesterol', color: '#ec4899' },
+  ];
+
   return (
     <div className="dashboard-page">
 
@@ -289,9 +365,9 @@ export default function Dashboard() {
 
           <button
             className="hero-cta-btn"
-            onClick={() => navigate('/meal-suggestions')}
+            onClick={() => navigate('/journal')}
           >
-            Khám phá món ăn
+            Vào nhật ký
           </button>
         </div>
 
@@ -305,6 +381,26 @@ export default function Dashboard() {
       </section>
 
       {/* ══════════════════════════════════════════
+          NUTRITION CIRCLES
+         ══════════════════════════════════════════ */}
+      <section className="dashboard-nutrition-circles">
+        {circleNutrients.map(cn => {
+          const data = nutritionData.find(d => d.key === cn.key);
+          if (!data) return null;
+          return (
+            <NutrientCircle
+              key={cn.key}
+              label={cn.label}
+              value={data.value}
+              unit={data.unit}
+              pct={data.pct}
+              color={cn.color}
+            />
+          );
+        })}
+      </section>
+
+      {/* ══════════════════════════════════════════
           HEALTH TIP
          ══════════════════════════════════════════ */}
       <section className="health-tip-section">
@@ -314,93 +410,6 @@ export default function Dashboard() {
           healthProfile={healthCtx?.healthProfile}
         />
         <CalorieGoalReminder />
-      </section>
-
-      {/* ══════════════════════════════════════════
-          NUTRITION OVERVIEW
-         ══════════════════════════════════════════ */}
-      <section>
-        <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">Tổng quan hôm nay</h2>
-          <div style={{ display:'flex', alignItems:'center', gap: 8 }}>
-            <span style={{ fontSize: 13, color: '#9ca3af', fontFamily: 'Inter, sans-serif' }}>Hôm nay</span>
-          </div>
-        </div>
-
-        <div className="nutrition-overview-grid">
-          {nutritionData.map(n => (
-            <div className="nutrition-card" key={n.key}>
-              <div className="nutrition-card-top">
-                <div className={`nutrition-card-icon ${n.key}`}>{n.icon}</div>
-                <div className="nutrition-card-info">
-                  <div className="nutrition-card-label">{n.label}</div>
-                  <div className="nutrition-card-value">
-                    {n.value}
-                    <span className="nutrition-card-unit">{n.unit}</span>
-                  </div>
-                </div>
-              </div>
-              <AnimatedBar pct={n.pct} className={n.key} />
-              <div className="nutrition-card-target">
-                Mục tiêu: {n.target} {n.unit}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          MEAL RECOMMENDATIONS
-         ══════════════════════════════════════════ */}
-      <section className="meal-carousel-wrap">
-        <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">Gợi ý cho bạn</h2>
-          <NavLink to="/meal-suggestions" className="section-see-all">
-            Xem tất cả →
-          </NavLink>
-        </div>
-
-        <div
-          className="meal-cards-scroll"
-          ref={scrollRef}
-          onMouseEnter={handleCarouselPause}
-          onMouseLeave={handleCarouselResume}
-          onTouchStart={handleCarouselPause}
-          onTouchEnd={handleCarouselResume}
-          onMouseDown={handleCarouselPause}
-          onMouseUp={handleCarouselResume}
-        >
-          {mealSuggestions.map(meal => (
-            <div
-              key={meal.id}
-              className="meal-card"
-              onClick={() => navigate('/meal-suggestions')}
-            >
-              <div className="meal-card-img-wrap">
-                <img src={meal.img} alt={meal.name} className="meal-card-img" loading="lazy" />
-                <button
-                  className={`meal-card-fav-btn${isFavorite(meal.id) ? ' active' : ''}`}
-                  onClick={e => {
-                    e.stopPropagation();
-                    toggleFavorite(meal);
-                  }}
-                  aria-label="Lưu vào bộ sưu tập"
-                >
-                  <FiHeart size={18} color={isFavorite(meal.id) ? '#ef4444' : '#94a3b8'} fill={isFavorite(meal.id) ? '#ef4444' : 'none'} />
-                </button>
-              </div>
-              <div className="meal-card-body">
-                <p className="meal-card-name">{meal.name}</p>
-                <div className="meal-card-meta">
-                  <span className="meal-card-calories"><FiZap size={14} /> {meal.calories} kcal</span>
-                </div>
-                <div style={{ marginTop: 8 }}>
-                  <span className="meal-card-tag">{meal.tag}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );

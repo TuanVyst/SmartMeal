@@ -8,7 +8,7 @@
 
 /* ── Page shell ── */
 .mps-page {
-  min-height: 100vh;
+  /* min-height: 100vh khi standalone route; khi embed trong scroll page thì tự co */
   background: linear-gradient(140deg, #f0fdf4 0%, #dcfce7 45%, #ecfdf5 100%);
   font-family: 'Inter', sans-serif;
 }

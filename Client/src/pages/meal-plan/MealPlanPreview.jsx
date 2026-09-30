@@ -72,7 +72,7 @@ const MealPlanPreview = () => {
     try {
       await api.post(`/MealPlan/${plan.mealPlan_id}/confirm`);
       toast.success('Xác nhận thực đơn thành công!');
-      navigate('/dashboard');
+      navigate('/home');
     } catch (error) {
       toast.error('Lỗi khi xác nhận thực đơn.');
     } finally {
