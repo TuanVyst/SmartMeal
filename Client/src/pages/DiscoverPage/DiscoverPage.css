@@ -18,13 +18,18 @@
   border-bottom: 1px solid rgba(34, 197, 94, 0.12);
   box-shadow: 0 2px 16px rgba(108, 203, 99, 0.08);
   display: flex;
+  flex-direction: column;
+}
+
+.discover-anchor-tabs {
+  display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 20px;
   overflow-x: auto;
   scrollbar-width: none;
 }
-.discover-anchor-nav::-webkit-scrollbar { display: none; }
+.discover-anchor-tabs::-webkit-scrollbar { display: none; }
 
 .discover-anchor-btn {
   display: inline-flex;

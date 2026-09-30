@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorite } from '../../context/FavoriteContext';
@@ -146,6 +147,7 @@ export default function Dashboard() {
   const healthCtx        = useContext(HealthProfileContext);
   const navigate         = useNavigate();
   const [, setSearchParams] = useSearchParams();
+  const [isMounted, setIsMounted] = useState(false);
   const [nutritionLogs, setNutritionLogs] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
@@ -219,6 +221,8 @@ export default function Dashboard() {
     };
 
     fetchData();
+
+    setIsMounted(true);
 
     return () => { isMounted = false; };
   }, []);
@@ -381,24 +385,27 @@ export default function Dashboard() {
       </section>
 
       {/* ══════════════════════════════════════════
-          NUTRITION CIRCLES
+          NUTRITION CIRCLES (PORTAL)
          ══════════════════════════════════════════ */}
-      <section className="dashboard-nutrition-circles">
-        {circleNutrients.map(cn => {
-          const data = nutritionData.find(d => d.key === cn.key);
-          if (!data) return null;
-          return (
-            <NutrientCircle
-              key={cn.key}
-              label={cn.label}
-              value={data.value}
-              unit={data.unit}
-              pct={data.pct}
-              color={cn.color}
-            />
-          );
-        })}
-      </section>
+      {isMounted && document.getElementById('nutrition-circles-portal-target') ? createPortal(
+        <div className="dashboard-nutrition-circles">
+          {circleNutrients.map(cn => {
+            const data = nutritionData.find(d => d.key === cn.key);
+            if (!data) return null;
+            return (
+              <NutrientCircle
+                key={cn.key}
+                label={cn.label}
+                value={data.value}
+                unit={data.unit}
+                pct={data.pct}
+                color={cn.color}
+              />
+            );
+          })}
+        </div>,
+        document.getElementById('nutrition-circles-portal-target')
+      ) : null}
 
       {/* ══════════════════════════════════════════
           HEALTH TIP

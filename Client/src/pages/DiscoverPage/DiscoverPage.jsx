@@ -65,22 +65,26 @@ export default function DiscoverPage() {
           STICKY ANCHOR NAV - Định hướng khi cuộn
          ══════════════════════════════════════════ */}
       <nav className="discover-anchor-nav" aria-label="Điều hướng nhanh">
-        {SECTIONS.map((s) => (
-          <button
-            key={s.id}
-            className={`discover-anchor-btn${activeSection === s.id ? ' active' : ''}`}
-            onClick={() => scrollToSection(s.id)}
-            aria-label={s.label}
-          >
-            <span>{s.icon}</span>
-            <span>{s.label}</span>
-            {s.requiresPro && !isPremium && (
-              <span className="pro-lock" title="Tính năng Pro">
-                <FiLock size={9} color={activeSection === s.id ? 'white' : '#94a3b8'} />
-              </span>
-            )}
-          </button>
-        ))}
+        <div className="discover-anchor-tabs">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.id}
+              className={`discover-anchor-btn${activeSection === s.id ? ' active' : ''}`}
+              onClick={() => scrollToSection(s.id)}
+              aria-label={s.label}
+            >
+              <span>{s.icon}</span>
+              <span>{s.label}</span>
+              {s.requiresPro && !isPremium && (
+                <span className="pro-lock" title="Tính năng Pro">
+                  <FiLock size={9} color={activeSection === s.id ? 'white' : '#94a3b8'} />
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        {/* Portal target for nutrition circles */}
+        <div id="nutrition-circles-portal-target" className="nutrition-circles-portal"></div>
       </nav>
 
       {/* ══════════════════════════════════════════
