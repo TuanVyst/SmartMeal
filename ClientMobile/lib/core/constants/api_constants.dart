@@ -4,13 +4,15 @@ import 'package:flutter/foundation.dart';
 class ApiConstants {
   ApiConstants._();
 
-  /// Web/Windows/iOS: host machine. Android emulator: 10.0.2.2 maps to host localhost.
+  /// Web/Windows/iOS: host machine. Android real device / emulator: 5267
   static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:5000/api';
+    if (kIsWeb) return 'http://localhost:5267/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:5000/api';
+      // TH1: Test trên điện thoại thật -> Đổi IP bên dưới thành IP Wi-Fi PC của bạn (gõ ipconfig)
+      // TH2: Test trên máy ảo Android Emulator -> Đổi thành 'http://10.0.2.2:5267/api'
+      return 'http://192.168.100.160:5267/api';
     }
-    return 'http://localhost:5000/api';
+    return 'http://localhost:5267/api';
   }
 
 
