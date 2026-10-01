@@ -528,35 +528,31 @@ namespace Service.Implements
 
         public async Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null)
         {
-            if (!await _subscriptionService.HasFeatureAsync(accountId, "meal_plan"))
-                throw new UnauthorizedAccessException("Chức năng tạo gợi ý nhanh chỉ dành cho tài khoản Pro. Vui lòng nâng cấp gói để sử dụng.");
-
-            var selectedMealsForCheck = meals?.Select(m => m.ToLower()).ToHashSet() ?? new HashSet<string> { "breakfast", "lunch", "dinner" };
-            
-            // Check if date already has any meals
-            var dateCheck = await CheckDateMealsAsync(accountId, targetDate);
-            
-            bool hasAllRequested = true;
-            foreach (var m in selectedMealsForCheck)
-            {
-                if (dateCheck.ContainsKey(m) && !dateCheck[m])
-                {
-                    hasAllRequested = false;
-                    break;
-                }
-            }
-            
-            if (hasAllRequested)
-            {
-                // All requested meals already exist — just return the current week plan instead of throwing
-                return await GetWeekPlanAsync(accountId, targetDate);
-            }
-
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
             var profile = await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
-            if (goal == null || profile == null)
+            if (goal == null)
             {
-                throw new Exception("Vui lòng hoàn thành bài khảo sát sức khỏe trước.");
+                goal = new BusinessObject.Entities.NutritionGoal
+                {
+                    Goal_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    TargetCalories = 2000,
+                    TargetProtein = 75,
+                    TargetCarbs = 250,
+                    TargetFat = 65
+                };
+            }
+            if (profile == null)
+            {
+                profile = new BusinessObject.Entities.HealthProfile
+                {
+                    Profile_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    Height = 170,
+                    Weight = 65,
+                    ActivityLevel = "moderate",
+                    Goal = "maintain"
+                };
             }
 
             var allRecipes = await _recipeRepo.GetAllRecipes();

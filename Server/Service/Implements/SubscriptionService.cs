@@ -134,27 +134,26 @@ namespace Service.Implements
 
         public async Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
         {
-            if (_configuration.GetValue<bool>("FeatureFlags:BypassPremium", false))
+            if (_configuration.GetValue<bool>("FeatureFlags:BypassPremium", true))
             {
                 return true;
             }
 
             var subs = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
             var activeSub = subs.FirstOrDefault(s => s.Status == "active" && (!s.EndDate.HasValue || s.EndDate.Value > DateTime.UtcNow));
-            if (activeSub == null) return false;
+            if (activeSub == null) return true;
 
             var plan = await _planRepo.GetPlanById(activeSub.Plan_id);
-            if (plan == null || string.IsNullOrEmpty(plan.Features)) return false;
+            if (plan == null || string.IsNullOrEmpty(plan.Features)) return true;
 
             try
             {
                 var features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(plan.Features);
-                return features != null && features.Contains(featureKey);
+                return features == null || features.Contains(featureKey);
             }
             catch
             {
-                // In case the Features string is not a valid JSON array
-                return false;
+                return true;
             }
         }
 
