@@ -15,7 +15,7 @@ class AuthProvider extends ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId: kIsWeb
         ? '713019409035-cihoqeo7m44pit05h2jo6quu8df4bjan.apps.googleusercontent.com'
-        : '713019409035-0p5oesa9i7t7ho3dba1jlr4cso02cud7.apps.googleusercontent.com',
+        : null,
     serverClientId: kIsWeb
         ? null
         : '713019409035-cihoqeo7m44pit05h2jo6quu8df4bjan.apps.googleusercontent.com',
@@ -91,13 +91,19 @@ class AuthProvider extends ChangeNotifier {
 
   Future<AuthResult> googleLogin() async {
     try {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) throw Exception('Google Sign-In cancelled');
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      if (idToken == null) throw Exception('No ID token');
+      final token = googleAuth.idToken ?? googleAuth.accessToken;
+      if (token == null || token.isEmpty) {
+        throw Exception('Mã xác thực Google chưa sẵn sàng. Vui lòng thử lại.');
+      }
 
-      final result = await _authRepository.googleLogin(idToken);
+      final result = await _authRepository.googleLogin(token);
       if (result.user != null) {
         await _saveUser(result.user!);
       }

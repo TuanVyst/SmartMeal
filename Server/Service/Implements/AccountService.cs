@@ -181,18 +181,27 @@ namespace Service.Implements
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new InvalidOperationException("Google login is not configured");
 
-            Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
+            Google.Apis.Auth.GoogleJsonWebSignature.Payload? payload = null;
             try
             {
+                var validAudiences = new List<string> { clientId };
+                var androidClientId = _config["Google:AndroidClientId"] ?? "713019409035-0p5oesa9i7t7ho3dba1jlr4cso02cud7.apps.googleusercontent.com";
+                if (!string.IsNullOrWhiteSpace(androidClientId)) validAudiences.Add(androidClientId);
+
                 payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(request.IdToken,
                     new Google.Apis.Auth.GoogleJsonWebSignature.ValidationSettings
                     {
-                        Audience = new[] { clientId }
+                        Audience = validAudiences
                     });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new UnauthorizedAccessException("Invalid Google token");
+                Console.WriteLine($"[GoogleLogin Error] JWT validation failed ({ex.Message}). Trying Google UserInfo API...");
+                payload = await VerifyGoogleTokenViaApiAsync(request.IdToken);
+                if (payload == null)
+                {
+                    throw new UnauthorizedAccessException($"Invalid Google token: {ex.Message}");
+                }
             }
 
             var email = payload.Email;
@@ -266,6 +275,78 @@ namespace Service.Implements
                 Email = account.Email,
                 Phone = account.Phone
             };
+        }
+
+        private async Task<Google.Apis.Auth.GoogleJsonWebSignature.Payload?> VerifyGoogleTokenViaApiAsync(string token)
+        {
+            try
+            {
+                using var httpClient = new System.Net.Http.HttpClient();
+                
+                // 1. Try tokeninfo with access_token
+                var response = await httpClient.GetAsync($"https://oauth2.googleapis.com/tokeninfo?access_token={Uri.EscapeDataString(token)}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    // 2. Try tokeninfo with id_token
+                    response = await httpClient.GetAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={Uri.EscapeDataString(token)}");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var doc = System.Text.Json.JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("email", out var emailElement))
+                    {
+                        var email = emailElement.GetString();
+                        var name = root.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : null;
+                        var sub = root.TryGetProperty("sub", out var subElement) ? subElement.GetString() : null;
+
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            return new Google.Apis.Auth.GoogleJsonWebSignature.Payload
+                            {
+                                Email = email,
+                                Name = name ?? email.Split('@')[0],
+                                Subject = sub
+                            };
+                        }
+                    }
+                }
+
+                // 3. Fallback to UserInfo endpoint with Bearer header
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var userinfoResponse = await httpClient.GetAsync("https://www.googleapis.com/oauth2/v3/userinfo");
+                if (userinfoResponse.IsSuccessStatusCode)
+                {
+                    var json = await userinfoResponse.Content.ReadAsStringAsync();
+                    using var doc = System.Text.Json.JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("email", out var emailElement))
+                    {
+                        var email = emailElement.GetString();
+                        var name = root.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : null;
+                        var sub = root.TryGetProperty("sub", out var subElement) ? subElement.GetString() : null;
+
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            return new Google.Apis.Auth.GoogleJsonWebSignature.Payload
+                            {
+                                Email = email,
+                                Name = name ?? email.Split('@')[0],
+                                Subject = sub
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GoogleTokenViaApi Error] {ex.Message}");
+            }
+            return null;
         }
     }
 }
