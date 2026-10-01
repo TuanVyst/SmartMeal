@@ -8,13 +8,17 @@ import AppRoutes from './routes/AppRoutes';
 import './App.css';
 import './assets/styles/landing.css';
 
+import ErrorBoundary from './components/common/ErrorBoundary';
+
 function AppContent() {
   const { user } = useAuth();
 
   return (
     <FavoriteProvider>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-      <AppRoutes />
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
     </FavoriteProvider>
   );
 }

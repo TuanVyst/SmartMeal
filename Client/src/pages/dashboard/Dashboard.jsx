@@ -97,46 +97,55 @@ function NutrientCircle({ label, value, unit, pct, color }) {
   );
 }
 
-function deriveLogNutrients(log, recipes, ingredients) {
+function deriveLogNutrients(log, recipes = [], ingredients = []) {
   const result = { fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
-  const recipeId = log.recipe_id || log.recipe?.recipe_id;
-  const ingId = log.ingredient_id || log.ingredient?.ingredient_id;
+  if (!log) return result;
 
-  if (recipeId) {
-    const recipe = recipes.find(r => r.recipe_id === recipeId) || log.recipe;
-    if (recipe) {
-      const riList = recipe.recipeIngredients || recipe.RecipeIngredients || [];
-      riList.forEach(ri => {
-        const nv = ri.ingredient?.nutritional_value || ri.Ingredient?.Nutritional_value
-                || ri.nutritionalValue || ri.NutritionalValue;
+  try {
+    const recipeId = log.recipe_id || log.recipe?.recipe_id || log.Recipe_id;
+    const ingId = log.ingredient_id || log.ingredient?.ingredient_id || log.Ingredient_id;
+
+    if (recipeId) {
+      const recipe = (recipes || []).find(r => r && (r.recipe_id === recipeId || r.Recipe_id === recipeId)) || log.recipe;
+      if (recipe) {
+        const riList = recipe.recipeIngredients || recipe.RecipeIngredients || [];
+        (riList || []).forEach(ri => {
+          if (!ri) return;
+          const nv = ri.ingredient?.nutritional_value || ri.Ingredient?.Nutritional_value
+                  || ri.nutritionalValue || ri.NutritionalValue;
+          if (nv) {
+            const qty = ri.quantity || ri.Quantity || 0;
+            const sv = nv.servingSize || nv.ServingSize || 1;
+            const mult = sv > 0 ? qty / sv : 1;
+            result.fiber += (nv.fiber || nv.Fiber || 0) * mult;
+            result.sugar += (nv.sugar || nv.Sugar || 0) * mult;
+            result.sodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * mult;
+            result.cholesterol += (nv.cholesterol || nv.Cholesterol || 0) * mult;
+          }
+        });
+        const servings = recipe.servings || recipe.Servings || 1;
+        const factor = servings > 0 ? (log.quantity || 1) / servings : 1;
+        result.fiber *= factor;
+        result.sugar *= factor;
+        result.sodium *= factor;
+        result.cholesterol *= factor;
+      }
+    } else if (ingId) {
+      const ing = (ingredients || []).find(i => i && (i.ingredient_id === ingId || i.Ingredient_id === ingId)) || log.ingredient;
+      if (ing) {
+        const nv = ing.nutritional_value || ing.Nutritional_value || ing.nutritionalValue || ing.NutritionalValue;
         if (nv) {
-          const qty = ri.quantity || ri.Quantity || 0;
-          const sv = nv.servingSize || nv.ServingSize || 1;
-          const mult = sv > 0 ? qty / sv : 1;
-          result.fiber += (nv.fiber || nv.Fiber || 0) * mult;
-          result.sugar += (nv.sugar || nv.Sugar || 0) * mult;
-          result.sodium += (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * mult;
-          result.cholesterol += (nv.cholesterol || nv.Cholesterol || 0) * mult;
+          const size = nv.servingSize || nv.ServingSize || 100;
+          const factor = size > 0 ? (log.quantity || 100) / size : 1;
+          result.fiber = (nv.fiber || nv.Fiber || 0) * factor;
+          result.sugar = (nv.sugar || nv.Sugar || 0) * factor;
+          result.sodium = (nv.salt || nv.Salt || nv.sodium || nv.Sodium || 0) * factor;
+          result.cholesterol = (nv.cholesterol || nv.Cholesterol || 0) * factor;
         }
-      });
-      const servings = recipe.servings || recipe.Servings || 1;
-      const factor = servings > 0 ? (log.quantity || 1) / servings : 1;
-      result.fiber *= factor;
-      result.sugar *= factor;
-      result.sodium *= factor;
-      result.cholesterol *= factor;
+      }
     }
-  } else if (ingId) {
-    const ing = ingredients.find(i => i.ingredient_id === ingId) || log.ingredient;
-    if (ing && ing.nutritional_value) {
-      const nv = ing.nutritional_value;
-      const size = nv.servingSize || 100;
-      const factor = size > 0 ? (log.quantity || 100) / size : 1;
-      result.fiber = (nv.fiber || 0) * factor;
-      result.sugar = (nv.sugar || 0) * factor;
-      result.sodium = (nv.salt || nv.sodium || 0) * factor;
-      result.cholesterol = (nv.cholesterol || 0) * factor;
-    }
+  } catch (err) {
+    console.error('Error deriving log nutrients:', err);
   }
   return result;
 }

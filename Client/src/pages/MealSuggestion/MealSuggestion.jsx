@@ -209,6 +209,7 @@ export default function MealSuggestion() {
   };
 
   const normalizeText = (str) => {
+    if (!str || typeof str !== 'string') return '';
     return str
       .toLowerCase()
       .normalize('NFD')
@@ -216,7 +217,7 @@ export default function MealSuggestion() {
       .replace(/đ/g, 'd')
       .replace(/Đ/g, 'D')
       .trim();
-  }
+  };
 
   const getGroupedIngredients = () => {
     // Simple grouping by label category - no dedup needed
