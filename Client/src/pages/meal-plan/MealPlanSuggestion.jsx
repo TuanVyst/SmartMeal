@@ -22,7 +22,7 @@ const SLOT_COLORS = {
 };
 
 export default function MealPlanSuggestion() {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const accountId = user?.accountId || user?.account_id;
 
   const [weekPlan, setWeekPlan] = useState(null);
@@ -35,19 +35,22 @@ export default function MealPlanSuggestion() {
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
 
   // Pro features
-  const [hasPro, setHasPro] = useState(false);
+  const [hasPro, setHasPro] = useState(Boolean(isPremium));
   const [showPaywall, setShowPaywall] = useState(false);
 
   const fetchHasPro = useCallback(async () => {
     try {
       const res = await subscriptionService.checkFeature('meal_plan');
       if (res.data && res.data.success) {
-        setHasPro(res.data.data);
+        setHasPro(Boolean(res.data.data) || Boolean(isPremium));
+      } else {
+        setHasPro(Boolean(isPremium));
       }
     } catch (err) {
       console.error('Failed to check pro status:', err);
+      setHasPro(Boolean(isPremium));
     }
-  }, []);
+  }, [isPremium]);
 
   // ── Safe date helpers (no UTC shift) ────────────────────────────────────
   // Backend may serialize DateTime without Z → JS parses as LOCAL → toISOString shifts back 7h.
