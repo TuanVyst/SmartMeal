@@ -41,15 +41,32 @@ namespace Service.Implements
 
         public async Task<MealPlanResponseDto> GeneratePlanPreviewAsync(Guid accountId, int days = 7)
         {
-            if (!await _subscriptionService.HasFeatureAsync(accountId, "meal_plan"))
-                throw new UnauthorizedAccessException("Chức năng tạo thực đơn chỉ dành cho tài khoản Pro. Vui lòng nâng cấp gói để sử dụng.");
-
             // 1. Get Nutrition Goal & Profile
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
             var profile = await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
-            if (goal == null || profile == null)
+            if (goal == null)
             {
-                throw new Exception("Vui lòng hoàn thành bài khảo sát sức khỏe trước khi tạo thực đơn.");
+                goal = new BusinessObject.Entities.NutritionGoal
+                {
+                    Goal_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    TargetCalories = 2000,
+                    TargetProtein = 75,
+                    TargetCarbs = 250,
+                    TargetFat = 65
+                };
+            }
+            if (profile == null)
+            {
+                profile = new BusinessObject.Entities.HealthProfile
+                {
+                    Profile_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    Height = 170,
+                    Weight = 65,
+                    ActivityLevel = "moderate",
+                    Goal = "maintain"
+                };
             }
 
             // Collect dates that already have meals
@@ -176,9 +193,6 @@ namespace Service.Implements
 
         public async Task<MealPlanResponseDto> SuggestNextDayAsync(Guid accountId)
         {
-            if (!await _subscriptionService.HasFeatureAsync(accountId, "meal_plan"))
-                throw new UnauthorizedAccessException("Chức năng gợi ý thực đơn chỉ dành cho tài khoản Pro. Vui lòng nâng cấp gói để sử dụng.");
-
             // Find existing active plan and add a new day to it
             var existingPlan = await _mealPlanRepo.GetActivePlanByAccountId(accountId);
             if (existingPlan == null)
@@ -186,8 +200,30 @@ namespace Service.Implements
 
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
             var profile = await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
-            if (goal == null || profile == null)
-                throw new Exception("Vui lòng hoàn thành bài khảo sát sức khỏe trước.");
+            if (goal == null)
+            {
+                goal = new BusinessObject.Entities.NutritionGoal
+                {
+                    Goal_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    TargetCalories = 2000,
+                    TargetProtein = 75,
+                    TargetCarbs = 250,
+                    TargetFat = 65
+                };
+            }
+            if (profile == null)
+            {
+                profile = new BusinessObject.Entities.HealthProfile
+                {
+                    Profile_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    Height = 170,
+                    Weight = 65,
+                    ActivityLevel = "moderate",
+                    Goal = "maintain"
+                };
+            }
 
             var allRecipes = await _recipeRepo.GetAllRecipes();
             var validRecipes = allRecipes.Where(r => !r.IsDeleted && r.RecipeIngredients != null && r.RecipeIngredients.Any()).ToList();
@@ -326,7 +362,7 @@ namespace Service.Implements
                     score -= 30; // Variety penalty
                 }
 
-                if (profile.DietType == "Vegetarian" || profile.DietType == "Ăn chay")
+                if (profile != null && (profile.DietType == "Vegetarian" || profile.DietType == "Ăn chay"))
                 {
                     bool isMeat = r.RecipeLabels != null && r.RecipeLabels.Any(l => l.RecipeTag.Type == "meat" || l.RecipeTag.Type == "seafood");
                     if (isMeat) score -= 1000;

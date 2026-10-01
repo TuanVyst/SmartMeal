@@ -125,7 +125,7 @@ export default function SuggestNextPlanPopup({ onClose }) {
     setLoading(true);
     setError('');
     try {
-      if (isStep1Changed || isStep2Changed) {
+      if ((isStep1Changed || isStep2Changed) && healthProfile) {
         const updateData = {};
         if (isStep1Changed) {
           updateData.goal = goal;
@@ -139,7 +139,11 @@ export default function SuggestNextPlanPopup({ onClose }) {
         if (isStep2Changed) {
           updateData.activityLevel = activityLevel;
         }
-        await healthSurveyService.updateHealthProfile(updateData);
+        try {
+          await healthSurveyService.updateHealthProfile(updateData);
+        } catch (profileErr) {
+          console.warn('Could not update health profile:', profileErr);
+        }
       }
 
       const mealsParam = selectedMeals.join(',');
@@ -156,36 +160,6 @@ export default function SuggestNextPlanPopup({ onClose }) {
       setLoading(false);
     }
   };
-
-  // If no profile, show redirect screen
-  if (!healthProfile || !healthProfile.height || !healthProfile.weight) {
-    return (
-      <div className="popup-overlay" onClick={onClose}>
-        <div className="popup-container" onClick={e => e.stopPropagation()}>
-          <div className="popup-header">
-            <h2>Tạo gợi ý bữa ăn</h2>
-            <button className="popup-close" onClick={() => onClose(null)}><FiX size={22} /></button>
-          </div>
-          <div className="popup-body" style={{ textAlign: 'center', padding: '32px 24px' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#1E293B', marginBottom: 8 }}>
-              Cần hoàn thành khảo sát sức khỏe
-            </h3>
-            <p style={{ fontSize: 14, color: '#64748b', marginBottom: 20, lineHeight: 1.6 }}>
-              Bạn cần hoàn thành bài khảo sát sức khỏe để hệ thống có thể gợi ý thực đơn phù hợp.
-            </p>
-            <button
-              className="popup-btn-primary"
-              style={{ maxWidth: 280, margin: '0 auto' }}
-              onClick={() => { window.location.href = '/survey'; onClose(null); }}
-            >
-              Làm khảo sát ngay
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="popup-overlay" onClick={() => onClose(null)}>

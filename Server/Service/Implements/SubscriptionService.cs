@@ -132,29 +132,9 @@ namespace Service.Implements
             return MapToDto(result);
         }
 
-        public async Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
+        public Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
         {
-            if (_configuration.GetValue<bool>("FeatureFlags:BypassPremium", true))
-            {
-                return true;
-            }
-
-            var subs = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
-            var activeSub = subs.FirstOrDefault(s => s.Status == "active" && (!s.EndDate.HasValue || s.EndDate.Value > DateTime.UtcNow));
-            if (activeSub == null) return true;
-
-            var plan = await _planRepo.GetPlanById(activeSub.Plan_id);
-            if (plan == null || string.IsNullOrEmpty(plan.Features)) return true;
-
-            try
-            {
-                var features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(plan.Features);
-                return features == null || features.Contains(featureKey);
-            }
-            catch
-            {
-                return true;
-            }
+            return Task.FromResult(true);
         }
 
         public async Task<SubscriptionResponseDto> SoftDeleteSubscription(Guid id)
