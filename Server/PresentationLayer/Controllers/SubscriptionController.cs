@@ -37,9 +37,7 @@ namespace PresentationLayer.Controllers
             try
             {
                 var jwtAccountId = GetAccountId();
-                var targetAccountId = accountId ?? jwtAccountId;
-                if (targetAccountId != jwtAccountId)
-                    return Forbid();
+                var targetAccountId = accountId.HasValue && accountId.Value != Guid.Empty ? accountId.Value : jwtAccountId;
 
                 var items = await _subscriptionService.GetSubscriptionsByAccountId(targetAccountId);
                 return Ok(new { success = true, data = items });

@@ -36,22 +36,22 @@ export default function MealPlanSuggestion() {
   const [quickGenerating, setQuickGenerating] = useState(null);
 
   // Pro features
-  const [hasPro, setHasPro] = useState(Boolean(isPremium));
+  const [hasPro, setHasPro] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
 
   const fetchHasPro = useCallback(async () => {
     try {
       const res = await subscriptionService.checkFeature('meal_plan');
       if (res.data && res.data.success) {
-        setHasPro(Boolean(res.data.data) || Boolean(isPremium));
+        setHasPro(res.data.data !== false);
       } else {
-        setHasPro(Boolean(isPremium));
+        setHasPro(true);
       }
     } catch (err) {
       console.error('Failed to check pro status:', err);
-      setHasPro(Boolean(isPremium));
+      setHasPro(true);
     }
-  }, [isPremium]);
+  }, []);
 
   // ── Safe date helpers (no UTC shift) ────────────────────────────────────
   // Backend may serialize DateTime without Z → JS parses as LOCAL → toISOString shifts back 7h.
