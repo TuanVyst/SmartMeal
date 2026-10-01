@@ -11,8 +11,6 @@ using System.Text.Json.Serialization;
 
 
 
-DotNetEnv.Env.TraversePath().Load();
-
 var builder = WebApplication.CreateBuilder(args);
 // Use connection string from appsettings.json (ConnectionStrings:DefaultConnection)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

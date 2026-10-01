@@ -1,5 +1,6 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.Extensions.Configuration;
 using Service.Interfaces;
 using System;
 using System.IO;
@@ -11,18 +12,18 @@ namespace Service.Implements
     {
         private readonly Cloudinary _cloudinary;
 
-        public CloudinaryService()
+        public CloudinaryService(IConfiguration config)
         {
-            var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
-            var apiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
-            var apiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
+            var cloudName = config["Cloudinary:CloudName"] ?? Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
+            var apiKey = config["Cloudinary:ApiKey"] ?? Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
+            var apiSecret = config["Cloudinary:ApiSecret"] ?? Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
 
             if (string.IsNullOrEmpty(cloudName) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
             {
-                throw new Exception("Cloudinary credentials are not fully configured in environment variables.");
+                throw new Exception("Cloudinary credentials are not fully configured in appsettings.json.");
             }
 
-            var account = new Account(cloudName, apiKey, apiSecret);
+            var account = new Account(cloudName.Trim(), apiKey.Trim(), apiSecret.Trim());
             _cloudinary = new Cloudinary(account);
         }
 

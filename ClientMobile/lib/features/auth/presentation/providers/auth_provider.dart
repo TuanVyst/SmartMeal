@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,7 +12,14 @@ import 'package:smart_meal/core/storage/secure_storage.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository = AuthRepository();
   final SubscriptionService _subscriptionService = SubscriptionService();
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb
+        ? '713019409035-cihoqeo7m44pit05h2jo6quu8df4bjan.apps.googleusercontent.com'
+        : null,
+    serverClientId: kIsWeb
+        ? null
+        : '713019409035-cihoqeo7m44pit05h2jo6quu8df4bjan.apps.googleusercontent.com',
+  );
 
   User? _user;
   bool _loading = true;
@@ -83,13 +91,19 @@ class AuthProvider extends ChangeNotifier {
 
   Future<AuthResult> googleLogin() async {
     try {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) throw Exception('Google Sign-In cancelled');
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      if (idToken == null) throw Exception('No ID token');
+      final token = googleAuth.idToken ?? googleAuth.accessToken;
+      if (token == null || token.isEmpty) {
+        throw Exception('Mã xác thực Google chưa sẵn sàng. Vui lòng thử lại.');
+      }
 
-      final result = await _authRepository.googleLogin(idToken);
+      final result = await _authRepository.googleLogin(token);
       if (result.user != null) {
         await _saveUser(result.user!);
       }
