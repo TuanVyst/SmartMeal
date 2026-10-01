@@ -17,8 +17,116 @@
   box-shadow: 4px 0 24px rgba(108, 203, 99, 0.08);
   overflow: hidden;
   font-family: 'Inter', sans-serif;
-  transition: transform 0.3s ease;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
 }
+
+/* ── Desktop Collapsed State ── */
+.main-sidebar.desktop-collapsed {
+  width: 72px;
+}
+
+/* Collapse: fade out text-only elements (inline, no layout impact) */
+.main-sidebar.desktop-collapsed .sidebar-logo-text,
+.main-sidebar.desktop-collapsed .nav-item-text {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.15s ease, max-width 0.3s ease;
+}
+
+.main-sidebar:not(.desktop-collapsed) .sidebar-logo-text,
+.main-sidebar:not(.desktop-collapsed) .nav-item-text {
+  opacity: 1;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity 0.25s ease 0.1s, max-width 0.3s ease;
+}
+
+/* Collapse: hide block sections using max-height (no width change → no squeezing) */
+.main-sidebar.desktop-collapsed .sidebar-user-greeting,
+.main-sidebar.desktop-collapsed .sidebar-stats-row,
+.main-sidebar.desktop-collapsed .sidebar-nav-label,
+.main-sidebar.desktop-collapsed .sidebar-mascot-widget {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease, padding 0.3s ease;
+}
+
+.main-sidebar:not(.desktop-collapsed) .sidebar-user-greeting,
+.main-sidebar:not(.desktop-collapsed) .sidebar-stats-row,
+.main-sidebar:not(.desktop-collapsed) .sidebar-nav-label,
+.main-sidebar:not(.desktop-collapsed) .sidebar-mascot-widget {
+  max-height: 300px;
+  opacity: 1;
+  overflow: visible;
+  transition: max-height 0.3s ease 0.05s, opacity 0.25s ease 0.1s;
+}
+
+/* Collapsed: center avatar and nav icons */
+.main-sidebar.desktop-collapsed .sidebar-profile-card {
+  align-items: center;
+  padding: 16px 12px;
+}
+
+.main-sidebar.desktop-collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 20px 12px;
+}
+
+.main-sidebar.desktop-collapsed .sidebar-nav {
+  align-items: center;
+  padding: 12px 8px;
+}
+
+.main-sidebar.desktop-collapsed .nav-item {
+  justify-content: center;
+  padding: 12px;
+  width: 48px;
+  border-radius: 14px;
+}
+
+.main-sidebar.desktop-collapsed .nav-item:hover {
+  transform: none;
+}
+
+/* ── Desktop Toggle Tab Button ── */
+.sidebar-desktop-toggle {
+  display: flex; /* Visible on desktop */
+  position: fixed;
+  top: 50%;
+  left: 280px;
+  transform: translateY(-50%) translateX(-50%);
+  z-index: 101;
+  width: 24px;
+  height: 48px;
+  border-radius: 0 12px 12px 0;
+  background: #ffffff;
+  border: 1px solid rgba(108, 203, 99, 0.3);
+  border-left: none;
+  box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+  color: #6CCB63;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, color 0.2s;
+}
+
+.sidebar-desktop-toggle:hover {
+  background: #f0faf0;
+  color: #2d6a29;
+}
+
+.sidebar-desktop-toggle.collapsed {
+  left: 72px;
+}
+
 
 /* ── Logo ── */
 .sidebar-logo {
@@ -342,4 +450,102 @@ button.sidebar-stat-card {
   vertical-align: middle;
   box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
   letter-spacing: 0.5px;
+}
+
+/* ── Mobile hamburger toggle ── */
+.sidebar-mobile-toggle {
+  display: none; /* Hidden on desktop */
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  z-index: 200;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(108, 203, 99, 0.3);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  color: #2d6a29;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.sidebar-mobile-toggle:hover {
+  background: #f0faf0;
+  border-color: #6CCB63;
+  transform: scale(1.05);
+}
+
+/* ── Mobile close button inside sidebar ── */
+.sidebar-close-btn {
+  display: none; /* Hidden on desktop */
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.sidebar-close-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+
+/* ── Mobile backdrop overlay ── */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 149;
+  animation: fadeInBackdrop 0.25s ease;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Mobile responsive breakpoint ── */
+@media (max-width: 768px) {
+  /* Show hamburger button and close button on mobile */
+  .sidebar-mobile-toggle {
+    display: flex;
+  }
+  .sidebar-close-btn {
+    display: flex;
+  }
+  .sidebar-backdrop {
+    display: block;
+  }
+
+  /* Hide desktop-only toggle tab on mobile */
+  .sidebar-desktop-toggle {
+    display: none !important;
+  }
+
+  /* Sidebar hidden off-screen by default on mobile */
+  .main-sidebar {
+    transform: translateX(-100%);
+    width: 280px !important; /* Always full width on mobile */
+    z-index: 150;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Sidebar slides in when mobile-open class is added */
+  .main-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.2);
+  }
 }

@@ -208,7 +208,19 @@ export default function MealSuggestion() {
     setTimeout(() => setAlertMsg(null), 3000);
   };
 
+  const normalizeText = (str) => {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .trim();
+  }
+
   const getGroupedIngredients = () => {
+    // Simple grouping by label category - no dedup needed
+    // matchSystemIngredient uses exact-match-first so "Phở" won't match recipes using "Bánh phở"
     const groups = {};
     ingredients.forEach(ing => {
       const labels = ing.ingredientLabels || [];
@@ -219,16 +231,6 @@ export default function MealSuggestion() {
       groups[tagName].push(ing);
     });
     return groups;
-  };
-
-  const normalizeText = (str) => {
-    return str
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
-      .trim();
   };
 
   const groupedIngredients = getGroupedIngredients();
@@ -266,15 +268,19 @@ export default function MealSuggestion() {
 
   const matchSystemIngredient = (recipeIngName, allSysIngredients) => {
     const rName = normalizeText(recipeIngName);
-    const matches = allSysIngredients.filter(sysIng => {
+    // 1. Exact match first (highest priority)
+    const exactMatch = allSysIngredients.find(sysIng => normalizeText(sysIng.name) === rName);
+    if (exactMatch) return exactMatch;
+    // 2. Substring/word-boundary match: dbName is whole word inside rName
+    const subMatches = allSysIngredients.filter(sysIng => {
       const dbName = normalizeText(sysIng.name);
-      if (dbName === rName) return true;
       const escapedDbName = dbName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`(?<!\\p{L})${escapedDbName}(?!\\p{L})`, 'iu');
       return regex.test(rName);
     });
-    if (matches.length === 0) return null;
-    return matches.sort((a, b) => b.name.length - a.name.length)[0];
+    if (subMatches.length === 0) return null;
+    // Pick longest name match to prefer specific (e.g. "Banh pho" over "Pho")
+    return subMatches.sort((a, b) => b.name.length - a.name.length)[0];
   };
 
   const mappedRecipes = useMemo(() => recipes.map(rec => {
@@ -345,7 +351,8 @@ export default function MealSuggestion() {
         totalCholesterol += nutrition.cholesterol;
 
         const sysIng = matchSystemIngredient(ingName, ingredients);
-        const possessed = sysIng ? pantryItems.includes(sysIng.ingredient_id) : false;
+        // Use loose comparison to handle string/number type mismatch from localStorage vs API
+        const possessed = sysIng ? pantryItems.some(id => id == sysIng.ingredient_id) : false;
         const isPrimary = ri.isPrimary !== undefined ? ri.isPrimary : (ri.IsPrimary !== undefined ? ri.IsPrimary : false);
 
         return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, isPrimary, nutrition };
@@ -366,9 +373,11 @@ export default function MealSuggestion() {
     const calculatedCalories = Math.round(totalCalories / servings);
 
     // --- Allergy check (always client-side) ---
+    // Use == (loose equality) to handle potential string/number type mismatch from API
     const allergicIngredients = requiredIngredients.filter(reqIng => {
       const sysIng = matchSystemIngredient(reqIng, ingredients);
-      return sysIng && allergies.some(a => a.ingredient_id === sysIng.ingredient_id);
+      // eslint-disable-next-line eqeqeq
+      return sysIng && allergies.some(a => a.ingredient_id == sysIng.ingredient_id);
     });
     const hasAllergyConflict = allergicIngredients.length > 0;
 

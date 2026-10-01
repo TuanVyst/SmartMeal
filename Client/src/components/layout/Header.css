@@ -128,3 +128,20 @@
   border-color: rgba(220, 38, 38, 0.4);
   transform: translateY(-1px);
 }
+
+/* ── Mobile responsive ── */
+@media (max-width: 768px) {
+  .main-header {
+    padding-left: 70px; /* Make space for hamburger button */
+    padding-right: 16px;
+    justify-content: space-between;
+  }
+
+  .header-logout-btn span {
+    display: none; /* Hide text on mobile, show only icon */
+  }
+
+  .header-logout-btn {
+    padding: 8px 12px;
+  }
+}
