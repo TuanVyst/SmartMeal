@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using Service.Interfaces;
@@ -8,17 +9,18 @@ namespace Service.Implements
     public class EmailService : IEmailService
     {
         private readonly IMemoryCache _cache;
+        private readonly IConfiguration _config;
 
-        public EmailService(IMemoryCache cache)
+        public EmailService(IMemoryCache cache, IConfiguration config)
         {
             _cache = cache;
+            _config = config;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            // Thay vì Host và Port, ta chỉ cần API Key và Email đã xác thực
-            var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
-            var emailUser = Environment.GetEnvironmentVariable("EMAIL_USER");
+            var apiKey = _config["Email:SendGridApiKey"] ?? Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
+            var emailUser = _config["Email:EmailUser"] ?? Environment.GetEnvironmentVariable("EMAIL_USER");
 
             if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(emailUser))
             {
