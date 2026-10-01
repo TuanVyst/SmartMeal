@@ -96,26 +96,38 @@ export function HealthProfileProvider({ children }) {
           computeDerivedState(profile);
           localStorage.setItem('userHealthProfile', JSON.stringify(profile));
           localStorage.setItem('healthSurveyCompleted', 'true');
+        } else {
+          localStorage.removeItem('userHealthProfile');
+          localStorage.removeItem('healthSurveyCompleted');
+          setHealthProfile(null);
+          setSurveyCompleted(false);
+          computeDerivedState(null);
         }
       } catch (e) {
-        // 404 = user chưa có hồ sơ sức khoẻ → clear cache cũ (nếu có)
-        if (e.status === 404) {
+        const isNotFound = e.status === 404 || e.response?.status === 404;
+        if (isNotFound) {
           localStorage.removeItem('userHealthProfile');
           localStorage.removeItem('healthSurveyCompleted');
           setHealthProfile(null);
           setSurveyCompleted(false);
           computeDerivedState(null);
         } else {
-          // Lỗi mạng / server → fallback về localStorage
+          // Lỗi mạng / server → fallback về localStorage chỉ khi profile hợp lệ
           const storedProfile = localStorage.getItem('userHealthProfile');
           const completed = localStorage.getItem('healthSurveyCompleted') === 'true';
 
           if (storedProfile && completed) {
             try {
               const profile = JSON.parse(storedProfile);
-              setHealthProfile(profile);
-              setSurveyCompleted(true);
-              computeDerivedState(profile);
+              if (profile) {
+                setHealthProfile(profile);
+                setSurveyCompleted(true);
+                computeDerivedState(profile);
+              } else {
+                setHealthProfile(null);
+                setSurveyCompleted(false);
+                computeDerivedState(null);
+              }
             } catch (err) {
               setHealthProfile(null);
               setSurveyCompleted(false);

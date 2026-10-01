@@ -235,15 +235,24 @@ export default function MealSuggestion() {
 
   const groupedIngredients = getGroupedIngredients();
 
+  const safeTestWord = (text, searchWord) => {
+    if (!text || !searchWord) return false;
+    try {
+      const escaped = searchWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu');
+      return regex.test(text);
+    } catch {
+      return text.toLowerCase().includes(searchWord.toLowerCase());
+    }
+  };
+
   const filteredGroupedIngredients = useMemo(() => {
     if (!ingredientSearchQuery.trim()) return groupedIngredients;
 
-    const escaped = ingredientSearchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu');
     const result = {};
     Object.keys(groupedIngredients).forEach(category => {
       const matches = groupedIngredients[category].filter(ing =>
-        re.test(ing.name)
+        safeTestWord(ing.name, ingredientSearchQuery)
       );
       if (matches.length > 0) {
         result[category] = matches;
@@ -256,12 +265,10 @@ export default function MealSuggestion() {
     if (!lockedIngredients.length) return null;
     const recipeIngNames = (recipe.ingredients || []).map(i => i.name) || recipe.requiredIngredients || [];
     const locked = lockedIngredients.filter(li => {
-      const escaped = li.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return recipeIngNames.some(ri => new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(ri));
+      return recipeIngNames.some(ri => safeTestWord(ri, li));
     });
     const reduced = reducedIngredients.filter(ri => {
-      const escaped = ri.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return recipeIngNames.some(rin => new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu').test(rin));
+      return recipeIngNames.some(rin => safeTestWord(rin, ri));
     });
     return { locked, reduced };
   };
@@ -274,9 +281,7 @@ export default function MealSuggestion() {
     // 2. Substring/word-boundary match: dbName is whole word inside rName
     const subMatches = allSysIngredients.filter(sysIng => {
       const dbName = normalizeText(sysIng.name);
-      const escapedDbName = dbName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(?<!\\p{L})${escapedDbName}(?!\\p{L})`, 'iu');
-      return regex.test(rName);
+      return safeTestWord(rName, dbName);
     });
     if (subMatches.length === 0) return null;
     // Pick longest name match to prefer specific (e.g. "Banh pho" over "Pho")
