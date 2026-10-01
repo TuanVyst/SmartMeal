@@ -33,6 +33,7 @@ export default function MealPlanSuggestion() {
   const [mealToDelete, setMealToDelete] = useState(null);
 
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+  const [quickGenerating, setQuickGenerating] = useState(null);
 
   // Pro features
   const [hasPro, setHasPro] = useState(Boolean(isPremium));
