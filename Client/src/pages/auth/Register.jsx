@@ -54,7 +54,7 @@ export default function Register() {
       } else if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        navigate('/home');
       }
     } catch (err) {
       if (err.response?.data?.message) {
@@ -80,7 +80,7 @@ export default function Register() {
       if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        navigate('/home');
       }
     } catch (err) {
       if (err.response?.data?.message) {

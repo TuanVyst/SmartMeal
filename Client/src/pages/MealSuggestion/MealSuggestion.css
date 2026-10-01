@@ -719,7 +719,8 @@
 .fab-reopen-sidebar {
   position: fixed;
   bottom: 2rem;
-  right: 2rem;
+  left: calc(280px + 2rem);
+  right: auto;
   width: 56px;
   height: 56px;
   border-radius: 50%;

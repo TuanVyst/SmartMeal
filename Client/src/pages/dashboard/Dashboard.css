@@ -258,6 +258,84 @@
 }
 
 /* ============================================
+   NUTRITION CIRCLES
+   ============================================ */
+.dashboard-nutrition-circles {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 32px;
+  border-top: 1px solid rgba(108, 203, 99, 0.15);
+  margin: 0;
+  animation: card-fade-up 0.5s ease both;
+  gap: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+@media (max-width: 992px) {
+  .dashboard-nutrition-circles {
+    left: 0;
+  }
+}
+
+.nutrient-circle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.nutrient-circle-svg-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+.nutrient-circle-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nutrient-circle-val-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.nutrient-circle-val-text .val {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a2e1a;
+  line-height: 1;
+}
+
+.nutrient-circle-val-text .unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.nutrient-circle-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  max-width: 90px;
+  line-height: 1.3;
+}
+
+/* ============================================
    HEALTH TIP SECTION
    ============================================ */
 .health-tip-section {

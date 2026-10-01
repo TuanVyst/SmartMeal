@@ -23,7 +23,7 @@ export default function Login() {
       } else if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        navigate('/home');
       }
     } catch (err) {
       if (err.response?.data?.message) {
@@ -46,7 +46,7 @@ export default function Login() {
       if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        navigate('/home');
       }
     } catch (err) {
       if (err.response?.data?.message) {
@@ -66,7 +66,7 @@ export default function Login() {
       if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        navigate('/home');
       }
     } catch (err) {
       if (err.response?.data?.message) {

@@ -6,7 +6,7 @@ import api from '../../services/api';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { getRecommendation } from '../../utils/recommendationEngine';
 import avocadoMascot from '../../assets/avocado_mascot.png';
-import { FiHome, FiSearch, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward, FiBookOpen, FiCalendar, FiLock } from 'react-icons/fi';
+import { FiHome, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward } from 'react-icons/fi';
 import SidebarProgressAvatar from '../common/SidebarProgressAvatar';
 import { useTodayCalorieProgress } from '../../hooks/useTodayCalorieProgress';
 import './Sidebar.css';
@@ -80,13 +80,10 @@ export default function Sidebar() {
   const accountId = user?.accountId || user?.account_id;
 
   const navItems = [
-    { to: '/dashboard',         icon: <FiHome size={20} />, label: 'Trang chủ',        end: true  },
-    { to: '/meal-suggestion',   icon: <FiCalendar size={20} />, label: 'Gợi ý bữa ăn', requiresPro: true },
-    { to: '/meal-suggestions',  icon: <FiSearch size={20} />, label: 'Khám phá món ăn' },
-    { to: '/ingredients',       icon: <FiBookOpen size={20} />, label: 'Tra cứu nguyên liệu'        },
-    { to: '/nutrition',         icon: <FiClipboard size={20} />, label: 'Nhật ký ăn uống'            },
-    { to: '/subscription',      icon: <FiAward size={20} />, label: isPremium ? 'Gói Pro' : 'Nâng cấp Pro' },
-    { to: '/profile',           icon: <FiSettings size={20} />, label: 'Cài đặt'                      },
+    { to: '/home',         icon: <FiHome size={20} />,      label: 'Khám phá',          end: false },
+    { to: '/journal',      icon: <FiClipboard size={20} />, label: 'Nhật ký',            end: false },
+    { to: '/subscription', icon: <FiAward size={20} />,     label: isPremium ? 'Gói Pro' : 'Nâng cấp Pro' },
+    { to: '/profile',      icon: <FiSettings size={20} />,  label: 'Cài đặt'            },
   ];
 
   // Rotate mascot tips every 8 seconds

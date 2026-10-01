@@ -48,8 +48,8 @@ export default function PaymentSuccess() {
         </p>
 
         {!loading && (
-          <button onClick={() => navigate('/dashboard')} className="btn-dashboard">
-            Đi tới Bảng điều khiển
+          <button onClick={() => navigate('/home')} className="btn-dashboard">
+            Đi tới Trang chính
           </button>
         )}
       </div>
