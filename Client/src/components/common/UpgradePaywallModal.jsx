@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FiStar, FiCheck, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './UpgradePaywallModal.css';
 
 const UpgradePaywallModal = ({ isOpen, onClose, featureName = "Tính năng này" }) => {
+  const { isPremium } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isPremium) {
       setIsVisible(true);
       document.body.style.overflow = 'hidden';
     } else {
@@ -19,9 +21,9 @@ const UpgradePaywallModal = ({ isOpen, onClose, featureName = "Tính năng này"
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, isPremium]);
 
-  if (!isOpen && !isVisible) return null;
+  if (isPremium || (!isOpen && !isVisible)) return null;
 
   return createPortal(
     <div className={`paywall-overlay ${isOpen ? 'show' : ''}`}>

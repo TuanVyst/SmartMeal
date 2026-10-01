@@ -232,10 +232,10 @@ export default function MealPlanSuggestion() {
     return SLOT_ORDER.map(slot => slotMap[slot] ? { ...slotMap[slot], slotKey: slot } : { isMissing: true, slotKey: slot });
   };
 
-  const [quickGenerating, setQuickGenerating] = useState(null);
+  const canUsePro = hasPro || isPremium;
 
   const handleQuickGenerate = async (slotKey, date) => {
-    if (!hasPro) {
+    if (!canUsePro) {
       setShowPaywall(true);
       return;
     }
@@ -257,7 +257,7 @@ export default function MealPlanSuggestion() {
   };
 
   const handleQuickGenerateAll = async (date) => {
-    if (!hasPro) {
+    if (!canUsePro) {
       setShowPaywall(true);
       return;
     }
@@ -302,7 +302,7 @@ export default function MealPlanSuggestion() {
       <button 
         className="mps-btn-create"
         onClick={() => {
-          if (!hasPro) {
+          if (!canUsePro) {
             setShowPaywall(true);
             return;
           }
@@ -310,7 +310,7 @@ export default function MealPlanSuggestion() {
         }}
         style={{ padding: '8px 16px', fontSize: '14px', height: '40px' }}
       >
-        {!hasPro && <FiLock size={16} style={{ marginRight: '6px' }} />}
+        {!canUsePro && <FiLock size={16} style={{ marginRight: '6px' }} />}
         <FiPlus size={16} /> Tạo thực đơn
       </button>
     );
@@ -383,13 +383,13 @@ export default function MealPlanSuggestion() {
             <h2>Chưa có thực đơn cho tuần này</h2>
             <p>Nhấn <strong>Tạo thực đơn tuần mới</strong> hoặc chọn một ngày bên dưới để bắt đầu gợi ý món ăn.</p>
             <button className="mps-btn-create mps-btn-lg" onClick={() => {
-              if (!hasPro) {
+              if (!canUsePro) {
                 setShowPaywall(true);
                 return;
               }
               setShowPopup(true);
             }}>
-              {!hasPro && <FiLock size={18} style={{ marginRight: '8px' }} />}
+              {!canUsePro && <FiLock size={18} style={{ marginRight: '8px' }} />}
               <FiPlus size={18} /> Tạo thực đơn ngay
             </button>
           </div>

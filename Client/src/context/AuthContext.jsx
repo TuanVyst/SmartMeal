@@ -36,11 +36,17 @@ export function AuthProvider({ children }) {
       const subs = data.data || [];
       const now = new Date();
       const activeSubs = subs
-        .filter(s => s.status === 'active' && (!s.endDate || new Date(s.endDate) > now))
+        .filter(s => {
+          const status = (s.status || s.Status || '').toLowerCase();
+          const endDateVal = s.endDate || s.EndDate;
+          return status === 'active' && (!endDateVal || new Date(endDateVal) > now);
+        })
         .sort((a, b) => {
-          if (!a.endDate) return 1;
-          if (!b.endDate) return -1;
-          return new Date(b.endDate) - new Date(a.endDate);
+          const endA = a.endDate || a.EndDate;
+          const endB = b.endDate || b.EndDate;
+          if (!endA) return 1;
+          if (!endB) return -1;
+          return new Date(endB) - new Date(endA);
         });
       const activeSub = activeSubs[0] || null;
 
