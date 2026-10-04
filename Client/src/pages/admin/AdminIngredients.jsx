@@ -162,7 +162,7 @@ export default function AdminIngredients() {
     .filter((ing) => (ing.name || '').toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-  if (loading) return <div className="admin-loading">Loading ingredients...</div>;
+  if (loading) return <div className="admin-loading">Đang tải nguyên liệu...</div>;
 
   return (
     <div className="admin-page">
@@ -190,8 +190,8 @@ export default function AdminIngredients() {
             <tr>
               <th>Hình ảnh</th>
               <th>Tên</th>
-              <th>Calories</th>
-              <th>Tags</th>
+              <th>Năng lượng (Calo)</th>
+              <th>Thẻ phân loại</th>
               <th>Thao tác</th>
             </tr>
           </thead>
@@ -233,10 +233,10 @@ export default function AdminIngredients() {
                 </td>
                 <td>
                   <div className="actions-flex">
-                    <button className="btn-icon btn-edit" onClick={() => handleEditIngredient(ingredient)} title="Edit">
+                    <button className="btn-icon btn-edit" onClick={() => handleEditIngredient(ingredient)} title="Chỉnh sửa">
                       <FiEdit size={16} />
                     </button>
-                    <button className="btn-icon btn-danger" onClick={() => handleDeleteIngredient(ingredient.ingredient_id || ingredient.id)} title="Delete">
+                    <button className="btn-icon btn-danger" onClick={() => handleDeleteIngredient(ingredient.ingredient_id || ingredient.id)} title="Xóa">
                       <FiTrash2 size={16} />
                     </button>
                   </div>
@@ -312,7 +312,7 @@ export default function AdminIngredients() {
               <h4 style={{ marginBottom: '1rem', marginTop: '1rem' }}>Giá trị dinh dưỡng</h4>
               <div className="form-grid-3">
                 <div className="form-group">
-                  <label className="form-label">Calories</label>
+                  <label className="form-label">Calo (kcal)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.calories}
@@ -320,7 +320,7 @@ export default function AdminIngredients() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Protein (g)</label>
+                  <label className="form-label">Chất đạm / Protein (g)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.protein}
@@ -328,7 +328,7 @@ export default function AdminIngredients() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Carbs (g)</label>
+                  <label className="form-label">Tinh bột / Carbs (g)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.carbohydrates}
@@ -336,7 +336,7 @@ export default function AdminIngredients() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Fat (g)</label>
+                  <label className="form-label">Chất béo / Fat (g)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.fat}
@@ -344,7 +344,7 @@ export default function AdminIngredients() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Fiber (g)</label>
+                  <label className="form-label">Chất xơ / Fiber (g)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.fiber}
@@ -352,7 +352,7 @@ export default function AdminIngredients() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Sugar (g)</label>
+                  <label className="form-label">Đường / Sugar (g)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.sugar}
@@ -360,7 +360,7 @@ export default function AdminIngredients() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Sodium (mg)</label>
+                  <label className="form-label">Natri / Muối (mg)</label>
                   <input
                     type="number" className="form-control"
                     value={ingredientFormData.sodium}

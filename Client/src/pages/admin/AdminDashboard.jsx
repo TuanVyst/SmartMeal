@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FiUsers, 
-  FiTag, 
-  FiShoppingBag, 
-  FiAward, 
-  FiHeart, 
-  FiClock, 
-  FiActivity, 
-  FiUserPlus, 
-  FiTrendingUp, 
+import {
+  FiUsers,
+  FiTag,
+  FiShoppingBag,
+  FiAward,
+  FiHeart,
+  FiClock,
+  FiActivity,
+  FiUserPlus,
+  FiTrendingUp,
   FiTrendingDown,
   FiCalendar,
   FiBarChart2,
   FiChevronLeft,
-  FiChevronRight
+  FiChevronRight,
 } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 
