@@ -15,14 +15,14 @@ export default function AdminSidebar() {
   };
 
   const navItems = [
-    { to: '/admin', icon: <FiGrid />, label: 'Dashboard', end: true },
-    { to: '/admin/users', icon: <FiUsers />, label: 'Users' },
-    { to: '/admin/ingredient-tags', icon: <FiShoppingBag />, label: 'Ingredient Tags' },
-    { to: '/admin/ingredients', icon: <FiHeart />, label: 'Ingredients' },
-    { to: '/admin/recipe-tags', icon: <FiAward />, label: 'Recipe Tags' },
-    { to: '/admin/recipes', icon: <FiHeart />, label: 'Recipes' },
-    { to: '/admin/plans', icon: <FiAward />, label: 'Plans' },
-    { to: '/admin/statistics', icon: <FiGrid />, label: 'Statistics' },
+    { to: '/admin', icon: <FiGrid />, label: 'Bảng điều khiển', end: true },
+    { to: '/admin/users', icon: <FiUsers />, label: 'Người dùng' },
+    { to: '/admin/ingredient-tags', icon: <FiShoppingBag />, label: 'Thẻ nguyên liệu' },
+    { to: '/admin/ingredients', icon: <FiHeart />, label: 'Nguyên liệu' },
+    { to: '/admin/recipe-tags', icon: <FiAward />, label: 'Thẻ công thức' },
+    { to: '/admin/recipes', icon: <FiHeart />, label: 'Món ăn & Công thức' },
+    { to: '/admin/plans', icon: <FiAward />, label: 'Gói dịch vụ' },
+    { to: '/admin/statistics', icon: <FiGrid />, label: 'Thống kê' },
   ];
 
   return (

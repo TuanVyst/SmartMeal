@@ -49,7 +49,7 @@ export default function AdminRecipeTags() {
   };
 
   const handleDelete = async (id) => {
-    const ok = await dialog.confirm({ title: 'Delete tag?', message: 'Are you sure you want to delete this tag?', confirmLabel: 'Delete', danger: true });
+    const ok = await dialog.confirm({ title: 'Xóa thẻ công thức?', message: 'Bạn có chắc chắn muốn xóa thẻ công thức này không?', confirmLabel: 'Xóa', danger: true });
     if (!ok) return;
     try {
       await adminService.deleteRecipeTag(id);
@@ -76,39 +76,39 @@ export default function AdminRecipeTags() {
     (tag.type || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <div className="admin-loading">Loading recipe tags...</div>;
+  if (loading) return <div className="admin-loading">Đang tải thẻ công thức...</div>;
 
   return (
     <div>
       <div className="admin-page-header">
-        <h1>Manage Recipe Tags</h1>
+        <h1>Quản lý Thẻ Công thức</h1>
       </div>
       <div className="admin-table-container">
         <div className="admin-table-toolbar">
-          <h2>All Recipe Tags</h2>
+          <h2>Tất cả thẻ công thức</h2>
           <input
             className="admin-table-search"
-            placeholder="Search by name or type..."
+            placeholder="Tìm theo tên hoặc loại..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <button className="action-btn create" onClick={openModal}>
-            <FiPlus size={16} /> Add New Tag
+            <FiPlus size={16} /> Thêm thẻ mới
           </button>
         </div>
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Actions</th>
+              <th>Tên thẻ</th>
+              <th>Phân loại</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {filteredTags.length === 0 && (
               <tr>
                 <td colSpan={3} className="empty-state">
-                  <p>No recipe tags found</p>
+                  <p>Không tìm thấy thẻ công thức nào</p>
                 </td>
               </tr>
             )}
@@ -117,10 +117,10 @@ export default function AdminRecipeTags() {
                 <td>{tag.name}</td>
                 <td>{tag.type || '-'}</td>
                 <td>
-                  <button className="action-btn edit" onClick={() => handleEdit(tag)} title="Edit">
+                  <button className="action-btn edit" onClick={() => handleEdit(tag)} title="Chỉnh sửa">
                     <FiEdit size={16} />
                   </button>
-                  <button className="action-btn delete" onClick={() => handleDelete(tag.id)} title="Delete">
+                  <button className="action-btn delete" onClick={() => handleDelete(tag.id)} title="Xóa">
                     <FiTrash2 size={16} />
                   </button>
                 </td>
@@ -134,37 +134,39 @@ export default function AdminRecipeTags() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>{editingTag ? 'Edit Recipe Tag' : 'Add New Recipe Tag'}</h3>
+              <h3>{editingTag ? 'Chỉnh sửa Thẻ Công thức' : 'Thêm mới Thẻ Công thức'}</h3>
               <button className="modal-close" onClick={closeModal}>
                 <FiX size={20} />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="modal-form">
               <div className="form-group">
-                <label className="form-label">Name</label>
+                <label className="form-label">Tên thẻ</label>
                 <input
                   type="text"
                   className="form-control"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="VD: Bữa sáng, Eat Clean, Nhanh gọn..."
                   required
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Type</label>
+                <label className="form-label">Phân loại</label>
                 <input
                   type="text"
                   className="form-control"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  placeholder="VD: Bữa ăn, Chế độ dinh dưỡng..."
                 />
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={closeModal}>
-                  Cancel
+                  Hủy
                 </button>
                 <button type="submit" className="btn-primary">
-                  {editingTag ? 'Update' : 'Create'}
+                  {editingTag ? 'Cập nhật' : 'Tạo mới'}
                 </button>
               </div>
             </form>

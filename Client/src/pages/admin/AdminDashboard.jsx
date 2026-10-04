@@ -17,10 +17,10 @@ export default function AdminDashboard() {
   if (loading) return <div className="admin-loading">Đang tải bảng điều khiển...</div>;
 
   const cards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green', to: '/admin/users' },
-    { label: 'Total Recipes', value: stats.totalRecipes, icon: <FiHeart />, color: 'blue', to: '/admin/recipes' },
-    { label: 'Total Ingredients', value: stats.totalIngredients, icon: <FiShoppingBag />, color: 'teal', to: '/admin/ingredients' },
-    { label: 'Total Tags', value: stats.totalTags, icon: <FiAward />, color: 'red', to: '/admin/recipe-tags' },
+    { label: 'Tổng người dùng', value: stats.totalUsers, icon: <FiUsers />, color: 'green', to: '/admin/users' },
+    { label: 'Tổng công thức', value: stats.totalRecipes, icon: <FiHeart />, color: 'blue', to: '/admin/recipes' },
+    { label: 'Tổng nguyên liệu', value: stats.totalIngredients, icon: <FiShoppingBag />, color: 'teal', to: '/admin/ingredients' },
+    { label: 'Tổng thẻ gắn', value: stats.totalTags, icon: <FiAward />, color: 'red', to: '/admin/recipe-tags' },
   ];
 
   return (

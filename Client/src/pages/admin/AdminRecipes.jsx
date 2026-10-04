@@ -230,7 +230,7 @@ export default function AdminRecipes() {
                   </span>
                 </td>
                 <td>{recipe.isPublic ? 'Công khai' : 'Riêng tư'}</td>
-                <td>{recipe.prepTime}m / {recipe.cookTime}m</td>
+                <td>{recipe.prepTime} phút / {recipe.cookTime} phút</td>
                 <td>
                   <div className="tags-flex">
                     {(recipe.recipeLabels || []).map((label) => (

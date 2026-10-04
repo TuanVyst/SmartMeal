@@ -505,9 +505,9 @@ export default function RecipeEditorModal({
                         value={formData.difficulty}
                         onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                       >
-                        <option value="easy">Dễ (Easy)</option>
-                        <option value="medium">Trung bình (Medium)</option>
-                        <option value="hard">Khó (Hard)</option>
+                        <option value="easy">Dễ</option>
+                        <option value="medium">Trung bình</option>
+                        <option value="hard">Khó</option>
                       </select>
                     </div>
 
@@ -517,8 +517,8 @@ export default function RecipeEditorModal({
                         value={formData.isPublic ? 'true' : 'false'}
                         onChange={(e) => setFormData({ ...formData, isPublic: e.target.value === 'true' })}
                       >
-                        <option value="true">Công khai (Public)</option>
-                        <option value="false">Riêng tư (Private)</option>
+                        <option value="true">Công khai</option>
+                        <option value="false">Riêng tư</option>
                       </select>
                     </div>
                   </div>
@@ -536,7 +536,7 @@ export default function RecipeEditorModal({
 
                   <div className="form-group-custom">
                     <label>
-                      Thẻ phân loại món ăn (Recipe Tags)
+                      Thẻ phân loại món ăn
                       {formData.recipeTagIds.length > 0 && (
                         <span style={{ marginLeft: 8, fontSize: 12, color: '#10b981', fontWeight: 'bold' }}>
                           ({formData.recipeTagIds.length} thẻ đã chọn)
