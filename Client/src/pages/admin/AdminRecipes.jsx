@@ -76,16 +76,16 @@ export default function AdminRecipes() {
       if (editingRecipe) {
         // Update Recipe
         await adminService.updateRecipe(editingRecipe.recipe_id, baseRecipeData);
-        
+
         // Handle Recipe Ingredients for update: 
         // Simple approach: Delete old ones and create new ones
         const oldIngredients = allRecipeIngredients.filter(ri => ri.recipe_id === editingRecipe.recipe_id);
-        
+
         // 1. Delete old ingredients
         for (const oldIng of oldIngredients) {
           await adminService.deleteRecipeIngredient(oldIng.id || oldIng.ri_id);
         }
-        
+
         // 2. Create new ones
         for (const ing of recipeFormData.ingredients) {
           if (ing.ingredient_id && ing.quantity > 0) {
@@ -102,10 +102,10 @@ export default function AdminRecipes() {
         // Create Recipe
         // Note: Make sure Account_id is set appropriately in your backend or by passing a default here
         baseRecipeData.Account_id = accountId || '00000000-0000-0000-0000-000000000000'; // Default or get from auth context
-        
+
         const newRecipeResponse = await adminService.createRecipe(baseRecipeData);
         const createdRecipe = newRecipeResponse?.data || newRecipeResponse;
-        
+
         if (createdRecipe && createdRecipe.recipe_id) {
           // Immediately create RecipeIngredients
           for (const ing of recipeFormData.ingredients) {
@@ -132,7 +132,7 @@ export default function AdminRecipes() {
 
   const handleEditRecipe = (recipe) => {
     setEditingRecipe(recipe);
-    
+
     // Reverse lookup Tag IDs from Label Names
     const tagIds = (recipe.recipeLabels || []).map(label => {
       const tag = availableRecipeTags.find(t => t.name === label.labelName);
@@ -336,7 +336,7 @@ export default function AdminRecipes() {
                       placeholder="e.g. Garlic Butter Steak"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">Hình ảnh</label>
                     <ImageUpload
@@ -345,7 +345,7 @@ export default function AdminRecipes() {
                       label="Tải ảnh công thức"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">Description</label>
                     <textarea
@@ -435,8 +435,8 @@ export default function AdminRecipes() {
                         const tagId = tag.id || tag.rt_Id;
                         const isSelected = (recipeFormData.recipeTagIds || []).includes(tagId);
                         return (
-                          <div 
-                            key={tagId} 
+                          <div
+                            key={tagId}
                             onClick={() => {
                               if (isSelected) {
                                 setRecipeFormData({ ...recipeFormData, recipeTagIds: recipeFormData.recipeTagIds.filter(t => t !== tagId) });
@@ -468,7 +468,7 @@ export default function AdminRecipes() {
                       <FiPlus size={14} /> Add Row
                     </button>
                   </div>
-                  
+
                   <div className="dynamic-list-container">
                     {recipeFormData.ingredients.length === 0 && (
                       <div className="empty-state-small">No ingredients added yet.</div>
@@ -523,8 +523,8 @@ export default function AdminRecipes() {
                             style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#22c55e' }}
                           />
                         </div>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           className="btn-icon btn-danger remove-row"
                           onClick={() => handleRemoveIngredientRow(index)}
                           title="Remove ingredient"
