@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiUsers, FiTag, FiShoppingBag, FiAward, FiHeart } from 'react-icons/fi';
+import { FiUsers, FiShoppingBag, FiAward, FiHeart } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 
 export default function AdminDashboard() {
@@ -19,7 +19,6 @@ export default function AdminDashboard() {
   const cards = [
     { label: 'Total Users', value: stats.totalUsers, icon: <FiUsers />, color: 'green', to: '/admin/users' },
     { label: 'Total Recipes', value: stats.totalRecipes, icon: <FiHeart />, color: 'blue', to: '/admin/recipes' },
-    { label: 'Categories', value: stats.totalCategories, icon: <FiTag />, color: 'orange', to: '/admin/categories' },
     { label: 'Total Ingredients', value: stats.totalIngredients, icon: <FiShoppingBag />, color: 'teal', to: '/admin/ingredients' },
     { label: 'Total Tags', value: stats.totalTags, icon: <FiAward />, color: 'red', to: '/admin/recipe-tags' },
   ];

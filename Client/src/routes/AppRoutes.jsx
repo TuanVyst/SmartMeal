@@ -136,7 +136,7 @@ export default function AppRoutes() {
         <Route path="ingredients"     element={<AdminIngredients />} />
         <Route path="recipe-tags"     element={<AdminRecipeTags />} />
         <Route path="recipes"         element={<AdminRecipes />} />
-        <Route path="categories"      element={<AdminCategories />} />
+        <Route path="categories"      element={<Navigate to="/admin/recipes" replace />} />
         <Route path="plans"           element={<AdminPlans />} />
         <Route path="statistics"      element={<AdminStatistics />} />
       </Route>
