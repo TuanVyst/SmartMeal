@@ -243,5 +243,17 @@ export const adminService = {
     const res = await api.get(url);
     return res.data.data;
   },
+
+  getWeeklyEngagementStats: async (date) => {
+    let url = '/Statistic/weekly-engagement';
+    if (date) url += `?date=${encodeURIComponent(date)}`;
+    const res = await api.get(url);
+    return res.data.data;
+  },
+
+  sendActivityHeartbeat: async (sessionToken) => {
+    const res = await api.post('/Activity/heartbeat', { sessionToken });
+    return res.data;
+  },
 };
 

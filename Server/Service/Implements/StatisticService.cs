@@ -51,5 +51,165 @@ namespace Service.Implements
                 PlanStatistics = planStats
             };
         }
+
+        public async Task<object> GetWeeklyEngagementStatisticsAsync(DateTime? targetDate = null)
+        {
+            // Vietnam Timezone offset +7
+            var vnNow = DateTime.UtcNow.AddHours(7);
+            int currentDayOfWeekNow = (int)vnNow.DayOfWeek;
+            int diffToMondayNow = currentDayOfWeekNow == 0 ? 6 : currentDayOfWeekNow - 1;
+            var currentRealWeekMondayVn = vnNow.Date.AddDays(-diffToMondayNow);
+
+            // Target week calculation in VN time (+7)
+            DateTime vnRefDate;
+            if (targetDate.HasValue)
+            {
+                vnRefDate = new DateTime(targetDate.Value.Year, targetDate.Value.Month, targetDate.Value.Day, 12, 0, 0);
+            }
+            else
+            {
+                vnRefDate = vnNow;
+            }
+
+            int currentDayOfWeek = (int)vnRefDate.DayOfWeek; // Sunday = 0, Monday = 1, ...
+            int diffToMonday = currentDayOfWeek == 0 ? 6 : currentDayOfWeek - 1;
+            var thisWeekMondayVn = new DateTime(vnRefDate.Year, vnRefDate.Month, vnRefDate.Day, 0, 0, 0).AddDays(-diffToMonday); // Monday 00:00:00 VN
+
+            // Convert VN Monday 00:00:00 to UTC (subtract 7 hours) and explicitly specify DateTimeKind.Utc for Npgsql
+            var thisWeekStartUtc = DateTime.SpecifyKind(thisWeekMondayVn.AddHours(-7), DateTimeKind.Utc);
+            var thisWeekEndUtc = DateTime.SpecifyKind(thisWeekStartUtc.AddDays(7), DateTimeKind.Utc);
+
+            var lastWeekStartUtc = DateTime.SpecifyKind(thisWeekStartUtc.AddDays(-7), DateTimeKind.Utc);
+            var lastWeekEndUtc = thisWeekStartUtc;
+
+            bool isCurrentWeek = thisWeekMondayVn.Date == currentRealWeekMondayVn.Date;
+
+            // 1. New Accounts registered in the week
+            var thisWeekNewAccounts = await _ctx.Accounts
+                .Where(a => a.CreatedAt >= thisWeekStartUtc && a.CreatedAt < thisWeekEndUtc)
+                .CountAsync();
+
+            var lastWeekNewAccounts = await _ctx.Accounts
+                .Where(a => a.CreatedAt >= lastWeekStartUtc && a.CreatedAt < lastWeekEndUtc)
+                .CountAsync();
+
+            // 2. Visits and Sessions in the week
+            var thisWeekSessions = await _ctx.UserSessionLogs
+                .Where(s => s.StartTime >= thisWeekStartUtc && s.StartTime < thisWeekEndUtc)
+                .ToListAsync();
+
+            var lastWeekSessions = await _ctx.UserSessionLogs
+                .Where(s => s.StartTime >= lastWeekStartUtc && s.StartTime < lastWeekEndUtc)
+                .ToListAsync();
+
+            var thisWeekVisits = thisWeekSessions.Count;
+            var lastWeekVisits = lastWeekSessions.Count;
+
+            var activeUsersThisWeek = thisWeekSessions
+                .Where(s => s.Account_id.HasValue)
+                .Select(s => s.Account_id!.Value)
+                .Distinct()
+                .Count();
+
+            double avgVisitsPerUser = activeUsersThisWeek > 0
+                ? Math.Round((double)thisWeekVisits / activeUsersThisWeek, 1)
+                : thisWeekVisits;
+
+            // 3. Usage Time (Average and Total)
+            var thisWeekTotalDurationSeconds = thisWeekSessions.Sum(s => s.DurationSeconds);
+            var lastWeekTotalDurationSeconds = lastWeekSessions.Sum(s => s.DurationSeconds);
+
+            // Average duration in minutes per session
+            double thisWeekAvgDurationMinutes = thisWeekVisits > 0
+                ? Math.Round((double)thisWeekTotalDurationSeconds / thisWeekVisits / 60.0, 1)
+                : 0;
+
+            double lastWeekAvgDurationMinutes = lastWeekVisits > 0
+                ? Math.Round((double)lastWeekTotalDurationSeconds / lastWeekVisits / 60.0, 1)
+                : 0;
+
+            double thisWeekTotalDurationHours = Math.Round((double)thisWeekTotalDurationSeconds / 3600.0, 1);
+
+            // Growth calculation helper
+            static double CalcGrowth(double curr, double prev)
+            {
+                if (prev == 0) return curr > 0 ? 100.0 : 0.0;
+                return Math.Round(((curr - prev) / prev) * 100.0, 1);
+            }
+
+            var newAccountsGrowth = CalcGrowth(thisWeekNewAccounts, lastWeekNewAccounts);
+            var visitsGrowth = CalcGrowth(thisWeekVisits, lastWeekVisits);
+            var durationGrowth = CalcGrowth(thisWeekAvgDurationMinutes, lastWeekAvgDurationMinutes);
+
+            // 4. Daily breakdown (Monday to Sunday)
+            var dayNames = new[] { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật" };
+            var dailyStats = new List<object>();
+
+            for (int i = 0; i < 7; i++)
+            {
+                var dayStartUtc = DateTime.SpecifyKind(thisWeekStartUtc.AddDays(i), DateTimeKind.Utc);
+                var dayEndUtc = DateTime.SpecifyKind(dayStartUtc.AddDays(1), DateTimeKind.Utc);
+                var dayVn = thisWeekMondayVn.AddDays(i);
+
+                var daySessions = thisWeekSessions
+                    .Where(s => s.StartTime >= dayStartUtc && s.StartTime < dayEndUtc)
+                    .ToList();
+
+                var dayNewAccounts = await _ctx.Accounts
+                    .Where(a => a.CreatedAt >= dayStartUtc && a.CreatedAt < dayEndUtc)
+                    .CountAsync();
+
+                var dayVisits = daySessions.Count;
+                var dayTotalSeconds = daySessions.Sum(s => s.DurationSeconds);
+                var dayAvgMinutes = dayVisits > 0 ? Math.Round((double)dayTotalSeconds / dayVisits / 60.0, 1) : 0;
+
+                dailyStats.Add(new
+                {
+                    DayIndex = i,
+                    DayName = dayNames[i],
+                    Date = dayVn.ToString("dd/MM"),
+                    FullDate = dayVn.ToString("yyyy-MM-dd"),
+                    IsToday = dayVn.Date == vnNow.Date,
+                    IsFuture = dayVn.Date > vnNow.Date,
+                    NewAccounts = dayNewAccounts,
+                    Visits = dayVisits,
+                    AvgDurationMinutes = dayAvgMinutes,
+                    TotalDurationMinutes = Math.Round(dayTotalSeconds / 60.0, 1)
+                });
+            }
+
+            return new
+            {
+                ThisWeek = new
+                {
+                    StartDate = thisWeekMondayVn.ToString("dd/MM/yyyy"),
+                    EndDate = thisWeekMondayVn.AddDays(6).ToString("dd/MM/yyyy"),
+                    SelectedDate = thisWeekMondayVn.ToString("yyyy-MM-dd"),
+                    PreviousWeekDate = thisWeekMondayVn.AddDays(-7).ToString("yyyy-MM-dd"),
+                    NextWeekDate = thisWeekMondayVn.AddDays(7).ToString("yyyy-MM-dd"),
+                    IsCurrentWeek = isCurrentWeek,
+                    CanGoNext = thisWeekMondayVn < currentRealWeekMondayVn,
+                    NewAccounts = thisWeekNewAccounts,
+                    TotalVisits = thisWeekVisits,
+                    ActiveUsers = activeUsersThisWeek,
+                    AvgVisitsPerUser = avgVisitsPerUser,
+                    AvgDurationMinutes = thisWeekAvgDurationMinutes,
+                    TotalDurationHours = thisWeekTotalDurationHours
+                },
+                LastWeek = new
+                {
+                    NewAccounts = lastWeekNewAccounts,
+                    TotalVisits = lastWeekVisits,
+                    AvgDurationMinutes = lastWeekAvgDurationMinutes
+                },
+                Growth = new
+                {
+                    NewAccounts = newAccountsGrowth,
+                    Visits = visitsGrowth,
+                    AvgDuration = durationGrowth
+                },
+                DailyStats = dailyStats
+            };
+        }
     }
 }

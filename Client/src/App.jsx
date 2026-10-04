@@ -9,9 +9,11 @@ import './App.css';
 import './assets/styles/landing.css';
 
 import ErrorBoundary from './components/common/ErrorBoundary';
+import { useActivityTracker } from './hooks/useActivityTracker';
 
 function AppContent() {
   const { user } = useAuth();
+  useActivityTracker();
 
   return (
     <FavoriteProvider>

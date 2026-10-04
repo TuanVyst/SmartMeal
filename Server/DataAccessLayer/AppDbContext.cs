@@ -47,7 +47,8 @@ namespace DataAccessLayer
         public DbSet<MealPlan> MealPlans { get; set; }
         public DbSet<MealPlanDay> MealPlanDays { get; set; }
         public DbSet<MealPlanEntry> MealPlanEntries { get; set; }
-     
+        // Activity & Session Tracking
+        public DbSet<UserSessionLog> UserSessionLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -62,6 +63,12 @@ namespace DataAccessLayer
             modelBuilder.Entity<BusinessObject.Entities.RecipeTag>()
                 .HasIndex(t => t.Name)
                 .IsUnique();
+
+            modelBuilder.Entity<BusinessObject.Entities.UserSessionLog>()
+                .HasIndex(s => s.SessionToken);
+
+            modelBuilder.Entity<BusinessObject.Entities.UserSessionLog>()
+                .HasIndex(s => s.StartTime);
         }
     }
 }
