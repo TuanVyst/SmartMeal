@@ -59,32 +59,32 @@ export default function AppRoutes() {
         <Route path="/home" element={<DiscoverPage />} />
 
         {/* Redirects từ routes cũ → đúng tab */}
-        <Route path="/dashboard"        element={<Navigate to="/home?tab=overview" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/home?tab=overview" replace />} />
         <Route path="/meal-suggestions" element={<Navigate to="/home?tab=discover" replace />} />
-        <Route path="/meal-suggestion"  element={<Navigate to="/home?tab=plan"     replace />} />
-        <Route path="/favorites"        element={<Favorites />} />
+        <Route path="/meal-suggestion" element={<Navigate to="/home?tab=plan" replace />} />
+        <Route path="/favorites" element={<Favorites />} />
 
         {/* ── TRANG 2: Journal (Nhật ký + Tra cứu nguyên liệu) ── */}
         <Route path="/journal" element={<JournalPage />} />
 
         {/* Redirects từ routes cũ → đúng tab */}
-        <Route path="/nutrition"   element={<Navigate to="/journal?tab=diary"  replace />} />
+        <Route path="/nutrition" element={<Navigate to="/journal?tab=diary" replace />} />
         <Route path="/ingredients" element={<Navigate to="/journal?tab=lookup" replace />} />
 
         {/* ── Trang phụ trợ giữ nguyên ── */}
-        <Route path="/subscription"         element={<SubscriptionPlans />} />
+        <Route path="/subscription" element={<SubscriptionPlans />} />
         <Route path="/subscription/payment" element={<Payment />} />
-        <Route path="/payment/success"      element={<PaymentSuccess />} />
-        <Route path="/payment/cancel"       element={<PaymentCancel />} />
-        <Route path="/profile"              element={<Profile />} />
-        <Route path="/recipe/:id"           element={<MealDetail />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/recipe/:id" element={<MealDetail />} />
 
         {/* Ingredient & Recipe forms (admin/power user) */}
-        <Route path="/ingredients/new"      element={<IngredientForm />} />
-        <Route path="/ingredients/:id"      element={<IngredientDetail />} />
+        <Route path="/ingredients/new" element={<IngredientForm />} />
+        <Route path="/ingredients/:id" element={<IngredientDetail />} />
         <Route path="/ingredients/:id/edit" element={<IngredientForm />} />
-        <Route path="/recipes/new"          element={<RecipeForm />} />
-        <Route path="/recipes/:id/edit"     element={<RecipeForm />} />
+        <Route path="/recipes/new" element={<RecipeForm />} />
+        <Route path="/recipes/:id/edit" element={<RecipeForm />} />
       </Route>
 
       {/* ── Protected routes without MainLayout (no sidebar) ── */}
@@ -131,14 +131,14 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<AdminDashboard />} />
-        <Route path="users"           element={<AdminUsers />} />
+        <Route path="users" element={<AdminUsers />} />
         <Route path="ingredient-tags" element={<AdminIngredientTags />} />
-        <Route path="ingredients"     element={<AdminIngredients />} />
-        <Route path="recipe-tags"     element={<AdminRecipeTags />} />
-        <Route path="recipes"         element={<AdminRecipes />} />
-        <Route path="categories"      element={<Navigate to="/admin/recipes" replace />} />
-        <Route path="plans"           element={<AdminPlans />} />
-        <Route path="statistics"      element={<AdminStatistics />} />
+        <Route path="ingredients" element={<AdminIngredients />} />
+        <Route path="recipe-tags" element={<AdminRecipeTags />} />
+        <Route path="recipes" element={<AdminRecipes />} />
+        <Route path="categories" element={<Navigate to="/admin/recipes" replace />} />
+        <Route path="plans" element={<AdminPlans />} />
+        <Route path="statistics" element={<AdminStatistics />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

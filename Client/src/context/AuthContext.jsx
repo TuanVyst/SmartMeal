@@ -23,14 +23,28 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser);
   const [loading, setLoading] = useState(false);
   const [subscription, setSubscription] = useState(null);
-  const [isPremium, setIsPremium] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  // Whether the user may use Pro-gated features (Pro subscriber OR server opened Pro features for all)
+  const [hasProAccess, setHasProAccess] = useState(false);
+
+  const checkProAccess = useCallback(async () => {
+    try {
+      const res = await subscriptionService.checkFeature('meal_plan');
+      setHasProAccess(!!(res.data && res.data.success && res.data.data === true));
+    } catch (err) {
+      console.error('Error checking pro feature access:', err);
+      setHasProAccess(false);
+    }
+  }, []);
 
   const checkPremiumStatus = useCallback(async (accountId) => {
     if (!accountId) {
       setSubscription(null);
-      setIsPremium(true);
+      setIsPremium(false);
+      setHasProAccess(false);
       return;
     }
+    checkProAccess();
     try {
       const { data } = await subscriptionService.getSubscriptionsByAccountId(accountId);
       const subs = data.data || [];
@@ -55,16 +69,16 @@ export function AuthProvider({ children }) {
         setIsPremium(true);
         pendingPaymentStorage.clearPendingPayment();
       } else {
-        // When bypass flag is active, default isPremium to true
+        // No active subscription → regular (non-Pro) account
         setSubscription(null);
-        setIsPremium(true);
+        setIsPremium(false);
       }
     } catch (err) {
       console.error('Error checking premium status:', err);
       setSubscription(null);
-      setIsPremium(true);
+      setIsPremium(false);
     }
-  }, []);
+  }, [checkProAccess]);
 
   useEffect(() => {
     const storedUser = readStoredUser();
@@ -189,6 +203,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     setSubscription(null);
     setIsPremium(false);
+    setHasProAccess(false);
   };
 
   const updateAvatar = async (avatarFile) => {
@@ -200,7 +215,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar, subscription, isPremium, checkPremiumStatus, checkPendingPaymentStatus }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar, subscription, isPremium, hasProAccess, checkPremiumStatus, checkPendingPaymentStatus }}>
       {children}
     </AuthContext.Provider>
   );

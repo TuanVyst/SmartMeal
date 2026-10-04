@@ -6,7 +6,6 @@ import SuggestNextPlanPopup from '../../components/forms/SuggestNextPlanPopup';
 import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronLeft, FiChevronRight, FiClock, FiZap, FiLock } from 'react-icons/fi';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
-import { subscriptionService } from '../../services/subscriptionService';
 import UpgradePaywallModal from '../../components/common/UpgradePaywallModal';
 import './MealPlanSuggestion.css';
 
@@ -22,7 +21,7 @@ const SLOT_COLORS = {
 };
 
 export default function MealPlanSuggestion() {
-  const { user, isPremium } = useAuth();
+  const { user, isPremium, hasProAccess } = useAuth();
   const accountId = user?.accountId || user?.account_id;
 
   const [weekPlan, setWeekPlan] = useState(null);
@@ -35,23 +34,8 @@ export default function MealPlanSuggestion() {
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [quickGenerating, setQuickGenerating] = useState(null);
 
-  // Pro features
-  const [hasPro, setHasPro] = useState(true);
+  // Pro features (access resolved centrally in AuthContext)
   const [showPaywall, setShowPaywall] = useState(false);
-
-  const fetchHasPro = useCallback(async () => {
-    try {
-      const res = await subscriptionService.checkFeature('meal_plan');
-      if (res.data && res.data.success) {
-        setHasPro(res.data.data !== false);
-      } else {
-        setHasPro(true);
-      }
-    } catch (err) {
-      console.error('Failed to check pro status:', err);
-      setHasPro(true);
-    }
-  }, []);
 
   // ── Safe date helpers (no UTC shift) ────────────────────────────────────
   // Backend may serialize DateTime without Z → JS parses as LOCAL → toISOString shifts back 7h.
@@ -110,8 +94,7 @@ export default function MealPlanSuggestion() {
 
   useEffect(() => {
     fetchWeekPlan(new Date());
-    fetchHasPro();
-  }, [fetchWeekPlan, fetchHasPro]);
+  }, [fetchWeekPlan]);
 
   const handlePopupClose = (msg) => {
     setShowPopup(false);
@@ -233,7 +216,7 @@ export default function MealPlanSuggestion() {
     return SLOT_ORDER.map(slot => slotMap[slot] ? { ...slotMap[slot], slotKey: slot } : { isMissing: true, slotKey: slot });
   };
 
-  const canUsePro = hasPro || isPremium;
+  const canUsePro = hasProAccess || isPremium;
 
   const handleQuickGenerate = async (slotKey, date) => {
     if (!canUsePro) {

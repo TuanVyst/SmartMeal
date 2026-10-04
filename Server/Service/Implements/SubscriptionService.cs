@@ -40,34 +40,7 @@ namespace Service.Implements
         public async Task<List<SubscriptionResponseDto>> GetSubscriptionsByAccountId(Guid accountId)
         {
             var items = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
-            var dtos = items.Select(MapToDto).ToList();
-
-            if (_configuration.GetValue<bool>("FeatureFlags:BypassPremium", false))
-            {
-                var now = DateTime.UtcNow;
-                bool hasActive = items.Any(s => s.Status == "active" && (!s.EndDate.HasValue || s.EndDate.Value > now));
-                if (!hasActive)
-                {
-                    var plans = await _planRepo.GetAllPlans();
-                    var proPlan = plans.FirstOrDefault(p => p.Features != null && p.Features.Contains("meal_plan"))
-                                  ?? plans.OrderByDescending(p => p.Price).FirstOrDefault();
-
-                    dtos.Insert(0, new SubscriptionResponseDto
-                    {
-                        Sub_id = Guid.NewGuid(),
-                        Account_id = accountId,
-                        Plan_id = proPlan?.Plan_id ?? Guid.Empty,
-                        StartDate = now,
-                        EndDate = now.AddYears(1),
-                        Status = "active",
-                        PaymentRef = "TRIAL_BYPASS",
-                        PricePaid = 0,
-                        IsDeleted = false
-                    });
-                }
-            }
-
-            return dtos;
+            return items.Select(MapToDto).ToList();
         }
 
         public async Task<SubscriptionResponseDto?> GetSubscriptionById(Guid id)
@@ -132,9 +105,41 @@ namespace Service.Implements
             return MapToDto(result);
         }
 
-        public Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
+        public async Task<bool> HasFeatureAsync(Guid accountId, string featureKey)
         {
-            return Task.FromResult(true);
+            // Temporary: open all Pro features to every account (toggle via appsettings)
+            if (_configuration.GetValue<bool>("FeatureFlags:OpenProFeaturesForAll", false))
+                return true;
+
+            var now = DateTime.UtcNow;
+            var subs = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
+            var activeSubs = subs.Where(s =>
+                !s.IsDeleted &&
+                string.Equals(s.Status, "active", StringComparison.OrdinalIgnoreCase) &&
+                (!s.EndDate.HasValue || s.EndDate.Value > now));
+
+            foreach (var sub in activeSubs)
+            {
+                var plan = await _planRepo.GetPlanById(sub.Plan_id);
+                if (PlanHasFeature(plan, featureKey))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool PlanHasFeature(Plan? plan, string featureKey)
+        {
+            if (plan == null || string.IsNullOrWhiteSpace(plan.Features)) return false;
+            try
+            {
+                var features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(plan.Features);
+                return features != null && features.Any(f => string.Equals(f, featureKey, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                return plan.Features.Contains(featureKey, StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         public async Task<SubscriptionResponseDto> SoftDeleteSubscription(Guid id)

@@ -13,7 +13,8 @@ const SECTIONS = [
 ];
 
 export default function DiscoverPage() {
-  const { isPremium } = useAuth();
+  const { isPremium, hasProAccess } = useAuth();
+  const canUsePro = isPremium || hasProAccess;
   const [activeSection, setActiveSection] = useState('overview');
   const [isPlanCollapsed, setIsPlanCollapsed] = useState(false);
   const observerRef = useRef(null);
@@ -75,7 +76,7 @@ export default function DiscoverPage() {
             >
               <span>{s.icon}</span>
               <span>{s.label}</span>
-              {s.requiresPro && !isPremium && (
+              {s.requiresPro && !canUsePro && (
                 <span className="pro-lock" title="Tính năng Pro">
                   <FiLock size={9} color={activeSection === s.id ? 'white' : '#94a3b8'} />
                 </span>
@@ -107,7 +108,7 @@ export default function DiscoverPage() {
           </div>
         </div>
         <div className="divider-right">
-          {!isPremium && (
+          {!canUsePro && (
             <div className="divider-badge">
               <FiLock size={11} /> Tính năng Pro
             </div>
