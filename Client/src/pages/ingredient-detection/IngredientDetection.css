@@ -1,0 +1,244 @@
+.ingredient-detection-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.ingredient-detection-header {
+  margin-bottom: 28px;
+}
+
+.ingredient-detection-header h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.ingredient-detection-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* Upload / Camera */
+
+.detection-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.detection-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 24px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  background: white;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  transition: 0.2s;
+}
+
+.detection-action-btn:hover {
+  transform: translateY(-2px);
+  border-color: #d1d5db;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.action-icon {
+  font-size: 32px;
+}
+
+.detection-action-btn span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detection-action-btn small {
+  color: #6b7280;
+}
+
+/* Tips */
+
+.shoot-tips {
+  margin-top: 24px;
+
+  padding: 20px 24px;
+
+  border-radius: 16px;
+
+  background: #f8fafc;
+}
+
+.shoot-tips h3 {
+  margin: 0 0 12px;
+}
+
+.shoot-tips ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.shoot-tips li {
+  margin: 8px 0;
+  color: #4b5563;
+}
+
+/* Camera */
+
+.camera-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.camera-preview {
+  position: relative;
+
+  width: 100%;
+  max-width: 760px;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  background: #000;
+}
+
+.camera-preview video {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  max-height: 65vh;
+
+  object-fit: cover;
+}
+
+.camera-guide {
+  position: absolute;
+
+  left: 50%;
+  bottom: 20px;
+
+  transform: translateX(-50%);
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+
+  font-size: 14px;
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  margin-top: 20px;
+}
+
+.capture-btn {
+  width: 68px;
+  height: 68px;
+
+  border-radius: 50%;
+
+  border: 5px solid #e5e7eb;
+
+  background: white;
+
+  color: #ef4444;
+
+  font-size: 32px;
+
+  cursor: pointer;
+}
+
+/* Preview */
+
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-preview {
+  width: 100%;
+  max-width: 760px;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  background: #f3f4f6;
+}
+
+.image-preview img {
+  display: block;
+
+  width: 100%;
+  max-height: 65vh;
+
+  object-fit: contain;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 14px;
+
+  margin-top: 20px;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 12px 22px;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+.primary-btn {
+  border: none;
+
+  background: #111827;
+  color: white;
+}
+
+.secondary-btn {
+  border: 1px solid #d1d5db;
+
+  background: white;
+  color: #374151;
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .ingredient-detection-page {
+    padding: 20px;
+  }
+
+  .detection-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .ingredient-detection-header h1 {
+    font-size: 25px;
+  }
+}
