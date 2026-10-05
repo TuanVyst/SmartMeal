@@ -18,7 +18,7 @@ CORS(
     }
 )
 # Load YOLO V6
-model = YOLO(r"C:\Users\Nitro5\Desktop\EXE201\SmartMeal-master\SmartMeal\AI\best.pt")
+model = YOLO("best.pt")
 
 
 @app.route("/predict", methods=["POST"])
@@ -82,8 +82,10 @@ def health():
 
 
 if __name__ == "__main__":
+    import os
+
     app.run(
         host="0.0.0.0",
-        port=5001,
-        debug=True
+        port=int(os.environ.get("PORT", 5001)),
+        debug=False
     )
