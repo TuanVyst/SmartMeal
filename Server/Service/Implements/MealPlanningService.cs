@@ -342,10 +342,27 @@ namespace Service.Implements
             return await BuildPlanDto(updatedPlan, updatedPlan.Account_id);
         }
 
-        private Recipe SelectBestRecipe(List<Recipe> recipes, double targetCalories, HealthProfile profile, HashSet<Guid> usedIds, Random rnd)
+        private Recipe SelectBestRecipe(List<Recipe> recipes, double targetCalories, HealthProfile profile, HashSet<Guid> usedIds, Random rnd, string focus = null)
         {
             // Hard limit: reject recipes exceeding target by more than 10%
             double maxAllowed = targetCalories * 1.10;
+
+            var focusKeys = NormalizeFocusList(focus);
+            var focusDataList = new List<(string key, bool isLimit, Dictionary<Guid, double> values, double max)>();
+            
+            if (focusKeys != null && focusKeys.Count > 0)
+            {
+                foreach (var k in focusKeys)
+                {
+                    bool isLimit = k == "sugar" || k == "sodium" || k == "cholesterol";
+                    var values = recipes.ToDictionary(r => r.Recipe_id, r => GetFocusNutrientPerServing(r, k));
+                    var max = values.Values.DefaultIfEmpty(0).Max();
+                    if (max > 0)
+                    {
+                        focusDataList.Add((k, isLimit, values, max));
+                    }
+                }
+            }
 
             var scoredRecipes = recipes.Select(r =>
             {
@@ -356,6 +373,16 @@ namespace Service.Implements
                     return new { Recipe = r, Score = -1000.0 };
 
                 double score = 100 - (Math.Abs(calories - targetCalories) / targetCalories * 100);
+
+                // Nutrient focus bonus (up to +80 per key)
+                if (focusDataList.Count > 0)
+                {
+                    foreach (var fData in focusDataList)
+                    {
+                        double ratio = fData.values[r.Recipe_id] / fData.max; // 0..1
+                        score += (fData.isLimit ? (1 - ratio) : ratio) * 80;
+                    }
+                }
 
                 if (usedIds.Contains(r.Recipe_id))
                 {
@@ -379,6 +406,59 @@ namespace Service.Implements
             // Tie-break top 3
             var top3 = scoredRecipes.Take(3).ToList();
             return top3[rnd.Next(top3.Count)].Recipe;
+        }
+
+        private static List<string> NormalizeFocusList(string focus)
+        {
+            if (string.IsNullOrWhiteSpace(focus)) return null;
+            var parts = focus.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var result = new List<string>();
+            var allowed = new HashSet<string> { "protein", "carbs", "fat", "fiber", "sugar", "sodium", "cholesterol" };
+            
+            foreach (var p in parts)
+            {
+                var f = p.Trim().ToLowerInvariant();
+                if (f == "salt") f = "sodium";
+                if (f == "carb") f = "carbs";
+                if (allowed.Contains(f) && !result.Contains(f))
+                {
+                    result.Add(f);
+                }
+            }
+            return result.Count > 0 ? result : null;
+        }
+
+        private double GetFocusNutrientPerServing(Recipe recipe, string focusKey)
+        {
+            if (recipe.RecipeIngredients == null || recipe.Servings <= 0) return 0;
+            double total = 0;
+            foreach (var ri in recipe.RecipeIngredients)
+            {
+                var nv = ri.Ingredient?.Nutritional_value;
+                if (nv == null) continue;
+                var multiplier = UnitConverter.GetMultiplier(
+                    ri.Quantity,
+                    ri.UOM,
+                    nv.ServingSize ?? 100.0,
+                    nv.ServingUnit,
+                    ri.Ingredient.Name,
+                    nv.EverydayWeight
+                );
+                if (multiplier <= 0) multiplier = 1.0;
+                double v = focusKey switch
+                {
+                    "protein" => nv.Protein ?? 0,
+                    "carbs" => nv.Carbs ?? 0,
+                    "fat" => nv.Fat ?? 0,
+                    "fiber" => nv.Fiber ?? 0,
+                    "sugar" => nv.Sugar ?? 0,
+                    "sodium" => nv.Salt ?? 0,
+                    "cholesterol" => nv.Cholesterol ?? 0,
+                    _ => 0
+                };
+                total += v * multiplier;
+            }
+            return total / recipe.Servings;
         }
 
         private (double calories, double protein, double carbs, double fat, double fiber) CalculateRecipeNutrition(Recipe recipe)
@@ -562,7 +642,7 @@ namespace Service.Implements
             return result;
         }
 
-        public async Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null)
+        public async Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null, string focus = null)
         {
             var goal = await _nutritionGoalRepo.GetNutritionGoalByAccountId(accountId);
             var profile = await _healthProfileRepo.GetHealthProfileByAccountId(accountId);
@@ -647,7 +727,7 @@ namespace Service.Implements
 
                 if (selectedMeals.Contains("breakfast"))
                 {
-                    var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random);
+                    var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random, focus);
                     if (bRecipe != null)
                     {
                         newDay.Entries.Add(CreateEntry(newDay.Day_id, bRecipe, "breakfast", 1));
@@ -656,7 +736,7 @@ namespace Service.Implements
                 }
                 if (selectedMeals.Contains("lunch"))
                 {
-                    var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random);
+                    var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random, focus);
                     if (lRecipe != null)
                     {
                         newDay.Entries.Add(CreateEntry(newDay.Day_id, lRecipe, "lunch", 2));
@@ -665,7 +745,7 @@ namespace Service.Implements
                 }
                 if (selectedMeals.Contains("dinner"))
                 {
-                    var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random);
+                    var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random, focus);
                     if (dRecipe != null)
                     {
                         newDay.Entries.Add(CreateEntry(newDay.Day_id, dRecipe, "dinner", 3));
@@ -706,7 +786,7 @@ namespace Service.Implements
 
                 if (selectedMeals.Contains("breakfast") && !existingSlots.Contains("breakfast"))
                 {
-                    var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random);
+                    var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random, focus);
                     if (bRecipe != null)
                     {
                         var entry = CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1);
@@ -717,7 +797,7 @@ namespace Service.Implements
 
                 if (selectedMeals.Contains("lunch") && !existingSlots.Contains("lunch"))
                 {
-                    var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random);
+                    var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random, focus);
                     if (lRecipe != null)
                     {
                         var entry = CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2);
@@ -728,7 +808,7 @@ namespace Service.Implements
 
                 if (selectedMeals.Contains("dinner") && !existingSlots.Contains("dinner"))
                 {
-                    var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random);
+                    var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random, focus);
                     if (dRecipe != null)
                     {
                         var entry = CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3);

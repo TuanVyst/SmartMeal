@@ -7,6 +7,7 @@ import { FiCalendar, FiPlus, FiCheck, FiAlertTriangle, FiChevronLeft, FiChevronR
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 import UpgradePaywallModal from '../../components/common/UpgradePaywallModal';
+import { useNutrientFocus, focusQueryParam, NUTRIENT_FOCUS_LABELS } from '../../utils/nutrientFocus';
 import './MealPlanSuggestion.css';
 
 const SLOT_LABELS = { breakfast: 'Bữa Sáng', lunch: 'Bữa Trưa', dinner: 'Bữa Tối' };
@@ -36,6 +37,7 @@ export default function MealPlanSuggestion() {
 
   // Pro features (access resolved centrally in AuthContext)
   const [showPaywall, setShowPaywall] = useState(false);
+  const [nutrientFocus, setNutrientFocus] = useNutrientFocus();
 
   // ── Safe date helpers (no UTC shift) ────────────────────────────────────
   // Backend may serialize DateTime without Z → JS parses as LOCAL → toISOString shifts back 7h.
@@ -227,7 +229,7 @@ export default function MealPlanSuggestion() {
       setQuickGenerating(slotKey);
       // Use safeDate() to avoid UTC timezone shift on backend date strings
       const dateParam = safeDate(date);
-      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}`);
+      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}${focusQueryParam()}`);
       toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
       // Always re-fetch the CURRENT displayed week — never use the response body to set weekPlan
       // because the response could be for a different week (timezone mismatch)
@@ -255,7 +257,7 @@ export default function MealPlanSuggestion() {
       setQuickGenerating('all');
       const dateParam = safeDate(date);
       const mealsParam = missingSlots.join(',');
-      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}`);
+      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}${focusQueryParam()}`);
       toast.success(`Đã tạo gợi ý ${missingSlots.length} bữa còn thiếu cho ngày này!`);
       await fetchWeekPlan(currentWeekDate, dateParam);
     } catch (err) {
@@ -334,7 +336,17 @@ export default function MealPlanSuggestion() {
           </div>
         </div>
 
-        {/* ── Week Navigator ── */}
+        {nutrientFocus && nutrientFocus.length > 0 && (
+          <div className="mps-focus-chip" role="status">
+            <span className="mps-focus-dot" />
+            <span>
+              Đang tập trung: <strong>
+                {nutrientFocus.map(k => NUTRIENT_FOCUS_LABELS[k]).join(', ')}
+              </strong> — các gợi ý tiếp theo sẽ ưu tiên chất này
+            </span>
+            <button className="mps-focus-clear" onClick={() => setNutrientFocus(null)}>Bỏ chọn</button>
+          </div>
+        )}
         <div className="mps-week-nav">
           <button className="mps-week-btn" onClick={handlePrevWeek} title="Xem tuần trước">
             <FiChevronLeft size={16} /> Tuần trước

@@ -18,7 +18,7 @@ namespace Service.Interfaces
         Task<MealPlanResponseDto> RemoveEntryAsync(Guid planId, Guid entryId);
 
         Task<MealPlanResponseDto> SuggestNextDayAsync(Guid accountId);
-        Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null);
+        Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null, string focus = null);
         Task<Dictionary<string, bool>> CheckDateMealsAsync(Guid accountId, DateTime date);
         Task<MealPlanResponseDto> GetWeekPlanAsync(Guid accountId, DateTime anyDateInWeek);
     }
