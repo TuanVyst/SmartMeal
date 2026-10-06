@@ -151,7 +151,7 @@ export default function IngredientDetection() {
 
       formData.append('image', blob, 'ingredient.jpg');
 
-      const aiResponse = await fetch('http://localhost:5001/predict', {
+      const aiResponse = await fetch('https://zoo-neon-enjoy-firewall.trycloudflare.com/predict', {
         method: 'POST',
         body: formData,
       });
