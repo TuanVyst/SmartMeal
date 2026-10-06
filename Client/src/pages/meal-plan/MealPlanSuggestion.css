@@ -493,6 +493,7 @@
   border-radius: 14px;
   margin: 0 14px;
   width: calc(100% - 28px);
+  cursor: pointer;
 }
 
 .mps-card-img {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
@@ -23,6 +24,7 @@ const SLOT_COLORS = {
 
 export default function MealPlanSuggestion() {
   const { user, isPremium, hasProAccess } = useAuth();
+  const navigate = useNavigate();
   const accountId = user?.accountId || user?.account_id;
 
   const [weekPlan, setWeekPlan] = useState(null);
@@ -535,7 +537,10 @@ export default function MealPlanSuggestion() {
                     </div>
 
                     {/* Food image */}
-                    <div className="mps-card-img-wrap">
+                    <div 
+                      className="mps-card-img-wrap"
+                      onClick={() => meal.recipe_id && navigate(`/recipe/${meal.recipe_id}`)}
+                    >
                       <img
                         src={imgSrc}
                         alt={meal.recipeName}
