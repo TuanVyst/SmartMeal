@@ -24,14 +24,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: smartmeal
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: gateway
-      ports:
+    - ports:
         - protocol: TCP
           port: 80
   egress:
@@ -66,17 +59,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: smartmeal
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: gateway
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: smartmeal-api
-      ports:
+    - ports:
         - protocol: TCP
           port: 8000
   egress:
