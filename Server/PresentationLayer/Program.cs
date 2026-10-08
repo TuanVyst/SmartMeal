@@ -200,7 +200,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var defaultOrigins = new[]
 {
-    "https://smart-meal-three.vercel.app/",
+    "https://smart-meal-three.vercel.app",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
