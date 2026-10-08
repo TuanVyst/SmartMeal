@@ -2,11 +2,13 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+ROUTE_PREFIX = os.getenv("ROUTE_PREFIX", "").strip("/")
+if ROUTE_PREFIX:
+    ROUTE_PREFIX = f"/{ROUTE_PREFIX}"
 
 MODEL_PATH = os.getenv("MODEL_PATH", str(BASE_DIR / "models" / "best.onnx"))
 if not os.path.exists(MODEL_PATH) and os.path.exists(str(BASE_DIR / "best.onnx")):
     MODEL_PATH = str(BASE_DIR / "best.onnx")
-
 IMG_SIZE = int(os.getenv("IMG_SIZE", "512"))
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.25"))
 IOU_THRESHOLD = float(os.getenv("IOU_THRESHOLD", "0.45"))

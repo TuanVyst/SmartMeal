@@ -4,9 +4,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from PIL import Image
 
-from smartmeal_predict.config import MODEL_PATH
+from smartmeal_predict.config import MODEL_PATH, ROUTE_PREFIX
 from smartmeal_predict.predictor import Predictor
-
 logger = logging.getLogger(__name__)
 
 
@@ -17,24 +16,30 @@ def create_app() -> Flask:
     predictor = Predictor(MODEL_PATH)
     logger.info("Loaded ONNX model from: %s", MODEL_PATH)
 
-    @app.route("/", methods=["GET"])
-    def root():
-        return jsonify({
-            "service": "smartmeal-predict",
-            "status": "ready",
-        })
+    def register_routes(prefix: str = ""):
+        prefix = f"/{prefix.strip('/')}" if prefix.strip("/") else ""
 
-    @app.route("/health", methods=["GET"])
-    def health():
-        return jsonify({
-            "status": "ok",
-            "model": MODEL_PATH,
-            "runtime": "ONNX Runtime",
-            "device": "CPU",
-        })
+        @app.route(f"{prefix}/" if prefix else "/", methods=["GET"])
+        def root():
+            return jsonify({
+                "service": "smartmeal-predict",
+                "status": "ready",
+            })
 
-    @app.route("/predict", methods=["POST"])
-    def predict_endpoint():
+        @app.route(f"{prefix}/health", methods=["GET"])
+        def health():
+            return jsonify({
+                "status": "ok",
+                "model": MODEL_PATH,
+                "runtime": "ONNX Runtime",
+                "device": "CPU",
+            })
+
+        @app.route(f"{prefix}/predict", methods=["POST"])
+        def predict_endpoint():
+            return handle_predict()
+
+    def handle_predict():
         try:
             if "image" not in request.files:
                 return jsonify({
@@ -63,5 +68,8 @@ def create_app() -> Flask:
                 "success": False,
                 "message": str(e),
             }), 500
+    register_routes("")
+    if ROUTE_PREFIX:
+        register_routes(ROUTE_PREFIX)
 
     return app

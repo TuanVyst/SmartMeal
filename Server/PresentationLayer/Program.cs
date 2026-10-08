@@ -227,11 +227,15 @@ using (var scope = app.Services.CreateScope())
 
 
 
+var swaggerRoutePrefix = builder.Configuration["Swagger:RoutePrefix"] 
+    ?? Environment.GetEnvironmentVariable("SWAGGER_ROUTE_PREFIX") 
+    ?? string.Empty;
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "RAG Chatbot API v1");
-    c.RoutePrefix = string.Empty;
+    c.RoutePrefix = swaggerRoutePrefix;
 });
 app.UseRouting();
 app.UseCors("AllowClient");
@@ -245,10 +249,10 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.Run();
 
 public partial class Program { }

@@ -7,6 +7,7 @@ metadata:
 data:
   ASPNETCORE_URLS: http://+:80
   ASPNETCORE_ENVIRONMENT: Production
+  Swagger__RoutePrefix: "swagger"
   Jwt__ExpiryMinutes: "256"
   PayOS__ReturnUrl: "https://smart-meal-orcin.vercel.app/payment/success"
   PayOS__CancelUrl: "https://smart-meal-orcin.vercel.app/payment/cancel"

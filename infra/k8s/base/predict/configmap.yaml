@@ -4,6 +4,7 @@ metadata:
   name: smartmeal-predict-conf
 data:
   PORT: "8000"
+  ROUTE_PREFIX: "predict"
   TRUST_PROXY: "true"
   PUID: "1000"
   PGID: "1000"
