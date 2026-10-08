@@ -1,8 +1,9 @@
 import axios from 'axios';
-const apiEndpont = import.meta.env.VITE_BASE_URL ?? '/api';
+
+const apiEndpoint = import.meta.env.VITE_BASE_URL || '';
 
 const api = axios.create({
-  baseURL: `${apiEndpont}`,
+  baseURL: apiEndpoint ? `${apiEndpoint}/api` : '/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: false,
   timeout: 15000,
@@ -33,5 +34,13 @@ api.interceptors.response.use(
     return Promise.reject({ message: error.message || 'Unknown error', status: -1, originalError: error });
   }
 );
+
+export const predictImage = async (formData) => {
+  const targetUrl = apiEndpoint ? `${apiEndpoint}/predict` : '/predict';
+  return fetch(targetUrl, {
+    method: 'POST',
+    body: formData,
+  });
+};
 
 export default api;

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { predictImage } from '../../services/api';
 import './IngredientDetection.css';
 
 export default function IngredientDetection() {
@@ -150,11 +151,7 @@ export default function IngredientDetection() {
       const blob = await response.blob();
 
       formData.append('image', blob, 'ingredient.jpg');
-
-      const aiResponse = await fetch('https://zoo-neon-enjoy-firewall.trycloudflare.com/predict', {
-        method: 'POST',
-        body: formData,
-      });
+      const aiResponse = await predictImage(formData);
 
       if (!aiResponse.ok) {
         throw new Error(`AI server error: ${aiResponse.status}`);
