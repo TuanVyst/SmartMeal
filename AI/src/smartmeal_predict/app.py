@@ -17,16 +17,18 @@ def create_app() -> Flask:
     logger.info("Loaded ONNX model from: %s", MODEL_PATH)
 
     def register_routes(prefix: str = ""):
-        prefix = f"/{prefix.strip('/')}" if prefix.strip("/") else ""
+        clean_prefix = prefix.strip("/")
+        url_prefix = f"/{clean_prefix}" if clean_prefix else ""
+        suffix = f"_{clean_prefix}" if clean_prefix else ""
 
-        @app.route(f"{prefix}/" if prefix else "/", methods=["GET"])
+        @app.route(f"{url_prefix}/" if url_prefix else "/", methods=["GET"], endpoint=f"root{suffix}")
         def root():
             return jsonify({
                 "service": "smartmeal-predict",
                 "status": "ready",
             })
 
-        @app.route(f"{prefix}/health", methods=["GET"])
+        @app.route(f"{url_prefix}/health", methods=["GET"], endpoint=f"health{suffix}")
         def health():
             return jsonify({
                 "status": "ok",
@@ -35,10 +37,9 @@ def create_app() -> Flask:
                 "device": "CPU",
             })
 
-        @app.route(f"{prefix}/predict", methods=["POST"])
+        @app.route(f"{url_prefix}/predict", methods=["POST"], endpoint=f"predict{suffix}")
         def predict_endpoint():
             return handle_predict()
-
     def handle_predict():
         try:
             if "image" not in request.files:
