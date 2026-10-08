@@ -2,7 +2,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: shared-gateway
-  namespace: gateway
+  namespace: smartmeal
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/part-of: smartmeal

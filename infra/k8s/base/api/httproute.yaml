@@ -7,7 +7,7 @@ metadata:
 spec:
   parentRefs:
     - name: shared-gateway
-      namespace: gateway
+      namespace: smartmeal
       sectionName: http
   hostnames:
     - api.ocgi.space
