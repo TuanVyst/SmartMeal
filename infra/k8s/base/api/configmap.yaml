@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmeal-api-conf
+  labels:
+    app.kubernetes.io/name: smartmeal-api
+data:
+  ASPNETCORE_URLS: http://+:80
+  ASPNETCORE_ENVIRONMENT: Production
+  Jwt__ExpiryMinutes: "256"
+  PayOS__ReturnUrl: "https://smart-meal-orcin.vercel.app/payment/success"
+  PayOS__CancelUrl: "https://smart-meal-orcin.vercel.app/payment/cancel"
+  FeatureFlags__OpenProFeaturesForAll: "false"

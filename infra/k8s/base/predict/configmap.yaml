@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmeal-predict-conf
+data:
+  PORT: "8000"
+  TRUST_PROXY: "true"
+  PUID: "1000"
+  PGID: "1000"
