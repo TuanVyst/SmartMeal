@@ -198,21 +198,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// CORS - allow FE dev server
+var defaultOrigins = new[]
+{
+    "https://smart-meal-orcin.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+};
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>();
+
+allowedOrigins = allowedOrigins is { Length: > 0 }
+    ? allowedOrigins
+    : defaultOrigins;
+    
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.SetIsOriginAllowed(origin =>
-              {
-                  if (string.IsNullOrWhiteSpace(origin)) return false;
-                  if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
-                  if (uri.Host is "localhost" or "127.0.0.1") return true;
-                  return origin == "https://smart-meal-orcin.vercel.app";
-              })
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
