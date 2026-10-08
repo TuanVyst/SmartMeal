@@ -3,11 +3,12 @@ kind: Deployment
 metadata:
   name: smartmeal-api
 spec:
-  replicas: 2
+  replicas: 1
   template:
     spec:
       containers:
         - name: smartmeal-api
+          imagePullPolicy: Always
           resources:
             requests:
               cpu: 200m

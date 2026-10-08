@@ -8,6 +8,9 @@ spec:
   rules:
     - matches:
         - path:
+            type: Exact
+            value: /
+        - path:
             type: PathPrefix
             value: /api
         - path:

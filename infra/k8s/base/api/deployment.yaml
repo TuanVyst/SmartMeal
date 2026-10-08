@@ -17,7 +17,7 @@ spec:
       containers:
         - name: smartmeal-api
           image: ghcr.io/tuanvyst/smartmeal/smartmeal-server:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
