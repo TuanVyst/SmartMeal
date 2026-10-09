@@ -13,6 +13,7 @@ import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { useAuth } from '../../context/AuthContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { trackRecipeSelection } from '../../hooks/useActivityTracker';
 import './MealDetail.css';
 
 export default function MealDetail() {
@@ -30,6 +31,13 @@ export default function MealDetail() {
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
   const [todayTotals, setTodayTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 });
+
+  // Track recipe selection for current session
+  useEffect(() => {
+    if (id) {
+      trackRecipeSelection(id);
+    }
+  }, [id]);
 
   useEffect(() => {
     const fetchTodayLogs = async () => {

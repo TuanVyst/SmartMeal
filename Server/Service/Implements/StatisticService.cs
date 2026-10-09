@@ -130,6 +130,81 @@ namespace Service.Implements
 
             double thisWeekTotalDurationHours = Math.Round((double)thisWeekTotalDurationSeconds / 3600.0, 1);
 
+
+            // 4. Recipe Selection Statistics (Time to First Recipe Select)
+            var thisWeekRecipeSelectSessions = thisWeekSessions
+                .Where(s => s.TimeToFirstRecipeSelectSeconds.HasValue)
+                .ToList();
+            var lastWeekRecipeSelectSessions = lastWeekSessions
+                .Where(s => s.TimeToFirstRecipeSelectSeconds.HasValue)
+                .ToList();
+
+            var thisWeekRecipeSelectCount = thisWeekRecipeSelectSessions.Count;
+            var lastWeekRecipeSelectCount = lastWeekRecipeSelectSessions.Count;
+
+            double thisWeekAvgTimeToRecipeSelectSeconds = thisWeekRecipeSelectCount > 0
+                ? Math.Round(thisWeekRecipeSelectSessions.Average(s => s.TimeToFirstRecipeSelectSeconds!.Value), 1)
+                : 0;
+
+            double lastWeekAvgTimeToRecipeSelectSeconds = lastWeekRecipeSelectCount > 0
+                ? Math.Round(lastWeekRecipeSelectSessions.Average(s => s.TimeToFirstRecipeSelectSeconds!.Value), 1)
+                : 0;
+
+            double thisWeekAvgTimeToRecipeSelectMinutes = Math.Round(thisWeekAvgTimeToRecipeSelectSeconds / 60.0, 1);
+            double lastWeekAvgTimeToRecipeSelectMinutes = Math.Round(lastWeekAvgTimeToRecipeSelectSeconds / 60.0, 1);
+
+            double thisWeekRecipeSelectRate = thisWeekVisits > 0
+                ? Math.Round(((double)thisWeekRecipeSelectCount / thisWeekVisits) * 100.0, 1)
+                : 0;
+
+            double lastWeekRecipeSelectRate = lastWeekVisits > 0
+                ? Math.Round(((double)lastWeekRecipeSelectCount / lastWeekVisits) * 100.0, 1)
+                : 0;
+
+            // 5. Meal Plan Dishes Statistics (Average dishes added to meal plans per week)
+            var thisWeekMealEntries = await _ctx.MealPlanEntries
+                .Include(e => e.MealPlanDay)
+                .ThenInclude(d => d.MealPlan)
+                .Where(e => !e.IsDeleted
+                            && !e.MealPlanDay.IsDeleted
+                            && !e.MealPlanDay.MealPlan.IsDeleted
+                            && e.MealPlanDay.DayDate >= thisWeekStartUtc
+                            && e.MealPlanDay.DayDate < thisWeekEndUtc)
+                .Select(e => new
+                {
+                    e.Entry_id,
+                    DayDate = e.MealPlanDay.DayDate,
+                    AccountId = e.MealPlanDay.MealPlan.Account_id
+                })
+                .ToListAsync();
+
+            var lastWeekMealEntries = await _ctx.MealPlanEntries
+                .Include(e => e.MealPlanDay)
+                .ThenInclude(d => d.MealPlan)
+                .Where(e => !e.IsDeleted
+                            && !e.MealPlanDay.IsDeleted
+                            && !e.MealPlanDay.MealPlan.IsDeleted
+                            && e.MealPlanDay.DayDate >= lastWeekStartUtc
+                            && e.MealPlanDay.DayDate < lastWeekEndUtc)
+                .Select(e => new
+                {
+                    e.Entry_id,
+                    DayDate = e.MealPlanDay.DayDate,
+                    AccountId = e.MealPlanDay.MealPlan.Account_id
+                })
+                .ToListAsync();
+
+            var thisWeekTotalPlanDishes = thisWeekMealEntries.Count;
+            var thisWeekPlanUsersCount = thisWeekMealEntries.Select(e => e.AccountId).Distinct().Count();
+            double thisWeekAvgDishesPerUser = thisWeekPlanUsersCount > 0
+                ? Math.Round((double)thisWeekTotalPlanDishes / thisWeekPlanUsersCount, 1)
+                : 0;
+
+            var lastWeekTotalPlanDishes = lastWeekMealEntries.Count;
+            var lastWeekPlanUsersCount = lastWeekMealEntries.Select(e => e.AccountId).Distinct().Count();
+            double lastWeekAvgDishesPerUser = lastWeekPlanUsersCount > 0
+                ? Math.Round((double)lastWeekTotalPlanDishes / lastWeekPlanUsersCount, 1)
+                : 0;
             // Growth calculation helper
             static double CalcGrowth(double curr, double prev)
             {
@@ -140,6 +215,10 @@ namespace Service.Implements
             var newAccountsGrowth = CalcGrowth(thisWeekNewAccounts, lastWeekNewAccounts);
             var visitsGrowth = CalcGrowth(thisWeekVisits, lastWeekVisits);
             var durationGrowth = CalcGrowth(thisWeekAvgDurationMinutes, lastWeekAvgDurationMinutes);
+            var timeToRecipeSelectGrowth = CalcGrowth(thisWeekAvgTimeToRecipeSelectSeconds, lastWeekAvgTimeToRecipeSelectSeconds);
+            var recipeSelectCountGrowth = CalcGrowth(thisWeekRecipeSelectCount, lastWeekRecipeSelectCount);
+            var avgDishesGrowth = CalcGrowth(thisWeekAvgDishesPerUser, lastWeekAvgDishesPerUser);
+            var totalPlanDishesGrowth = CalcGrowth(thisWeekTotalPlanDishes, lastWeekTotalPlanDishes);
 
             // 4. Daily breakdown (Monday to Sunday)
             var dayNames = new[] { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật" };
@@ -163,6 +242,19 @@ namespace Service.Implements
                 var dayTotalSeconds = daySessions.Sum(s => s.DurationSeconds);
                 var dayAvgMinutes = dayVisits > 0 ? Math.Round((double)dayTotalSeconds / dayVisits / 60.0, 1) : 0;
 
+
+                var dayRecipeSelectSessions = daySessions
+                    .Where(s => s.TimeToFirstRecipeSelectSeconds.HasValue)
+                    .ToList();
+                var dayRecipeSelectCount = dayRecipeSelectSessions.Count;
+                var dayAvgTimeToRecipeSelectSeconds = dayRecipeSelectCount > 0
+                    ? Math.Round(dayRecipeSelectSessions.Average(s => s.TimeToFirstRecipeSelectSeconds!.Value), 1)
+                    : 0;
+                var dayAvgTimeToRecipeSelectMinutes = Math.Round(dayAvgTimeToRecipeSelectSeconds / 60.0, 1);
+
+                var dayPlanDishesCount = thisWeekMealEntries
+                    .Where(e => e.DayDate >= dayStartUtc && e.DayDate < dayEndUtc)
+                    .Count();
                 dailyStats.Add(new
                 {
                     DayIndex = i,
@@ -174,7 +266,11 @@ namespace Service.Implements
                     NewAccounts = dayNewAccounts,
                     Visits = dayVisits,
                     AvgDurationMinutes = dayAvgMinutes,
-                    TotalDurationMinutes = Math.Round(dayTotalSeconds / 60.0, 1)
+                    TotalDurationMinutes = Math.Round(dayTotalSeconds / 60.0, 1),
+                    RecipeSelectCount = dayRecipeSelectCount,
+                    AvgTimeToRecipeSelectSeconds = dayAvgTimeToRecipeSelectSeconds,
+                    AvgTimeToRecipeSelectMinutes = dayAvgTimeToRecipeSelectMinutes,
+                    PlanDishes = dayPlanDishesCount
                 });
             }
 
@@ -194,19 +290,37 @@ namespace Service.Implements
                     ActiveUsers = activeUsersThisWeek,
                     AvgVisitsPerUser = avgVisitsPerUser,
                     AvgDurationMinutes = thisWeekAvgDurationMinutes,
-                    TotalDurationHours = thisWeekTotalDurationHours
+                    TotalDurationHours = thisWeekTotalDurationHours,
+                    AvgTimeToRecipeSelectSeconds = thisWeekAvgTimeToRecipeSelectSeconds,
+                    AvgTimeToRecipeSelectMinutes = thisWeekAvgTimeToRecipeSelectMinutes,
+                    RecipeSelectCount = thisWeekRecipeSelectCount,
+                    RecipeSelectRate = thisWeekRecipeSelectRate,
+                    TotalPlanDishes = thisWeekTotalPlanDishes,
+                    PlanUsersCount = thisWeekPlanUsersCount,
+                    AvgDishesPerUser = thisWeekAvgDishesPerUser
                 },
                 LastWeek = new
                 {
                     NewAccounts = lastWeekNewAccounts,
                     TotalVisits = lastWeekVisits,
-                    AvgDurationMinutes = lastWeekAvgDurationMinutes
+                    AvgDurationMinutes = lastWeekAvgDurationMinutes,
+                    AvgTimeToRecipeSelectSeconds = lastWeekAvgTimeToRecipeSelectSeconds,
+                    AvgTimeToRecipeSelectMinutes = lastWeekAvgTimeToRecipeSelectMinutes,
+                    RecipeSelectCount = lastWeekRecipeSelectCount,
+                    RecipeSelectRate = lastWeekRecipeSelectRate,
+                    TotalPlanDishes = lastWeekTotalPlanDishes,
+                    PlanUsersCount = lastWeekPlanUsersCount,
+                    AvgDishesPerUser = lastWeekAvgDishesPerUser
                 },
                 Growth = new
                 {
                     NewAccounts = newAccountsGrowth,
                     Visits = visitsGrowth,
-                    AvgDuration = durationGrowth
+                    AvgDuration = durationGrowth,
+                    AvgTimeToRecipeSelect = timeToRecipeSelectGrowth,
+                    RecipeSelectCount = recipeSelectCountGrowth,
+                    AvgDishesPerUser = avgDishesGrowth,
+                    TotalPlanDishes = totalPlanDishesGrowth
                 },
                 DailyStats = dailyStats
             };

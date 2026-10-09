@@ -31,8 +31,26 @@ namespace BusinessObject.Entities
         [MaxLength(255)]
         public string? UserAgent { get; set; }
 
+        /// <summary>
+        /// Timestamp when the user first selected/viewed a recipe in this session
+        /// </summary>
+        public DateTime? FirstRecipeSelectTime { get; set; }
+
+        /// <summary>
+        /// Elapsed seconds from StartTime until the user selected their first recipe in this session
+        /// </summary>
+        public int? TimeToFirstRecipeSelectSeconds { get; set; }
+
+        /// <summary>
+        /// ID of the first recipe selected in this session
+        /// </summary>
+        public Guid? FirstRecipe_id { get; set; }
+
         // Navigation properties
         [ForeignKey("Account_id")]
         public virtual Account? Account { get; set; }
+
+        [ForeignKey("FirstRecipe_id")]
+        public virtual Recipe? FirstRecipe { get; set; }
     }
 }
