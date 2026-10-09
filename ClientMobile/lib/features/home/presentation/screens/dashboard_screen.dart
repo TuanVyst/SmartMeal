@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
-import 'package:smart_meal/core/theme/app_typography.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
 import 'package:smart_meal/features/recipes/presentation/providers/recipe_provider.dart';
 import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
@@ -170,20 +169,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Kế hoạch tuần',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              const Expanded(
+                child: Text(
+                  'Kế hoạch tuần',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                      minimumSize: const Size(60, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                      minimumSize: const Size(48, 30),
                       side: const BorderSide(color: AppColors.border),
                     ),
                     onPressed: () => setState(() => _isWeeklyPlanVisible = !_isWeeklyPlanVisible),
@@ -192,12 +196,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                      minimumSize: const Size(96, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      minimumSize: const Size(84, 30),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () => context.push('/meal-plan/preview', extra: 7),
@@ -217,65 +221,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    minimumSize: const Size(54, 30),
                     side: const BorderSide(color: AppColors.border),
                   ),
                   onPressed: () {},
-                  icon: const Icon(Icons.chevron_left, size: 16, color: AppColors.textSecondary),
-                  label: const Text('Trước', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  icon: const Icon(Icons.chevron_left, size: 14, color: AppColors.textSecondary),
+                  label: const Text('Trước', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                 ),
-                const Text(
-                  'Tuần này (12/10 - 18/10)',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
+                const Flexible(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      'Tuần này (12/10 - 18/10)',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.textPrimary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    minimumSize: const Size(54, 30),
                     side: const BorderSide(color: AppColors.border),
                   ),
                   onPressed: () {},
-                  icon: const Icon(Icons.chevron_right, size: 16, color: AppColors.textSecondary),
-                  label: const Text('Sau', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  icon: const Icon(Icons.chevron_right, size: 14, color: AppColors.textSecondary),
+                  label: const Text('Sau', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                 ),
               ],
             ),
             const SizedBox(height: 14),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(_days.length, (index) {
                 final isSelected = _selectedDayIndex == index;
-                return InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => setState(() => _selectedDayIndex = index),
-                  child: Container(
-                    width: 42,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary : AppColors.surfaceHover,
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: index == 0 || index == _days.length - 1 ? 1 : 2),
+                    child: InkWell(
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isSelected ? AppColors.primary : Colors.transparent,
+                      onTap: () => setState(() => _selectedDayIndex = index),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.primary : AppColors.surfaceHover,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected ? AppColors.primary : Colors.transparent,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              _days[index],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: isSelected ? Colors.white : AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${12 + index}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected ? Colors.white70 : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          _days[index],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${12 + index}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isSelected ? Colors.white70 : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 );

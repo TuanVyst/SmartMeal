@@ -80,6 +80,10 @@ class DailyTargets {
     this.cholesterolLimit = 300,
   });
 
+  double get sugar => sugarLimit;
+  double get sodium => saltLimit * 1000.0;
+  double get cholesterol => cholesterolLimit;
+
   factory DailyTargets.fromGoal(NutritionGoal goal) {
     return DailyTargets(
       calories: goal.calories ?? 2000,

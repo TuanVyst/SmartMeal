@@ -68,12 +68,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   void _showAddLogSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => const AddLogSheet(),
-    );
+    final date = context.read<NutritionProvider>().selectedDate;
+    AddLogSheet.show(context, date);
   }
 
   @override
@@ -338,11 +334,16 @@ class _DiaryScreenState extends State<DiaryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Hồ sơ sức khoẻ',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              const Expanded(
+                child: Text(
+                  'Hồ sơ sức khoẻ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
+              const SizedBox(width: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
