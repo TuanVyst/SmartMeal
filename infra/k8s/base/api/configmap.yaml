@@ -11,7 +11,7 @@ data:
   Jwt__ExpiryMinutes: "256"
   PayOS__ReturnUrl: "https://smart-meal-three.vercel.app/payment/success"
   PayOS__CancelUrl: "https://smart-meal-three.vercel.app/payment/cancel"
-  FeatureFlags__OpenProFeaturesForAll: "false"
+  FeatureFlags__OpenProFeaturesForAll: "true"
   Cors__AllowedOrigins__0: "https://smart-meal-three.vercel.app"
   Cors__AllowedOrigins__1: "http://localhost:3000"
   Cors__AllowedOrigins__2: "https://smart-meal-orcin.vercel.app"
