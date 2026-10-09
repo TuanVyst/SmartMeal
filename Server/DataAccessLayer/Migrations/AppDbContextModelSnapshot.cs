@@ -1169,6 +1169,48 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("UserDietPlan");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.UserSessionLog", b =>
+                {
+                    b.Property<Guid>("Session_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("Account_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("LastHeartbeat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SessionToken")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Session_id");
+
+                    b.HasIndex("Account_id");
+
+                    b.HasIndex("SessionToken");
+
+                    b.HasIndex("StartTime");
+
+                    b.ToTable("UserSessionLog");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.AffiliateProduct", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Ingredient", "Ingredient")
@@ -1546,6 +1588,15 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("DietPlan");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.UserSessionLog", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("Account_id");
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Account", b =>

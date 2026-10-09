@@ -35,5 +35,33 @@ namespace PresentationLayer.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet("weekly-engagement")]
+        public async Task<IActionResult> GetWeeklyEngagementStatistics([FromQuery] string? date = null)
+        {
+            try
+            {
+                DateTime? targetDate = null;
+                if (!string.IsNullOrWhiteSpace(date))
+                {
+                    if (DateTime.TryParse(date, out var parsed))
+                    {
+                        targetDate = parsed;
+                    }
+                    else
+                    {
+                        return BadRequest(new { success = false, message = "Invalid date format. Expected yyyy-MM-dd." });
+                    }
+                }
+
+                var data = await _statisticService.GetWeeklyEngagementStatisticsAsync(targetDate);
+                return Ok(new { success = true, data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting weekly engagement statistics");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

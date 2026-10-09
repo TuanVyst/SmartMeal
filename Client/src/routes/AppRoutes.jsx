@@ -35,6 +35,7 @@ import MealPlanPage from '../pages/meal-plan/MealPlanPage';
 import DiscoverPage from '../pages/DiscoverPage/DiscoverPage';
 import JournalPage from '../pages/JournalPage/JournalPage';
 import Favorites from '../pages/food/Favorites';
+import IngredientDetection from '../pages/ingredient-detection/IngredientDetection';
 
 export default function AppRoutes() {
   return (
@@ -63,6 +64,7 @@ export default function AppRoutes() {
         <Route path="/meal-suggestions" element={<Navigate to="/home?tab=discover" replace />} />
         <Route path="/meal-suggestion" element={<Navigate to="/home?tab=plan" replace />} />
         <Route path="/favorites" element={<Favorites />} />
+        <Route path="/ingredient-detection" element={<IngredientDetection />} />
 
         {/* ── TRANG 2: Journal (Nhật ký + Tra cứu nguyên liệu) ── */}
         <Route path="/journal" element={<JournalPage />} />

@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: smartmeal-predict
+  labels:
+    app.kubernetes.io/name: smartmeal-predict
+spec:
+  parentRefs:
+    - name: shared-gateway
+      namespace: smartmeal
+      sectionName: http
+  hostnames:
+    - api.ocgi.space
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /predict
+      backendRefs:
+        - name: smartmeal-predict
+          port: 8000

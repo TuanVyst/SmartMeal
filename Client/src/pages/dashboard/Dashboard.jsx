@@ -13,6 +13,7 @@ import { getIngredients } from '../../services/foodService';
 import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart, FiLock } from 'react-icons/fi';
 import HealthTipCard from '../../components/common/HealthTipCard';
 import CalorieGoalReminder from '../../components/common/CalorieGoalReminder';
+import { useNutrientFocus, LIMIT_NUTRIENTS } from '../../utils/nutrientFocus';
 import './Dashboard.css';
 
 const SPEED = 0.05;
@@ -63,7 +64,7 @@ function AnimatedBar({ pct, className }) {
 }
 
 /* ── Circular progress for nutrients ── */
-function NutrientCircle({ label, value, unit, pct, color }) {
+function NutrientCircle({ label, value, unit, pct, color, active, limit, onClick }) {
   const [animatedPct, setAnimatedPct] = useState(0);
   useEffect(() => {
     const t = setTimeout(() => setAnimatedPct(pct), 300);
@@ -76,7 +77,13 @@ function NutrientCircle({ label, value, unit, pct, color }) {
   const strokeDash = `${(displayPct / 100) * circumference} ${circumference}`;
 
   return (
-    <div className="nutrient-circle-container">
+    <button
+      type="button"
+      className={`nutrient-circle-container nutrient-focusable${active ? ' is-focused' : ''}`}
+      onClick={onClick}
+      aria-pressed={!!active}
+      title={active ? 'Bỏ chọn' : `Tập trung vào ${label.toLowerCase()}`}
+    >
       <div className="nutrient-circle-svg-wrapper">
         <svg className="nutrient-circle-svg" viewBox="0 0 72 72">
           <circle cx="36" cy="36" r={radius} fill="none" stroke="#f1f5f9" strokeWidth="6" />
@@ -93,7 +100,7 @@ function NutrientCircle({ label, value, unit, pct, color }) {
         </div>
       </div>
       <div className="nutrient-circle-label">{label}</div>
-    </div>
+    </button>
   );
 }
 
@@ -161,6 +168,7 @@ export default function Dashboard() {
   const [ingredients, setIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [mealSuggestions, setMealSuggestions] = useState([]);
+  const [nutrientFocus, setNutrientFocus] = useNutrientFocus();
 
   const accountId = user?.accountId || user?.account_id;
 
@@ -409,6 +417,13 @@ export default function Dashboard() {
                 unit={data.unit}
                 pct={data.pct}
                 color={cn.color}
+                active={nutrientFocus.includes(cn.key)}
+                limit={LIMIT_NUTRIENTS.includes(cn.key)}
+                onClick={() => {
+                  import('../../utils/nutrientFocus').then(({ toggleNutrientFocus }) => {
+                    toggleNutrientFocus(cn.key);
+                  });
+                }}
               />
             );
           })}

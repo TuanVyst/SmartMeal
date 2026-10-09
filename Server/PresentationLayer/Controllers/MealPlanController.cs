@@ -111,7 +111,7 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPost("suggest-for-date")]
-        public async Task<IActionResult> SuggestForDate([FromQuery] DateTime date, [FromQuery] string meals = null)
+        public async Task<IActionResult> SuggestForDate([FromQuery] DateTime date, [FromQuery] string meals = null, [FromQuery] string focus = null)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace PresentationLayer.Controllers
                 var mealList = !string.IsNullOrEmpty(meals)
                     ? meals.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
                     : null;
-                var plan = await _mealPlanningService.SuggestForDateAsync(accountId, date, mealList);
+                var plan = await _mealPlanningService.SuggestForDateAsync(accountId, date, mealList, focus);
                 return Ok(new { data = plan });
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)

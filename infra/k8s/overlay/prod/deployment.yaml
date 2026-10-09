@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartmeal-api
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: smartmeal-api
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartmeal-predict
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: smartmeal-predict
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi

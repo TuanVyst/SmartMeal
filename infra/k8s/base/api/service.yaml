@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartmeal-api
+  labels:
+    app.kubernetes.io/name: smartmeal-api
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: smartmeal-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

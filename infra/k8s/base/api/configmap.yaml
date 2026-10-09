@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartmeal-api-conf
+  labels:
+    app.kubernetes.io/name: smartmeal-api
+data:
+  ASPNETCORE_URLS: http://+:80
+  ASPNETCORE_ENVIRONMENT: Production
+  Swagger__RoutePrefix: "swagger"
+  Jwt__ExpiryMinutes: "256"
+  PayOS__ReturnUrl: "https://smart-meal-three.vercel.app/payment/success"
+  PayOS__CancelUrl: "https://smart-meal-three.vercel.app/payment/cancel"
+  FeatureFlags__OpenProFeaturesForAll: "true"
+  Cors__AllowedOrigins__0: "https://smart-meal-three.vercel.app"
+  Cors__AllowedOrigins__1: "http://localhost:3000"
+  Cors__AllowedOrigins__2: "https://smart-meal-orcin.vercel.app"

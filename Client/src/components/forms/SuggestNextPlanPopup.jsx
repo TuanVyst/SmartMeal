@@ -3,6 +3,7 @@ import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { healthSurveyService } from '../../services/healthSurveyService';
 import api from '../../services/api';
 import { getTodayDateKey } from '../../utils/dateTime';
+import { focusQueryParam } from '../../utils/nutrientFocus';
 import { FiTrendingDown, FiTrendingUp, FiMinus, FiActivity, FiCalendar, FiX, FiSunrise, FiSun, FiMoon } from 'react-icons/fi';
 
 const ACTIVITY_OPTIONS = [
@@ -147,7 +148,7 @@ export default function SuggestNextPlanPopup({ onClose }) {
       }
 
       const mealsParam = selectedMeals.join(',');
-      const res = await api.post(`/MealPlan/suggest-for-date?date=${selectedDate}&meals=${mealsParam}`);
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${selectedDate}&meals=${mealsParam}${focusQueryParam()}`);
 
       if (res.data.data) {
         // Pass selectedDate so the parent can navigate to the correct week
