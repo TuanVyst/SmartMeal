@@ -4,7 +4,19 @@ import { healthSurveyService } from '../../services/healthSurveyService';
 import api from '../../services/api';
 import { getTodayDateKey } from '../../utils/dateTime';
 import { focusQueryParam } from '../../utils/nutrientFocus';
-import { FiTrendingDown, FiTrendingUp, FiMinus, FiActivity, FiCalendar, FiX, FiSunrise, FiSun, FiMoon } from 'react-icons/fi';
+import {
+  FiTrendingDown,
+  FiTrendingUp,
+  FiMinus,
+  FiActivity,
+  FiCalendar,
+  FiX,
+  FiSunrise,
+  FiSun,
+  FiMoon,
+  FiPlus,
+  FiCheck,
+} from 'react-icons/fi';
 
 const ACTIVITY_OPTIONS = [
   { value: 'sedentary', label: 'Ít vận động', desc: 'Làm việc văn phòng, ít đi lại', factor: 1.2 },
@@ -19,22 +31,60 @@ const MEAL_OPTIONS = [
   { value: 'dinner', label: 'Tối', icon: <FiMoon size={18} /> },
 ];
 
-const VIET_MONTHS = [
-  'Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
-  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'
+const DAY_PRESETS = [
+  { days: 1, label: '1 ngày' },
+  { days: 3, label: '3 ngày' },
+  { days: 5, label: '5 ngày' },
+  { days: 7, label: '7 ngày (1 tuần)' },
+  { days: 14, label: '14 ngày (2 tuần)' },
 ];
 
-// Helper: parse YYYY-MM-DD into {day, month, year} as numbers
-function parseDateStr(str) {
-  const [y, m, d] = (str || '').split('-').map(Number);
-  return { year: y || new Date().getFullYear(), month: m || new Date().getMonth() + 1, day: d || new Date().getDate() };
+// Helper: format Date object to YYYY-MM-DD
+function toDateStr(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
-// Helper: days in a month
-function daysInMonth(year, month) {
-  return new Date(year, month, 0).getDate();
+
+// Helper: add N calendar days to YYYY-MM-DD string
+function addDays(dateStr, n) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d, 12, 0, 0);
+  dt.setDate(dt.getDate() + n);
+  return toDateStr(dt);
 }
-// Helper: zero-pad
-function pad2(n) { return String(n).padStart(2, '0'); }
+
+// Helper: calculate inclusive difference in days between two YYYY-MM-DD strings
+function diffDays(startStr, endStr) {
+  if (!startStr || !endStr) return 1;
+  const [y1, m1, d1] = startStr.split('-').map(Number);
+  const [y2, m2, d2] = endStr.split('-').map(Number);
+  const dt1 = new Date(y1, m1 - 1, d1, 12, 0, 0);
+  const dt2 = new Date(y2, m2 - 1, d2, 12, 0, 0);
+  const ms = dt2.getTime() - dt1.getTime();
+  return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)) + 1);
+}
+
+// Helper: format Vietnamese date e.g. "Thứ Hai, ngày 12/10/2026"
+function formatVietnameseDate(dateStr) {
+  if (!dateStr) return '';
+  const dt = new Date(dateStr + 'T12:00:00');
+  return dt.toLocaleDateString('vi-VN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+// Helper: short date DD/MM
+function formatShortDate(dateStr) {
+  if (!dateStr) return '';
+  const [, m, d] = dateStr.split('-');
+  return `${d}/${m}`;
+}
 
 export default function SuggestNextPlanPopup({ onClose }) {
   const { healthProfile } = useHealthProfile();
@@ -42,57 +92,63 @@ export default function SuggestNextPlanPopup({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Constraint: Today is the minimum allowed date (cannot pick past dates)
   const today = getTodayDateKey(); // YYYY-MM-DD
-  const todayParsed = parseDateStr(today);
 
-  // Step 0: Date parts stored separately for DD/MM/YYYY dropdowns
-  const [selDay,   setSelDay]   = useState(todayParsed.day);
-  const [selMonth, setSelMonth] = useState(todayParsed.month);
-  const [selYear,  setSelYear]  = useState(todayParsed.year);
-
-  // Derived YYYY-MM-DD for API — always in sync
-  const selectedDate = `${selYear}-${pad2(selMonth)}-${pad2(selDay)}`;
+  // 3 synchronized indicators: startDate, numDays, endDate
+  const [startDate, setStartDate] = useState(today);
+  const [numDays, setNumDays] = useState(1);
+  const endDate = useMemo(() => addDays(startDate, numDays - 1), [startDate, numDays]);
 
   const [selectedMeals, setSelectedMeals] = useState(['breakfast', 'lunch', 'dinner']);
 
-  // Clamp day to valid range when month/year change
-  const maxDay = daysInMonth(selYear, selMonth);
-  const clampedDay = Math.min(selDay, maxDay);
-  if (clampedDay !== selDay) setSelDay(clampedDay);
-
-  // Min date = today — prevent past dates
-  const todayStr = today;
-
-  // Year options: current year + next 2 years
-  const yearOptions = useMemo(() => {
-    const y = todayParsed.year;
-    return [y, y + 1, y + 2];
-  }, [todayParsed.year]);
-
-  // Change handlers — validate min date
-  const handleDayChange = (d) => {
-    const newDate = `${selYear}-${pad2(selMonth)}-${pad2(d)}`;
-    if (newDate >= todayStr) setSelDay(d);
-  };
-  const handleMonthChange = (m) => {
-    const maxD = daysInMonth(selYear, m);
-    const newD = Math.min(selDay, maxD);
-    const newDate = `${selYear}-${pad2(m)}-${pad2(newD)}`;
-    if (newDate >= todayStr) { setSelMonth(m); setSelDay(newD); }
-  };
-  const handleYearChange = (y) => {
-    const maxD = daysInMonth(y, selMonth);
-    const newD = Math.min(selDay, maxD);
-    const newDate = `${y}-${pad2(selMonth)}-${pad2(newD)}`;
-    if (newDate >= todayStr) { setSelYear(y); setSelDay(newD); }
+  // Handle changes to startDate: keep numDays, recalculate endDate automatically
+  const handleStartDateChange = (newStart) => {
+    if (!newStart) return;
+    if (newStart < today) {
+      setError('Không thể chọn ngày bắt đầu trong quá khứ.');
+      return;
+    }
+    setError('');
+    setStartDate(newStart);
   };
 
-  const selectStyle = {
-    padding: '8px 10px', border: '1.5px solid #e2e8f0', borderRadius: 8,
-    fontSize: 14, background: 'white', color: '#1e293b', cursor: 'pointer',
-    outline: 'none', appearance: 'none', WebkitAppearance: 'none',
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', paddingRight: 28,
+  // Handle changes to numDays: recalculate endDate automatically
+  const handleNumDaysChange = (val) => {
+    const parsed = parseInt(val, 10);
+    if (isNaN(parsed) || parsed < 1) {
+      setNumDays(1);
+      setError('');
+      return;
+    }
+    if (parsed > 30) {
+      setNumDays(30);
+      setError('Tối đa lên kế hoạch 30 ngày một lần.');
+      return;
+    }
+    setError('');
+    setNumDays(parsed);
+  };
+
+  // Handle changes to endDate: recalculate numDays automatically
+  const handleEndDateChange = (newEnd) => {
+    if (!newEnd) return;
+    if (newEnd < today) {
+      setError('Không thể chọn ngày kết thúc trong quá khứ.');
+      return;
+    }
+    if (newEnd < startDate) {
+      setError('Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
+      return;
+    }
+    const days = diffDays(startDate, newEnd);
+    if (days > 30) {
+      setError('Khoảng thời gian tối đa là 30 ngày.');
+      setNumDays(30);
+      return;
+    }
+    setError('');
+    setNumDays(days);
   };
 
   // Step 1: Weight goal
@@ -107,19 +163,31 @@ export default function SuggestNextPlanPopup({ onClose }) {
   const currentActivity = healthProfile?.activityLevel || 'sedentary';
 
   const toggleMeal = (meal) => {
-    setSelectedMeals(prev =>
-      prev.includes(meal)
-        ? prev.filter(m => m !== meal)
-        : [...prev, meal]
+    setSelectedMeals((prev) =>
+      prev.includes(meal) ? prev.filter((m) => m !== meal) : [...prev, meal]
     );
   };
 
-  const isStep1Changed = goal !== currentGoal || (goal !== 'maintain' && targetWeight && Number(targetWeight) !== healthProfile?.targetWeight);
+  const isStep1Changed =
+    goal !== currentGoal ||
+    (goal !== 'maintain' && targetWeight && Number(targetWeight) !== healthProfile?.targetWeight);
   const isStep2Changed = activityLevel !== currentActivity;
 
   const handleGenerate = async () => {
     if (selectedMeals.length === 0) {
       setError('Vui lòng chọn ít nhất một bữa ăn.');
+      return;
+    }
+    if (startDate < today) {
+      setError('Không thể chọn ngày bắt đầu trong quá khứ.');
+      return;
+    }
+    if (endDate < startDate) {
+      setError('Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
+      return;
+    }
+    if (numDays < 1 || numDays > 30) {
+      setError('Số ngày lên kế hoạch phải từ 1 đến 30 ngày.');
       return;
     }
 
@@ -148,11 +216,28 @@ export default function SuggestNextPlanPopup({ onClose }) {
       }
 
       const mealsParam = selectedMeals.join(',');
-      const res = await api.post(`/MealPlan/suggest-for-date?date=${selectedDate}&meals=${mealsParam}${focusQueryParam()}`);
+      let res;
+      if (numDays > 1) {
+        res = await api.post(
+          `/MealPlan/suggest-for-date-range?startDate=${startDate}&endDate=${endDate}&meals=${mealsParam}${focusQueryParam()}`
+        );
+      } else {
+        res = await api.post(
+          `/MealPlan/suggest-for-date?date=${startDate}&meals=${mealsParam}${focusQueryParam()}`
+        );
+      }
 
-      if (res.data.data) {
-        // Pass selectedDate so the parent can navigate to the correct week
-        onClose({ type: 'success', text: 'Đã tạo gợi ý thành công!', date: selectedDate });
+      if (res.data?.data) {
+        onClose({
+          type: 'success',
+          text:
+            numDays > 1
+              ? `Đã tạo gợi ý thành công cho ${numDays} ngày (${formatShortDate(startDate)} – ${formatShortDate(endDate)})!`
+              : 'Đã tạo gợi ý thành công!',
+          date: startDate,
+          endDate: endDate,
+          numDays: numDays,
+        });
       }
     } catch (err) {
       console.error('Lỗi tạo thực đơn:', err);
@@ -164,75 +249,128 @@ export default function SuggestNextPlanPopup({ onClose }) {
 
   return (
     <div className="popup-overlay" onClick={() => onClose(null)}>
-      <div className="popup-container" onClick={e => e.stopPropagation()}>
+      <div className="popup-container" onClick={(e) => e.stopPropagation()}>
         <div className="popup-header">
-          <h2>Tạo gợi ý bữa ăn</h2>
-          <button className="popup-close" onClick={() => onClose(null)}><FiX size={22} /></button>
+          <h2>{numDays > 1 ? `Tạo gợi ý thực đơn (${numDays} ngày)` : 'Tạo gợi ý bữa ăn'}</h2>
+          <button className="popup-close" onClick={() => onClose(null)}>
+            <FiX size={22} />
+          </button>
         </div>
 
         <div className="popup-body">
           <div className="popup-step-dots">
-            {[0, 1, 2].map(i => (
+            {[0, 1, 2].map((i) => (
               <div key={i} className={`popup-step-dot ${step === i ? 'active' : ''}`} />
             ))}
           </div>
 
-          {/* Step 0: Date + Meals */}
+          {/* Step 0: Date Range + Meals */}
           {step === 0 && (
             <div>
               <h3 className="popup-section-title">
                 <FiCalendar style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                Chọn ngày và bữa ăn
+                {numDays > 1 ? 'Chọn khoảng thời gian và bữa ăn' : 'Chọn ngày và bữa ăn'}
               </h3>
-              <p className="popup-section-desc">Chọn ngày và các bữa ăn bạn muốn gợi ý</p>
+              <p className="popup-section-desc">
+                Thiết lập ngày bắt đầu, số ngày cần tạo hoặc chọn ngày kết thúc
+              </p>
 
+              {/* 1. Ngày bắt đầu */}
               <div className="popup-form-group">
-                <label className="popup-label">Ngày</label>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  {/* Day input */}
-                  <input
-                    type="number"
-                    value={selDay}
-                    min={1}
-                    max={maxDay}
-                    onChange={e => handleDayChange(Number(e.target.value))}
-                    style={{ ...selectStyle, width: 70, textAlign: 'center' }}
-                  />
-                  <span style={{ color: '#94a3b8', fontWeight: 600 }}>/</span>
-                  {/* Month dropdown */}
-                  <select
-                    value={selMonth}
-                    onChange={e => handleMonthChange(Number(e.target.value))}
-                    style={{ ...selectStyle, flex: 1 }}
-                  >
-                    {VIET_MONTHS.map((label, idx) => (
-                      <option key={idx + 1} value={idx + 1}>{label}</option>
-                    ))}
-                  </select>
-                  <span style={{ color: '#94a3b8', fontWeight: 600 }}>/</span>
-                  {/* Year input */}
-                  <input
-                    type="number"
-                    value={selYear}
-                    min={yearOptions[0]}
-                    max={yearOptions[yearOptions.length - 1]}
-                    onChange={e => handleYearChange(Number(e.target.value))}
-                    style={{ ...selectStyle, width: 80, textAlign: 'center' }}
-                  />
-                </div>
-                {/* Weekday confirmation */}
-                <div style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>
-                  📅 {new Date(selectedDate + 'T12:00:00').toLocaleDateString('vi-VN', { weekday: 'long' })}, ngày {pad2(selDay)}/{pad2(selMonth)}/{selYear}
+                <label className="popup-label">Ngày bắt đầu</label>
+                <input
+                  type="date"
+                  className="popup-date-input"
+                  value={startDate}
+                  min={today}
+                  onChange={(e) => handleStartDateChange(e.target.value)}
+                />
+                <div className="popup-date-subtext">
+                  📅 {formatVietnameseDate(startDate)}
                 </div>
               </div>
 
-
+              {/* 2. Số ngày lên kế hoạch */}
               <div className="popup-form-group">
-                <label className="popup-label">Bữa ăn</label>
+                <label className="popup-label">Số ngày tạo thực đơn (1 – 30 ngày)</label>
+                <div className="popup-days-stepper">
+                  <button
+                    type="button"
+                    className="popup-stepper-btn"
+                    disabled={numDays <= 1}
+                    onClick={() => handleNumDaysChange(numDays - 1)}
+                    title="Giảm 1 ngày"
+                  >
+                    <FiMinus size={16} />
+                  </button>
+                  <input
+                    type="number"
+                    className="popup-days-input"
+                    value={numDays}
+                    min={1}
+                    max={30}
+                    onChange={(e) => handleNumDaysChange(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="popup-stepper-btn"
+                    disabled={numDays >= 30}
+                    onClick={() => handleNumDaysChange(numDays + 1)}
+                    title="Tăng 1 ngày"
+                  >
+                    <FiPlus size={16} />
+                  </button>
+                </div>
+
+                {/* Preset pills */}
+                <div className="popup-presets-row">
+                  {DAY_PRESETS.map((preset) => (
+                    <button
+                      key={preset.days}
+                      type="button"
+                      className={`popup-preset-pill ${numDays === preset.days ? 'active' : ''}`}
+                      onClick={() => handleNumDaysChange(preset.days)}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Ngày kết thúc */}
+              <div className="popup-form-group">
+                <label className="popup-label">Ngày kết thúc</label>
+                <input
+                  type="date"
+                  className="popup-date-input"
+                  value={endDate}
+                  min={startDate}
+                  max={addDays(startDate, 29)}
+                  onChange={(e) => handleEndDateChange(e.target.value)}
+                />
+                <div className="popup-date-subtext">
+                  📅 {formatVietnameseDate(endDate)} ({numDays} ngày)
+                </div>
+              </div>
+
+              {/* Summary card for range */}
+              <div className="popup-plan-range-card">
+                <FiCalendar size={18} style={{ flexShrink: 0 }} />
+                <span>
+                  Kế hoạch <strong>{numDays} ngày</strong>: từ{' '}
+                  <strong>{formatShortDate(startDate)}</strong> đến{' '}
+                  <strong>{formatShortDate(endDate)}</strong>
+                </span>
+              </div>
+
+              {/* 4. Chọn bữa ăn */}
+              <div className="popup-form-group">
+                <label className="popup-label">Các bữa ăn áp dụng mỗi ngày</label>
                 <div className="popup-meal-options">
-                  {MEAL_OPTIONS.map(opt => (
+                  {MEAL_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
+                      type="button"
                       className={`popup-meal-btn ${selectedMeals.includes(opt.value) ? 'active' : ''}`}
                       onClick={() => toggleMeal(opt.value)}
                     >
@@ -246,12 +384,27 @@ export default function SuggestNextPlanPopup({ onClose }) {
               {error && <div className="popup-error">{error}</div>}
 
               <div className="popup-actions">
-                <button className="popup-btn-cancel" onClick={() => onClose(null)}>Hủy</button>
+                <button type="button" className="popup-btn-cancel" onClick={() => onClose(null)}>
+                  Hủy
+                </button>
                 <button
+                  type="button"
                   className="popup-btn-primary"
                   onClick={() => {
                     if (selectedMeals.length === 0) {
                       setError('Vui lòng chọn ít nhất một bữa ăn.');
+                      return;
+                    }
+                    if (startDate < today) {
+                      setError('Không thể chọn ngày bắt đầu trong quá khứ.');
+                      return;
+                    }
+                    if (endDate < startDate) {
+                      setError('Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.');
+                      return;
+                    }
+                    if (numDays < 1 || numDays > 30) {
+                      setError('Số ngày lên kế hoạch phải từ 1 đến 30 ngày.');
                       return;
                     }
                     setError('');
@@ -268,16 +421,19 @@ export default function SuggestNextPlanPopup({ onClose }) {
           {step === 1 && (
             <div>
               <h3 className="popup-section-title">Mục tiêu cân nặng</h3>
-              <p className="popup-section-desc">Bạn có muốn thay đổi mục tiêu cân nặng không? Có thể bỏ qua để giữ nguyên.</p>
+              <p className="popup-section-desc">
+                Bạn có muốn thay đổi mục tiêu cân nặng không? Có thể bỏ qua để giữ nguyên.
+              </p>
 
               <div className="popup-goal-options">
                 {[
                   { value: 'lose', icon: <FiTrendingDown size={22} />, label: 'Giảm cân' },
                   { value: 'maintain', icon: <FiMinus size={22} />, label: 'Duy trì' },
                   { value: 'gain', icon: <FiTrendingUp size={22} />, label: 'Tăng cân' },
-                ].map(opt => (
+                ].map((opt) => (
                   <button
                     key={opt.value}
+                    type="button"
                     className={`popup-goal-btn ${goal === opt.value ? 'active' : ''}`}
                     onClick={() => setGoal(opt.value)}
                   >
@@ -294,7 +450,7 @@ export default function SuggestNextPlanPopup({ onClose }) {
                     <input
                       type="number"
                       value={targetWeight}
-                      onChange={e => setTargetWeight(e.target.value)}
+                      onChange={(e) => setTargetWeight(e.target.value)}
                       placeholder={currentWeight ? `Hiện tại: ${currentWeight}kg` : 'Nhập cân nặng mục tiêu'}
                       className="popup-text-input"
                     />
@@ -304,8 +460,10 @@ export default function SuggestNextPlanPopup({ onClose }) {
               )}
 
               <div className="popup-actions">
-                <button className="popup-btn-cancel" onClick={() => setStep(0)}>← Quay lại</button>
-                <button className="popup-btn-primary" onClick={() => setStep(2)}>
+                <button type="button" className="popup-btn-cancel" onClick={() => setStep(0)}>
+                  ← Quay lại
+                </button>
+                <button type="button" className="popup-btn-primary" onClick={() => setStep(2)}>
                   {isStep1Changed ? 'Tiếp tục' : 'Bỏ qua, dùng chỉ số hiện tại →'}
                 </button>
               </div>
@@ -322,9 +480,10 @@ export default function SuggestNextPlanPopup({ onClose }) {
               <p className="popup-section-desc">Chọn mức vận động phù hợp với bạn</p>
 
               <div className="popup-activity-options">
-                {ACTIVITY_OPTIONS.map(opt => (
+                {ACTIVITY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
+                    type="button"
                     className={`popup-activity-btn ${activityLevel === opt.value ? 'active' : ''}`}
                     onClick={() => setActivityLevel(opt.value)}
                   >
@@ -337,14 +496,18 @@ export default function SuggestNextPlanPopup({ onClose }) {
               {/* Summary */}
               <div className="popup-summary">
                 <div className="popup-summary-row">
-                  <span>Ngày:</span>
+                  <span>Khoảng thời gian:</span>
                   <span className="popup-summary-val">
-                    {new Date(selectedDate + 'T12:00:00').toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                    {numDays > 1
+                      ? `${numDays} ngày (${formatShortDate(startDate)} – ${formatShortDate(endDate)})`
+                      : formatVietnameseDate(startDate)}
                   </span>
                 </div>
                 <div className="popup-summary-row">
                   <span>Bữa ăn:</span>
-                  <span className="popup-summary-val">{selectedMeals.map(m => MEAL_OPTIONS.find(o => o.value === m)?.label).join(', ')}</span>
+                  <span className="popup-summary-val">
+                    {selectedMeals.map((m) => MEAL_OPTIONS.find((o) => o.value === m)?.label).join(', ')}
+                  </span>
                 </div>
                 <div className="popup-summary-row">
                   <span>Mục tiêu:</span>
@@ -355,16 +518,25 @@ export default function SuggestNextPlanPopup({ onClose }) {
                 </div>
                 <div className="popup-summary-row">
                   <span>Vận động:</span>
-                  <span className="popup-summary-val">{ACTIVITY_OPTIONS.find(a => a.value === activityLevel)?.label || activityLevel}</span>
+                  <span className="popup-summary-val">
+                    {ACTIVITY_OPTIONS.find((a) => a.value === activityLevel)?.label || activityLevel}
+                  </span>
                 </div>
               </div>
 
               {error && <div className="popup-error">{error}</div>}
 
               <div className="popup-actions">
-                <button className="popup-btn-cancel" onClick={() => setStep(1)}>← Quay lại</button>
-                <button className="popup-btn-primary popup-btn-generate" onClick={handleGenerate} disabled={loading}>
-                  {loading ? '⏳ Đang tạo...' : '✨ Tạo thực đơn'}
+                <button type="button" className="popup-btn-cancel" onClick={() => setStep(1)}>
+                  ← Quay lại
+                </button>
+                <button
+                  type="button"
+                  className="popup-btn-primary popup-btn-generate"
+                  onClick={handleGenerate}
+                  disabled={loading}
+                >
+                  {loading ? '⏳ Đang tạo...' : numDays > 1 ? `✨ Tạo thực đơn (${numDays} ngày)` : '✨ Tạo thực đơn'}
                 </button>
               </div>
             </div>

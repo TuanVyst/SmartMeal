@@ -831,6 +831,112 @@
 
 .popup-btn-generate { flex: 1; padding: 14px 0; font-size: 16px; }
 
+/* ── Multi-day Plan Picker Controls ── */
+.popup-days-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.popup-stepper-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.popup-stepper-btn:hover:not(:disabled) {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.popup-stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.popup-days-input {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #1e293b;
+  padding: 10px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.popup-days-input:focus {
+  border-color: #22c55e;
+}
+
+.popup-presets-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.popup-preset-pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.popup-preset-pill:hover {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.popup-preset-pill.active {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #16a34a;
+  box-shadow: 0 0 0 1px #22c55e;
+}
+
+.popup-date-subtext {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.popup-plan-range-card {
+  margin: 14px 0 16px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* ── Nutrient focus chip ── */
 .mps-focus-chip {
   display: flex;
