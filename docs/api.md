@@ -69,6 +69,9 @@ Base URL: `https://api.ocgi.space`
 
 ### Nutrition & Meal Plans (`/api/MealPlan`, `/api/NutritionDiary`)
 - `POST /api/MealPlan/generate`: Generate customized weekly/daily meal plan based on health constraints.
+- `POST /api/MealPlan/suggest-for-date`: Suggest meals for a single date (`?date=YYYY-MM-DD&meals=...&focus=...`).
+- `POST /api/MealPlan/suggest-for-date-range`: Suggest meals across a multi-day range (`?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&meals=...&focus=...`). Enforces future-or-today and max 30 days constraints.
+- `GET /api/MealPlan/week`: Fetch 7-day Monday–Sunday meal plan view for a target date (`?date=YYYY-MM-DD`).
 - `GET /api/NutritionDiary`: Fetch user consumption logs for specific date ranges.
 - `POST /api/NutritionDiary/log`: Log meal consumption and compute remaining macro allowance.
 

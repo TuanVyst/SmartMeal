@@ -98,7 +98,8 @@ export default function Sidebar() {
   const navItems = [
     { to: '/home',                  icon: <FiHome size={20} />,      label: 'Khám phá',                    end: false },
     { to: '/journal',               icon: <FiClipboard size={20} />, label: 'Nhật ký',                     end: false },
-    { to: '/ingredient-detection',  icon: <FiCamera size={20} />,    label: 'Nhận diện nguyên liệu' },
+    // Tạm ẩn tính năng Nhận diện nguyên liệu cho demo
+    // { to: '/ingredient-detection',  icon: <FiCamera size={20} />,    label: 'Nhận diện nguyên liệu' },
     { to: '/subscription',          icon: <FiAward size={20} />,     label: isPremium ? 'Gói Pro' : 'Nâng cấp Pro' },
     { to: '/profile',               icon: <FiSettings size={20} />,  label: 'Cài đặt'                      },
   ];
