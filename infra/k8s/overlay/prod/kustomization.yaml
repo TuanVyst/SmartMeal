@@ -3,9 +3,9 @@ kind: Kustomization
 namespace: smartmeal
 images:
 - name: ghcr.io/tuanvyst/smartmeal/smartmeal-predict
-  newTag: v0.1.3
+  newTag: v0.1.4
 - name: ghcr.io/tuanvyst/smartmeal/smartmeal-server
-  newTag: v0.1.3
+  newTag: v0.1.4
 resources:
 - network-policy.yaml
 - gateway.yaml
