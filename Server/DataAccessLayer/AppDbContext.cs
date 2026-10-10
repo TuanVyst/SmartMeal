@@ -69,6 +69,12 @@ namespace DataAccessLayer
 
             modelBuilder.Entity<BusinessObject.Entities.UserSessionLog>()
                 .HasIndex(s => s.StartTime);
+
+            modelBuilder.Entity<BusinessObject.Entities.UserSessionLog>()
+                .HasOne(s => s.FirstRecipe)
+                .WithMany()
+                .HasForeignKey(s => s.FirstRecipe_id)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

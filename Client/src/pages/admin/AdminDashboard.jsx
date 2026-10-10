@@ -15,6 +15,8 @@ import {
   FiBarChart2,
   FiChevronLeft,
   FiChevronRight,
+  FiCheckSquare,
+  FiLayers,
 } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 
@@ -24,7 +26,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [isEngagementLoading, setIsEngagementLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
-  const [activeChartTab, setActiveChartTab] = useState('visits'); // 'visits' | 'duration' | 'newAccounts'
+  const [activeChartTab, setActiveChartTab] = useState('visits'); // 'visits' | 'duration' | 'newAccounts' | 'recipeSelectTime' | 'planDishes'
   const dateInputRef = useRef(null);
 
   useEffect(() => {
@@ -126,11 +128,22 @@ export default function AdminDashboard() {
     );
   };
 
+  // Format seconds into a friendly human-readable string
+  const formatSecondsToFriendly = (sec) => {
+    if (!sec || sec <= 0) return '0 giây';
+    if (sec < 60) return `${Math.round(sec)} giây`;
+    const m = Math.floor(sec / 60);
+    const s = Math.round(sec % 60);
+    return s > 0 ? `${m}p ${s}s` : `${m} phút`;
+  };
+
   // Determine max value for chart scaling
   const getChartMetricValue = (day) => {
     if (activeChartTab === 'visits') return day.visits || 0;
     if (activeChartTab === 'duration') return day.avgDurationMinutes || 0;
     if (activeChartTab === 'newAccounts') return day.newAccounts || 0;
+    if (activeChartTab === 'recipeSelectTime') return day.avgTimeToRecipeSelectSeconds || 0;
+    if (activeChartTab === 'planDishes') return day.planDishes || 0;
     return 0;
   };
 
@@ -140,6 +153,8 @@ export default function AdminDashboard() {
     if (activeChartTab === 'visits') return 'lượt';
     if (activeChartTab === 'duration') return 'phút';
     if (activeChartTab === 'newAccounts') return 'tài khoản';
+    if (activeChartTab === 'recipeSelectTime') return 'giây';
+    if (activeChartTab === 'planDishes') return 'món';
     return '';
   };
 
@@ -260,7 +275,45 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Card 3: Số lượng tài khoản mới đăng ký trong tuần */}
+          {/* Card 3: Thời gian chọn công thức món ăn trung bình */}
+          <div className="engagement-card">
+            <div>
+              <div className="engagement-card-header">
+                <span className="engagement-card-title">Thời gian chọn món TB</span>
+                <div className="engagement-icon amber">
+                  <FiCheckSquare />
+                </div>
+              </div>
+              <div className="engagement-value">
+                {formatSecondsToFriendly(thisWeek.avgTimeToRecipeSelectSeconds ?? 0)}
+              </div>
+            </div>
+            <div className="engagement-card-footer">
+              <span>Đã chọn: <strong>{thisWeek.recipeSelectCount ?? 0} lượt</strong> ({thisWeek.recipeSelectRate ?? 0}% phiên)</span>
+              {renderGrowthBadge(growth.avgTimeToRecipeSelect)}
+            </div>
+          </div>
+
+          {/* Card 4: Món trong thực đơn trung bình mỗi người */}
+          <div className="engagement-card">
+            <div>
+              <div className="engagement-card-header">
+                <span className="engagement-card-title">TB số món được thêm vào thực đơn</span>
+                <div className="engagement-icon purple">
+                  <FiLayers />
+                </div>
+              </div>
+              <div className="engagement-value">
+                ~{thisWeek.avgDishesPerUser ?? 0} <span style={{ fontSize: '16px', fontWeight: 500, color: '#64748b' }}>món / người</span>
+              </div>
+            </div>
+            <div className="engagement-card-footer">
+              <span>Tổng: <strong>{thisWeek.totalPlanDishes ?? 0} món</strong> ({thisWeek.planUsersCount ?? 0} người lên thực đơn)</span>
+              {renderGrowthBadge(growth.avgDishesPerUser)}
+            </div>
+          </div>
+
+          {/* Card 5: Số lượng tài khoản mới đăng ký trong tuần */}
           <div className="engagement-card">
             <div>
               <div className="engagement-card-header">
@@ -310,6 +363,20 @@ export default function AdminDashboard() {
                 >
                   Tài khoản mới
                 </button>
+                <button
+                  type="button"
+                  className={`chart-tab-btn ${activeChartTab === 'recipeSelectTime' ? 'active' : ''}`}
+                  onClick={() => setActiveChartTab('recipeSelectTime')}
+                >
+                  Thời gian chọn món
+                </button>
+                <button
+                  type="button"
+                  className={`chart-tab-btn ${activeChartTab === 'planDishes' ? 'active' : ''}`}
+                  onClick={() => setActiveChartTab('planDishes')}
+                >
+                  Món thực đơn
+                </button>
               </div>
             </div>
 
@@ -324,11 +391,11 @@ export default function AdminDashboard() {
                       <div
                         className={`chart-bar-fill ${activeChartTab} ${day.isToday ? 'is-today' : ''} ${day.isFuture ? 'is-future' : ''}`}
                         style={{ height: `${heightPct}%` }}
-                        title={`${day.dayName} (${day.date}): ${val} ${getMetricUnit()}`}
+                        title={`${day.dayName} (${day.date}): ${val} ${getMetricUnit()}${activeChartTab === 'recipeSelectTime' && day.recipeSelectCount !== undefined ? ` (${day.recipeSelectCount} lượt chọn món)` : ''}`}
                       >
                         {!day.isFuture && (
                           <span className="chart-bar-val-top">
-                            {val}
+                            {activeChartTab === 'recipeSelectTime' && val > 0 ? `${val}s` : val}
                           </span>
                         )}
                       </div>

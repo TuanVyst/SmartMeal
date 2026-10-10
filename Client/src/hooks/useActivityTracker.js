@@ -3,7 +3,7 @@ import { adminService } from '../services/adminService';
 
 const SESSION_STORAGE_KEY = 'smartmeal_session_token';
 
-function getOrCreateSessionToken() {
+export function getOrCreateSessionToken() {
   try {
     let token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
@@ -53,4 +53,21 @@ export function useActivityTracker() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+}
+
+/**
+ * Records a user selecting/viewing a recipe in their current session.
+ * @param {string|Guid} recipeId 
+ */
+export function trackRecipeSelection(recipeId) {
+  try {
+    const sessionToken = getOrCreateSessionToken();
+    if (sessionToken && recipeId) {
+      adminService.recordRecipeSelect(sessionToken, recipeId).catch(() => {
+        // Non-blocking
+      });
+    }
+  } catch {
+    // Non-blocking
+  }
 }

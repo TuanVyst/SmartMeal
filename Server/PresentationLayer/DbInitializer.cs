@@ -49,6 +49,9 @@ public static class DbInitializer
 
         // After migrations, ensure Sodium→Salt column renames are applied
         await EnsureSaltColumnsAsync(context);
+        // Ensure UserSessionLog columns exist
+        await EnsureUserSessionLogColumnsAsync(context);
+
 
         // Seed subscription plans
         await SeedPlansAsync(context);
@@ -591,6 +594,53 @@ public static class DbInitializer
         catch (Exception ex)
         {
             Console.WriteLine($"[DbInitializer] Warning: Could not rename salt columns: {ex.Message}");
+        }
+    }
+
+    private static async Task EnsureUserSessionLogColumnsAsync(AppDbContext context)
+    {
+        try
+        {
+            await context.Database.ExecuteSqlRawAsync(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_class c
+                        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = 'public' AND c.relname = 'UserSessionLog'
+                    ) THEN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_catalog.pg_attribute a
+                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                            WHERE n.nspname = 'public' AND c.relname = 'UserSessionLog' AND a.attname = 'FirstRecipeSelectTime'
+                        ) THEN
+                            ALTER TABLE ""UserSessionLog"" ADD COLUMN ""FirstRecipeSelectTime"" timestamp with time zone NULL;
+                        END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_catalog.pg_attribute a
+                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                            WHERE n.nspname = 'public' AND c.relname = 'UserSessionLog' AND a.attname = 'TimeToFirstRecipeSelectSeconds'
+                        ) THEN
+                            ALTER TABLE ""UserSessionLog"" ADD COLUMN ""TimeToFirstRecipeSelectSeconds"" integer NULL;
+                        END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_catalog.pg_attribute a
+                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                            WHERE n.nspname = 'public' AND c.relname = 'UserSessionLog' AND a.attname = 'FirstRecipe_id'
+                        ) THEN
+                            ALTER TABLE ""UserSessionLog"" ADD COLUMN ""FirstRecipe_id"" uuid NULL;
+                        END IF;
+                    END IF;
+                END $$;");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DbInitializer] Warning: Could not ensure UserSessionLog columns: {ex.Message}");
         }
     }
 

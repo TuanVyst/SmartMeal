@@ -255,5 +255,10 @@ export const adminService = {
     const res = await api.post('/Activity/heartbeat', { sessionToken });
     return res.data;
   },
+
+  recordRecipeSelect: async (sessionToken, recipeId) => {
+    const res = await api.post('/Activity/record-recipe-select', { sessionToken, recipeId });
+    return res.data;
+  },
 };
 

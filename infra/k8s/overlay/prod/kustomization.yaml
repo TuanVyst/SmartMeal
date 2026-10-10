@@ -1,12 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: smartmeal
+images:
+- name: ghcr.io/tuanvyst/smartmeal/smartmeal-predict
+  newTag: v0.1.0
+- name: ghcr.io/tuanvyst/smartmeal/smartmeal-server
+  newTag: v0.1.0
 resources:
-  - network-policy.yaml
-  - gateway.yaml
-  - ../../base/api
-  - ../../base/predict
+- network-policy.yaml
+- gateway.yaml
+- ../../base/api
+- ../../base/predict
 
 patches:
-  - path: deployment.yaml
-  - path: routing.yaml
+- path: deployment.yaml
+- path: routing.yaml

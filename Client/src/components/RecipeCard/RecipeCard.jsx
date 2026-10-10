@@ -4,6 +4,7 @@ import { FiClock, FiHeart, FiZap } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
+import { trackRecipeSelection } from '../../hooks/useActivityTracker';
 import './RecipeCard.css';
 
 const RecipeCard = ({ recipe }) => {
@@ -18,8 +19,15 @@ const RecipeCard = ({ recipe }) => {
     toggleFavorite(recipe);
   };
 
+  const handleCardClick = () => {
+    if (id) {
+      trackRecipeSelection(id);
+    }
+    navigate(`/recipe/${id}`);
+  };
+
   return (
-    <div className="recipe-card" onClick={() => navigate(`/recipe/${id}`)}>
+    <div className="recipe-card" onClick={handleCardClick}>
       {imageUrl && (
         <div className="card-image-container">
           <img src={imageUrl} alt={title} className="card-image" />
