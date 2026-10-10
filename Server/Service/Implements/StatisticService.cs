@@ -119,7 +119,7 @@ namespace Service.Implements
             var thisWeekTotalDurationSeconds = thisWeekSessions.Sum(s => s.DurationSeconds);
             var lastWeekTotalDurationSeconds = lastWeekSessions.Sum(s => s.DurationSeconds);
 
-            // Average duration in minutes per session
+            // Average duration in minutes and seconds per session
             double thisWeekAvgDurationMinutes = thisWeekVisits > 0
                 ? Math.Round((double)thisWeekTotalDurationSeconds / thisWeekVisits / 60.0, 1)
                 : 0;
@@ -128,10 +128,19 @@ namespace Service.Implements
                 ? Math.Round((double)lastWeekTotalDurationSeconds / lastWeekVisits / 60.0, 1)
                 : 0;
 
+            int thisWeekAvgDurationSeconds = thisWeekVisits > 0
+                ? (int)Math.Round((double)thisWeekTotalDurationSeconds / thisWeekVisits)
+                : 0;
+
+            int lastWeekAvgDurationSeconds = lastWeekVisits > 0
+                ? (int)Math.Round((double)lastWeekTotalDurationSeconds / lastWeekVisits)
+                : 0;
+
             double thisWeekTotalDurationHours = Math.Round((double)thisWeekTotalDurationSeconds / 3600.0, 1);
 
 
             // 4. Recipe Selection Statistics (Time to First Recipe Select)
+            // Bounded by DurationSeconds to eliminate historical idle tab skew
             var thisWeekRecipeSelectSessions = thisWeekSessions
                 .Where(s => s.TimeToFirstRecipeSelectSeconds.HasValue)
                 .ToList();
@@ -143,16 +152,15 @@ namespace Service.Implements
             var lastWeekRecipeSelectCount = lastWeekRecipeSelectSessions.Count;
 
             double thisWeekAvgTimeToRecipeSelectSeconds = thisWeekRecipeSelectCount > 0
-                ? Math.Round(thisWeekRecipeSelectSessions.Average(s => s.TimeToFirstRecipeSelectSeconds!.Value), 1)
+                ? Math.Round(thisWeekRecipeSelectSessions.Average(s => Math.Min(s.TimeToFirstRecipeSelectSeconds!.Value, Math.Max(s.DurationSeconds, 0))), 1)
                 : 0;
 
             double lastWeekAvgTimeToRecipeSelectSeconds = lastWeekRecipeSelectCount > 0
-                ? Math.Round(lastWeekRecipeSelectSessions.Average(s => s.TimeToFirstRecipeSelectSeconds!.Value), 1)
+                ? Math.Round(lastWeekRecipeSelectSessions.Average(s => Math.Min(s.TimeToFirstRecipeSelectSeconds!.Value, Math.Max(s.DurationSeconds, 0))), 1)
                 : 0;
 
             double thisWeekAvgTimeToRecipeSelectMinutes = Math.Round(thisWeekAvgTimeToRecipeSelectSeconds / 60.0, 1);
             double lastWeekAvgTimeToRecipeSelectMinutes = Math.Round(lastWeekAvgTimeToRecipeSelectSeconds / 60.0, 1);
-
             double thisWeekRecipeSelectRate = thisWeekVisits > 0
                 ? Math.Round(((double)thisWeekRecipeSelectCount / thisWeekVisits) * 100.0, 1)
                 : 0;
@@ -241,14 +249,14 @@ namespace Service.Implements
                 var dayVisits = daySessions.Count;
                 var dayTotalSeconds = daySessions.Sum(s => s.DurationSeconds);
                 var dayAvgMinutes = dayVisits > 0 ? Math.Round((double)dayTotalSeconds / dayVisits / 60.0, 1) : 0;
-
+                var dayAvgSeconds = dayVisits > 0 ? (int)Math.Round((double)dayTotalSeconds / dayVisits) : 0;
 
                 var dayRecipeSelectSessions = daySessions
                     .Where(s => s.TimeToFirstRecipeSelectSeconds.HasValue)
                     .ToList();
                 var dayRecipeSelectCount = dayRecipeSelectSessions.Count;
                 var dayAvgTimeToRecipeSelectSeconds = dayRecipeSelectCount > 0
-                    ? Math.Round(dayRecipeSelectSessions.Average(s => s.TimeToFirstRecipeSelectSeconds!.Value), 1)
+                    ? Math.Round(dayRecipeSelectSessions.Average(s => Math.Min(s.TimeToFirstRecipeSelectSeconds!.Value, Math.Max(s.DurationSeconds, 0))), 1)
                     : 0;
                 var dayAvgTimeToRecipeSelectMinutes = Math.Round(dayAvgTimeToRecipeSelectSeconds / 60.0, 1);
 
@@ -266,7 +274,9 @@ namespace Service.Implements
                     NewAccounts = dayNewAccounts,
                     Visits = dayVisits,
                     AvgDurationMinutes = dayAvgMinutes,
+                    AvgDurationSeconds = dayAvgSeconds,
                     TotalDurationMinutes = Math.Round(dayTotalSeconds / 60.0, 1),
+                    TotalDurationSeconds = dayTotalSeconds,
                     RecipeSelectCount = dayRecipeSelectCount,
                     AvgTimeToRecipeSelectSeconds = dayAvgTimeToRecipeSelectSeconds,
                     AvgTimeToRecipeSelectMinutes = dayAvgTimeToRecipeSelectMinutes,
@@ -290,7 +300,9 @@ namespace Service.Implements
                     ActiveUsers = activeUsersThisWeek,
                     AvgVisitsPerUser = avgVisitsPerUser,
                     AvgDurationMinutes = thisWeekAvgDurationMinutes,
+                    AvgDurationSeconds = thisWeekAvgDurationSeconds,
                     TotalDurationHours = thisWeekTotalDurationHours,
+                    TotalDurationSeconds = thisWeekTotalDurationSeconds,
                     AvgTimeToRecipeSelectSeconds = thisWeekAvgTimeToRecipeSelectSeconds,
                     AvgTimeToRecipeSelectMinutes = thisWeekAvgTimeToRecipeSelectMinutes,
                     RecipeSelectCount = thisWeekRecipeSelectCount,
@@ -304,6 +316,8 @@ namespace Service.Implements
                     NewAccounts = lastWeekNewAccounts,
                     TotalVisits = lastWeekVisits,
                     AvgDurationMinutes = lastWeekAvgDurationMinutes,
+                    AvgDurationSeconds = lastWeekAvgDurationSeconds,
+                    TotalDurationSeconds = lastWeekTotalDurationSeconds,
                     AvgTimeToRecipeSelectSeconds = lastWeekAvgTimeToRecipeSelectSeconds,
                     AvgTimeToRecipeSelectMinutes = lastWeekAvgTimeToRecipeSelectMinutes,
                     RecipeSelectCount = lastWeekRecipeSelectCount,
