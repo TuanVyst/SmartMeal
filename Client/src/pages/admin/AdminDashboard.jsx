@@ -158,7 +158,7 @@ export default function AdminDashboard() {
     if (activeChartTab === 'duration') return 'phút';
     if (activeChartTab === 'newAccounts') return 'tài khoản';
     if (activeChartTab === 'recipeSelectTime') return 'giây';
-    if (activeChartTab === 'planDishes') return 'món';
+    if (activeChartTab === 'planDishes') return 'bữa';
     return '';
   };
 
@@ -298,21 +298,21 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Card 4: Món trong thực đơn trung bình mỗi người */}
+          {/* Card 4: Bữa ăn trong thực đơn trung bình mỗi người */}
           <div className="engagement-card">
             <div>
               <div className="engagement-card-header">
-                <span className="engagement-card-title">TB số món được thêm vào thực đơn</span>
+                <span className="engagement-card-title">TB số bữa ăn được ghi nhận</span>
                 <div className="engagement-icon purple">
                   <FiLayers />
                 </div>
               </div>
               <div className="engagement-value">
-                ~{thisWeek.avgDishesPerUser ?? 0} <span style={{ fontSize: '16px', fontWeight: 500, color: '#64748b' }}>món / người</span>
+                ~{thisWeek.avgDishesPerUser ?? 0} <span style={{ fontSize: '16px', fontWeight: 500, color: '#64748b' }}>bữa / người</span>
               </div>
             </div>
             <div className="engagement-card-footer">
-              <span>Tổng: <strong>{thisWeek.totalPlanDishes ?? 0} món</strong> ({thisWeek.planUsersCount ?? 0} người lên thực đơn)</span>
+              <span>Tổng: <strong>{thisWeek.totalPlanDishes ?? 0} bữa</strong> ({thisWeek.planUsersCount ?? 0} người lên thực đơn)</span>
               {renderGrowthBadge(growth.avgDishesPerUser)}
             </div>
           </div>
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
                   className={`chart-tab-btn ${activeChartTab === 'planDishes' ? 'active' : ''}`}
                   onClick={() => setActiveChartTab('planDishes')}
                 >
-                  Món thực đơn
+                  Bữa ăn ghi nhận
                 </button>
               </div>
             </div>
