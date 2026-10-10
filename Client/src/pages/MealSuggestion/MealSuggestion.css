@@ -17,14 +17,16 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   position: sticky;
-  top: 1rem;
+  top: calc(var(--discover-nav-height, 180px) + 1rem);
   align-self: flex-start;
-  max-height: calc(100vh - 64px - 2rem);
+  max-height: calc(100vh - 64px - var(--discover-nav-height, 180px) - 2rem);
   display: flex;
   flex-direction: column;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
 .sidebar-header-toggle {
@@ -124,20 +126,24 @@
 }
 
 /* Custom Scrollbar for Sidebar */
+.pantry-config-sidebar::-webkit-scrollbar,
 .pantry-config-sidebar ::-webkit-scrollbar {
   width: 6px;
 }
 
+.pantry-config-sidebar::-webkit-scrollbar-track,
 .pantry-config-sidebar ::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 10px;
 }
 
+.pantry-config-sidebar::-webkit-scrollbar-thumb,
 .pantry-config-sidebar ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
 }
 
+.pantry-config-sidebar::-webkit-scrollbar-thumb:hover,
 .pantry-config-sidebar ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }

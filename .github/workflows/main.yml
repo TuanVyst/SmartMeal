@@ -1,18 +1,79 @@
+name: CI/CD Pipeline
+
 on:
   push:
-    branches: ["master"]
+    branches:
+      - master
+      - main
+    tags:
+      - "**"
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
-  api-build:
-    name: Build source code to Docker image
+  tag:
+    name: Auto Tag Release
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Paths
+        if: github.ref_type != 'tag'
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'Server/**'
+              - 'AI/**'
+
+      - name: Calculate Semantic Version
+        if: github.ref_type != 'tag'
+        id: semver
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(BREAKING CHANGE|breaking:)"
+          minor_pattern: "feat:"
+          bump_each_commit: false
+
+      - name: Resolve and Push Tag
+        id: resolve
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          FINAL_VERSION="${{ steps.semver.outputs.version_tag }}"
+
+          if [ "${{ steps.filter.outputs.backend }}" = "true" ] && [ "${{ steps.semver.outputs.increment }}" = "0" ]; then
+            IFS='.' read -r MAJ MIN PAT <<< "${{ steps.semver.outputs.version }}"
+            MIN=$((MIN + 1))
+            FINAL_VERSION="v${MAJ}.${MIN}.0"
+          fi
+
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag -a "${FINAL_VERSION}" -m "Auto-release ${FINAL_VERSION} [skip ci]"
+          git push origin "${FINAL_VERSION}"
+
+          echo "tag=${FINAL_VERSION}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build and Push Docker Images
+    needs: [tag]
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout Develop
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: DockerHub Login
         uses: docker/login-action@v3.1.0
@@ -23,40 +84,56 @@ jobs:
 
       - name: Lowercase repository name
         run: |
-            REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-            echo "REGISTRY=ghcr.io/$REPO_LOWER" >> $GITHUB_ENV
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "REGISTRY=ghcr.io/$REPO_LOWER" >> $GITHUB_ENV
 
-      - name: Build Image And Push
-        uses: docker/build-push-action@v4
+      - name: Build and Push Server Image
+        uses: docker/build-push-action@v5
         with:
           context: Server
           file: Server/Dockerfile
           push: true
-          tags: ${{env.REGISTRY}}/smartmeal-server:latest
-
-  ai-build:
-    name: Build AI inference Docker image
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: DockerHub Login
-        uses: docker/login-action@v3.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Lowercase repository name
-        run: |
-            REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-            echo "REGISTRY=ghcr.io/$REPO_LOWER" >> $GITHUB_ENV
+          tags: |
+            ${{ env.REGISTRY }}/smartmeal-server:${{ needs.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/smartmeal-server:latest
 
       - name: Build and Push AI Image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: AI
           file: AI/Dockerfile
           push: true
-          tags: ${{env.REGISTRY}}/smartmeal-predict:latest
+          tags: |
+            ${{ env.REGISTRY }}/smartmeal-predict:${{ needs.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/smartmeal-predict:latest
+
+  deploy:
+    name: Update Kustomization Manifest
+    needs: [tag, build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Update image tags in kustomization
+        run: |
+          TAG="${{ needs.tag.outputs.tag }}"
+          cd infra/k8s/overlay/prod
+          kustomize edit set image \
+            ghcr.io/tuanvyst/smartmeal/smartmeal-server:${TAG} \
+            ghcr.io/tuanvyst/smartmeal/smartmeal-predict:${TAG}
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(k8s): update image tags to ${{ needs.tag.outputs.tag }} [skip ci]"
+          branch: master
+          file_pattern: 'infra/k8s/overlay/prod/kustomization.yaml'
+          commit_user_name: "${{ github.actor }}"
+          commit_user_email: "${{ github.actor }}@users.noreply.github.com"
+          commit_author: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"

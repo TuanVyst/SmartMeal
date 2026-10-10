@@ -1,8 +1,9 @@
-/* ============================================
-   SMARTMEAL DISCOVER PAGE - Single Scroll Layout
-   ============================================ */
+:root {
+  --discover-nav-height: 180px;
+}
 
 .discover-page {
+  --discover-nav-height: 180px;
   background: #F8FBF7;
   font-family: 'Inter', sans-serif;
 }
@@ -180,7 +181,7 @@
 
 /* ── Sections ── */
 .discover-section {
-  scroll-margin-top: 50px;
+  scroll-margin-top: calc(var(--discover-nav-height, 180px) + 16px);
 }
 
 /* ── Responsive ── */

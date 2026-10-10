@@ -18,6 +18,29 @@ export default function DiscoverPage() {
   const [activeSection, setActiveSection] = useState('overview');
   const [isPlanCollapsed, setIsPlanCollapsed] = useState(false);
   const observerRef = useRef(null);
+  const navRef = useRef(null);
+
+  // Measure discover-anchor-nav height dynamically and set CSS variable
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+
+    const updateNavHeight = () => {
+      const height = el.offsetHeight;
+      if (height > 0) {
+        document.documentElement.style.setProperty('--discover-nav-height', `${height}px`);
+      }
+    };
+
+    updateNavHeight();
+    const resizeObserver = new ResizeObserver(updateNavHeight);
+    resizeObserver.observe(el);
+
+    return () => {
+      resizeObserver.disconnect();
+      document.documentElement.style.removeProperty('--discover-nav-height');
+    };
+  }, []);
 
   // Cuộn tới section khi click anchor
   const scrollToSection = useCallback((id) => {
@@ -36,9 +59,10 @@ export default function DiscoverPage() {
 
   // IntersectionObserver: highlight anchor khi section vào viewport
   useEffect(() => {
+    const navHeight = navRef.current?.offsetHeight || 180;
     const options = {
       root: document.querySelector('.main-page-content'), // scroll container của MainLayout
-      rootMargin: '-50px 0px -55% 0px',
+      rootMargin: `-${navHeight + 20}px 0px -55% 0px`,
       threshold: 0,
     };
 
@@ -65,7 +89,7 @@ export default function DiscoverPage() {
       {/* ══════════════════════════════════════════
           STICKY ANCHOR NAV - Định hướng khi cuộn
          ══════════════════════════════════════════ */}
-      <nav className="discover-anchor-nav" aria-label="Điều hướng nhanh">
+      <nav ref={navRef} className="discover-anchor-nav" aria-label="Điều hướng nhanh">
         <div className="discover-anchor-tabs">
           {SECTIONS.map((s) => (
             <button
