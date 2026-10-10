@@ -138,11 +138,18 @@ namespace PresentationLayer.Controllers
                 }
                 else
                 {
+                    // Existing session: accumulate active seconds since last heartbeat
+                    var deltaSeconds = (int)(now - session.LastHeartbeat).TotalSeconds;
+                    if (deltaSeconds > 0 && deltaSeconds <= 120)
+                    {
+                        session.DurationSeconds += deltaSeconds;
+                    }
+
                     if (!session.FirstRecipeSelectTime.HasValue)
                     {
-                        var timeDiff = (int)Math.Max(0, (now - session.StartTime).TotalSeconds);
                         session.FirstRecipeSelectTime = now;
-                        session.TimeToFirstRecipeSelectSeconds = timeDiff;
+                        // Direction 1: Measure by active duration up to recipe selection
+                        session.TimeToFirstRecipeSelectSeconds = Math.Max(0, session.DurationSeconds);
                         session.FirstRecipe_id = validRecipeId;
                     }
 

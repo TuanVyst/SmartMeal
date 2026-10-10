@@ -128,12 +128,16 @@ export default function AdminDashboard() {
     );
   };
 
-  // Format seconds into a friendly human-readable string
+  // Format seconds into a friendly human-readable string (supports seconds, minutes, hours)
   const formatSecondsToFriendly = (sec) => {
     if (!sec || sec <= 0) return '0 giây';
     if (sec < 60) return `${Math.round(sec)} giây`;
-    const m = Math.floor(sec / 60);
+    const hours = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
     const s = Math.round(sec % 60);
+    if (hours > 0) {
+      return m > 0 ? `${hours}h ${m}p` : `${hours} giờ`;
+    }
     return s > 0 ? `${m}p ${s}s` : `${m} phút`;
   };
 
@@ -289,7 +293,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="engagement-card-footer">
-              <span>Đã chọn: <strong>{thisWeek.recipeSelectCount ?? 0} lượt</strong> ({thisWeek.recipeSelectRate ?? 0}% phiên)</span>
+              <span>Đã chọn: <strong>{thisWeek.recipeSelectCount ?? 0} lượt</strong> ({thisWeek.recipeSelectRate ?? 0}% phiên có chọn món)</span>
               {renderGrowthBadge(growth.avgTimeToRecipeSelect)}
             </div>
           </div>
@@ -408,6 +412,142 @@ export default function AdminDashboard() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Bảng hiển thị thời gian sử dụng trung bình mỗi ngày */}
+        {dailyStats.length > 0 && (
+          <div className={`daily-usage-card ${isEngagementLoading ? 'engagement-content-loading' : ''}`}>
+            <div className="daily-usage-header">
+              <div>
+                <h3>
+                  <FiClock style={{ color: '#4f46e5' }} /> Bảng thời gian sử dụng & chọn món mỗi ngày
+                </h3>
+                <p>Chi tiết thời lượng sử dụng trung bình mỗi phiên và thời gian chọn món cho từng ngày trong tuần</p>
+              </div>
+            </div>
+
+            <div className="daily-usage-table-wrap">
+              <table className="daily-usage-table">
+                <thead>
+                  <tr>
+                    <th>Ngày</th>
+                    <th>Lượt truy cập</th>
+                    <th>Thời gian sử dụng TB / phiên</th>
+                    <th>Tổng thời lượng trong ngày</th>
+                    <th>Thời gian chọn món TB</th>
+                    <th>Lượt chọn món</th>
+                    <th>Tỷ lệ chọn món</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dailyStats.map((day, idx) => {
+                    const avgSec = day.avgDurationSeconds ?? Math.round((day.avgDurationMinutes || 0) * 60);
+                    const totalSec = day.totalDurationSeconds ?? Math.round((day.totalDurationMinutes || 0) * 60);
+                    const selectRate = day.visits > 0 ? Math.round(((day.recipeSelectCount || 0) / day.visits) * 100) : 0;
+                    const maxAvgSec = Math.max(...dailyStats.map(d => d.avgDurationSeconds ?? Math.round((d.avgDurationMinutes || 0) * 60)), 1);
+                    const barPct = day.visits > 0 ? Math.min(100, Math.max(5, Math.round((avgSec / maxAvgSec) * 100))) : 0;
+
+                    return (
+                      <tr
+                        key={idx}
+                        className={`${day.isToday ? 'is-today-row' : ''} ${day.isFuture ? 'is-future-row' : ''}`}
+                      >
+                        <td>
+                          <div className="daily-day-cell">
+                            <div>
+                              <span className="daily-day-name">{day.dayName}</span>{' '}
+                              <span className="daily-day-date">({day.date})</span>
+                            </div>
+                            {day.isToday && <span className="daily-tag today">Hôm nay</span>}
+                            {day.isFuture && <span className="daily-tag future">Chưa diễn ra</span>}
+                          </div>
+                        </td>
+                        <td>
+                          {day.isFuture ? (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          ) : (
+                            <div>
+                              <span className="daily-val-primary">{(day.visits || 0).toLocaleString('vi-VN')}</span>
+                              <span className="daily-val-sub">phiên truy cập</span>
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {day.isFuture ? (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          ) : (
+                            <div>
+                              <span className="daily-val-primary">
+                                {formatSecondsToFriendly(avgSec)}
+                              </span>
+                              <span className="daily-val-sub">
+                                ~{day.avgDurationMinutes || 0} phút / phiên
+                              </span>
+                              {day.visits > 0 && (
+                                <div className="daily-progress-bar-wrap" title={`So với ngày cao nhất: ${barPct}%`}>
+                                  <div className="daily-progress-bar-fill" style={{ width: `${barPct}%` }} />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {day.isFuture ? (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          ) : (
+                            <div>
+                              <span className="daily-val-primary">
+                                {formatSecondsToFriendly(totalSec)}
+                              </span>
+                              <span className="daily-val-sub">
+                                {day.totalDurationMinutes || 0} phút tổng cộng
+                              </span>
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {day.isFuture ? (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          ) : (day.recipeSelectCount > 0 ? (
+                            <div>
+                              <span className="daily-val-primary">
+                                {formatSecondsToFriendly(day.avgTimeToRecipeSelectSeconds || 0)}
+                              </span>
+                              <span className="daily-val-sub">
+                                Active time trước khi chọn
+                              </span>
+                            </div>
+                          ) : (
+                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>Chưa có lượt chọn</span>
+                          ))}
+                        </td>
+                        <td>
+                          {day.isFuture ? (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          ) : (
+                            <div>
+                              <span className="daily-val-primary">{day.recipeSelectCount || 0}</span>
+                              <span className="daily-val-sub">lượt xem chi tiết</span>
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {day.isFuture ? (
+                            <span style={{ color: '#94a3b8' }}>-</span>
+                          ) : (
+                            <div>
+                              <span className="daily-val-primary">{selectRate}%</span>
+                              <span className="daily-val-sub">tỷ lệ phiên chọn</span>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
