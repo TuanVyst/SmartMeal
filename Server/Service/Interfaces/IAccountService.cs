@@ -17,5 +17,8 @@ namespace Service.Interfaces
         Task<AuthResponseDto> Register(RegisterRequest request);
         Task<AuthResponseDto> GoogleLogin(GoogleLoginRequest request);
         Task<Account> UpdateAvatarUrl(Guid accountId, string avatarUrl);
+        Task<bool> ForgotPassword(ForgotPasswordRequest request);
+        Task<bool> ResetPassword(ResetPasswordRequest request);
+        Task<bool> ChangePassword(Guid accountId, ChangePasswordRequest request);
     }
 }

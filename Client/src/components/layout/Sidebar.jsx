@@ -189,18 +189,18 @@ export default function Sidebar() {
           </div>
 
           <div className="sidebar-stats-row">
-            <div className="sidebar-stat-card">
-              <div className="stat-icon"><FiTrendingUp size={18} /></div>
+            <div className="sidebar-stat-card stat-streak">
+              <div className="stat-icon"><FiTrendingUp size={20} /></div>
               <div className="stat-value">{streakDays}</div>
               <div className="stat-label">ngày liên tiếp</div>
             </div>
             <button
               type="button"
-              className="sidebar-stat-card sidebar-stat-card-clickable"
+              className="sidebar-stat-card sidebar-stat-card-clickable stat-favorites"
               onClick={() => navigate('/favorites')}
               title="Mở bộ sưu tập"
             >
-              <div className="stat-icon"><FiHeart size={18} /></div>
+              <div className="stat-icon"><FiHeart size={20} /></div>
               <div className="stat-value">{favorites.length}</div>
               <div className="stat-label">bộ sưu tập</div>
             </button>

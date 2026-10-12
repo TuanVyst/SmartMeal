@@ -6,6 +6,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import AdminGuard from '../components/admin/AdminGuard';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
+import ForgotPassword from '../pages/auth/ForgotPassword';
 import Profile from '../pages/profile/Profile';
 import MealDetail from '../pages/MealDetail/MealDetail';
 import IngredientForm from '../pages/food/IngredientForm';
@@ -20,6 +21,7 @@ import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminCategories from '../pages/admin/AdminCategories';
 import AdminPlans from '../pages/admin/AdminPlans';
 import AdminStatistics from '../pages/admin/AdminStatistics';
+import AdminFeedbacks from '../pages/admin/AdminFeedbacks';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
 import SubscriptionPlans from '../pages/subscription/SubscriptionPlans';
@@ -44,6 +46,7 @@ export default function AppRoutes() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Route>
 
       {/* ═══════════════════════════════════════════════
@@ -142,6 +145,7 @@ export default function AppRoutes() {
         <Route path="categories" element={<Navigate to="/admin/recipes" replace />} />
         <Route path="plans" element={<AdminPlans />} />
         <Route path="statistics" element={<AdminStatistics />} />
+        <Route path="feedbacks" element={<AdminFeedbacks />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
