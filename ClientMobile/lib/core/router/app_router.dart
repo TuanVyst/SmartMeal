@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
@@ -15,26 +16,29 @@ import '../../features/meal_plan/presentation/screens/meal_plan_preview_screen.d
 GoRouter createAppRouter(AuthProvider authProvider, HealthProfileProvider healthProvider) {
   return GoRouter(
     initialLocation: '/splash',
-    refreshListenable: authProvider,
+    refreshListenable: Listenable.merge([authProvider, healthProvider]),
     redirect: (context, state) {
+      final isGoingToSplash = state.matchedLocation == '/splash';
+
+      if (authProvider.loading || healthProvider.loading) {
+        return isGoingToSplash ? null : '/splash';
+      }
+
       final isLoggedIn = authProvider.isLoggedIn;
       final isSurveyCompleted = healthProvider.surveyCompleted;
-      
-      final isGoingToSplash = state.matchedLocation == '/splash';
+
       final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
       final isGoingToSurvey = state.matchedLocation == '/onboarding';
 
-      if (isGoingToSplash) return null;
-
-      if (!isLoggedIn && !isGoingToAuth) {
-        return '/login';
+      if (!isLoggedIn) {
+        return isGoingToAuth ? null : '/login';
       }
 
-      if (isLoggedIn && !isSurveyCompleted && !isGoingToSurvey) {
-        return '/onboarding';
+      if (!isSurveyCompleted) {
+        return isGoingToSurvey ? null : '/onboarding';
       }
 
-      if (isLoggedIn && isSurveyCompleted && (isGoingToAuth || isGoingToSurvey)) {
+      if (isGoingToAuth || isGoingToSurvey || isGoingToSplash) {
         return '/main';
       }
 

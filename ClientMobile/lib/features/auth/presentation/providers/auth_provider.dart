@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'package:smart_meal/features/profile/domain/subscription_model.dart' as s
 import 'package:smart_meal/features/auth/domain/auth_repository.dart';
 import 'package:smart_meal/features/profile/data/subscription_service.dart';
 import 'package:smart_meal/core/storage/secure_storage.dart';
+import 'package:smart_meal/core/network/api_client.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository = AuthRepository();
@@ -34,7 +36,14 @@ class AuthProvider extends ChangeNotifier {
   String? get accountId => _user?.accountId;
 
   AuthProvider() {
+    ApiClient.onUnauthorized = handleUnauthorized;
     _loadStoredUser();
+  }
+
+  void handleUnauthorized() {
+    if (_user != null) {
+      logout();
+    }
   }
 
   Future<void> _loadStoredUser() async {
@@ -162,6 +171,9 @@ class AuthProvider extends ChangeNotifier {
       _subscription = null;
       _isPremium = false;
       notifyListeners();
+      if (e is DioException && e.response?.statusCode == 401) {
+        await logout();
+      }
     }
   }
 

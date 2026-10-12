@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import 'package:smart_meal/features/onboarding/presentation/providers/health_profile_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,41 +19,76 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuthState() async {
-    // Wait a bit to show splash
-    await Future.delayed(const Duration(seconds: 1));
+    // Show splash branding for at least 800ms
+    await Future.delayed(const Duration(milliseconds: 800));
     if (!mounted) return;
 
     final authProvider = context.read<AuthProvider>();
-    
-    if (authProvider.loading) {
-      // If still loading, wait more
-      await Future.delayed(const Duration(milliseconds: 500));
+    final healthProvider = context.read<HealthProfileProvider>();
+
+    while (authProvider.loading || healthProvider.loading) {
+      await Future.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
     }
 
-    if (authProvider.isLoggedIn) {
+    if (!authProvider.isLoggedIn) {
+      context.go('/login');
+    } else if (healthProvider.surveyCompleted) {
       context.go('/main');
     } else {
-      context.go('/login');
+      context.go('/onboarding');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: const Color(0xFFF8FBF7),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.restaurant_menu, size: 80, color: Colors.white),
-            const SizedBox(height: 16),
-            Text(
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF16A34A), Color(0xFF22C55E)],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x3322C55E),
+                    blurRadius: 24,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.eco, size: 40, color: Colors.white),
+            ),
+            const SizedBox(height: 20),
+            const Text(
               'SmartMeal',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(color: Colors.white),
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF22C55E),
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Ăn uống lành mạnh mỗi ngày',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+              ),
             ),
             const SizedBox(height: 32),
-            const CircularProgressIndicator(color: Colors.white),
+            const CircularProgressIndicator(
+              color: Color(0xFF22C55E),
+              strokeWidth: 3,
+            ),
           ],
         ),
       ),
