@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
+import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
+import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
+import 'package:smart_meal/features/recipes/presentation/providers/recipe_provider.dart';
+import 'package:smart_meal/features/favorites/presentation/providers/favorite_provider.dart';
 import 'dashboard_screen.dart';
 import 'package:smart_meal/features/recipes/presentation/screens/meal_suggestions_screen.dart';
 import 'package:smart_meal/features/meal_plan/presentation/screens/meal_plan_screen.dart';
@@ -18,6 +23,33 @@ class MainShell extends StatefulWidget {
 
 class MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  String? _initializedAccountId;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = context.watch<AuthProvider>();
+    final accountId = auth.accountId;
+
+    if (accountId != null && accountId != _initializedAccountId) {
+      _initializedAccountId = accountId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final recipeProvider = context.read<RecipeProvider>();
+        final nutritionProvider = context.read<NutritionProvider>();
+        final favoriteProvider = context.read<FavoriteProvider>();
+
+        recipeProvider.fetchAll().then((_) {
+          if (mounted) {
+            nutritionProvider.setRecipes(recipeProvider.recipes);
+          }
+        });
+        nutritionProvider.fetchLogs(accountId);
+        nutritionProvider.fetchGoals(accountId);
+        favoriteProvider.fetchFavorites(accountId);
+      });
+    }
+  }
 
   final List<Widget> _screens = const [
     DashboardScreen(),
@@ -52,28 +84,33 @@ class MainShellState extends State<MainShell> {
           ),
         ),
         title: _currentIndex == 0
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.orange.shade200),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.local_fire_department, color: Colors.orange, size: 18),
-                    SizedBox(width: 4),
-                    Text(
-                      '7 Ngày liên tiếp',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
+            ? Consumer<NutritionProvider>(
+                builder: (context, nutrition, _) {
+                  final streak = nutrition.streakDays;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange.shade200),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.local_fire_department, color: Colors.orange, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$streak Ngày liên tiếp',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               )
             : Text(
                 _titles[_currentIndex],
