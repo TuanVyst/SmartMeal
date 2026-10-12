@@ -8,6 +8,7 @@ import 'package:smart_meal/features/diary/presentation/providers/nutrition_provi
 import 'package:smart_meal/features/favorites/presentation/providers/favorite_provider.dart';
 import 'package:smart_meal/features/recipes/presentation/widgets/ingredient_fridge_sheet.dart';
 import 'package:smart_meal/features/recipes/presentation/widgets/recipe_filter_sheet.dart';
+import 'package:smart_meal/core/utils/recipe_images.dart';
 
 /// Màn hình chính Dashboard kết hợp Kế hoạch tuần, Gợi ý món ăn và Khám phá món ăn (Wireframe Page 3 & Page 7)
 class DashboardScreen extends StatefulWidget {
@@ -33,11 +34,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final auth = context.read<AuthProvider>();
       final accountId = auth.accountId;
 
-      context.read<RecipeProvider>().fetchAll();
+      final recipeProvider = context.read<RecipeProvider>();
+      final nutritionProvider = context.read<NutritionProvider>();
+      final favoriteProvider = context.read<FavoriteProvider>();
+
+      recipeProvider.fetchAll().then((_) {
+        if (mounted) {
+          nutritionProvider.setRecipes(recipeProvider.recipes);
+        }
+      });
       if (accountId != null) {
-        context.read<NutritionProvider>().fetchLogs(accountId);
-        context.read<NutritionProvider>().fetchGoals(accountId);
-        context.read<FavoriteProvider>().fetchFavorites(accountId);
+        nutritionProvider.fetchLogs(accountId);
+        nutritionProvider.fetchGoals(accountId);
+        favoriteProvider.fetchFavorites(accountId);
       }
     });
   }
@@ -332,7 +341,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             final recipe = recipes.length > index ? recipes[index] : null;
             final dishName = recipe?.recipeName ?? mealMeta['fallbackName']!;
             final dishCalo = recipe != null ? '${recipe.displayCalories} kcal' : mealMeta['fallbackCalo']!;
-            final imageUrl = recipe?.imageUrl;
+            final imageUrl = recipe?.imageUrl ?? RecipeImages.resolve(dishName);
 
             return Expanded(
               child: Container(
@@ -366,11 +375,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         height: 72,
                         width: double.infinity,
                         color: AppColors.surfaceHover,
-                        child: imageUrl != null && imageUrl.isNotEmpty
+                        child: imageUrl.isNotEmpty
                             ? Image.network(
                                 imageUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, color: Colors.grey, size: 28),
+                                errorBuilder: (_, _, _) => const Icon(Icons.restaurant, color: Colors.grey, size: 28),
                               )
                             : const Icon(Icons.restaurant, color: Colors.grey, size: 28),
                       ),
