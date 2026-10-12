@@ -60,6 +60,9 @@ Base URL: `https://api.ocgi.space`
 - `POST /api/Auth/register`: Register user credentials.
 - `POST /api/Auth/login`: Authenticate and obtain JWT Bearer token.
 - `POST /api/Auth/google-login`: Authenticate with Google ID token.
+- `POST /api/Auth/forgot-password`: Dispatch a 6-digit password reset verification OTP code to the account's registered email via SendGrid.
+- `POST /api/Auth/reset-password`: Validate the OTP code and update the account's hashed password (BCrypt).
+- `PUT /api/Auth/change-password`: Change user password with current password verification (Bearer token required).
 
 ### Recipes & Ingredients (`/api/Recipe`, `/api/Ingredient`)
 - `GET /api/Recipe`: Paginated recipe query with tag, label, and allergy filtering.
@@ -78,4 +81,12 @@ Base URL: `https://api.ocgi.space`
 ### Health Profile (`/api/HealthProfile`, `/api/MedicalCondition`)
 - `GET /api/HealthProfile`: Fetch current user metrics (BMI, allergies, dietary goals).
 - `PUT /api/HealthProfile`: Update physical stats and health preferences.
+
+### User Feedback & Support (`/api/Feedback`)
+- `POST /api/Feedback`: Submit user feedback, bug report, or feature suggestion (Bearer token required).
+- `GET /api/Feedback/my`: Retrieve current user's submitted feedback history (Bearer token required).
+- `GET /api/Feedback/admin`: Paginated feedback query with `status`, `category`, and `search` filters (Admin role required).
+- `GET /api/Feedback/admin/{id}`: Retrieve detailed feedback information including screenshot attachments (Admin role required).
+- `PUT /api/Feedback/admin/{id}/reply`: Submit admin response, update status to Replied, and dispatch formatted email notification via SendGrid (Admin role required).
+- `DELETE /api/Feedback/admin/{id}`: Soft-delete feedback entry (Admin role required).
 - `GET /api/MedicalCondition`: Pre-configured medical conditions affecting diet recommendations.

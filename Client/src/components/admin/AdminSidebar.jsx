@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiGrid, FiUsers, FiLogOut, FiMenu, FiX, FiShoppingBag, FiAward, FiHeart } from 'react-icons/fi';
+import { FiGrid, FiUsers, FiLogOut, FiMenu, FiX, FiShoppingBag, FiAward, FiHeart, FiMessageSquare } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 import './AdminSidebar.css';
@@ -23,6 +23,7 @@ export default function AdminSidebar() {
     { to: '/admin/recipes', icon: <FiHeart />, label: 'Món ăn & Công thức' },
     { to: '/admin/plans', icon: <FiAward />, label: 'Gói dịch vụ' },
     { to: '/admin/statistics', icon: <FiGrid />, label: 'Thống kê' },
+    { to: '/admin/feedbacks', icon: <FiMessageSquare />, label: 'Phản hồi người dùng' },
   ];
 
   return (

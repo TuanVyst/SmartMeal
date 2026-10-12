@@ -49,6 +49,7 @@ namespace DataAccessLayer
         public DbSet<MealPlanEntry> MealPlanEntries { get; set; }
         // Activity & Session Tracking
         public DbSet<UserSessionLog> UserSessionLogs { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -74,6 +75,18 @@ namespace DataAccessLayer
                 .HasOne(s => s.FirstRecipe)
                 .WithMany()
                 .HasForeignKey(s => s.FirstRecipe_id)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.Account)
+                .WithMany()
+                .HasForeignKey(f => f.Account_id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.RepliedByAccount)
+                .WithMany()
+                .HasForeignKey(f => f.RepliedBy)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

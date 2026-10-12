@@ -69,7 +69,7 @@ namespace Service.Implements
 
             if (account == null || !BCrypt.Net.BCrypt.Verify(request.Password, account.Password))
             {
-                throw new UnauthorizedAccessException("Invalid username/email or password");
+                throw new UnauthorizedAccessException("Tài khoản hoặc mật khẩu không chính xác");
             }
 
             if (!account.IsActive)
@@ -347,6 +347,112 @@ namespace Service.Implements
                 Console.WriteLine($"[GoogleTokenViaApi Error] {ex.Message}");
             }
             return null;
+        }
+
+        public async Task<bool> ForgotPassword(ForgotPasswordRequest request)
+        {
+            var email = request.Email.Trim().ToLower();
+            var account = await _accountRepo.GetAccountByEmail(email);
+            if (account == null)
+            {
+                throw new InvalidOperationException("Không tìm thấy tài khoản với email này.");
+            }
+
+            var otp = new Random().Next(100000, 999999).ToString();
+            _cache.Set($"RESET_OTP_{email}", otp, TimeSpan.FromMinutes(10));
+
+            var subject = "[SmartMeal] Mã xác nhận đặt lại mật khẩu";
+            var userName = account.Name ?? account.Username;
+            var htmlBody = $@"
+                <div style=""font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;"">
+                    <div style=""text-align: center; margin-bottom: 20px;"">
+                        <h2 style=""color: #16a34a; margin: 0;"">SmartMeal</h2>
+                        <p style=""color: #64748b; font-size: 13px; margin: 4px 0 0;"">Đặt lại mật khẩu tài khoản</p>
+                    </div>
+                    <p style=""font-size: 15px; color: #1e293b;"">Xin chào <strong>{userName}</strong>,</p>
+                    <p style=""color: #475569; line-height: 1.6;"">
+                        Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản SmartMeal. Dưới đây là mã xác thực OTP của bạn:
+                    </p>
+                    <div style=""text-align: center; margin: 24px 0;"">
+                        <span style=""display: inline-block; font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #16a34a; background: #f0fdf4; padding: 12px 28px; border-radius: 8px; border: 1.5px dashed #16a34a;"">
+                            {otp}
+                        </span>
+                    </div>
+                    <p style=""color: #64748b; font-size: 13px; line-height: 1.5;"">
+                        Mã xác thực có hiệu lực trong vòng <strong>10 phút</strong>. Vì lý do an toàn, vui lòng không chia sẻ mã này cho bất kỳ ai.
+                    </p>
+                    <p style=""color: #94a3b8; font-size: 12px; line-height: 1.5; margin-top: 20px;"">
+                        Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này. Mật khẩu của bạn vẫn an toàn.
+                    </p>
+                </div>";
+
+            await _emailService.SendEmailAsync(email, subject, htmlBody);
+            return true;
+        }
+
+        public async Task<bool> ResetPassword(ResetPasswordRequest request)
+        {
+            var email = request.Email.Trim().ToLower();
+
+            if (request.NewPassword != request.ConfirmNewPassword)
+            {
+                throw new InvalidOperationException("Mật khẩu xác nhận không khớp.");
+            }
+
+            if (request.NewPassword.Length < 6)
+            {
+                throw new InvalidOperationException("Mật khẩu phải có ít nhất 6 ký tự.");
+            }
+
+            if (!_cache.TryGetValue($"RESET_OTP_{email}", out string? savedOtp) || savedOtp != request.OtpCode.Trim())
+            {
+                throw new UnauthorizedAccessException("Mã OTP không chính xác hoặc đã hết hạn.");
+            }
+
+            var account = await _accountRepo.GetAccountByEmail(email);
+            if (account == null)
+            {
+                throw new InvalidOperationException("Không tìm thấy tài khoản cần đặt lại mật khẩu.");
+            }
+
+            account.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            await _accountRepo.UpdateAccount(account);
+
+            _cache.Remove($"RESET_OTP_{email}");
+            return true;
+        }
+
+        public async Task<bool> ChangePassword(Guid accountId, ChangePasswordRequest request)
+        {
+            var account = await _accountRepo.GetAccountById(accountId);
+            if (account == null)
+            {
+                throw new InvalidOperationException("Không tìm thấy thông tin tài khoản.");
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, account.Password))
+            {
+                throw new UnauthorizedAccessException("Mật khẩu hiện tại không chính xác.");
+            }
+
+            if (request.NewPassword != request.ConfirmNewPassword)
+            {
+                throw new InvalidOperationException("Mật khẩu mới xác nhận không khớp.");
+            }
+
+            if (request.NewPassword.Length < 6)
+            {
+                throw new InvalidOperationException("Mật khẩu mới phải có ít nhất 6 ký tự.");
+            }
+
+            if (BCrypt.Net.BCrypt.Verify(request.NewPassword, account.Password))
+            {
+                throw new InvalidOperationException("Mật khẩu mới không được trùng với mật khẩu hiện tại.");
+            }
+
+            account.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            await _accountRepo.UpdateAccount(account);
+            return true;
         }
     }
 }

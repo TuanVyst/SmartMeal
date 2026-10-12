@@ -29,6 +29,11 @@ export const adminService = {
     return res.data.data || [];
   },
 
+  updateUser: async (id, data) => {
+    const res = await api.put(`/auth/accounts/${id}`, data);
+    return res.data;
+  },
+
   toggleUserStatus: async (id, isActive) => {
     const res = await api.put(`/auth/accounts/${id}`, { isActive });
     return res.data;
