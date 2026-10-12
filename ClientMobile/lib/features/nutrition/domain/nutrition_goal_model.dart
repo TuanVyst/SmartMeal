@@ -9,6 +9,7 @@ class NutritionGoal {
   final double? fiber;
   final double? sugarLimit;
   final double? saltLimit;
+  final double? cholesterolLimit;
 
   NutritionGoal({
     this.id,
@@ -20,32 +21,38 @@ class NutritionGoal {
     this.fiber,
     this.sugarLimit,
     this.saltLimit,
+    this.cholesterolLimit,
   });
 
   factory NutritionGoal.fromJson(Map<String, dynamic> json) {
     return NutritionGoal(
-      id: json['nutrition_goal_id']?.toString() ?? json['id']?.toString(),
+      id: json['goal_id']?.toString() ??
+          json['goalId']?.toString() ??
+          json['nutrition_goal_id']?.toString() ??
+          json['id']?.toString(),
       accountId: json['account_id']?.toString() ?? json['accountId']?.toString(),
-      calories: _toDouble(json['calories']),
-      protein: _toDouble(json['protein']),
-      carbs: _toDouble(json['carbs']),
-      fat: _toDouble(json['fat']),
-      fiber: _toDouble(json['fiber']),
-      sugarLimit: _toDouble(json['sugarLimit'] ?? json['sugar_limit']),
-      saltLimit: _toDouble(json['saltLimit'] ?? json['salt_limit']),
+      calories: _toDouble(json['targetCalories'] ?? json['target_calories'] ?? json['calories']),
+      protein: _toDouble(json['targetProtein'] ?? json['target_protein'] ?? json['protein']),
+      carbs: _toDouble(json['targetCarbs'] ?? json['target_carbs'] ?? json['carbs']),
+      fat: _toDouble(json['targetFat'] ?? json['target_fat'] ?? json['fat']),
+      fiber: _toDouble(json['targetFiber'] ?? json['target_fiber'] ?? json['fiber']),
+      sugarLimit: _toDouble(json['targetSugar'] ?? json['target_sugar'] ?? json['sugarLimit'] ?? json['sugar_limit']),
+      saltLimit: _toDouble(json['targetSalt'] ?? json['target_salt'] ?? json['saltLimit'] ?? json['salt_limit']),
+      cholesterolLimit: _toDouble(json['targetCholesterol'] ?? json['target_cholesterol'] ?? json['cholesterolLimit'] ?? json['cholesterol_limit']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'accountId': accountId,
-      'calories': calories,
-      'protein': protein,
-      'carbs': carbs,
-      'fat': fat,
-      'fiber': fiber,
-      'sugarLimit': sugarLimit,
-      'saltLimit': saltLimit,
+      'targetCalories': calories,
+      'targetProtein': protein,
+      'targetCarbs': carbs,
+      'targetFat': fat,
+      'targetFiber': fiber,
+      'targetSugar': sugarLimit,
+      'targetSalt': saltLimit,
+      'targetCholesterol': cholesterolLimit,
     };
   }
 
@@ -81,18 +88,19 @@ class DailyTargets {
   });
 
   double get sugar => sugarLimit;
-  double get sodium => saltLimit * 1000.0;
+  double get sodium => saltLimit;
   double get cholesterol => cholesterolLimit;
 
   factory DailyTargets.fromGoal(NutritionGoal goal) {
     return DailyTargets(
-      calories: goal.calories ?? 2000,
-      protein: goal.protein ?? 75,
-      carbs: goal.carbs ?? 250,
-      fat: goal.fat ?? 65,
-      fiber: goal.fiber ?? 25,
-      sugarLimit: goal.sugarLimit ?? 50,
-      saltLimit: goal.saltLimit ?? 5,
+      calories: (goal.calories != null && goal.calories! > 0) ? goal.calories! : 2000,
+      protein: (goal.protein != null && goal.protein! > 0) ? goal.protein! : 75,
+      carbs: (goal.carbs != null && goal.carbs! > 0) ? goal.carbs! : 250,
+      fat: (goal.fat != null && goal.fat! > 0) ? goal.fat! : 65,
+      fiber: (goal.fiber != null && goal.fiber! > 0) ? goal.fiber! : 25,
+      sugarLimit: (goal.sugarLimit != null && goal.sugarLimit! > 0) ? goal.sugarLimit! : 50,
+      saltLimit: (goal.saltLimit != null && goal.saltLimit! > 0) ? goal.saltLimit! : 5,
+      cholesterolLimit: (goal.cholesterolLimit != null && goal.cholesterolLimit! > 0) ? goal.cholesterolLimit! : 300,
     );
   }
 }
