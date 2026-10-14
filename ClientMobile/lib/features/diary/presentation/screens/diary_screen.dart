@@ -9,8 +9,8 @@ import '../widgets/add_log_sheet.dart';
 
 /// Màn hình Nhật ký ăn uống & Hồ sơ sức khỏe (Wireframe Page 1)
 class DiaryScreen extends StatefulWidget {
-  const DiaryScreen({super.key});
-
+  final bool showAppBar;
+  const DiaryScreen({super.key, this.showAppBar = true});
   @override
   State<DiaryScreen> createState() => _DiaryScreenState();
 }
@@ -79,18 +79,20 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Nhật ký ăn uống', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_circle, color: AppColors.primary, size: 28),
-            tooltip: 'Ghi nhận bữa ăn',
-            onPressed: _showAddLogSheet,
-          ),
-        ],
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Nhật ký ăn uống', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              backgroundColor: Colors.white,
+              elevation: 0.5,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add_circle, color: AppColors.primary, size: 28),
+                  tooltip: 'Ghi nhận bữa ăn',
+                  onPressed: _showAddLogSheet,
+                ),
+              ],
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Column(

@@ -20,9 +20,11 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey _weeklyPlanKey = GlobalKey();
   final GlobalKey _exploreSectionKey = GlobalKey();
   final TextEditingController _searchController = TextEditingController();
 
+  int _activeAnchorIndex = 0;
   bool _isWeeklyPlanVisible = true;
   int _selectedDayIndex = 0;
   final List<String> _days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
@@ -58,15 +60,91 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
   }
 
-  void _scrollToExplore() {
-    final context = _exploreSectionKey.currentContext;
-    if (context != null) {
+  void _scrollToSection(int index) {
+    setState(() => _activeAnchorIndex = index);
+    if (index == 0) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+      return;
+    }
+    final key = index == 1 ? _weeklyPlanKey : _exploreSectionKey;
+    final ctx = key.currentContext;
+    if (ctx != null) {
       Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 500),
+        ctx,
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  void _scrollToExplore() {
+    _scrollToSection(2);
+  }
+
+  Widget _buildAnchorNav() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          _buildAnchorItem(0, '🏠', 'Tổng quan'),
+          _buildAnchorItem(1, '📅', 'Kế hoạch'),
+          _buildAnchorItem(2, '🍽️', 'Khám phá'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnchorItem(int index, String emoji, String label) {
+    final isSelected = _activeAnchorIndex == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _scrollToSection(index),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _openIngredientsFridgeSheet() {
@@ -98,8 +176,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Thanh điều hướng Section (chuẩn format Web DiscoverPage) ──
+          _buildAnchorNav(),
+
           // 1. KẾ HOẠCH TUẦN
-          _buildWeeklyPlanSection(),
+          Container(
+            key: _weeklyPlanKey,
+            child: _buildWeeklyPlanSection(),
+          ),
           const SizedBox(height: 20),
 
           // 2. GỢI Ý MÓN ĂN (Sáng, Trưa, Tối)
@@ -562,7 +646,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ? Image.network(
                                       recipe.imageUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(Icons.fastfood, size: 36, color: Colors.grey),
+                                      errorBuilder: (_, _, _) => const Icon(Icons.fastfood, size: 36, color: Colors.grey),
                                     )
                                   : const Icon(Icons.fastfood, size: 36, color: Colors.grey),
                             ),

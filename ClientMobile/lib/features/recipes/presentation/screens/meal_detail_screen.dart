@@ -113,7 +113,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
               _recipe!.imageUrl!,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, _) => const Icon(Icons.fastfood, size: 64, color: Colors.grey),
+              errorBuilder: (_, _, _) => const Icon(Icons.fastfood, size: 64, color: Colors.grey),
             )
           : const Icon(Icons.fastfood, size: 64, color: Colors.grey),
     );
