@@ -3,7 +3,7 @@
    ============================================ */
 
 .main-header {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 0 28px;
@@ -13,11 +13,22 @@
   justify-content: flex-end;
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 200;
   border-bottom: 1px solid rgba(108, 203, 99, 0.12);
   box-shadow: 0 1px 20px rgba(0, 0, 0, 0.04);
   width: 100%;
   box-sizing: border-box;
+}
+
+/* ── Mobile-only elements: hidden on desktop ── */
+.header-mobile-left {
+  display: none;
+}
+.header-logo-mobile {
+  display: none;
+}
+.header-avatar-container {
+  display: none;
 }
 
 /* ── Search Bar ── */
@@ -132,16 +143,98 @@
 /* ── Mobile responsive ── */
 @media (max-width: 768px) {
   .main-header {
-    padding-left: 70px; /* Make space for hamburger button */
-    padding-right: 16px;
+    padding: 0 12px;
     justify-content: space-between;
+    height: 56px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
   }
 
-  .header-logout-btn span {
-    display: none; /* Hide text on mobile, show only icon */
+  /* Left container */
+  .header-mobile-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
+  /* Show hamburger ─ triggers sidebar */
+  .header-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    color: #2d6a29;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .header-hamburger:hover {
+    background: rgba(108, 203, 99, 0.1);
+  }
+
+  /* Streak label on mobile next to hamburger */
+  .header-streak-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #10b981;
+    color: #10b981;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  
+  /* Remove logo on mobile completely */
+  .header-logo-mobile {
+    display: none !important;
+  }
+  .header-logo-icon {
+    font-size: 20px;
+  }
+  .header-logo-text {
+    font-size: 16px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3db435, #6CCB63);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Show avatar container with calorie progress ring on mobile */
+  .header-avatar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    border-radius: 50%;
+  }
+
+  .header-avatar-container .sidebar-progress-avatar {
+    transform: scale(0.56);
+    transform-origin: center center;
+  }
+
+  /* Hide desktop-only logout button on mobile */
   .header-logout-btn {
-    padding: 8px 12px;
+    display: none !important;
+  }
+
+  /* Hide bell on mobile to match wireframe */
+  .desktop-only-bell {
+    display: none !important;
   }
 }

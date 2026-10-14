@@ -1,9 +1,9 @@
 :root {
-  --discover-nav-height: 180px;
+  --discover-nav-height: 80px;
 }
 
 .discover-page {
-  --discover-nav-height: 180px;
+  --discover-nav-height: 80px;
   background: #F8FBF7;
   font-family: 'Inter', sans-serif;
 }
@@ -167,16 +167,20 @@
 
 /* ── Collapsible Section Content ── */
 .discover-collapsible {
-  overflow: hidden;
-  max-height: 5000px;
-  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.35s ease;
+  transition: opacity 0.35s ease, max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
+}
+
+.discover-collapsible:not(.collapsed) {
+  overflow: visible;
+  max-height: none;
 }
 
 .discover-collapsible.collapsed {
   max-height: 0;
   opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* ── Sections ── */
@@ -184,10 +188,143 @@
   scroll-margin-top: calc(var(--discover-nav-height, 180px) + 16px);
 }
 
+.mobile-nutrition-hide-btn {
+  display: none;
+}
+
+.mobile-nutrition-pill-trigger {
+  display: none;
+}
+
+.mobile-nutrition-backdrop {
+  display: none;
+}
+
 /* ── Responsive ── */
-@media (max-width: 640px) {
-  .discover-anchor-nav { padding: 8px 12px; gap: 4px; }
-  .discover-anchor-btn { padding: 6px 12px; font-size: 12.5px; }
+@media (max-width: 768px) {
+  .discover-anchor-tabs { display: none !important; }
+  
+  /* Sidebar dinh dưỡng dạng ngăn kéo bên phải */
+  .discover-anchor-nav { 
+    background: #ffffff !important;
+    border: 1.5px solid #dcfce7 !important;
+    border-right: none !important;
+    border-radius: 18px 0 0 18px !important;
+    box-shadow: -4px 4px 20px rgba(0, 0, 0, 0.12) !important;
+    position: fixed !important;
+    top: 60px !important;
+    right: 0 !important;
+    bottom: 16px !important;
+    width: 88px !important;
+    z-index: 150 !important;
+    transform: translateX(110%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 10px 4px 10px !important;
+  }
+  
+  /* Trạng thái mở */
+  .discover-anchor-nav.mobile-open {
+    transform: translateX(0) !important;
+  }
+  
+  .nutrition-circles-portal {
+    pointer-events: auto;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  .nutrition-circles-portal::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Nút Ẩn ở dưới cùng của sidebar theo wireframe */
+  .mobile-nutrition-hide-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .mobile-nutrition-hide-btn:hover,
+  .mobile-nutrition-hide-btn:active {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  /* Pill trigger dọc gắn cạnh phải màn hình khi thanh đang ẩn */
+  .mobile-nutrition-pill-trigger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: fixed !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 18px !important;
+    height: 64px !important;
+    background: #ffffff !important;
+    border: 2px solid #22c55e !important;
+    border-right: none !important;
+    border-radius: 12px 0 0 12px !important;
+    box-shadow: -3px 2px 10px rgba(0, 0, 0, 0.12) !important;
+    cursor: pointer !important;
+    z-index: 140 !important;
+    transition: all 0.25s ease !important;
+    padding: 0 !important;
+  }
+
+  .mobile-nutrition-pill-trigger:active {
+    background: #f0fdf4 !important;
+  }
+
+  .pill-grip-line {
+    width: 3.5px;
+    height: 30px;
+    background: #22c55e;
+    border-radius: 99px;
+  }
+
+  .mobile-nutrition-pill-trigger.open {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(-50%) translateX(100%) !important;
+  }
+  
+  .mobile-nutrition-backdrop {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    z-index: 145 !important;
+    animation: fadeIn 0.2s ease !important;
+  }
+
+  #discover-section-overview { display: none !important; }
+  .discover-section-divider:first-of-type { border-top: none; }
+  .discover-section { scroll-margin-top: calc(56px + 16px); }
+  
   .discover-section-divider { padding: 14px 16px; }
   .divider-text h2 { font-size: 14px; }
   .divider-toggle-btn { padding: 6px 10px; font-size: 12px; }

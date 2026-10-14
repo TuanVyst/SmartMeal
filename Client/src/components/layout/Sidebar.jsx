@@ -43,7 +43,7 @@ function calculateCurrentStreak(logs) {
 }
 
 export default function Sidebar() {
-  const { user, isPremium } = useAuth();
+  const { user, isPremium, logout } = useAuth();
   const { favorites } = useFavorite();
   const navigate = useNavigate();
   const [streakDays, setStreakDays] = useState(0);
@@ -78,6 +78,19 @@ export default function Sidebar() {
     );
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Listen to header hamburger event (mobile)
+  useEffect(() => {
+    const handler = () => setIsMobileOpen(true);
+    window.addEventListener('smartmeal:open-sidebar', handler);
+    return () => window.removeEventListener('smartmeal:open-sidebar', handler);
+  }, []);
+
+  const handleLogout = () => {
+    setIsMobileOpen(false);
+    logout();
+    navigate('/login');
+  };
+
   const nextTip = useCallback(() => {
     setFading(true);
     setTimeout(() => {
@@ -98,8 +111,9 @@ export default function Sidebar() {
   const navItems = [
     { to: '/home',                  icon: <FiHome size={20} />,      label: 'Khám phá',                    end: false },
     { to: '/journal',               icon: <FiClipboard size={20} />, label: 'Nhật ký',                     end: false },
-    { to: '/ingredient-detection',  icon: <FiCamera size={20} />,    label: 'Nhận diện nguyên liệu' },
-    { to: '/subscription',          icon: <FiAward size={20} />,     label: isPremium ? 'Gói Pro' : 'Nâng cấp Pro' },
+    { to: '/favorites',             icon: <FiHeart size={20} />,     label: 'Bộ sưu tập',                  end: false },
+    { to: '/ingredient-detection',  icon: <FiCamera size={20} />,    label: 'Nhận diện nguyên liệu',       desktopOnly: true },
+    { to: '/subscription',          icon: <FiAward size={20} />,     label: 'Gói Pro' },
     { to: '/profile',               icon: <FiSettings size={20} />,  label: 'Cài đặt'                      },
   ];
 
@@ -126,15 +140,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── Mobile hamburger toggle (only visible on mobile) ── */}
-      <button
-        className="sidebar-mobile-toggle"
-        onClick={() => setIsMobileOpen(true)}
-        aria-label="Mở menu"
-      >
-        <FiMenu size={22} />
-      </button>
-
       {/* ── Mobile backdrop ── */}
       {isMobileOpen && (
         <div
@@ -154,24 +159,16 @@ export default function Sidebar() {
         {isDesktopCollapsed ? <FiChevronRight size={14} /> : <FiChevronLeft size={14} />}
       </button>
 
-      <aside className={`main-sidebar${isDesktopCollapsed ? ' desktop-collapsed' : ''}${isMobileOpen ? ' mobile-open' : ''}`}>
-        {/* ── Mobile close button ── */}
-        <button
-          className="sidebar-close-btn"
-          onClick={() => setIsMobileOpen(false)}
-          aria-label="Đóng menu"
-        >
-          <FiX size={20} />
-        </button>
+      <aside className={`main-sidebar${(!isMobileOpen && isDesktopCollapsed) ? ' desktop-collapsed' : ''}${isMobileOpen ? ' mobile-open' : ''}`}>
 
-        {/* ── Logo ── */}
-        <div className="sidebar-logo">
+        {/* ── Logo (Desktop only) ── */}
+        <div className="sidebar-logo desktop-only">
           <div className="sidebar-logo-icon"><FiHome size={24} /></div>
           <h2 className="sidebar-logo-text">SmartMeal</h2>
         </div>
 
-        {/* ── Profile Card ── */}
-        <div className="sidebar-profile-card">
+        {/* ── Profile Card (Desktop only, hidden on mobile) ── */}
+        <div className="sidebar-profile-card desktop-only">
           <SidebarProgressAvatar
             avatarSrc={avatarSrc}
             initials={initials}
@@ -208,14 +205,15 @@ export default function Sidebar() {
 
         {/* ── Navigation ── */}
         <nav className="sidebar-nav">
-          <span className="sidebar-nav-label">Menu chính</span>
+          <span className="sidebar-nav-label desktop-only">Menu chính</span>
 
-          {navItems.map(item => (
+          {(isMobileOpen ? navItems.filter(item => !item.desktopOnly) : navItems).map(item => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.desktopOnly ? 'desktop-only-nav' : ''}`}
+              onClick={() => setIsMobileOpen(false)}
               title={isDesktopCollapsed ? item.label : ''}
             >
               <span className="nav-item-icon">{item.icon}</span>
@@ -223,24 +221,36 @@ export default function Sidebar() {
             </NavLink>
           ))}
 
-          {isAdmin && (
+          {isAdmin && !isMobileOpen && (
             <>
-              <span className="sidebar-nav-label">Quản trị</span>
+              <span className="sidebar-nav-label desktop-only">Quản trị</span>
               <NavLink
                 to="/admin"
                 className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+                onClick={() => setIsMobileOpen(false)}
                 title={isDesktopCollapsed ? 'Quản trị hệ thống' : ''}
               >
                 <span className="nav-item-icon"><FiShield size={20} /></span>
-                <span className="nav-item-text">Quản trị hệ thống</span>
+                <span className="nav-item-text">Quản trị</span>
               </NavLink>
             </>
           )}
         </nav>
 
-        {/* ── Mascot Widget ── */}
+        {/* ── Mobile Logout button (at bottom of narrow sidebar) ── */}
+        <div className="sidebar-mobile-logout-wrapper">
+          <button 
+            type="button" 
+            className="sidebar-mobile-logout-btn" 
+            onClick={handleLogout}
+          >
+            Đăng xuất
+          </button>
+        </div>
+
+        {/* ── Mascot Widget (Desktop only) ── */}
         <div
-          className={`sidebar-mascot-widget${fading ? ' mascot--fading' : ''}`}
+          className={`sidebar-mascot-widget desktop-only${fading ? ' mascot--fading' : ''}`}
           onMouseEnter={() => { pausedRef.current = true; }}
           onMouseLeave={() => { pausedRef.current = false; }}
         >

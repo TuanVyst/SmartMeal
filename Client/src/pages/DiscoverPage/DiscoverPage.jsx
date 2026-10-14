@@ -17,6 +17,8 @@ export default function DiscoverPage() {
   const canUsePro = isPremium || hasProAccess;
   const [activeSection, setActiveSection] = useState('overview');
   const [isPlanCollapsed, setIsPlanCollapsed] = useState(false);
+  const [isDiscoverCollapsed, setIsDiscoverCollapsed] = useState(false);
+  const [isNutritionOpen, setIsNutritionOpen] = useState(false);
   const observerRef = useRef(null);
   const navRef = useRef(null);
 
@@ -89,7 +91,11 @@ export default function DiscoverPage() {
       {/* ══════════════════════════════════════════
           STICKY ANCHOR NAV - Định hướng khi cuộn
          ══════════════════════════════════════════ */}
-      <nav ref={navRef} className="discover-anchor-nav" aria-label="Điều hướng nhanh">
+      <nav 
+        ref={navRef} 
+        className={`discover-anchor-nav ${isNutritionOpen ? 'mobile-open' : ''}`} 
+        aria-label="Điều hướng nhanh"
+      >
         <div className="discover-anchor-tabs">
           {SECTIONS.map((s) => (
             <button
@@ -110,7 +116,35 @@ export default function DiscoverPage() {
         </div>
         {/* Portal target for nutrition circles */}
         <div id="nutrition-circles-portal-target" className="nutrition-circles-portal"></div>
+        
+        {/* Nút Ẩn ở dưới cùng của sidebar dinh dưỡng trên mobile theo đúng wireframe */}
+        <button 
+          type="button"
+          className="mobile-nutrition-hide-btn"
+          onClick={() => setIsNutritionOpen(false)}
+        >
+          Ẩn
+        </button>
       </nav>
+
+      {/* Floating Pill Trigger trên cạnh phải màn hình khi thanh đang đóng */}
+      <button 
+        type="button"
+        className={`mobile-nutrition-pill-trigger ${isNutritionOpen ? 'open' : ''}`}
+        onClick={() => setIsNutritionOpen(prev => !prev)}
+        aria-label={isNutritionOpen ? "Đóng thanh dinh dưỡng" : "Mở thanh dinh dưỡng"}
+        title="Dinh dưỡng"
+      >
+        <span className="pill-grip-line" />
+      </button>
+
+      {/* Backdrop cho thanh dinh dưỡng */}
+      {isNutritionOpen && (
+        <div 
+          className="mobile-nutrition-backdrop" 
+          onClick={() => setIsNutritionOpen(false)} 
+        />
+      )}
 
       {/* ══════════════════════════════════════════
           SECTION 1: Tổng quan hôm nay (Dashboard - chỉ còn Hero & Health Tip)
@@ -169,17 +203,29 @@ export default function DiscoverPage() {
             <p>Tìm công thức phù hợp với nguyên liệu bạn có</p>
           </div>
         </div>
+        <div className="divider-right">
+          <button 
+            className="divider-toggle-btn"
+            onClick={() => setIsDiscoverCollapsed(!isDiscoverCollapsed)}
+            aria-expanded={!isDiscoverCollapsed}
+          >
+            {isDiscoverCollapsed ? 'Hiện' : 'Ẩn'}
+            <span className={`divider-toggle-icon ${isDiscoverCollapsed ? 'collapsed' : ''}`}>▼</span>
+          </button>
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════
           SECTION 3: Khám phá món ăn (MealSuggestion)
          ══════════════════════════════════════════ */}
-      <section
-        id="discover-section-discover"
-        className="discover-section"
-      >
-        <MealSuggestion />
-      </section>
+      <div className={`discover-collapsible ${isDiscoverCollapsed ? 'collapsed' : ''}`}>
+        <section
+          id="discover-section-discover"
+          className="discover-section"
+        >
+          <MealSuggestion />
+        </section>
+      </div>
 
     </div>
   );
