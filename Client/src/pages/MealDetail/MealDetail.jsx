@@ -89,6 +89,7 @@ export default function MealDetail() {
           const instruction = item.instruction || item.Instruction || "";
           const prepTime = item.prepTime || item.PrepTime || 0;
           const cookTime = item.cookTime || item.CookTime || 0;
+          const servings = item.servings || item.Servings || 1;
           const difficultyRaw = item.difficulty || item.Difficulty || "";
           const difficultyMap = { easy: "Dễ", medium: "Trung bình", hard: "Khó" };
           const difficulty = difficultyMap[difficultyRaw.toLowerCase()] || difficultyRaw || "Dễ";
