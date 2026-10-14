@@ -43,10 +43,6 @@ export default function IngredientDetail() {
           <span>{ingredient.name}</span>
         </div>
         <div className="detail-row">
-          <span className="label">Giá trung bình</span>
-          <span>${ingredient.averagePrice?.toFixed(2)}</span>
-        </div>
-        <div className="detail-row">
           <span className="label">URL hình ảnh</span>
           <span>{ingredient.imageUrl || '—'}</span>
         </div>

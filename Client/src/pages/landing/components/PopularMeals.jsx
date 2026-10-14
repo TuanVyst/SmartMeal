@@ -23,7 +23,9 @@ function mapRecipeToCard(recipe, saveCount = 0) {
   const name = recipe.recipe_name || recipe.Recipe_name || recipe.title || 'Món ăn';
   const cook = recipe.cookTime || recipe.CookTime || 0;
   const prep = recipe.prepTime || recipe.PrepTime || 0;
-  const difficulty = recipe.difficulty || recipe.Difficulty || '';
+  const rawDiff = recipe.difficulty || recipe.Difficulty || '';
+  const diffMap = { easy: 'Dễ', medium: 'Trung bình', hard: 'Khó' };
+  const difficulty = diffMap[rawDiff.toLowerCase()] || rawDiff;
   return {
     id: recipe.recipe_id || recipe.Recipe_id || recipe.id,
     name,

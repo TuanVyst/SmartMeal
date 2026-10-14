@@ -16,7 +16,11 @@ function mapRecipe(raw) {
     title,
     description: raw.description || raw.Description || '',
     time: `${prep + cook} phút`,
-    difficulty: raw.difficulty || raw.Difficulty || '',
+    difficulty: (() => {
+      const rawDiff = raw.difficulty || raw.Difficulty || '';
+      const diffMap = { easy: 'Dễ', medium: 'Trung bình', hard: 'Khó' };
+      return diffMap[rawDiff.toLowerCase()] || rawDiff;
+    })(),
     imageUrl: raw.imageUrl || raw.ImageUrl || resolveRecipeImageUrl(title),
     ...raw,
   };

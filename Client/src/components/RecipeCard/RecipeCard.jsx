@@ -48,7 +48,9 @@ const RecipeCard = ({ recipe }) => {
         
         <div className="recipe-meta">
           <span className="meta-item"><FiClock /> {time}</span>
-          <span className="meta-item"><FaUtensils /> {difficulty}</span>
+          <span className="meta-item">
+            <FaUtensils /> {difficulty === 'easy' ? 'Dễ' : difficulty === 'medium' ? 'Trung bình' : difficulty === 'hard' ? 'Khó' : (difficulty || 'Dễ')}
+          </span>
           {calories && <span className="meta-item" style={{fontWeight: 600}}><FiZap size={14} /> {calories}</span>}
         </div>
 

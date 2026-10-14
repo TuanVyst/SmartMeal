@@ -89,8 +89,9 @@ export default function MealDetail() {
           const instruction = item.instruction || item.Instruction || "";
           const prepTime = item.prepTime || item.PrepTime || 0;
           const cookTime = item.cookTime || item.CookTime || 0;
-          const servings = item.servings || item.Servings || 1;
-          const difficulty = item.difficulty || item.Difficulty || "";
+          const difficultyRaw = item.difficulty || item.Difficulty || "";
+          const difficultyMap = { easy: "Dễ", medium: "Trung bình", hard: "Khó" };
+          const difficulty = difficultyMap[difficultyRaw.toLowerCase()] || difficultyRaw || "Dễ";
           const recipeIngredients = item.recipeIngredients || item.RecipeIngredients || [];
 
           const imageUrl = resolveRecipeImageUrl(recipeName);
@@ -259,7 +260,9 @@ export default function MealDetail() {
               <FaUtensils className="meta-icon" />
               <div>
                 <span className="meta-label">Độ khó</span>
-                <span className="meta-value">{recipe.difficulty}</span>
+                <span className="meta-value">
+                  {recipe.difficulty === 'easy' ? 'Dễ' : recipe.difficulty === 'medium' ? 'Trung bình' : recipe.difficulty === 'hard' ? 'Khó' : (recipe.difficulty || 'Dễ')}
+                </span>
               </div>
             </div>
             <button className="meta-diary-btn" onClick={handleAddToDiaryClick}>

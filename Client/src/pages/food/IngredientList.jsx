@@ -409,9 +409,6 @@ export default function IngredientList() {
               {/* Card Main Body */}
               <div className="ingredient-card-content">
                 <h3 className="ingredient-name">{i.name}</h3>
-                <p className="ingredient-price-tag" style={{ marginBottom: 6 }}>
-                  Giá TB: ~${i.averagePrice?.toFixed(2)}
-                </p>
                 <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, marginBottom: 14 }}>
                   {portionLabel}
                 </div>
@@ -480,9 +477,6 @@ export default function IngredientList() {
                       {l.labelName}
                     </span>
                   ))}
-                  <span className="modal-badge" style={{ background: '#22c55e' }}>
-                    Giá: ~${activeIngredient.averagePrice?.toFixed(2)}
-                  </span>
                 </div>
               </div>
             </div>
