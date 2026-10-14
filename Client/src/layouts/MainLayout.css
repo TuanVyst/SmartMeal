@@ -57,9 +57,10 @@
 @media (max-width: 768px) {
   .main-content-wrapper {
     margin-left: 0; /* Sidebar is now overlay on mobile */
+    padding-top: 56px; /* Account for fixed header height */
   }
 
   .main-page-content {
-    padding-top: 0; /* Header handles spacing */
+    padding-top: 0; /* Header handles spacing via wrapper padding */
   }
 }

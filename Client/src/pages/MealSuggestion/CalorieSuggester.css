@@ -337,14 +337,33 @@
   border-color: #fca5a5;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .cal-preset-buttons {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  .cal-preset-btn {
+    padding: 6px 4px;
+  }
+  .cal-preset-icon {
+    font-size: 1rem;
+  }
+  .cal-preset-name {
+    font-size: 0.65rem;
+  }
+  .cal-preset-kcal {
+    font-size: 0.6rem;
   }
 
   .cal-daily-summary {
-    flex-wrap: wrap;
-    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .cal-daily-value {
+    font-size: 1rem;
+  }
+  .cal-daily-label {
+    font-size: 0.65rem;
   }
 
   .cal-custom-row {
@@ -354,5 +373,9 @@
   .cal-remaining-btn {
     width: 100%;
     justify-content: center;
+  }
+  
+  .cal-suggester-title {
+    font-size: 0.85rem;
   }
 }

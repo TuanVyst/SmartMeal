@@ -354,10 +354,10 @@ export default function Dashboard() {
     { key: 'protein', label: 'Đạm', color: '#3b82f6' },
     { key: 'sugar', label: 'Đường', color: '#eab308' },
     { key: 'sodium', label: 'Muối', color: '#94a3b8' },
-    { key: 'fat', label: 'Chất béo', color: '#f97316' },
-    { key: 'carbs', label: 'Chất bột đường (carb)', color: '#8b5cf6' },
+    { key: 'fat', label: 'Chất Béo', color: '#f97316' },
+    { key: 'carbs', label: 'Carb', color: '#8b5cf6' },
     { key: 'fiber', label: 'Chất xơ', color: '#22c55e' },
-    { key: 'cholesterol', label: 'Cholesterol', color: '#ec4899' },
+    { key: 'cholesterol', label: 'Chol', color: '#ec4899' },
   ];
 
   return (

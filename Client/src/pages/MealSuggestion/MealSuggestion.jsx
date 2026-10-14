@@ -53,6 +53,7 @@ export default function MealSuggestion() {
   
   // Advanced Filter States
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth > 992);
+  const [isMobileIngredientOpen, setIsMobileIngredientOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState('suitability');
   const [timeRange, setTimeRange] = useState([0, 180]);
@@ -552,7 +553,16 @@ export default function MealSuggestion() {
         </div>
       )}
 
-      <div className={`pantry-config-sidebar glass-panel ${!isSidebarOpen ? 'collapsed' : ''}`}>
+      {/* Mobile ingredient drawer backdrop */}
+      {isMobileIngredientOpen && (
+        <div
+          className="mobile-ingredient-backdrop"
+          onClick={() => setIsMobileIngredientOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <div className={`pantry-config-sidebar glass-panel ${!isSidebarOpen ? 'collapsed' : ''} ${isMobileIngredientOpen ? 'mobile-open' : ''}`}>
         <div 
           className="sidebar-header-toggle" 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -770,81 +780,48 @@ export default function MealSuggestion() {
       </div>
 
       <div className="suggestions-main-content">
-        <div className="suggestions-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <h2>Gợi ý Thực đơn Thông minh</h2>
-            <span className="results-count-text">
-              {searchQuery.trim()
-                ? `Tìm thấy ${suggestedRecipes.length} công thức cho "${searchQuery}"`
-                : `Tìm thấy ${suggestedRecipes.length} công thức món ăn`}
-            </span>
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              {!isSidebarOpen && (
-                <button 
-                  onClick={() => setIsSidebarOpen(true)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '9px 16px',
-                    borderRadius: '24px',
-                    border: '1px solid #10b981',
-                    background: '#ecfdf5',
-                    color: '#047857',
-                    fontWeight: '600',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                  }}
-                  className="desktop-only-btn"
-                >
-                  <MdOutlineKitchen size={16} />
-                  Hiện nguyên liệu
-                </button>
+        <div className="explore-header-container">
+          {/* Hàng 1: Khám phá món ăn (trái) và Bộ lọc (phải) */}
+          <div className="explore-header-row1">
+            <h2 className="explore-page-title">Khám phá món ăn</h2>
+            <button 
+              type="button"
+              className="explore-filter-btn"
+              onClick={() => setIsFilterOpen(true)}
+            >
+              <FiFilter size={16} />
+              <span>Bộ lọc</span>
+              {(timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) && (
+                <span className="filter-badge-dot" />
               )}
-              <button 
-                onClick={() => setIsFilterOpen(true)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '9px 16px',
-                  borderRadius: '24px',
-                  border: '1px solid #e2e8f0',
-                  background: (timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) ? '#ecfdf5' : 'white',
-                  color: (timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) ? '#047857' : '#475569',
-                  fontWeight: '500',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                }}
-              >
-                <FiFilter size={16} />
-                Bộ lọc
-                {timeRange[0]!==0 || timeRange[1]!==180 ? ` (${timeRange[0]}-${timeRange[1]>=180 ? '180+' : timeRange[1]}p)` : ''}
-              </button>
-              
-              <div className="suggestions-search-bar" style={{ margin: 0 }}>
-                <FiSearch size={16} />
-                <input
-                  type="text"
-                  placeholder="Tìm theo tên món ăn..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div className="allergy-toggle-checkbox" style={{ margin: 0 }}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showAllergicRecipes}
-                  onChange={(e) => setShowAllergicRecipes(e.target.checked)}
-                />
-                Hiển thị món ăn chứa chất dị ứng
-              </label>
+            </button>
+          </div>
+
+          {/* Hàng 2: Hiện bảng nguyên liệu (trái) và Tìm kiếm tên món ăn (phải) */}
+          <div className="explore-header-row2">
+            <button
+              type="button"
+              className="explore-ingredient-toggle-btn"
+              onClick={() => {
+                if (window.innerWidth <= 768) {
+                  setIsMobileIngredientOpen(true);
+                } else {
+                  setIsSidebarOpen(prev => !prev);
+                }
+              }}
+            >
+              <MdOutlineKitchen size={18} />
+              <span>Hiện bảng nguyên liệu</span>
+            </button>
+
+            <div className="explore-search-bar">
+              <FiSearch size={16} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm tên món ăn"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
         </div>
@@ -860,15 +837,6 @@ export default function MealSuggestion() {
             totalResults={suggestedRecipes.length}
           />
         )}
-
-        <CalorieSuggester
-          dailyBudget={dailyTargets?.calories || 2000}
-          todayCalories={todayTotals?.calories || 0}
-          onTargetChange={setCalorieTarget}
-          currentTarget={calorieTarget}
-          totalRecipes={calorieTarget ? baseFilteredRecipes.length : suggestedRecipes.length}
-          matchedRecipes={suggestedRecipes.length}
-        />
 
         {suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">
@@ -886,80 +854,23 @@ export default function MealSuggestion() {
             ) : (
               <>
                 <MdWarning className="empty-warn-icon" />
-                <p>Không có công thức món ăn nào phù hợp với cài đặt của bạn. {pantryMode === 'cook' ? 'Thử chọn thêm nguyên liệu hoặc chuyển sang chế độ Khám phá nhé!' : 'Thử thêm nguyên liệu vào tủ lạnh hoặc tắt lọc dị ứng nhé!'}</p>
+                <p>Không có công thức món ăn nào phù hợp với cài đặt của bạn. {pantryMode === 'cook' ? 'Thử chọn thêm nguyên liệu hoặc chuyển sang chế độ Khám phá nhé!' : 'Thử thêm nguyên liệu vào tủ lạnh hoặc kiểm tra bộ lọc nhé!'}</p>
               </>
             )}
           </div>
         ) : (
           <div className="recipes-grid-suggestions">
-            {suggestedRecipes.map(recipe => {
-              const healthInfo = getRecipeHealthInfo(recipe);
-              const score = recipe.healthDetails?.score ?? 100;
-              const lowScore = score < 60;
-
-              return (
-                <div
-                  key={recipe.id}
-                  className={`recipe-suggestion-card-wrapper ${recipe.hasAllergyConflict ? 'allergic-warning-card' : ''}`}
-                >
-                  {recipe.hasAllergyConflict && (
-                    <div className="allergy-card-overlay">
-                      <MdWarning className="warn-badge-icon" />
-                      <span>Cảnh báo Dị ứng: Chứa {recipe.allergicIngredients.join(', ')}</span>
-                    </div>
-                  )}
-
-                  <div style={{
-                    opacity: recipe.hasAllergyConflict || lowScore ? 0.7 : 1,
-                    transition: 'opacity 0.2s',
-                    position: 'relative',
-                  }}>
-                    {/* Badge nổi bật trên ảnh card */}
-                    <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
-                      <RecipeHealthScore recipe={recipe} variant="card" />
-                    </div>
-
-                    {/* Nút dấu cộng nằm ngay bên dưới Health Score */}
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleAddToDiaryClick(recipe); }}
-                      title="Thêm vào nhật ký"
-                      style={{
-                        position: 'absolute', top: 152, right: 12, zIndex: 10,
-                        width: 36, height: 36, borderRadius: '50%',
-                        background: '#22C55E', color: 'white', border: 'none',
-                        fontSize: 24, fontWeight: 600, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        boxShadow: '0 4px 12px rgba(34,197,94,0.4)',
-                        lineHeight: 1, paddingBottom: 4
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      +
-                    </button>
-
-                    <RecipeCard recipe={recipe} />
-
-                    <div style={{ padding: '8px 16px 12px', borderTop: '1px solid #f1f5f9' }}>
-                      {healthInfo?.reduced?.length > 0 && (
-                        <div style={{ marginTop: 6 }}>
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 3,
-                            padding: '2px 8px', borderRadius: 10,
-                            background: '#fff7ed', color: '#ea580c',
-                            fontSize: 11, fontWeight: 500,
-                          }}>
-                            Đã điều chỉnh cho bạn
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {suggestedRecipes.map(recipe => (
+              <div
+                key={recipe.id}
+                className="recipe-suggestion-card-wrapper"
+              >
+                <RecipeCard 
+                  recipe={recipe} 
+                  onAddToDiary={handleAddToDiaryClick} 
+                />
+              </div>
+            ))}
           </div>
         )}
       </div>

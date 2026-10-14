@@ -1,13 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiClock, FiHeart, FiZap } from 'react-icons/fi';
+import { FiClock, FiHeart, FiZap, FiPlus } from 'react-icons/fi';
 import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
 import { trackRecipeSelection } from '../../hooks/useActivityTracker';
+import RecipeHealthScore from '../common/RecipeHealthScore';
 import './RecipeCard.css';
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe, onAddToDiary }) => {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorite();
   const { id, title, matchPercentage, description, time, difficulty, missingIngredients, allIngredients, calories, imageUrl } = recipe;
@@ -17,6 +18,13 @@ const RecipeCard = ({ recipe }) => {
   const handleSave = (e) => {
     e.stopPropagation();
     toggleFavorite(recipe);
+  };
+
+  const handleAddToDiary = (e) => {
+    e.stopPropagation();
+    if (onAddToDiary) {
+      onAddToDiary(recipe);
+    }
   };
 
   const handleCardClick = () => {
@@ -30,21 +38,13 @@ const RecipeCard = ({ recipe }) => {
     <div className="recipe-card" onClick={handleCardClick}>
       {imageUrl && (
         <div className="card-image-container">
-          <img src={imageUrl} alt={title} className="card-image" />
+          <img src={imageUrl} alt={title} className="card-image" loading="lazy" />
         </div>
       )}
+
       <div className="card-content">
-        <div className="card-header">
-          <h3 className="recipe-title">{title}</h3>
-          <div className="header-actions">
-            {matchPercentage !== undefined && <span className="match-badge">{matchPercentage}% Phù hợp</span>}
-            <button className={`save-btn ${isFav ? 'saved' : ''}`} onClick={handleSave} aria-label="Lưu công thức">
-              <FiHeart className={isFav ? 'fill-heart' : ''} />
-            </button>
-          </div>
-        </div>
-        
-        <p className="recipe-description">{description}</p>
+        <h3 className="recipe-title">{title}</h3>
+        {description && <p className="recipe-description">{description}</p>}
         
         <div className="recipe-meta">
           <span className="meta-item"><FiClock /> {time}</span>
@@ -76,6 +76,47 @@ const RecipeCard = ({ recipe }) => {
                 </span>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Cột các tương tác & chỉ số bên phải thẻ (theo đúng wireframe) */}
+      <div className="card-right-actions" onClick={(e) => e.stopPropagation()}>
+        {/* 1. Độ phù hợp (Màu xanh - sức khỏe người dùng) */}
+        <div className="card-action-health-score" title="Độ tương thích sức khỏe">
+          <RecipeHealthScore recipe={recipe} variant="card" />
+        </div>
+
+        {/* 2. Bộ sưu tập (Trái tim) */}
+        <button 
+          type="button"
+          className={`save-btn ${isFav ? 'saved' : ''}`} 
+          onClick={handleSave} 
+          aria-label="Lưu vào bộ sưu tập"
+          title={isFav ? "Bỏ lưu bộ sưu tập" : "Lưu vào bộ sưu tập"}
+        >
+          <FiHeart className={isFav ? 'fill-heart' : ''} />
+        </button>
+
+        {/* 3. Thêm vào nhật ký (Nút +) */}
+        {onAddToDiary && (
+          <button
+            type="button"
+            className="card-add-diary-btn"
+            onClick={handleAddToDiary}
+            title="Thêm vào nhật ký"
+            aria-label="Thêm vào nhật ký"
+          >
+            <FiPlus size={18} />
+          </button>
+        )}
+
+        {/* Phù hợp vàng (nguyên liệu khi lọc) - nằm ở góc dưới bên phải */}
+        {matchPercentage !== undefined && (
+          <div className="card-match-badge-container">
+            <span className="match-badge">
+              {matchPercentage}% Phù hợp
+            </span>
           </div>
         )}
       </div>

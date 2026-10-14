@@ -350,23 +350,24 @@ export default function MealPlanSuggestion() {
           </div>
         )}
         <div className="mps-week-nav">
-          <button className="mps-week-btn" onClick={handlePrevWeek} title="Xem tuần trước">
-            <FiChevronLeft size={16} /> Tuần trước
+          {/* Arrow left */}
+          <button className="mps-week-arrow-btn" onClick={handlePrevWeek} title="Tuần trước" aria-label="Tuần trước">
+            <FiChevronLeft size={20} />
           </button>
 
-          <div className="mps-week-title">
-            <FiCalendar size={18} />
-            <span>Tuần từ {formatDateShort(weekPlan?.startDate)} – {formatDateShort(weekPlan?.endDate)}</span>
-            <button className="mps-today-btn" onClick={handleGoToday}>Trở về ngày hiện tại</button>
+          {/* Center: date range + today btn */}
+          <div className="mps-week-center">
+            <div className="mps-week-title">
+              <FiCalendar size={15} />
+              <span>{formatDateShort(weekPlan?.startDate)} – {formatDateShort(weekPlan?.endDate)}</span>
+            </div>
+            <button className="mps-today-btn" onClick={handleGoToday}>Hôm nay</button>
           </div>
 
-          <div className="mps-week-actions">
-
-
-            <button className="mps-week-btn" onClick={handleNextWeek} title="Xem tuần sau">
-              Tuần sau <FiChevronRight size={16} />
-            </button>
-          </div>
+          {/* Arrow right */}
+          <button className="mps-week-arrow-btn" onClick={handleNextWeek} title="Tuần sau" aria-label="Tuần sau">
+            <FiChevronRight size={20} />
+          </button>
         </div>
 
         {/* ── Main content ── */}
@@ -400,22 +401,17 @@ export default function MealPlanSuggestion() {
                 const isActive = i === selectedDayIdx;
                 const isToday = isTodayDate(day.dayDate);
                 const dateShort = formatDateShort(day.dayDate);
-                const weekdayName = WEEKDAY_LABELS[i] || `Thứ ${i + 2}`;
+                const weekdayShort = ['T2','T3','T4','T5','T6','T7','CN'][i] || `T${i+2}`;
 
                 return (
                   <button
                     key={day.day_id || i}
-                    className={`mps-day-tab ${isActive ? 'active' : ''}`}
+                    className={`mps-day-tab ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}`}
                     onClick={() => setSelectedDayIdx(i)}
                   >
-                    <span className="mps-day-num">{weekdayName}</span>
+                    <span className="mps-day-num">{weekdayShort}</span>
                     {dateShort && <span className="mps-day-date">{dateShort}</span>}
-                    {isToday && <span className="mps-day-today-badge">Hôm nay</span>}
-                    {day.totalCalories > 0 ? (
-                      <span className="mps-day-kcal">{Math.round(day.totalCalories)} kcal</span>
-                    ) : (
-                      <span className="mps-day-date" style={{ opacity: 0.7 }}>Trống</span>
-                    )}
+                    {isToday && <span className="mps-day-today-badge">●</span>}
                   </button>
                 );
               })}
@@ -454,56 +450,29 @@ export default function MealPlanSuggestion() {
                   return (
                     <div
                       key={slotKey}
-                      className="mps-meal-card"
+                      className="mps-meal-card mps-missing-card"
                       style={{
                         '--card-bg':     '#f8fafc',
                         '--card-border': '#e2e8f0',
-                        '--badge-bg':    '#f1f5f9',
-                        '--badge-color': '#64748b',
                         animation: `slideInRight 0.35s ease ${i * 0.08}s both`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '16px',
-                        minHeight: '300px',
-                        borderStyle: 'dashed'
                       }}
                     >
-                      <div style={{ fontSize: '48px', opacity: 0.4 }}>{SLOT_ICONS[slotKey]}</div>
-                      <div style={{ color: '#64748b', fontSize: '15px', fontWeight: 500 }}>Chưa có {SLOT_LABELS[slotKey].toLowerCase()}</div>
+                      <div className="mps-missing-icon">{SLOT_ICONS[slotKey]}</div>
+                      <div className="mps-missing-label">{SLOT_LABELS[slotKey]}</div>
                       {!isPastDay && (
                         <button
+                          className="mps-quick-gen-btn"
                           onClick={() => handleQuickGenerate(slotKey, selectedDay.dayDate)}
                           disabled={isQuickGenerating}
-                          style={{
-                            marginTop: '8px',
-                            padding: '10px 20px',
-                            borderRadius: '12px',
-                            border: 'none',
-                            background: 'white',
-                            color: '#22c55e',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: isQuickGenerating ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0',
-                            transition: 'all 0.2s',
-                            opacity: isQuickGenerating ? 0.7 : 1
-                          }}
-                          onMouseOver={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05), 0 0 0 1px #cbd5e1' }}
-                          onMouseOut={btn => { if(!isQuickGenerating) btn.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05), 0 0 0 1px #e2e8f0' }}
                         >
-                          {isQuickGenerating ? <div className="mps-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <FiPlus />}
-                          {isQuickGenerating ? 'Đang tạo...' : 'Tạo gợi ý nhanh'}
+                          {isQuickGenerating
+                            ? <div className="mps-spinner" style={{ width: 12, height: 12, borderWidth: 2 }} />
+                            : <FiPlus size={12} />}
+                          <span>Tạo gợi ý</span>
                         </button>
                       )}
                       {isPastDay && (
-                        <div style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic' }}>
-                          Ngày đã qua, không thể thêm gợi ý
-                        </div>
+                        <span className="mps-past-label">Ngày đã qua</span>
                       )}
                     </div>
                   );
@@ -529,15 +498,15 @@ export default function MealPlanSuggestion() {
                       <span className="mps-card-slot-label" style={{ color: colors.badge }}>
                         {SLOT_LABELS[slotKey]}
                       </span>
-                    </div>
-
-                    {/* Dish name */}
-                    <div className="mps-card-name" title={meal.recipeName}>
-                      {meal.recipeName}
+                      {meal.slotCalories > 0 && (
+                        <span className="mps-card-kcal-inline">
+                          <FiZap size={11} /> {Math.round(meal.slotCalories)}
+                        </span>
+                      )}
                     </div>
 
                     {/* Food image */}
-                    <div 
+                    <div
                       className="mps-card-img-wrap"
                       onClick={() => meal.recipe_id && navigate(`/recipe/${meal.recipe_id}`)}
                     >
@@ -550,106 +519,29 @@ export default function MealPlanSuggestion() {
                         }}
                       />
                       <div className="mps-card-img-overlay" />
+                      {/* Dish name overlaid on image */}
+                      <div className="mps-card-name-overlay">{meal.recipeName}</div>
                     </div>
 
-                    {/* Meta badges */}
-                    <div className="mps-card-meta">
-                      <span
-                        className="mps-meta-badge"
-                        style={{ background: colors.soft, color: colors.text }}
-                      >
-                        {SLOT_ICONS[slotKey]} {SLOT_LABELS[slotKey]}
-                      </span>
-                      <span className="mps-meta-kcal">
-                        <FiZap size={12} /> {Math.round(meal.slotCalories)} kcal
-                      </span>
-                      {meal.cookTime > 0 && (
-                        <span className="mps-meta-time">
-                          <FiClock size={11} /> {meal.cookTime}p
-                        </span>
+                    {/* Actions */}
+                    <div className="mps-card-actions">
+                      {isToday && !meal.isLogged && (
+                        <button
+                          className="mps-card-action-btn mps-card-log-btn"
+                          onClick={(e) => { e.stopPropagation(); handleLogMeal(meal, selectedDay.dayDate); }}
+                        >
+                          🍽️ Đã ăn
+                        </button>
                       )}
-                    </div>
-
-                    <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 12, width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {isToday && (
-                        meal.isLogged ? (
-                          <button
-                            disabled
-                            style={{
-                              width: '100%',
-                              padding: '10px 14px',
-                              borderRadius: 12,
-                              border: '1px solid #bbf7d0',
-                              background: '#f0fdf4',
-                              color: '#16a34a',
-                              fontSize: 13,
-                              fontWeight: 600,
-                              cursor: 'not-allowed',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: 6
-                            }}
-                          >
-                            ✓ Đã ghi nhận nhật ký
-                          </button>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLogMeal(meal, selectedDay.dayDate);
-                            }}
-                            style={{
-                              width: '100%',
-                              padding: '10px 14px',
-                              borderRadius: 12,
-                              border: 'none',
-                              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                              color: 'white',
-                              fontSize: 13,
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: 6,
-                              boxShadow: '0 4px 6px rgba(34,197,94,0.15)',
-                              transition: 'all 0.2s'
-                            }}
-                            onMouseOver={btn => btn.currentTarget.style.opacity = 0.9}
-                            onMouseOut={btn => btn.currentTarget.style.opacity = 1}
-                          >
-                            🍽️ Xác nhận đã ăn
-                          </button>
-                        )
+                      {isToday && meal.isLogged && (
+                        <span className="mps-card-logged-tag">✓ Đã ghi nhận</span>
                       )}
-
                       {!meal.isLogged && (
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMealToDelete(meal);
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '10px 14px',
-                            borderRadius: 12,
-                            border: '1px solid #fee2e2',
-                            background: '#fef2f2',
-                            color: '#ef4444',
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: 6,
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseOver={btn => btn.currentTarget.style.background = '#fee2e2'}
-                          onMouseOut={btn => btn.currentTarget.style.background = '#fef2f2'}
+                          className="mps-card-action-btn mps-card-del-btn"
+                          onClick={(e) => { e.stopPropagation(); setMealToDelete(meal); }}
                         >
-                          ❌ Huỷ bữa ăn này
+                          ❌
                         </button>
                       )}
                     </div>

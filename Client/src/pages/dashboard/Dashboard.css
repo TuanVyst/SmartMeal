@@ -280,6 +280,52 @@
   }
 }
 
+@media (max-width: 768px) {
+  .dashboard-nutrition-circles {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 6px 0;
+    gap: 10px;
+    background: transparent;
+    border-top: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    scrollbar-width: none;
+    width: 100%;
+  }
+  .dashboard-nutrition-circles::-webkit-scrollbar {
+    display: none;
+  }
+  .dashboard-nutrition-circles .nutrient-circle-container {
+    min-width: 56px;
+    gap: 3px;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  .dashboard-nutrition-circles .nutrient-circle-svg-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+  .dashboard-nutrition-circles .nutrient-circle-val-text .val {
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .dashboard-nutrition-circles .nutrient-circle-val-text .unit {
+    font-size: 8px;
+  }
+  .dashboard-nutrition-circles .nutrient-circle-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #1e293b;
+    max-width: 68px;
+    line-height: 1.15;
+  }
+}
+
 .nutrient-circle-container {
   display: flex;
   flex-direction: column;
@@ -842,3 +888,4 @@
   color: #16a34a !important;
   font-weight: 700;
 }
+

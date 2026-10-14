@@ -45,35 +45,68 @@ const BADGE_STYLES = {
 export default function RecipeHealthScore({ recipe, variant = 'badge' }) {
   const { getHealthScoreDetails, healthProfile } = useHealthProfile();
 
-  if (!healthProfile) return null;
-
-  const { score, badge } = getHealthScoreDetails(recipe);
+  const healthDetails = healthProfile ? getHealthScoreDetails(recipe) : null;
+  const score = recipe?.healthDetails?.score ?? healthDetails?.score ?? 100;
+  const badge = healthDetails?.badge || {
+    percent: `${score}/100`,
+    label: score >= 85 ? 'Rất phù hợp' : score >= 70 ? 'Phù hợp' : 'Tạm được',
+    level: score >= 85 ? 'excellent' : score >= 70 ? 'good' : 'fair'
+  };
   const style = BADGE_STYLES[badge.level] || BADGE_STYLES.excellent;
 
-  if (variant === 'card') {
-    // Badge lớn, đặt overlay trên ảnh card
+  if (variant === 'compact') {
     return (
       <div
+        className="recipe-health-score-badge compact"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 5,
-          padding: '5px 10px',
-          borderRadius: 20,
+          gap: 3,
+          padding: '3px 8px',
+          borderRadius: 12,
           background: style.background,
           border: style.border,
-          boxShadow: `0 2px 8px ${style.glow}`,
+          boxShadow: `0 1px 4px ${style.glow}`,
           color: style.color,
           fontWeight: 700,
-          fontSize: 12,
-          letterSpacing: '0.02em',
+          fontSize: 11,
+          letterSpacing: '0.01em',
+          whiteSpace: 'nowrap',
+          userSelect: 'none',
+        }}
+        title={`Độ phù hợp sức khỏe: ${badge.percent} (${badge.label})`}
+      >
+        <span style={{ fontSize: 10 }}>{style.icon}</span>
+        <span>{badge.percent}</span>
+      </div>
+    );
+  }
+
+  if (variant === 'card') {
+    // Badge lớn hoặc trên thẻ card
+    return (
+      <div
+        className="recipe-health-score-badge card-variant"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '4px 8px',
+          borderRadius: 16,
+          background: style.background,
+          border: style.border,
+          boxShadow: `0 2px 6px ${style.glow}`,
+          color: style.color,
+          fontWeight: 700,
+          fontSize: 11,
+          letterSpacing: '0.01em',
           whiteSpace: 'nowrap',
           userSelect: 'none',
         }}
       >
-        <span style={{ fontSize: 11 }}>{style.icon}</span>
+        <span style={{ fontSize: 10 }}>{style.icon}</span>
         <span>{badge.percent}</span>
-        <span style={{ fontWeight: 500, opacity: 0.92 }}>{badge.label}</span>
+        <span className="health-score-label-text" style={{ fontWeight: 500, opacity: 0.95 }}>{badge.label}</span>
       </div>
     );
   }
