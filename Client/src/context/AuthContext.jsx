@@ -199,6 +199,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user');
     localStorage.removeItem('userHealthProfile');
     localStorage.removeItem('healthSurveyCompleted');
+    sessionStorage.removeItem('allowHealthReportOnce');
     pendingPaymentStorage.clearPendingPayment();
     setUser(null);
     setSubscription(null);

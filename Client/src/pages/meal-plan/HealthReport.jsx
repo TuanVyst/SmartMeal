@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import api from '../../services/api';
 import Header from '../../components/layout/Header';
+import { useAuth } from '../../context/AuthContext';
 
 const styles = {
   page: {
@@ -158,11 +159,31 @@ const styles = {
 
 const HealthReport = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const accountId = user?.accountId || user?.account_id;
+  const hasSeenReportKey = accountId ? `hasSeenHealthReport_${accountId}` : null;
+  const alreadySeen = hasSeenReportKey ? localStorage.getItem(hasSeenReportKey) === 'true' : false;
+  const allowedFromSession = sessionStorage.getItem('allowHealthReportOnce') === 'true';
+  const allowedFromState = Boolean(location.state?.fromSurvey);
+
+  const isAllowedToView = !alreadySeen && (allowedFromState || allowedFromSession);
+
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    return () => {
+      if (hasSeenReportKey) {
+        localStorage.setItem(hasSeenReportKey, 'true');
+      }
+      sessionStorage.removeItem('allowHealthReportOnce');
+    };
+  }, [hasSeenReportKey]);
+
+  useEffect(() => {
+    if (!isAllowedToView) return;
     const fetchReport = async () => {
       try {
         const response = await api.get('/HealthReport');
@@ -175,7 +196,19 @@ const HealthReport = () => {
       }
     };
     fetchReport();
-  }, []);
+  }, [isAllowedToView]);
+
+  const handleContinue = () => {
+    if (hasSeenReportKey) {
+      localStorage.setItem(hasSeenReportKey, 'true');
+    }
+    sessionStorage.removeItem('allowHealthReportOnce');
+    navigate('/home', { replace: true });
+  };
+
+  if (!isAllowedToView) {
+    return <Navigate to="/home" replace />;
+  }
 
   if (loading) {
     return (
@@ -271,7 +304,7 @@ const HealthReport = () => {
               style={styles.ctaBtn}
               onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
               onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-              onClick={() => navigate('/home')}
+              onClick={handleContinue}
             >
               Khám Phá SmartMeal →
             </button>

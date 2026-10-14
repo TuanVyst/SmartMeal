@@ -7,10 +7,11 @@ export default function SurveyPage() {
   const { surveyCompleted, loading } = useHealthProfile();
 
   if (loading) return <div className="loading">Loading...</div>;
-  if (surveyCompleted) return <Navigate to="/meal-plan/report" replace />;
+  if (surveyCompleted) return <Navigate to="/home" replace />;
 
   const handleComplete = () => {
-    navigate('/meal-plan/report', { replace: true });
+    sessionStorage.setItem('allowHealthReportOnce', 'true');
+    navigate('/meal-plan/report', { replace: true, state: { fromSurvey: true } });
   };
 
   return <OnboardingSurvey onComplete={handleComplete} />;

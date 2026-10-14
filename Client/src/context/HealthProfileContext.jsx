@@ -23,6 +23,9 @@ export function HealthProfileProvider({ children }) {
   const [mealsPerDay, setMealsPerDay] = useState(3);
   const [dietType, setDietType] = useState('omnivore');
   const [loading, setLoading] = useState(true);
+  const currentUserId = user?.accountId || user?.account_id || null;
+  const [profileLoadedForUser, setProfileLoadedForUser] = useState(null);
+  const isProfileLoading = loading || (Boolean(currentUserId) && profileLoadedForUser !== currentUserId);
 
   const computeDerivedState = useCallback((profile) => {
     if (!profile) {
@@ -83,9 +86,12 @@ export function HealthProfileProvider({ children }) {
       localStorage.removeItem('userHealthProfile');
       localStorage.removeItem('healthSurveyCompleted');
       computeDerivedState(null);
+      setProfileLoadedForUser(null);
       setLoading(false);
       return;
     }
+    const currentAccId = user.accountId || user.account_id;
+    setLoading(true);
 
     const fetchProfile = async () => {
       try {
@@ -96,6 +102,9 @@ export function HealthProfileProvider({ children }) {
           computeDerivedState(profile);
           localStorage.setItem('userHealthProfile', JSON.stringify(profile));
           localStorage.setItem('healthSurveyCompleted', 'true');
+          if (currentAccId) {
+            localStorage.setItem(`hasSeenHealthReport_${currentAccId}`, 'true');
+          }
         } else {
           localStorage.removeItem('userHealthProfile');
           localStorage.removeItem('healthSurveyCompleted');
@@ -123,6 +132,9 @@ export function HealthProfileProvider({ children }) {
                 setHealthProfile(profile);
                 setSurveyCompleted(true);
                 computeDerivedState(profile);
+                if (currentAccId) {
+                  localStorage.setItem(`hasSeenHealthReport_${currentAccId}`, 'true');
+                }
               } else {
                 setHealthProfile(null);
                 setSurveyCompleted(false);
@@ -140,6 +152,7 @@ export function HealthProfileProvider({ children }) {
           }
         }
       } finally {
+        setProfileLoadedForUser(currentAccId);
         setLoading(false);
       }
     };
@@ -158,10 +171,12 @@ export function HealthProfileProvider({ children }) {
         computeDerivedState(result.profile);
       }
       setSurveyCompleted(true);
+      const accId = user?.accountId || user?.account_id;
+      if (accId) setProfileLoadedForUser(accId);
       localStorage.setItem('healthSurveyCompleted', 'true');
     }
     return result;
-  }, [computeDerivedState]);
+  }, [computeDerivedState, user]);
 
   const updateProfile = useCallback(async (data) => {
     const result = await healthSurveyService.updateHealthProfile(data);
@@ -201,7 +216,7 @@ export function HealthProfileProvider({ children }) {
       planCycleDays,
       mealsPerDay,
       dietType,
-      loading,
+      loading: isProfileLoading,
       completeSurvey,
       updateProfile,
       getHealthScoreForRecipe,
