@@ -11,6 +11,8 @@ import 'package:smart_meal/features/favorites/presentation/screens/favorites_scr
 import 'package:smart_meal/features/profile/presentation/screens/subscription/subscription_plans_screen.dart';
 import 'package:smart_meal/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_meal/features/diary/presentation/widgets/add_log_sheet.dart';
+import 'package:smart_meal/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:smart_meal/features/notifications/presentation/widgets/notification_sheet.dart';
 import '../widgets/app_navigation_drawer.dart';
 /// Main shell tích hợp Menu Drawer trái và Thanh Dinh Dưỡng phải (Theo Wireframe Draw.io)
 class MainShell extends StatefulWidget {
@@ -137,6 +139,25 @@ class MainShellState extends State<MainShell> {
                 AddLogSheet.show(context, date);
               },
             ),
+          // Nút chuông thông báo (Notification Center phong cách Duolingo)
+          Consumer<NotificationProvider>(
+            builder: (context, notifProvider, _) {
+              final unreadCount = notifProvider.unreadCount;
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text('$unreadCount'),
+                  backgroundColor: Colors.redAccent,
+                  child: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 24),
+                ),
+                tooltip: 'Thông báo',
+                onPressed: () => NotificationSheet.show(
+                  context,
+                  onActionSelect: switchTab,
+                ),
+              );
+            },
+          ),
           // Avatar có vòng tròn tiến độ calo trong ngày (chuẩn format Header Web)
           Padding(
             padding: const EdgeInsets.only(right: 14),
