@@ -19,6 +19,7 @@ namespace Service.Interfaces
 
         Task<MealPlanResponseDto> SuggestNextDayAsync(Guid accountId);
         Task<MealPlanResponseDto> SuggestForDateAsync(Guid accountId, DateTime targetDate, List<string> meals = null, string focus = null);
+        Task<MealPlanResponseDto> SuggestForDateRangeAsync(Guid accountId, DateTime startDate, DateTime endDate, List<string> meals = null, string focus = null);
         Task<Dictionary<string, bool>> CheckDateMealsAsync(Guid accountId, DateTime date);
         Task<MealPlanResponseDto> GetWeekPlanAsync(Guid accountId, DateTime anyDateInWeek);
     }

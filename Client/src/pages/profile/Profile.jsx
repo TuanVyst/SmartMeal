@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
-import { FiUser, FiAward } from 'react-icons/fi';
+import { FiUser, FiAward, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { authService } from '../../services/authService';
+import toast from 'react-hot-toast';
 import './Profile.css';
 
 export default function Profile() {
@@ -26,6 +28,18 @@ export default function Profile() {
     email: '',
     address: ''
   });
+  // Change Password States
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   useEffect(() => {
     setAvatarPreview(user?.avatar || '');
@@ -123,6 +137,47 @@ export default function Profile() {
       setTimeout(() => setSuccessMsg(''), 3000);
     }, 800);
   };
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      setPasswordError('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const res = await authService.changePassword(passwordData);
+      if (res.data?.success) {
+        toast.success('Đổi mật khẩu thành công!');
+        setPasswordSuccess('Đổi mật khẩu thành công!');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+        setTimeout(() => setPasswordSuccess(''), 4000);
+      } else {
+        setPasswordError(res.data?.message || 'Đổi mật khẩu thất bại.');
+      }
+    } catch (err) {
+      if (err.code === 'ERR_NETWORK' || !err.response) {
+        setPasswordError('Không thể kết nối với máy chủ. Vui lòng thử lại sau.');
+      } else {
+        setPasswordError(err.response?.data?.message || 'Mật khẩu hiện tại không chính xác.');
+      }
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   const currentAvatar = avatarPreview.trim() || user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username||'U')}&background=38bdf8&color=fff&size=96`;
 
@@ -138,6 +193,12 @@ export default function Profile() {
           onClick={() => setActiveTab('profile')}
         >
           <FiUser size={16} /> Hồ sơ cá nhân
+        </button>
+        <button
+          className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`}
+          onClick={() => setActiveTab('password')}
+        >
+          <FiLock size={16} /> Đổi mật khẩu
         </button>
         <button
           className={`profile-tab-btn ${activeTab === 'subscription' ? 'active' : ''}`}
@@ -252,6 +313,98 @@ export default function Profile() {
             <div className="form-actions">
               <button type="submit" className="btn-save" disabled={loading}>
                 {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : activeTab === 'password' ? (
+        <div className="profile-card">
+          <h2 className="profile-title">Đổi mật khẩu</h2>
+          <p className="profile-subtitle">Cập nhật mật khẩu định kỳ để nâng cao tính bảo mật cho tài khoản SmartMeal</p>
+
+          {passwordSuccess && <div className="alert-success">{passwordSuccess}</div>}
+          {passwordError && <div className="alert-error">{passwordError}</div>}
+
+          <form onSubmit={handlePasswordSubmit} className="profile-form">
+            <div className="form-group">
+              <label htmlFor="currentPassword">Mật khẩu hiện tại</label>
+              <div className="password-input-wrap">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  id="currentPassword"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="form-input"
+                  placeholder="Nhập mật khẩu đang sử dụng"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  title={showCurrentPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={showCurrentPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showCurrentPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="newPassword">Mật khẩu mới</label>
+              <div className="password-input-wrap">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  id="newPassword"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  className="form-input"
+                  placeholder="Tối thiểu 6 ký tự"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  title={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showNewPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirmNewPassword">Xác nhận mật khẩu mới</label>
+              <div className="password-input-wrap">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirmNewPassword"
+                  name="confirmNewPassword"
+                  value={passwordData.confirmNewPassword}
+                  onChange={handlePasswordChange}
+                  className="form-input"
+                  placeholder="Nhập lại mật khẩu mới"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn-save" disabled={passwordLoading}>
+                {passwordLoading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
               </button>
             </div>
           </form>

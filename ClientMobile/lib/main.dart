@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_meal/core/theme/app_theme.dart';
@@ -24,99 +25,63 @@ void main() {
   runApp(const SmartMealApp());
 }
 
-class SmartMealApp extends StatelessWidget {
+class SmartMealApp extends StatefulWidget {
   const SmartMealApp({super.key});
+
+  @override
+  State<SmartMealApp> createState() => _SmartMealAppState();
+}
+
+class _SmartMealAppState extends State<SmartMealApp> {
+  late final AuthProvider _authProvider;
+  late final HealthProfileProvider _healthProfileProvider;
+  late final RecipeProvider _recipeProvider;
+  late final NutritionProvider _nutritionProvider;
+  late final FavoriteProvider _favoriteProvider;
+  late final MealPlanProvider _mealPlanProvider;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _authProvider = AuthProvider();
+    _healthProfileProvider = HealthProfileProvider();
+    _recipeProvider = RecipeProvider();
+    _nutritionProvider = NutritionProvider();
+    _favoriteProvider = FavoriteProvider();
+    _mealPlanProvider = MealPlanProvider();
+
+    _router = createAppRouter(_authProvider, _healthProfileProvider);
+  }
+
+  @override
+  void dispose() {
+    _authProvider.dispose();
+    _healthProfileProvider.dispose();
+    _recipeProvider.dispose();
+    _nutritionProvider.dispose();
+    _favoriteProvider.dispose();
+    _mealPlanProvider.dispose();
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => RecipeProvider()),
-        ChangeNotifierProvider(create: (_) => NutritionProvider()),
-        ChangeNotifierProvider(create: (_) => HealthProfileProvider()),
-        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
-        ChangeNotifierProvider(create: (_) => MealPlanProvider()),
+        ChangeNotifierProvider.value(value: _authProvider),
+        ChangeNotifierProvider.value(value: _recipeProvider),
+        ChangeNotifierProvider.value(value: _nutritionProvider),
+        ChangeNotifierProvider.value(value: _healthProfileProvider),
+        ChangeNotifierProvider.value(value: _favoriteProvider),
+        ChangeNotifierProvider.value(value: _mealPlanProvider),
       ],
-      child: Consumer2<AuthProvider, HealthProfileProvider>(
-        builder: (context, auth, health, child) {
-          // While loading stored user, show a splash screen
-          if (auth.loading || health.loading) {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: const _SplashScreen(),
-            );
-          }
-
-          // Once auth is loaded, we pass it to the GoRouter refreshListenable
-          return MaterialApp.router(
-            title: 'SmartMeal',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            routerConfig: createAppRouter(auth, health),
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Splash screen shown while loading auth state
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FBF7),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Logo
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF16A34A), Color(0xFF22C55E)],
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFF22C55E),
-                    blurRadius: 24,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.eco, size: 40, color: Colors.white),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'SmartMeal',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF22C55E),
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Ăn uống lành mạnh mỗi ngày',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF64748B),
-              ),
-            ),
-            const SizedBox(height: 32),
-            const CircularProgressIndicator(
-              color: Color(0xFF22C55E),
-              strokeWidth: 3,
-            ),
-          ],
-        ),
+      child: MaterialApp.router(
+        title: 'SmartMeal',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        routerConfig: _router,
       ),
     );
   }

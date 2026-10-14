@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_meal/core/network/api_exceptions.dart';
+import 'package:smart_meal/core/storage/secure_storage.dart';
 import '../../domain/health_profile_model.dart';
 import '../../domain/profile_repository.dart';
 
@@ -9,14 +12,29 @@ class HealthProfileProvider extends ChangeNotifier {
 
   HealthProfile? _profile;
   bool _loading = true;
+  bool _submitting = false;
   bool _surveyCompleted = false;
 
   HealthProfile? get profile => _profile;
   bool get loading => _loading;
+  bool get submitting => _submitting;
   bool get surveyCompleted => _surveyCompleted;
 
   HealthProfileProvider() {
     _loadProfile();
+  }
+
+  Future<void> loadProfile() async {
+    _loading = true;
+    notifyListeners();
+    await _loadProfile();
+  }
+
+  Future<void> clearProfile() async {
+    _profile = null;
+    _surveyCompleted = false;
+    await _clearLocal();
+    notifyListeners();
   }
 
   Future<void> _loadProfile() async {
@@ -26,22 +44,38 @@ class HealthProfileProvider extends ChangeNotifier {
       final completed = prefs.getBool('healthSurveyCompleted') ?? false;
 
       if (localData != null) {
-        _profile = HealthProfile.fromJson(jsonDecode(localData));
+        try {
+          _profile = HealthProfile.fromJson(jsonDecode(localData));
+        } catch (e) {
+          debugPrint('Error parsing cached health profile: $e');
+        }
       }
       _surveyCompleted = completed;
       
       // Fetch latest from remote if logged in
-      final fetched = await _repository.getHealthProfile();
-      if (fetched != null) {
-        _profile = fetched;
-        _surveyCompleted = true;
-        await _saveLocal(fetched, true);
+      final token = await SecureStorage.getToken();
+      if (token != null && token.isNotEmpty) {
+        final fetched = await _repository.getHealthProfile();
+        if (fetched != null) {
+          _profile = fetched;
+          _surveyCompleted = true;
+          await _saveLocal(fetched, true);
+        }
       }
     } catch (e) {
       debugPrint('Error loading health profile: $e');
-      // If error (e.g. 404 because not created), survey is not completed
-      _surveyCompleted = false;
-      await _clearLocal();
+      final is401 = e is UnauthorizedException ||
+          (e is DioException &&
+              (e.error is UnauthorizedException || e.response?.statusCode == 401));
+      final is404 = e is NotFoundException ||
+          (e is DioException &&
+              (e.error is NotFoundException || e.response?.statusCode == 404));
+      if (is401 || is404) {
+        _profile = null;
+        _surveyCompleted = false;
+        await _clearLocal();
+      }
+      // For network errors, safely keep local profile & completed status
     } finally {
       _loading = false;
       notifyListeners();
@@ -61,7 +95,7 @@ class HealthProfileProvider extends ChangeNotifier {
   }
 
   Future<bool> submitSurvey(Map<String, dynamic> data) async {
-    _loading = true;
+    _submitting = true;
     notifyListeners();
     try {
       final profile = await _repository.submitHealthSurvey(data);
@@ -69,32 +103,36 @@ class HealthProfileProvider extends ChangeNotifier {
         _profile = profile;
         _surveyCompleted = true;
         await _saveLocal(profile, true);
+        notifyListeners();
         return true;
       }
       return false;
     } catch (e) {
+      debugPrint('Error submitting survey: $e');
       rethrow;
     } finally {
-      _loading = false;
+      _submitting = false;
       notifyListeners();
     }
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
-    _loading = true;
+    _submitting = true;
     notifyListeners();
     try {
       final profile = await _repository.updateHealthProfile(data);
       if (profile != null) {
         _profile = profile;
         await _saveLocal(profile, true);
+        notifyListeners();
         return true;
       }
       return false;
     } catch (e) {
+      debugPrint('Error updating health profile: $e');
       rethrow;
     } finally {
-      _loading = false;
+      _submitting = false;
       notifyListeners();
     }
   }

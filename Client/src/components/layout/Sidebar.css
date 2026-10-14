@@ -195,51 +195,99 @@
 /* Stats mini cards */
 .sidebar-stats-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
 }
 
 .sidebar-stat-card {
   flex: 1;
-  background: #f8fbf7;
-  border: 1px solid rgba(108, 203, 99, 0.2);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  padding: 10px 8px;
+  padding: 12px 8px 10px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 button.sidebar-stat-card {
   font: inherit;
+  border: 1px solid #e2e8f0;
 }
 
 .sidebar-stat-card-clickable {
   cursor: pointer;
 }
 
-.sidebar-stat-card:hover {
-  background: linear-gradient(135deg, #f0faf0, #e8f7e8);
-  border-color: rgba(108, 203, 99, 0.4);
-  transform: translateY(-1px);
+/* Card 1: Streak (Ngày liên tiếp) - Cam năng lượng */
+.sidebar-stat-card.stat-streak {
+  background: linear-gradient(145deg, #fffaf5 0%, #fff7ed 100%);
+  border-color: rgba(249, 115, 22, 0.25);
 }
 
-.sidebar-stat-card .stat-icon {
-  font-size: 16px;
-  margin-bottom: 2px;
+.sidebar-stat-card.stat-streak .stat-icon {
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3px;
+  filter: drop-shadow(0 2px 4px rgba(234, 88, 12, 0.2));
+}
+
+.sidebar-stat-card.stat-streak .stat-value {
+  color: #ea580c;
+}
+
+.sidebar-stat-card.stat-streak:hover {
+  background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+  border-color: rgba(234, 88, 12, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.18);
+}
+
+/* Card 2: Favorites (Bộ sưu tập) - Hồng đỏ rực rỡ */
+.sidebar-stat-card.stat-favorites {
+  background: linear-gradient(145deg, #fff5f7 0%, #ffe4e6 100%);
+  border-color: rgba(244, 63, 94, 0.25);
+}
+
+.sidebar-stat-card.stat-favorites .stat-icon {
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3px;
+  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.2));
+}
+
+.sidebar-stat-card.stat-favorites .stat-value {
+  color: #e11d48;
+}
+
+.sidebar-stat-card.stat-favorites:hover {
+  background: linear-gradient(145deg, #ffe4e6 0%, #fecdd3 100%);
+  border-color: rgba(225, 29, 72, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.18);
 }
 
 .sidebar-stat-card .stat-value {
-  font-size: 17px;
+  font-size: 22px;
   font-weight: 800;
-  color: #1a2e1a;
   line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 1px 0;
 }
 
 .sidebar-stat-card .stat-label {
-  font-size: 10px;
-  color: #6b7280;
-  font-weight: 500;
-  margin-top: 1px;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
 /* ── Navigation ── */

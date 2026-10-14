@@ -108,8 +108,13 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     return Container(
       height: 250,
       color: Colors.grey[200],
-      child: _recipe!.imageUrl != null
-          ? Image.network(_recipe!.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.fastfood, size: 64, color: Colors.grey))
+      child: (_recipe!.imageUrl != null && _recipe!.imageUrl!.isNotEmpty)
+          ? Image.network(
+              _recipe!.imageUrl!,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, _) => const Icon(Icons.fastfood, size: 64, color: Colors.grey),
+            )
           : const Icon(Icons.fastfood, size: 64, color: Colors.grey),
     );
   }
@@ -233,9 +238,13 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         children: [
           _buildNutriRow('Năng lượng', '${_recipe!.calories.round()} kcal', isTotal: true),
           const Divider(),
-          _buildNutriRow('Đạm', '${_recipe!.protein.round()} g'),
-          _buildNutriRow('Carbs', '${_recipe!.carbs.round()} g'),
-          _buildNutriRow('Chất béo', '${_recipe!.fat.round()} g'),
+          _buildNutriRow('Đạm', '${_recipe!.protein.toStringAsFixed(1)} g'),
+          _buildNutriRow('Carbs', '${_recipe!.carbs.toStringAsFixed(1)} g'),
+          _buildNutriRow('Chất béo', '${_recipe!.fat.toStringAsFixed(1)} g'),
+          _buildNutriRow('Chất xơ', '${_recipe!.fiber.toStringAsFixed(1)} g'),
+          _buildNutriRow('Đường', '${_recipe!.sugar.toStringAsFixed(1)} g'),
+          _buildNutriRow('Muối', '${_recipe!.sodium.toStringAsFixed(1)} g'),
+          _buildNutriRow('Cholesterol', '${_recipe!.cholesterol.round()} mg'),
         ],
       ),
     );

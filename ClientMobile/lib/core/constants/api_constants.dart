@@ -6,6 +6,10 @@ class ApiConstants {
 
   /// Web/Windows/iOS: host machine. Android real device / emulator: 5267
   static String get baseUrl {
+    // Cho phép truyền URL qua lệnh build (ví dụ: flutter build apk --dart-define=API_URL=https://api.ocgi.space/api)
+    const envUrl = String.fromEnvironment('API_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+
     if (kIsWeb) return 'http://localhost:5267/api';
     if (defaultTargetPlatform == TargetPlatform.android) {
       // TH1: Test trên điện thoại thật -> Đổi IP bên dưới thành IP Wi-Fi PC của bạn (gõ ipconfig)

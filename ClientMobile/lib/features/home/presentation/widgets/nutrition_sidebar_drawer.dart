@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
+import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
 import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
 
 /// Drawer bên phải hiển thị nhanh các chỉ số dinh dưỡng (Wireframe Page 4)
@@ -9,15 +10,23 @@ class NutritionSidebarDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.read<AuthProvider>();
     final nutritionProvider = context.watch<NutritionProvider>();
     final totals = nutritionProvider.todayTotals;
     final targets = nutritionProvider.dailyTargets;
+
+    if (auth.accountId != null && nutritionProvider.logs.isEmpty && !nutritionProvider.loading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        nutritionProvider.fetchLogs(auth.accountId!);
+        nutritionProvider.fetchGoals(auth.accountId!);
+      });
+    }
 
     final nutrients = [
       {
         'label': 'Đạm',
         'current': totals.protein,
-        'target': targets.protein > 0 ? targets.protein : 90.0,
+        'target': targets.protein > 0 ? targets.protein : 75.0,
         'unit': 'g',
         'color': const Color(0xFF3B82F6),
         'icon': Icons.fitness_center,
@@ -32,8 +41,8 @@ class NutritionSidebarDrawer extends StatelessWidget {
       },
       {
         'label': 'Muối',
-        'current': totals.sodium / 1000.0, // convert mg to g if needed
-        'target': targets.sodium > 0 ? (targets.sodium / 1000.0) : 5.0,
+        'current': totals.sodium > 50 ? (totals.sodium / 1000.0) : totals.sodium,
+        'target': targets.sodium > 50 ? (targets.sodium / 1000.0) : (targets.sodium > 0 ? targets.sodium : 5.0),
         'unit': 'g',
         'color': const Color(0xFF64748B),
         'icon': Icons.grain_outlined,
@@ -41,7 +50,7 @@ class NutritionSidebarDrawer extends StatelessWidget {
       {
         'label': 'Chất Béo',
         'current': totals.fat,
-        'target': targets.fat > 0 ? targets.fat : 60.0,
+        'target': targets.fat > 0 ? targets.fat : 65.0,
         'unit': 'g',
         'color': const Color(0xFFEF4444),
         'icon': Icons.opacity_outlined,

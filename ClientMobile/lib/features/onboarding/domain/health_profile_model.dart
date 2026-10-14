@@ -41,29 +41,30 @@ class HealthProfile {
 
   factory HealthProfile.fromJson(Map<String, dynamic> json) {
     return HealthProfile(
-      accountId: json['account_id']?.toString(),
+      accountId: json['account_id']?.toString() ?? json['accountId']?.toString(),
       height: (json['height'] as num?)?.toDouble(),
       weight: (json['weight'] as num?)?.toDouble(),
       targetWeight: (json['targetWeight'] as num?)?.toDouble(),
-      targetDays: json['targetDays'] as int?,
+      targetDays: (json['targetDays'] as num?)?.toInt(),
       goal: json['goal'] as String?,
       gender: json['gender'] as String?,
-      dateOfBirth: json['dateOfBirth'] != null ? DateTime.parse(json['dateOfBirth'].toString()) : null,
+      dateOfBirth: json['dateOfBirth'] != null ? DateTime.tryParse(json['dateOfBirth'].toString()) : null,
       activityLevel: json['activityLevel'] as String?,
       bmiLevel: json['bmiLevel'] as String?,
       conditions: (json['conditions'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
       allergies: (json['allergies'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      cookingTimeMinutes: json['cookingTimeMinutes'] as int?,
+      cookingTimeMinutes: (json['cookingTimeMinutes'] as num?)?.toInt(),
       budgetLevel: json['budgetLevel'] as String?,
-      mealsPerDay: json['mealsPerDay'] as int?,
+      mealsPerDay: (json['mealsPerDay'] as num?)?.toInt(),
       dietType: json['dietType'] as String?,
-      planCycleDays: json['planCycleDays'] as int?,
+      planCycleDays: (json['planCycleDays'] as num?)?.toInt(),
       dailyTargets: json['dailyTargets'] != null ? DailyTargets.fromJson(json['dailyTargets'] as Map<String, dynamic>) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'accountId': accountId,
       'height': height,
       'weight': weight,
       'targetWeight': targetWeight,
@@ -72,6 +73,7 @@ class HealthProfile {
       'gender': gender,
       'dateOfBirth': dateOfBirth?.toIso8601String(),
       'activityLevel': activityLevel,
+      'bmiLevel': bmiLevel,
       'conditions': conditions,
       'allergies': allergies,
       'cookingTimeMinutes': cookingTimeMinutes,
@@ -79,6 +81,17 @@ class HealthProfile {
       'mealsPerDay': mealsPerDay,
       'dietType': dietType,
       'planCycleDays': planCycleDays,
+      'dailyTargets': dailyTargets != null
+          ? {
+              'calories': dailyTargets!.calories,
+              'protein': dailyTargets!.protein,
+              'carbs': dailyTargets!.carbs,
+              'fat': dailyTargets!.fat,
+              'fiber': dailyTargets!.fiber,
+              'sugarLimit': dailyTargets!.sugarLimit,
+              'saltLimit': dailyTargets!.saltLimit,
+            }
+          : null,
     };
   }
 }

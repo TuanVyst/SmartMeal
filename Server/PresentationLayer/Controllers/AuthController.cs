@@ -1,5 +1,6 @@
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Entities;
+using BusinessObject.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
@@ -57,14 +58,47 @@ namespace PresentationLayer.Controllers
                 if (account == null)
                     return NotFound(new { success = false, message = "Account not found" });
 
+                var currentUserId = GetCurrentAccountId();
+
+                // Bảo vệ an toàn: Không cho phép vô hiệu hóa tài khoản Quản trị viên
+                if (request.IsActive.HasValue && !request.IsActive.Value)
+                {
+                    if (account.Role == RoleEnum.Admin)
+                    {
+                        return BadRequest(new { success = false, message = "Không thể vô hiệu hóa tài khoản Quản trị viên." });
+                    }
+                    if (currentUserId.HasValue && account.Account_id == currentUserId.Value)
+                    {
+                        return BadRequest(new { success = false, message = "Bạn không thể tự vô hiệu hóa tài khoản của chính mình." });
+                    }
+                }
+
+                // Cập nhật vai trò nếu được cung cấp
+                if (!string.IsNullOrWhiteSpace(request.Role))
+                {
+                    if (Enum.TryParse<RoleEnum>(request.Role, true, out var newRole))
+                    {
+                        // Bảo vệ: Quản trị viên không thể tự hạ quyền của chính mình
+                        if (currentUserId.HasValue && account.Account_id == currentUserId.Value && account.Role == RoleEnum.Admin && newRole != RoleEnum.Admin)
+                        {
+                            return BadRequest(new { success = false, message = "Bạn không thể tự hạ quyền Quản trị viên của chính mình." });
+                        }
+                        account.Role = newRole;
+                    }
+                }
+
                 if (request.IsActive.HasValue)
-                    account.IsActive = request.IsActive.Value;
-                if (!string.IsNullOrEmpty(request.Name))
-                    account.Name = request.Name;
-                if (!string.IsNullOrEmpty(request.Email))
-                    account.Email = request.Email;
-                if (!string.IsNullOrEmpty(request.Phone))
-                    account.Phone = request.Phone;
+                {
+                    // Tài khoản Admin luôn được giữ ở trạng thái Active
+                    account.IsActive = account.Role == RoleEnum.Admin ? true : request.IsActive.Value;
+                }
+
+                if (request.Name != null)
+                    account.Name = request.Name.Trim();
+                if (request.Email != null)
+                    account.Email = request.Email.Trim();
+                if (request.Phone != null)
+                    account.Phone = request.Phone.Trim();
 
                 var updated = await _service.UpdateAccount(account);
                 return Ok(new { success = true, data = updated });
@@ -173,6 +207,85 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Email không hợp lệ.", errors = ModelState });
+                }
+
+                await _service.ForgotPassword(request);
+                return Ok(new { success = true, message = "Mã xác thực OTP đã được gửi đến email của bạn." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ.", errors = ModelState });
+                }
+
+                await _service.ResetPassword(request);
+                return Ok(new { success = true, message = "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay bây giờ." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+        [HttpPut("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ.", errors = ModelState });
+                }
+
+                var accountId = GetAccountId();
+                await _service.ChangePassword(accountId, request);
+                return Ok(new { success = true, message = "Đổi mật khẩu thành công!" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
         [HttpPut("avatar")]
         [Authorize]
         public async Task<IActionResult> UpdateAvatar([FromForm] UpdateAvatarRequest request)
@@ -206,10 +319,18 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        private Guid? GetCurrentAccountId()
+        {
+            var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (claim != null && Guid.TryParse(claim.Value, out var id))
+                return id;
+            return null;
+        }
+
         private Guid GetAccountId()
         {
             var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            return Guid.Parse(claim.Value);
+            return Guid.Parse(claim!.Value);
         }
     }
 
@@ -219,6 +340,7 @@ namespace PresentationLayer.Controllers
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
+        public string? Role { get; set; }
     }
 
     public class UpdateAvatarRequest

@@ -36,21 +36,32 @@ class NutritionLog {
 
   factory NutritionLog.fromJson(Map<String, dynamic> json) {
     return NutritionLog(
-      id: json['nutrition_log_id']?.toString() ?? json['nutritionLogId']?.toString() ?? json['id']?.toString(),
-      accountId: json['account_id']?.toString() ?? json['accountId']?.toString(),
-      recipeId: json['recipe_id']?.toString() ?? json['recipeId']?.toString(),
-      ingredientId: json['ingredient_id']?.toString() ?? json['ingredientId']?.toString(),
-      logDate: _parseDate(json['logDate'] ?? json['log_date']),
-      mealType: json['mealType'] as String? ?? json['meal_type'] as String?,
-      quantity: _toDouble(json['quantity']),
-      totalCalories: _toDouble(json['totalCalories']),
-      totalProtein: _toDouble(json['totalProtein']),
-      totalCarbs: _toDouble(json['totalCarbs']),
-      totalFat: _toDouble(json['totalFat']),
-      totalFiber: _toDouble(json['totalFiber']),
-      totalSugar: _toDouble(json['totalSugar']),
-      totalSalt: _toDouble(json['totalSalt'] ?? json['totalSodium']),
-      totalCholesterol: _toDouble(json['totalCholesterol']),
+      id: json['log_id']?.toString() ??
+          json['logId']?.toString() ??
+          json['Log_id']?.toString() ??
+          json['nutrition_log_id']?.toString() ??
+          json['nutritionLogId']?.toString() ??
+          json['id']?.toString(),
+      accountId: json['account_id']?.toString() ??
+          json['accountId']?.toString() ??
+          json['Account_id']?.toString(),
+      recipeId: json['recipe_id']?.toString() ??
+          json['recipeId']?.toString() ??
+          json['Recipe_id']?.toString(),
+      ingredientId: json['ingredient_id']?.toString() ??
+          json['ingredientId']?.toString() ??
+          json['Ingredient_id']?.toString(),
+      logDate: _parseDate(json['logDate'] ?? json['log_date'] ?? json['LogDate']),
+      mealType: (json['mealType'] ?? json['meal_type'] ?? json['MealType']) as String?,
+      quantity: _toDouble(json['quantity'] ?? json['Quantity']),
+      totalCalories: _toDouble(json['totalCalories'] ?? json['total_calories'] ?? json['TotalCalories']),
+      totalProtein: _toDouble(json['totalProtein'] ?? json['total_protein'] ?? json['TotalProtein']),
+      totalCarbs: _toDouble(json['totalCarbs'] ?? json['total_carbs'] ?? json['TotalCarbs']),
+      totalFat: _toDouble(json['totalFat'] ?? json['total_fat'] ?? json['TotalFat']),
+      totalFiber: _toDouble(json['totalFiber'] ?? json['total_fiber'] ?? json['TotalFiber']),
+      totalSugar: _toDouble(json['totalSugar'] ?? json['total_sugar'] ?? json['TotalSugar']),
+      totalSalt: _toDouble(json['totalSalt'] ?? json['total_salt'] ?? json['TotalSalt'] ?? json['totalSodium'] ?? json['total_sodium'] ?? json['TotalSodium']),
+      totalCholesterol: _toDouble(json['totalCholesterol'] ?? json['total_cholesterol'] ?? json['TotalCholesterol']),
     );
   }
 
@@ -75,7 +86,11 @@ class NutritionLog {
 
   static DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
-    if (value is String) return DateTime.tryParse(value);
+    if (value is DateTime) return value.toLocal();
+    if (value is String) {
+      final dt = DateTime.tryParse(value);
+      return dt?.toLocal();
+    }
     return null;
   }
 

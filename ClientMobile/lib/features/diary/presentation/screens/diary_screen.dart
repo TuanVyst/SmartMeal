@@ -503,8 +503,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
       },
       {
         'name': 'Muối',
-        'current': '${(totals.sodium / 1000.0).toStringAsFixed(1)}g',
-        'target': '${(targets.sodium > 0 ? (targets.sodium / 1000.0) : 5.0).toStringAsFixed(1)}g',
+        'current': '${(totals.sodium > 50 ? (totals.sodium / 1000.0) : totals.sodium).toStringAsFixed(1)}g',
+        'target': '${(targets.sodium > 50 ? (targets.sodium / 1000.0) : (targets.sodium > 0 ? targets.sodium : 5.0)).toStringAsFixed(1)}g',
         'color': const Color(0xFF64748B),
       },
       {

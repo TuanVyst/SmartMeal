@@ -137,6 +137,37 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpPost("suggest-for-date-range")]
+        public async Task<IActionResult> SuggestForDateRange(
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate,
+            [FromQuery] string meals = null,
+            [FromQuery] string focus = null)
+        {
+            try
+            {
+                var accountId = GetAccountId();
+                var mealList = !string.IsNullOrEmpty(meals)
+                    ? meals.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                    : null;
+                var plan = await _mealPlanningService.SuggestForDateRangeAsync(accountId, startDate, endDate, mealList, focus);
+                return Ok(new { data = plan });
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+            {
+                var entry = ex.Entries.FirstOrDefault();
+                string entityName = entry?.Entity?.GetType().Name ?? "Unknown";
+                string state = entry?.State.ToString() ?? "Unknown";
+                string details = $"Concurrency Exception on {entityName} (State: {state}). Message: {ex.Message}";
+                Console.WriteLine($"[DB ERROR] {details}");
+                return BadRequest(new { message = details });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         public class SwapRecipeDto
         {
             public Guid EntryId { get; set; }

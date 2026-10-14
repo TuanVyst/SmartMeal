@@ -635,6 +635,11 @@ public static class DbInitializer
                         ) THEN
                             ALTER TABLE ""UserSessionLog"" ADD COLUMN ""FirstRecipe_id"" uuid NULL;
                         END IF;
+                        -- Sanitize historical records where recipe select time exceeded session duration
+                        UPDATE ""UserSessionLog""
+                        SET ""TimeToFirstRecipeSelectSeconds"" = ""DurationSeconds""
+                        WHERE ""TimeToFirstRecipeSelectSeconds"" IS NOT NULL
+                          AND ""TimeToFirstRecipeSelectSeconds"" > ""DurationSeconds"";
                     END IF;
                 END $$;");
         }

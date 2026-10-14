@@ -37,6 +37,7 @@ erDiagram
     Account ||--o{ SavedRecipe : "saves"
     Account ||--o{ MealPlan : "generates"
     Account ||--o{ UserSessionLog : "activity"
+    Account ||--o{ Feedback : "submits"
 
     Plan ||--o{ Subscription : "tier for"
 
@@ -415,6 +416,30 @@ Monetization partnerships linking ingredients to purchasable merchant products.
 
 ---
 
+### 3.6 User Feedback & Support
+
+#### `Feedback`
+Stores user feedback, bug reports, feature suggestions, ratings, screenshot attachments, and administrator responses.
+
+| Column | Type | Nullable | Description |
+|---|---|---|---|
+| `Feedback_id` | `uuid` | NO | Primary Key |
+| `Account_id` | `uuid` | NO | FK to `Account.Account_id` (Submitter, CASCADE) |
+| `ContactEmail` | `character varying(150)` | YES | User contact email for receiving replies |
+| `Category` | `integer` | NO | Category enum (`0`: Bug, `1`: Suggestion, `2`: Nutrition, `3`: Billing, `4`: Other) |
+| `Title` | `character varying(200)` | NO | Short summary/title |
+| `Content` | `text` | NO | Detailed feedback description |
+| `Rating` | `integer` | YES | User rating from 1 to 5 stars |
+| `AttachmentUrl` | `character varying(1000)` | YES | Screenshot or illustrative image asset link (Cloudinary) |
+| `Status` | `integer` | NO | Status enum (`0`: Pending, `1`: Replied, `2`: Closed) |
+| `AdminReply` | `text` | YES | Response text from administrator |
+| `RepliedBy` | `uuid` | YES | FK to `Account.Account_id` (Admin responder, SET NULL) |
+| `RepliedAt` | `timestamp with time zone` | YES | Timestamp when admin replied |
+| `CreatedAt` | `timestamp with time zone` | NO | Timestamp created |
+| `IsDeleted` | `boolean` | NO | Soft deletion flag |
+
+---
+
 ## 4. EF Core Migration History
 
 Migrations are tracked in `__EFMigrationsHistory` and executed during runtime initialization or via CI/CD:
@@ -458,4 +483,7 @@ Migrations are tracked in `__EFMigrationsHistory` and executed during runtime in
 │
 20261009165129_AddRecipeSelectTrackingToUserSessionLog
 └── Adds FirstRecipe_id, FirstRecipeSelectTime, and TimeToFirstRecipeSelectSeconds
+│
+20261012160418_AddFeedbackEntity
+└── Adds Feedback table for user suggestions, bug reports, ratings, attachments, and admin replies
 ```

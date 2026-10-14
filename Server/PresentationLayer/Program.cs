@@ -172,6 +172,10 @@ builder.Services.AddScoped<Service.Interfaces.IPaymentService, Service.Implement
 // Statistic
 builder.Services.AddScoped<Service.Interfaces.IStatisticService, Service.Implements.StatisticService>();
 
+
+// Feedback
+builder.Services.AddScoped<Repository.Interfaces.IFeedbackRepo, Repository.Implements.FeedbackRepo>();
+builder.Services.AddScoped<Service.Interfaces.IFeedbackService, Service.Implements.FeedbackService>();
 // Background Services
 builder.Services.AddHostedService<SubscriptionExpiryBackgroundService>();
 
@@ -218,11 +222,22 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy
-            .WithOrigins(allowedOrigins)
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+        if (builder.Environment.IsDevelopment())
+        {
+            policy
+                .SetIsOriginAllowed(_ => true)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
+        else
+        {
+            policy
+                .WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        }
     });
 });
 

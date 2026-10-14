@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
+import FeedbackWidget from '../components/common/FeedbackWidget';
 import './MainLayout.css';
 
 export default function MainLayout() {
@@ -12,6 +13,7 @@ export default function MainLayout() {
         <main className="main-page-content">
           <Outlet />
         </main>
+        <FeedbackWidget />
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import '../../../../core/ui/smart_button.dart';
 import '../../../../core/ui/smart_text_field.dart';
 import '../../../../core/ui/smart_dialog.dart';
 import '../providers/auth_provider.dart';
+import 'package:smart_meal/features/onboarding/presentation/providers/health_profile_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -50,7 +51,14 @@ class _LoginScreenState extends State<LoginScreen> {
           message: result.message ?? 'Vui lòng kiểm tra email để nhận mã OTP'
         );
       } else {
-        context.go('/main');
+        final healthProvider = context.read<HealthProfileProvider>();
+        await healthProvider.loadProfile();
+        if (!mounted) return;
+        if (healthProvider.surveyCompleted) {
+          context.go('/main');
+        } else {
+          context.go('/onboarding');
+        }
       }
     } catch (e) {
       SmartDialog.showAlert(
@@ -71,7 +79,14 @@ class _LoginScreenState extends State<LoginScreen> {
       await authProvider.googleLogin();
 
       if (!mounted) return;
-      context.go('/main');
+      final healthProvider = context.read<HealthProfileProvider>();
+      await healthProvider.loadProfile();
+      if (!mounted) return;
+      if (healthProvider.surveyCompleted) {
+        context.go('/main');
+      } else {
+        context.go('/onboarding');
+      }
     } catch (e) {
       if (mounted) {
         SmartDialog.showAlert(

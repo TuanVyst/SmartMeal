@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -12,6 +13,8 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [otpStep, setOtpStep] = useState(false);
   const [otpCode, setOtpCode] = useState('');
@@ -132,7 +135,7 @@ export default function Register() {
         <form onSubmit={handleSubmit}>
           <div className="register-row">
             <div className="form-group">
-              <label>Họ và tên</label>
+              <label>Họ và tên <span className="req">*</span></label>
               <input
                 type="text"
                 name="name"
@@ -143,7 +146,7 @@ export default function Register() {
               />
             </div>
             <div className="form-group">
-              <label>Tên đăng nhập</label>
+              <label>Tên đăng nhập <span className="req">*</span></label>
               <input
                 type="text"
                 name="username"
@@ -157,7 +160,7 @@ export default function Register() {
           </div>
           <div className="register-row">
             <div className="form-group">
-              <label>Email</label>
+              <label>Email <span className="req">*</span></label>
               <input
                 type="email"
                 name="email"
@@ -190,27 +193,49 @@ export default function Register() {
           </div>
           <div className="register-row">
             <div className="form-group">
-              <label>Mật khẩu</label>
-              <input
-                type="password"
-                name="password"
-                placeholder="Tối thiểu 6 ký tự"
-                value={form.password}
-                onChange={handleChange}
-                required
-                minLength={6}
-              />
+              <label>Mật khẩu <span className="req">*</span></label>
+              <div className="password-input-wrap">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder="Tối thiểu 6 ký tự"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </div>
             <div className="form-group">
-              <label>Xác nhận mật khẩu</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Nhập lại mật khẩu"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                required
-              />
+              <label>Xác nhận mật khẩu <span className="req">*</span></label>
+              <div className="password-input-wrap">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  placeholder="Nhập lại mật khẩu"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
           {error && <p className="auth-error">{error}</p>}

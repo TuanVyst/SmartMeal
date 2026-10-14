@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/network/api_exceptions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/ui/smart_button.dart';
@@ -8,6 +10,7 @@ import '../../../../core/ui/smart_text_field.dart';
 import '../../../../core/ui/smart_dialog.dart';
 import '../../../../core/ui/smart_card.dart';
 import '../providers/health_profile_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
@@ -62,13 +65,19 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   String? _validateStep() {
     if (_step == 1) {
-      if (_heightCtrl.text.isEmpty || _weightCtrl.text.isEmpty || _ageCtrl.text.isEmpty) {
-        return 'Vui lòng điền đầy đủ thông tin';
+      final h = double.tryParse(_heightCtrl.text);
+      final w = double.tryParse(_weightCtrl.text);
+      final a = int.tryParse(_ageCtrl.text);
+      if (h == null || h <= 0 || w == null || w <= 0 || a == null || a <= 0) {
+        return 'Vui lòng điền thông tin hợp lệ (chiều cao, cân nặng, tuổi)';
       }
     } else if (_step == 2) {
       if (_goal.isEmpty) return 'Vui lòng chọn mục tiêu';
-      if ((_goal == 'lose' || _goal == 'gain') && _targetWeightCtrl.text.isEmpty) {
-        return 'Vui lòng nhập cân nặng mục tiêu hợp lệ';
+      if (_goal == 'lose' || _goal == 'gain') {
+        final tw = double.tryParse(_targetWeightCtrl.text);
+        if (tw == null || tw <= 0) {
+          return 'Vui lòng nhập cân nặng mục tiêu hợp lệ';
+        }
       }
     } else if (_step == 3) {
       if (_activityLevel.isEmpty) return 'Vui lòng chọn mức độ vận động';
@@ -119,7 +128,15 @@ class _SurveyScreenState extends State<SurveyScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      SmartDialog.showAlert(context: context, title: 'Lỗi', message: e.toString());
+      String errorMsg = e.toString();
+      if (e is DioException) {
+        if (e.error is AppException) {
+          errorMsg = (e.error as AppException).message;
+        } else if (e.message != null && e.message!.isNotEmpty) {
+          errorMsg = e.message!;
+        }
+      }
+      SmartDialog.showAlert(context: context, title: 'Lỗi', message: errorMsg);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -132,6 +149,18 @@ class _SurveyScreenState extends State<SurveyScreen> {
         title: Text('Bước $_step/5'),
         leading: _step > 1 ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: _prevStep) : null,
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Đăng xuất',
+            onPressed: () async {
+              final auth = context.read<AuthProvider>();
+              final health = context.read<HealthProfileProvider>();
+              await auth.logout();
+              await health.clearProfile();
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
