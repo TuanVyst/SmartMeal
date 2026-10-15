@@ -201,6 +201,7 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        
         [HttpGet("suggest/pantry/{accountId}")]
         public async Task<IActionResult> SuggestRecipesBasedOnPantry(Guid accountId)
         {
@@ -215,5 +216,45 @@ namespace PresentationLayer.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpPost("suggest/detected-ingredients")]
+        public async Task<IActionResult> SuggestByDetectedIngredients(
+            [FromBody] DetectedIngredientRequest request)
+        {
+            try
+            {
+                if (request?.Ingredients == null || !request.Ingredients.Any())
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Ingredient list cannot be empty"
+                    });
+                }
+
+                var suggestions =
+                    await _recipeService.SuggestRecipesByDetectedIngredients(
+                        request.Ingredients);
+
+                return Ok(new
+                {
+                    success = true,
+                    data = suggestions
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error suggesting recipes based on detected ingredients");
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }
+
