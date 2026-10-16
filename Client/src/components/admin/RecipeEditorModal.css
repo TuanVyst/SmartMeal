@@ -196,7 +196,19 @@
   gap: 16px;
 }
 
-/* Tags Selection Chips */
+/* Tags Selection Chips - Grouped */
+.tag-chips-grouped {
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .tag-chips-container {
   display: flex;
   flex-wrap: wrap;
@@ -207,6 +219,28 @@
   border-radius: 10px;
   max-height: 140px;
   overflow-y: auto;
+}
+
+.tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tag-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tag-group-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .tag-chip-item {
