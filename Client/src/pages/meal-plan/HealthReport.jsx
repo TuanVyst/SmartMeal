@@ -203,11 +203,11 @@ const HealthReport = () => {
       localStorage.setItem(hasSeenReportKey, 'true');
     }
     sessionStorage.removeItem('allowHealthReportOnce');
-    navigate('/home', { replace: true });
+    navigate('/', { replace: true });
   };
 
   if (!isAllowedToView) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (loading) {

@@ -109,7 +109,7 @@ export default function Sidebar() {
   const accountId = user?.accountId || user?.account_id;
 
   const navItems = [
-    { to: '/home',                  icon: <FiHome size={20} />,      label: 'Khám phá',                    end: false },
+    { to: '/',                      icon: <FiHome size={20} />,      label: 'Khám phá',                    end: true },
     { to: '/journal',               icon: <FiClipboard size={20} />, label: 'Nhật ký',                     end: false },
     { to: '/favorites',             icon: <FiHeart size={20} />,     label: 'Bộ sưu tập',                  end: false },
     { to: '/ingredient-detection',  icon: <FiCamera size={20} />,    label: 'Nhận diện nguyên liệu',       desktopOnly: true },

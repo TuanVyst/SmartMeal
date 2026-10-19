@@ -55,13 +55,13 @@ const MealPlanPage = () => {
         if (response.data.data) {
           setPlan(response.data.data);
         } else {
-          navigate('/home?tab=plan', { replace: true });
+          navigate('/?tab=plan', { replace: true });
         }
       } catch (error) {
         console.error('Error:', error);
         // If no active plan, redirect to get one
         if (error?.status === 404 || !plan) {
-          navigate('/home?tab=plan', { replace: true });
+          navigate('/?tab=plan', { replace: true });
         } else {
           toast.error('Không thể tải dữ liệu thực đơn.');
         }
