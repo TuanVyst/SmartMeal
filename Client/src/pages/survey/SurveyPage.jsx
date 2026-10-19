@@ -7,7 +7,7 @@ export default function SurveyPage() {
   const { surveyCompleted, loading } = useHealthProfile();
 
   if (loading) return <div className="loading">Loading...</div>;
-  if (surveyCompleted) return <Navigate to="/home" replace />;
+  if (surveyCompleted) return <Navigate to="/" replace />;
 
   const handleComplete = () => {
     sessionStorage.setItem('allowHealthReportOnce', 'true');

@@ -183,7 +183,7 @@ export default function Profile() {
 
   return (
     <div className="profile-container">
-      <button className="btn-back" onClick={() => navigate('/home')}>
+      <button className="btn-back" onClick={() => navigate('/')}>
         &larr; Quay lại Bảng điều khiển
       </button>
 

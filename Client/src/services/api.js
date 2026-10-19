@@ -25,6 +25,13 @@ api.interceptors.response.use(
     }
     if (error.response) {
       const { status, data } = error.response;
+      if (status === 401 && !error.config?.url?.includes('/auth/login') && !error.config?.url?.includes('/auth/verify')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+          window.location.href = '/login';
+        }
+      }
       const message = data?.message || data?.title || `Server error (${status})`;
       return Promise.reject({ message, status, data, originalError: error });
     }
