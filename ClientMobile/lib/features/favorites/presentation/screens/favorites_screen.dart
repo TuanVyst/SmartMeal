@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/core/theme/app_spacing.dart';
 import 'package:smart_meal/core/ui/smart_card.dart';
+import 'package:smart_meal/core/utils/recipe_images.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
 import 'package:smart_meal/features/favorites/presentation/providers/favorite_provider.dart';
 
@@ -59,26 +61,34 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       itemCount: favorites.length,
       itemBuilder: (context, index) {
         final recipe = favorites[index];
+        final imgUrl = RecipeImages.resolve(recipe.recipeName, recipe.imageUrl);
+
         return GestureDetector(
-          onTap: () => Navigator.of(context).pushNamed('/recipe-detail/${recipe.recipeId}'),
+          onTap: () => context.push('/recipe-detail/${recipe.recipeId}'),
           child: SmartCard(
             margin: const EdgeInsets.only(bottom: AppSpacing.md),
             padding: EdgeInsets.zero,
             child: Row(
               children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+                ClipRRect(
+                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: imgUrl.isNotEmpty
+                        ? Image.network(
+                            imgUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => Container(
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.fastfood, color: Colors.grey),
+                            ),
+                          )
+                        : Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.fastfood, color: Colors.grey),
+                          ),
                   ),
-                  child: recipe.imageUrl != null
-                      ? ClipRRect(
-                          borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-                          child: Image.network(recipe.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.fastfood, color: Colors.grey)),
-                        )
-                      : const Icon(Icons.fastfood, color: Colors.grey),
                 ),
                 Expanded(
                   child: Padding(

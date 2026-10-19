@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// API constants for SmartMeal backend
 class ApiConstants {
@@ -10,13 +9,9 @@ class ApiConstants {
     const envUrl = String.fromEnvironment('API_URL');
     if (envUrl.isNotEmpty) return envUrl;
 
-    if (kIsWeb) return 'http://localhost:5267/api';
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      // TH1: Test trên điện thoại thật -> Đổi IP bên dưới thành IP Wi-Fi PC của bạn (gõ ipconfig)
-      // TH2: Test trên máy ảo Android Emulator -> Đổi thành 'http://10.0.2.2:5267/api'
-      return 'http://192.168.100.160:5267/api';
-    }
-    return 'http://localhost:5267/api';
+    // Mặc định kết nối Cloud API Production của SmartMeal (api.ocgi.space)
+    // Đảm bảo dữ liệu ảnh Cloudinary, công thức, thanh toán PayOS và tài khoản chạy mượt mà cả trên máy ảo, máy thật và APK xuất ra
+    return 'https://api.ocgi.space/api';
   }
 
 
@@ -31,6 +26,10 @@ class ApiConstants {
   static const String verifyRegisterOtp = '/auth/verify-register-otp';
   static const String googleLogin = '/auth/google-login';
   static const String updateAvatar = '/auth/avatar';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String resetPassword = '/auth/reset-password';
+  static const String changePassword = '/auth/change-password';
+  static const String feedback = '/Feedback';
 
   // ── Recipe endpoints ──
   static const String recipes = '/recipe';

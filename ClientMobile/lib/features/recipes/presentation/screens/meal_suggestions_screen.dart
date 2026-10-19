@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/core/theme/app_spacing.dart';
 import 'package:smart_meal/core/ui/smart_text_field.dart';
@@ -118,7 +119,7 @@ class _MealSuggestionsScreenState extends State<MealSuggestionsScreen> {
       itemBuilder: (context, index) {
         final recipe = recipes[index];
         return GestureDetector(
-          onTap: () => Navigator.of(context).pushNamed('/recipe-detail/${recipe.recipeId}'),
+          onTap: () => context.push('/recipe-detail/${recipe.recipeId}'),
           child: SmartCard(
             margin: const EdgeInsets.only(bottom: AppSpacing.md),
             padding: EdgeInsets.zero,

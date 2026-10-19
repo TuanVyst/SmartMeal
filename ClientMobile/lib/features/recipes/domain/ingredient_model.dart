@@ -26,7 +26,7 @@ class NutritionalValue {
     return NutritionalValue(
       calories: _toDouble(json['calories'] ?? json['Calories']),
       protein: _toDouble(json['protein'] ?? json['Protein']),
-      carbs: _toDouble(json['carbs'] ?? json['Carbs']),
+      carbs: _toDouble(json['carbs'] ?? json['Carbs'] ?? json['carbohydrates'] ?? json['Carbohydrates']),
       fat: _toDouble(json['fat'] ?? json['Fat']),
       fiber: _toDouble(json['fiber'] ?? json['Fiber']),
       sugar: _toDouble(json['sugar'] ?? json['Sugar']),
@@ -54,8 +54,18 @@ class IngredientTag {
 
   factory IngredientTag.fromJson(Map<String, dynamic> json) {
     return IngredientTag(
-      tagId: json['ingredient_tag_id']?.toString() ?? json['ingredientTagId']?.toString(),
-      tagName: json['tag_name'] as String? ?? json['tagName'] as String?,
+      tagId: json['ingredient_tag_id']?.toString() ??
+          json['ingredientTagId']?.toString() ??
+          json['label_id']?.toString() ??
+          json['labelId']?.toString() ??
+          json['id']?.toString() ??
+          json['tagId']?.toString(),
+      tagName: json['tag_name'] as String? ??
+          json['tagName'] as String? ??
+          json['labelName'] as String? ??
+          json['LabelName'] as String? ??
+          json['name'] as String? ??
+          json['Name'] as String?,
     );
   }
 }
@@ -78,15 +88,41 @@ class Ingredient {
     this.tags = const [],
   });
 
+  String get name => ingredientName ?? '';
+
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     final nvJson = json['nutritional_value'] ?? json['nutritionalValue'] ?? json['NutritionalValue'];
-    final tagsJson = json['ingredientTags'] ?? json['IngredientTags'] ?? [];
+    final tagsJson = json['ingredientTags'] ??
+        json['IngredientTags'] ??
+        json['ingredientLabels'] ??
+        json['IngredientLabels'] ??
+        json['tags'] ??
+        json['Tags'] ??
+        [];
+
+    final rawName = json['name'] ??
+        json['Name'] ??
+        json['ingredient_name'] ??
+        json['ingredientName'] ??
+        json['title'] ??
+        json['Title'];
+
+    final rawImage = json['imageUrl'] ??
+        json['image_url'] ??
+        json['ImageUrl'] ??
+        json['image'] ??
+        json['Image'];
 
     return Ingredient(
-      ingredientId: json['ingredient_id']?.toString() ?? json['ingredientId']?.toString(),
-      ingredientName: json['ingredient_name'] as String? ?? json['ingredientName'] as String?,
-      description: json['description'] as String?,
-      imageUrl: json['image_url'] as String? ?? json['imageUrl'] as String?,
+      ingredientId: json['ingredient_id']?.toString() ??
+          json['Ingredient_id']?.toString() ??
+          json['ingredientId']?.toString() ??
+          json['IngredientId']?.toString() ??
+          json['id']?.toString() ??
+          json['Id']?.toString(),
+      ingredientName: rawName?.toString(),
+      description: (json['description'] ?? json['Description']) as String?,
+      imageUrl: rawImage?.toString(),
       nutritionalValue: nvJson != null ? NutritionalValue.fromJson(nvJson as Map<String, dynamic>) : null,
       tags: (tagsJson as List).map((t) => IngredientTag.fromJson(t as Map<String, dynamic>)).toList(),
     );

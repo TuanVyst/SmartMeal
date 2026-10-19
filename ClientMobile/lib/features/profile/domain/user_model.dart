@@ -23,15 +23,19 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      accountId: json['accountId']?.toString() ?? json['account_id']?.toString(),
-      username: json['username'] as String?,
-      email: json['email'] as String?,
-      name: json['name'] as String?,
-      phone: json['phone'] as String?,
-      avatarUrl: json['avatarUrl'] as String? ?? json['avatar'] as String?,
-      role: json['role'] as String?,
-      token: json['token'] as String?,
-      address: json['address'] as String?,
+      accountId: json['accountId']?.toString() ??
+          json['account_id']?.toString() ??
+          json['Account_id']?.toString() ??
+          json['id']?.toString() ??
+          json['Id']?.toString(),
+      username: (json['username'] ?? json['Username']) as String?,
+      email: (json['email'] ?? json['Email']) as String?,
+      name: (json['name'] ?? json['Name']) as String?,
+      phone: (json['phone'] ?? json['Phone']) as String?,
+      avatarUrl: (json['avatarUrl'] ?? json['AvatarUrl'] ?? json['avatar'] ?? json['Avatar']) as String?,
+      role: (json['role'] ?? json['Role'])?.toString(),
+      token: (json['token'] ?? json['Token']) as String?,
+      address: (json['address'] ?? json['Address']) as String?,
     );
   }
 

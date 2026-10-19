@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/core/ui/smart_button.dart';
 import '../providers/meal_plan_provider.dart';
+import 'package:smart_meal/core/utils/recipe_images.dart';
 import '../widgets/swap_recipe_sheet.dart';
 
 class MealPlanPreviewScreen extends StatefulWidget {
@@ -69,15 +70,45 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                                   ),
                                   const Divider(),
                                   ...(day['entries'] as List).map<Widget>((entry) {
+                                    final recipeName = entry['recipeName']?.toString() ?? '';
+                                    final rawImg = (entry['imageUrl'] ?? entry['recipeImage'] ?? entry['image'])?.toString();
+                                    final imgUrl = RecipeImages.resolve(recipeName, rawImg);
+
                                     return ListTile(
                                       contentPadding: EdgeInsets.zero,
-                                      title: Text(entry['recipeName'] ?? ''),
+                                      leading: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: SizedBox(
+                                          width: 46,
+                                          height: 46,
+                                          child: imgUrl.isNotEmpty
+                                              ? Image.network(
+                                                  imgUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, _, _) => Container(
+                                                    color: Colors.grey[200],
+                                                    child: const Icon(Icons.fastfood, size: 20, color: Colors.grey),
+                                                  ),
+                                                )
+                                              : Container(
+                                                  color: Colors.grey[200],
+                                                  child: const Icon(Icons.fastfood, size: 20, color: Colors.grey),
+                                                ),
+                                        ),
+                                      ),
+                                      title: Text(recipeName, style: const TextStyle(fontWeight: FontWeight.w600)),
                                       subtitle: Text('${entry['mealSlot']} • ${entry['slotCalories']} kcal'),
                                       trailing: IconButton(
                                         icon: const Icon(Icons.swap_horiz, color: Colors.blue),
                                         onPressed: () {
-                                          if (entry['entryId'] != null) {
-                                            SwapRecipeSheet.show(context, entry['entryId']);
+                                          final entryId = (entry['entryId'] ??
+                                                  entry['entry_id'] ??
+                                                  entry['Entry_id'] ??
+                                                  entry['id'] ??
+                                                  entry['Id'])
+                                              ?.toString();
+                                          if (entryId != null) {
+                                            SwapRecipeSheet.show(context, entryId);
                                           }
                                         },
                                       ),

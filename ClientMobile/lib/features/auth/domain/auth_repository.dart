@@ -51,4 +51,36 @@ class AuthRepository {
     final data = await _remoteDataSource.googleLogin(idToken);
     return _mapToResult(data);
   }
+  Future<bool> forgotPassword(String email) async {
+    final data = await _remoteDataSource.forgotPassword(email);
+    return data['success'] == true;
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    final data = await _remoteDataSource.resetPassword(
+      email: email,
+      otp: otp,
+      newPassword: newPassword,
+      confirmNewPassword: confirmNewPassword,
+    );
+    return data['success'] == true;
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    final data = await _remoteDataSource.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmNewPassword: confirmNewPassword,
+    );
+    return data['success'] == true;
+  }
 }
