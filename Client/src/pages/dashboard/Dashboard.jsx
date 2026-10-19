@@ -21,7 +21,7 @@ const SPEED = 0.05;
 function mapRecipeToSuggestion(recipe, index) {
   const id = recipe.recipe_id || recipe.Recipe_id || recipe.id || `recipe-${index}`;
   const name = recipe.recipe_name || recipe.Recipe_name || recipe.title || 'Món ăn';
-  const imageUrl = resolveRecipeImageUrl(name);
+  const imageUrl = resolveRecipeImageUrl(name, recipe.imageUrl || recipe.ImageUrl);
   const servings = recipe.servings || recipe.Servings || 1;
   const recipeIngredients = recipe.recipeIngredients || recipe.RecipeIngredients || [];
 

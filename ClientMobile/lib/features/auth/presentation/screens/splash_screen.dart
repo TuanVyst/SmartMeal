@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!authProvider.isLoggedIn) {
       context.go('/login');
-    } else if (healthProvider.surveyCompleted) {
+    } else if (healthProvider.surveyCompleted || authProvider.user?.isAdmin == true) {
       context.go('/main');
     } else {
       context.go('/onboarding');

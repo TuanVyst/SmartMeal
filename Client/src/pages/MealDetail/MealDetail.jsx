@@ -95,7 +95,7 @@ export default function MealDetail() {
           const difficulty = difficultyMap[difficultyRaw.toLowerCase()] || difficultyRaw || "Dễ";
           const recipeIngredients = item.recipeIngredients || item.RecipeIngredients || [];
 
-          const imageUrl = resolveRecipeImageUrl(recipeName);
+          const imageUrl = resolveRecipeImageUrl(recipeName, item.imageUrl || item.ImageUrl);
 
           const steps = instruction
             ? instruction.split('\n')

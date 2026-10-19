@@ -91,6 +91,16 @@ export function HealthProfileProvider({ children }) {
       return;
     }
     const currentAccId = user.accountId || user.account_id;
+    const isAdmin = (user.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      setHealthProfile(null);
+      setSurveyCompleted(true);
+      computeDerivedState(null);
+      setProfileLoadedForUser(currentAccId);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     const fetchProfile = async () => {
@@ -161,6 +171,11 @@ export function HealthProfileProvider({ children }) {
   }, [user, computeDerivedState]);
 
   const completeSurvey = useCallback(async (profileData) => {
+    const isAdmin = (user?.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      return { success: false, message: 'Tài khoản quản trị viên không sử dụng khảo sát sức khỏe.' };
+    }
+
     const result = profileData
       ? await healthSurveyService.submitHealthSurvey(profileData)
       : { success: true };
@@ -179,6 +194,11 @@ export function HealthProfileProvider({ children }) {
   }, [computeDerivedState, user]);
 
   const updateProfile = useCallback(async (data) => {
+    const isAdmin = (user?.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      return { success: false, message: 'Tài khoản quản trị viên không sử dụng khảo sát sức khỏe.' };
+    }
+
     const result = await healthSurveyService.updateHealthProfile(data);
     if (result.success && result.profile) {
       setHealthProfile(result.profile);

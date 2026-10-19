@@ -29,7 +29,8 @@ GoRouter createAppRouter(AuthProvider authProvider, HealthProfileProvider health
       }
 
       final isLoggedIn = authProvider.isLoggedIn;
-      final isSurveyCompleted = healthProvider.surveyCompleted;
+      final isAdmin = authProvider.user?.isAdmin ?? false;
+      final isSurveyCompleted = healthProvider.surveyCompleted || isAdmin;
 
       final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
       final isGoingToSurvey = state.matchedLocation == '/onboarding';

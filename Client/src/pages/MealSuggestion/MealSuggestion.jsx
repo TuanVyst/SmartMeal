@@ -304,7 +304,7 @@ export default function MealSuggestion() {
     const recipeIngredients = rec.recipeIngredients || rec.RecipeIngredients || [];
 
     // --- Image ---
-    const imageUrl = resolveRecipeImageUrl(recipeName);
+    const imageUrl = resolveRecipeImageUrl(recipeName, rec.imageUrl || rec.ImageUrl);
 
     // --- Handle suggestFromPantry response (pre-computed matchPercentage, missingIngredients, allIngredients) ---
     const fromPantry = rec.matchPercentage !== undefined;

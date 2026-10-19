@@ -161,6 +161,9 @@ const HealthReport = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const isAdmin = (user?.role || '').toLowerCase() === 'admin';
+  if (isAdmin) return <Navigate to="/admin" replace />;
+
   const accountId = user?.accountId || user?.account_id;
   const hasSeenReportKey = accountId ? `hasSeenHealthReport_${accountId}` : null;
   const alreadySeen = hasSeenReportKey ? localStorage.getItem(hasSeenReportKey) === 'true' : false;

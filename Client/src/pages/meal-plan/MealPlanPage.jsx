@@ -173,7 +173,7 @@ const MealPlanPage = () => {
                       >
                         <div style={s.entryImage}>
                           <img 
-                            src={resolveRecipeImageUrl(entry.recipeName)} 
+                            src={resolveRecipeImageUrl(entry.recipeName, entry.recipeImage || entry.imageUrl)} 
                             alt={entry.recipeName}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop'; }}

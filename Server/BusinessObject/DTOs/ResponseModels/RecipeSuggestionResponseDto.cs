@@ -11,6 +11,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public int CookTime { get; set; }
         public int PrepTime { get; set; }
         public string Difficulty { get; set; }
+        public string? ImageUrl { get; set; }
         public double MatchPercentage { get; set; }
         public List<string> MissingIngredients { get; set; } = new List<string>();
         public List<IngredientStatusDto> AllIngredients { get; set; } = new List<IngredientStatusDto>();

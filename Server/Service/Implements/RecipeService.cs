@@ -104,6 +104,7 @@ namespace Service.Implements
                     Servings = request.Servings,
                     Difficulty = request.Difficulty,
                     IsPublic = request.IsPublic,
+                    ImageUrl = request.ImageUrl,
                     CreatedAt = DateTime.UtcNow,
                     IsDeleted = false
                 };
@@ -173,6 +174,7 @@ namespace Service.Implements
                 existingItem.Servings = request.Servings;
                 existingItem.Difficulty = request.Difficulty;
                 existingItem.IsPublic = request.IsPublic;
+                existingItem.ImageUrl = request.ImageUrl;
 
                 await _recipeRepo.UpdateRecipe(existingItem);
 
@@ -345,6 +347,7 @@ namespace Service.Implements
                         PrepTime = recipe.PrepTime,
                         Servings = recipe.Servings,
                         Difficulty = recipe.Difficulty,
+                        ImageUrl = recipe.ImageUrl,
                         TotalCalories = Math.Round(totalCal, 1),
                         CaloriesPerServing = Math.Round(calPerServing, 1),
                         TotalProtein = Math.Round(totalPro, 1),
@@ -471,6 +474,7 @@ namespace Service.Implements
                         CookTime = recipe.CookTime,
                         PrepTime = recipe.PrepTime,
                         Difficulty = recipe.Difficulty,
+                        ImageUrl = recipe.ImageUrl,
                         MatchPercentage = Math.Round(matchPercentage, 0),
                         MissingIngredients = missing,
                         AllIngredients = allIngDetails
@@ -607,6 +611,7 @@ namespace Service.Implements
                 Servings = entity.Servings,
                 Difficulty = entity.Difficulty,
                 IsPublic = entity.IsPublic,
+                ImageUrl = entity.ImageUrl,
                 CreatedAt = entity.CreatedAt,
                 IsDeleted = entity.IsDeleted,
 

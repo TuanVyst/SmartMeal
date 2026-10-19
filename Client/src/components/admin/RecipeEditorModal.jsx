@@ -5,6 +5,7 @@ import {
   FiGrid, FiFileText, FiClock, FiUsers, FiAward, FiArrowLeft
 } from 'react-icons/fi';
 import ImageUpload from '../common/ImageUpload';
+import { resolveRecipeImageUrl, FALLBACK_MEAL_IMAGE } from '../../utils/recipeImages';
 import './RecipeEditorModal.css';
 
 const COMMON_UOMS = [
@@ -124,9 +125,13 @@ export default function RecipeEditorModal({
         return tag ? (tag.id || tag.rt_Id) : null;
       }).filter(Boolean);
 
+      const existingImg = initialRecipe.imageUrl || initialRecipe.ImageUrl || '';
+      const fallbackImg = resolveRecipeImageUrl(initialRecipe.recipe_name);
+      const initialImg = existingImg || (fallbackImg && fallbackImg !== FALLBACK_MEAL_IMAGE ? fallbackImg : '');
+
       setFormData({
         recipe_name: initialRecipe.recipe_name || '',
-        imageUrl: initialRecipe.imageUrl || '',
+        imageUrl: initialImg,
         description: initialRecipe.description || '',
         cookTime: initialRecipe.cookTime || 0,
         prepTime: initialRecipe.prepTime || 0,
@@ -365,6 +370,7 @@ export default function RecipeEditorModal({
     const baseRecipeData = {
       ...formData,
       recipe_name: formData.recipe_name.trim(),
+      imageUrl: formData.imageUrl || '',
       description: formData.description.trim(),
       instruction: instructionSerialized,
       cookTime: parseInt(formData.cookTime) || 0,

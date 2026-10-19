@@ -46,6 +46,11 @@ namespace PresentationLayer.Controllers
             return Guid.Parse(claim.Value);
         }
 
+        private bool IsAdmin()
+        {
+            return User.IsInRole("Admin");
+        }
+
         // Frontend key -> search keyword used to match DB record name
         private static readonly Dictionary<string, string> ConditionKeywordMap = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -149,6 +154,11 @@ namespace PresentationLayer.Controllers
             try
             {
                 var accountId = GetAccountId();
+
+                if (IsAdmin())
+                {
+                    return BadRequest(new { success = false, message = "Tài khoản quản trị viên không sử dụng khảo sát sức khỏe." });
+                }
 
                 var profileRequest = new HealthProfileRequest
                 {
@@ -312,6 +322,11 @@ namespace PresentationLayer.Controllers
             try
             {
                 var accountId = GetAccountId();
+                if (IsAdmin())
+                {
+                    return Ok(new { success = false, isAdmin = true, message = "Tài khoản quản trị viên không có hồ sơ sức khỏe." });
+                }
+
                 var profile = await _healthProfileService.GetHealthProfileByAccountId(accountId);
                 if (profile == null)
                     return NotFound(new { success = false, message = "Chưa có hồ sơ sức khoẻ" });
@@ -386,6 +401,11 @@ namespace PresentationLayer.Controllers
             {
                 var accountId = GetAccountId();
                 var existing = await _healthProfileService.GetHealthProfileByAccountId(accountId);
+                if (IsAdmin())
+                {
+                    return BadRequest(new { success = false, message = "Tài khoản quản trị viên không sử dụng khảo sát sức khỏe." });
+                }
+
                 if (existing == null)
                     return NotFound(new { success = false, message = "Chưa có hồ sơ sức khoẻ" });
 
@@ -593,6 +613,11 @@ namespace PresentationLayer.Controllers
             {
                 var accountId = GetAccountId();
                 var logs = await _bmiLogService.GetBmiLogsByAccountId(accountId);
+                if (IsAdmin())
+                {
+                    return Ok(new { success = true, data = new List<object>() });
+                }
+
                 return Ok(new
                 {
                     success = true,

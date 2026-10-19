@@ -367,3 +367,4 @@ FodyWeavers.xsd
 .env.*.local
 /Server/PresentationLayer/appsettings.json
 /PresentationLayer/appsettings.json
+.omp/mcp.json

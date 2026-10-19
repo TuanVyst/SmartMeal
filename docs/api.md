@@ -68,6 +68,7 @@ Base URL: `https://api.ocgi.space`
 - `GET /api/Recipe`: Paginated recipe query with tag, label, and allergy filtering.
 - `GET /api/Recipe/{id}`: Detailed recipe instructions, ingredients, and nutrition facts.
 - `POST /api/Recipe`: Create recipe entry (Admin/Partner only).
+- `PUT /api/Recipe/{id}`: Update recipe metadata, instructions, tags, and cover `imageUrl`.
 - `GET /api/Ingredient`: List recognized ingredients and calorie estimates.
 
 ### Nutrition & Meal Plans (`/api/MealPlan`, `/api/NutritionDiary`)

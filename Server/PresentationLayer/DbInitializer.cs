@@ -18,7 +18,7 @@ public static class DbInitializer
     private record RecipeIngredientDto(string Name, int Quantity, string UOM);
     private record RecipeDto(string Recipe_name, string Description, string Instruction,
         int CookTime, int PrepTime, int Servings, string Difficulty, bool IsPublic,
-        string AccountUsername, List<RecipeIngredientDto> Ingredients, List<string> TagNames);
+        string AccountUsername, List<RecipeIngredientDto> Ingredients, List<string> TagNames, string? ImageUrl = null);
 
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
@@ -51,6 +51,8 @@ public static class DbInitializer
         await EnsureSaltColumnsAsync(context);
         // Ensure UserSessionLog columns exist
         await EnsureUserSessionLogColumnsAsync(context);
+        // Ensure Recipe columns exist
+        await EnsureRecipeColumnsAsync(context);
 
 
         // Seed subscription plans
@@ -383,7 +385,8 @@ public static class DbInitializer
                 Servings = dto.Servings,
                 Difficulty = dto.Difficulty,
                 IsPublic = dto.IsPublic,
-                CreatedAt = seedDate
+                CreatedAt = seedDate,
+                ImageUrl = dto.ImageUrl
             };
             context.Recipes.Add(recipe);
 
@@ -670,6 +673,35 @@ public static class DbInitializer
         catch (Exception ex)
         {
             Console.WriteLine($"[DbInitializer] Warning: Could not ensure UserSessionLog columns: {ex.Message}");
+        }
+    }
+
+    private static async Task EnsureRecipeColumnsAsync(AppDbContext context)
+    {
+        try
+        {
+            await context.Database.ExecuteSqlRawAsync(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_catalog.pg_class c
+                        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = 'public' AND c.relname = 'Recipe'
+                    ) THEN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_catalog.pg_attribute a
+                            JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+                            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                            WHERE n.nspname = 'public' AND c.relname = 'Recipe' AND a.attname = 'ImageUrl'
+                        ) THEN
+                            ALTER TABLE ""Recipe"" ADD COLUMN ""ImageUrl"" text NULL;
+                        END IF;
+                    END IF;
+                END $$;");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DbInitializer] Warning: Could not ensure Recipe columns: {ex.Message}");
         }
     }
 

@@ -571,7 +571,7 @@ namespace Service.Implements
                             Entry_id = e.Entry_id,
                             Recipe_id = e.Recipe_id,
                             RecipeName = e.Recipe?.Recipe_name ?? "Unknown",
-                            RecipeImage = e.Recipe?.Recipe_name, // client resolve this
+                            RecipeImage = !string.IsNullOrWhiteSpace(e.Recipe?.ImageUrl) ? e.Recipe.ImageUrl : e.Recipe?.Recipe_name,
                             MealSlot = e.MealSlot,
                             SlotCalories = Math.Round(e.SlotCalories),
                             SlotProtein = Math.Round(e.SlotProtein),
@@ -1104,7 +1104,7 @@ namespace Service.Implements
                         Entry_id = e.Entry_id,
                         Recipe_id = e.Recipe_id,
                         RecipeName = e.Recipe?.Recipe_name ?? "Unknown",
-                        RecipeImage = e.Recipe?.Recipe_name,
+                        RecipeImage = !string.IsNullOrWhiteSpace(e.Recipe?.ImageUrl) ? e.Recipe.ImageUrl : e.Recipe?.Recipe_name,
                         MealSlot = e.MealSlot,
                         SlotCalories = Math.Round(e.SlotCalories),
                         SlotProtein = Math.Round(e.SlotProtein),

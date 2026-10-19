@@ -1,19 +1,78 @@
 [
-  { "Name": "Bữa sáng", "Type": "meal" },
-  { "Name": "Bữa trưa", "Type": "meal" },
-  { "Name": "Bữa tối", "Type": "meal" },
-  { "Name": "Bữa phụ", "Type": "meal" },
-  { "Name": "Xào", "Type": "cook" },
-  { "Name": "Chiên", "Type": "cook" },
-  { "Name": "Nướng", "Type": "cook" },
-  { "Name": "Luộc / Hấp", "Type": "cook" },
-  { "Name": "Canh & Súp", "Type": "cook" },
-  { "Name": "Kho / Rim", "Type": "cook" },
-  { "Name": "Salad / Trộn", "Type": "cook" },
-  { "Name": "Hầm / Ninh", "Type": "cook" },
-  { "Name": "Làm bánh", "Type": "cook" },
-  { "Name": "Đồ uống", "Type": "cook" },
-  { "Name": "Tráng miệng", "Type": "cook" },
-  { "Name": "Chay", "Type": "diet" },
-  { "Name": "Cay", "Type": "taste" }
+  {
+    "Name": "Bữa sáng",
+    "Type": "meal"
+  },
+  {
+    "Name": "Bữa trưa",
+    "Type": "meal"
+  },
+  {
+    "Name": "Bữa tối",
+    "Type": "meal"
+  },
+  {
+    "Name": "Bữa phụ",
+    "Type": "meal"
+  },
+  {
+    "Name": "Xào",
+    "Type": "cook"
+  },
+  {
+    "Name": "Chiên",
+    "Type": "cook"
+  },
+  {
+    "Name": "Nướng",
+    "Type": "cook"
+  },
+  {
+    "Name": "Luộc / Hấp",
+    "Type": "cook"
+  },
+  {
+    "Name": "Canh & Súp",
+    "Type": "cook"
+  },
+  {
+    "Name": "Kho / Rim",
+    "Type": "cook"
+  },
+  {
+    "Name": "Salad / Trộn",
+    "Type": "cook"
+  },
+  {
+    "Name": "Hầm / Ninh",
+    "Type": "cook"
+  },
+  {
+    "Name": "Làm bánh",
+    "Type": "cook"
+  },
+  {
+    "Name": "Đồ uống",
+    "Type": "cook"
+  },
+  {
+    "Name": "Tráng miệng",
+    "Type": "cook"
+  },
+  {
+    "Name": "Chay",
+    "Type": "diet"
+  },
+  {
+    "Name": "Cay",
+    "Type": "taste"
+  },
+  {
+    "Name": "Ăn kèm",
+    "Type": "meal"
+  },
+  {
+    "Name": "Ăn vặt",
+    "Type": "meal"
+  }
 ]

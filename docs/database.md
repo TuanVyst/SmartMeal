@@ -255,6 +255,7 @@ Primary meal instructions and metadata.
 | `Servings` | `integer` | NO | Standard number of servings |
 | `Difficulty` | `character varying(20)` | NO | `Easy`, `Medium`, `Hard` |
 | `IsPublic` | `boolean` | NO | Visibility to public search |
+| `ImageUrl` | `text` | YES | Cloud asset link or custom image URL |
 | `CreatedAt` | `timestamp with time zone` | NO | Timestamp created |
 | `IsDeleted` | `boolean` | NO | Soft deletion flag |
 
@@ -486,4 +487,7 @@ Migrations are tracked in `__EFMigrationsHistory` and executed during runtime in
 │
 20261012160418_AddFeedbackEntity
 └── Adds Feedback table for user suggestions, bug reports, ratings, attachments, and admin replies
+│
+20261019120000_AddImageUrlToRecipe
+└── Adds nullable ImageUrl column to Recipe table for custom recipe cover images
 ```
