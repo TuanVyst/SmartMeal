@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
+import '../widgets/change_password_dialog.dart';
+import '../widgets/feedback_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -58,6 +61,79 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildInfoField('Địa chỉ', user?.address ?? ''),
           const SizedBox(height: 24),
+          // Nút truy cập Hồ sơ Sức khỏe
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              leading: CircleAvatar(
+                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
+                child: const Icon(Icons.monitor_heart, color: AppColors.primaryDark),
+              ),
+              title: const Text(
+                'Hồ sơ Sức khỏe & Dinh dưỡng',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+              subtitle: const Text(
+                'Chỉ số BMI, calo mục tiêu, bệnh lý & thực đơn',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              trailing: const Icon(Icons.chevron_right, color: AppColors.primaryDark),
+              onTap: () {
+                context.push('/health-profile');
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Đổi mật khẩu
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: AppColors.surfaceHover,
+                child: Icon(Icons.lock_outline, color: AppColors.textPrimary),
+              ),
+              title: const Text('Đổi mật khẩu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              subtitle: const Text('Cập nhật mật khẩu bảo mật tài khoản', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+              onTap: () => ChangePasswordDialog.show(context),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Góp ý & Báo lỗi
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: AppColors.surfaceHover,
+                child: Icon(Icons.feedback_outlined, color: AppColors.textPrimary),
+              ),
+              title: const Text('Góp ý & Báo lỗi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              subtitle: const Text('Gửi phản hồi cho đội ngũ phát triển', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+              onTap: () => FeedbackDialog.show(context),
+            ),
+          ),
+          const SizedBox(height: 20),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
@@ -71,20 +147,6 @@ class ProfileScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.logout),
             label: const Text('Đăng xuất'),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
-              foregroundColor: AppColors.primary,
-              elevation: 0,
-              minimumSize: const Size(double.infinity, 50),
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/health-stats');
-            },
-            icon: const Icon(Icons.monitor_heart),
-            label: const Text('Hồ sơ Sức khỏe & BMI'),
           ),
         ],
       ),

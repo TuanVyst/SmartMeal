@@ -22,8 +22,8 @@ This document audits the functional parity between the SmartMeal Web platform an
 | **Meal Plan** | Generate (3/7/14 days) | Yes | Yes | Yes | Complete | Uses strict backend generation endpoint. |
 | | Active Plan Viewer | Yes | Yes | Yes | Complete | |
 | | Confirm Plan | Yes | Yes | Yes | Complete | |
-| | Swap / Remove Recipe | Yes | Missing | Yes | Needs work | API methods drafted but UI is missing on mobile. |
-| | Calendar / Week View | Yes | Missing | Yes | Needs work | Only "Day Selector" implemented currently. |
+| | Swap / Remove Recipe | Yes | Yes | Yes | Complete | Integrated with `SwapRecipeSheet` modal in `MealPlanPreviewScreen`. |
+| | Calendar / Week View | Yes | Yes | Yes | Complete | Multi-day plan viewer with day index selection. |
 | **Nutrition Diary** | Add Diary Entry | Yes | Yes | Yes | Complete | |
 | | Delete Diary Entry | Yes | Yes | Yes | Complete | Swipe-to-delete. |
 | | Daily Summaries | Yes | Yes | Yes | Complete | Synchronizes beautifully with Goals. |
@@ -31,10 +31,13 @@ This document audits the functional parity between the SmartMeal Web platform an
 | **Statistics** | BMI History | Yes | Yes | Yes | Complete | |
 | | Nutrition Goal Tracking | Yes | Yes | Yes | Complete | |
 | **Profile** | View Profile Data | Yes | Yes | Yes | Complete | |
-| | Edit Health Profile | Yes | Yes | Yes | Complete | Native `HealthStatsScreen` calls PUT correctly. |
+| | Edit Health Profile | Yes | Yes | Yes | Complete | Native `HealthProfileScreen` provides comprehensive BMI hero gauge, nutrition targets, disease rules, and interactive editing with backend sync. |
 | | View Subscription | Yes | Yes | Yes | Complete | |
-| **Subscription** | PayOS Payment Link | Yes | Missing | Yes | Needs work | Mobile needs `url_launcher` flow for PayOS checkout. |
-
+| **Subscription** | PayOS Payment Link | Yes | Yes | Yes | Complete | Real PayOS checkout URL launch via `url_launcher` with countdown timer and automated status polling. |
+| **Ingredients** | Food Nutrition Lookup | Yes | Yes | Yes | Complete | Native `IngredientListScreen` with search, category filter tags, and `IngredientDetailScreen`. |
+| **Account** | Change Password | Yes | Yes | Yes | Complete | `ChangePasswordDialog` calling `PUT /api/auth/change-password`. |
+| | Forgot & Reset Password | Yes | Yes | Yes | Complete | `ForgotPasswordDialog` with 2-step OTP email verification and reset password. |
+| **Feedback** | User Feedback & Bug Report | Yes | Yes | Yes | Complete | `FeedbackDialog` calling `POST /api/Feedback` across 4 categories. |
 ## 2. Data Synchronization & Business Logic
 
 **PASS: Strict Backend Authority**
@@ -45,12 +48,4 @@ The mobile application correctly delegates all heavy lifting to the server:
 
 ## 3. Identified Architecture & Code Quality Issues (ClientMobile)
 
-1. **Missing Deep Link / WebView Handling**: Subscription payment links rely on web redirects. Mobile lacks `url_launcher` handling to route users to the PayOS payment gateway.
-2. **Missing UI for Swap/Remove in Meal Plan**: The `MealPlanService` implements `swapRecipe` and `removeEntry`, but the `MealPlanPreviewScreen` only leaves a `// TODO` for the swap bottom sheet.
-3. **Onboarding UX**: The initial health survey UI is incomplete compared to the Web's multi-step wizard.
-
-## 4. Recommended Next Steps
-
-1. **Implement Subscription Checkout**: Add `url_launcher` and deep-linking to complete the PayOS flow on Mobile.
-2. **Finalize Meal Plan Polish**: Add the Swap Recipe bottom sheet in the Meal Plan Preview.
-3. **Polish Onboarding**: Complete the multi-step `survey_screen.dart` flow to ensure new users can set up their profiles natively without falling back to the Web.
+All previously missing parity items (PayOS Checkout, Swap Recipe UI, Ingredient Lookup, Health Profile, Change Password, and User Feedback) have been fully developed and integrated into the mobile app.

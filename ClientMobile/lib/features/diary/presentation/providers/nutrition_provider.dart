@@ -23,6 +23,8 @@ class NutritionProvider extends ChangeNotifier {
   DailyTargets get dailyTargets => _dailyTargets;
   bool get loading => _loading;
   String? get error => _error;
+  Map<String, Recipe> get recipesMap => _recipesMap;
+  String? getRecipeName(String? recipeId) => recipeId != null ? _recipesMap[recipeId]?.recipeName : null;
 
   /// Today's date key (yyyy-MM-dd)
   String get todayKey => DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -172,7 +174,35 @@ class NutritionProvider extends ChangeNotifier {
   Future<void> addLog(Map<String, dynamic> data) async {
     try {
       final newLog = await _logService.create(data);
-      _logs.add(newLog);
+      final resolvedName = (newLog.recipeName != null && newLog.recipeName!.isNotEmpty)
+          ? newLog.recipeName
+          : (data['recipeName']?.toString() ??
+              data['recipe_name']?.toString() ??
+              (newLog.recipeId != null ? _recipesMap[newLog.recipeId]?.recipeName : null));
+
+      final logToStore = (resolvedName != null && resolvedName.isNotEmpty && (newLog.recipeName == null || newLog.recipeName!.isEmpty))
+          ? NutritionLog(
+              id: newLog.id,
+              accountId: newLog.accountId,
+              recipeId: newLog.recipeId,
+              ingredientId: newLog.ingredientId,
+              logDate: newLog.logDate,
+              mealType: newLog.mealType,
+              quantity: newLog.quantity,
+              totalCalories: newLog.totalCalories,
+              totalProtein: newLog.totalProtein,
+              totalCarbs: newLog.totalCarbs,
+              totalFat: newLog.totalFat,
+              totalFiber: newLog.totalFiber,
+              totalSugar: newLog.totalSugar,
+              totalSalt: newLog.totalSalt,
+              totalCholesterol: newLog.totalCholesterol,
+              recipeName: resolvedName,
+              unit: newLog.unit,
+            )
+          : newLog;
+
+      _logs.add(logToStore);
       notifyListeners();
     } catch (e) {
       debugPrint('Error adding log: $e');

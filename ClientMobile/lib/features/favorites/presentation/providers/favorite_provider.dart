@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_meal/features/recipes/domain/recipe_model.dart';
 import 'package:smart_meal/features/favorites/data/saved_recipe_service.dart';
+import 'package:smart_meal/features/recipes/data/recipe_service.dart';
 
 class FavoriteProvider extends ChangeNotifier {
   final SavedRecipeService _service = SavedRecipeService();
@@ -31,13 +32,31 @@ class FavoriteProvider extends ChangeNotifier {
       }
 
       final data = await _service.getAll();
-      _favorites = data.map((item) {
+      final recipeService = RecipeService();
+
+      final recipeFutures = data.map((item) async {
         final recipeData = item['recipe'] as Map<String, dynamic>?;
-        if (recipeData != null) {
+        if (recipeData != null && (recipeData['recipe_name'] != null || recipeData['recipeName'] != null)) {
           return Recipe.fromJson(recipeData);
         }
-        return Recipe.fromJson(item);
-      }).toList();
+
+        final recipeId = item['recipe_id']?.toString() ??
+            item['recipeId']?.toString() ??
+            item['Recipe_id']?.toString() ??
+            item['id']?.toString();
+
+        if (recipeId != null && recipeId.isNotEmpty) {
+          try {
+            return await recipeService.getById(recipeId);
+          } catch (e) {
+            debugPrint('Failed to load recipe detail for favorite $recipeId: $e');
+          }
+        }
+        return null;
+      });
+
+      final loaded = await Future.wait(recipeFutures);
+      _favorites = loaded.whereType<Recipe>().toList();
     } catch (e) {
       debugPrint('Error fetching favorites: $e');
     } finally {

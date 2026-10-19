@@ -23,9 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final GlobalKey _exploreSectionKey = GlobalKey();
   final TextEditingController _searchController = TextEditingController();
 
-  bool _isWeeklyPlanVisible = true;
-  int _selectedDayIndex = 0;
-  final List<String> _days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  int _activeAnchorIndex = 0;
 
   @override
   void initState() {
@@ -58,15 +56,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
   }
 
-  void _scrollToExplore() {
-    final context = _exploreSectionKey.currentContext;
-    if (context != null) {
+  void _scrollToSection(int index) {
+    setState(() => _activeAnchorIndex = index);
+    if (index == 0) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+      return;
+    }
+    final ctx = _exploreSectionKey.currentContext;
+    if (ctx != null) {
       Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 500),
+        ctx,
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  void _scrollToExplore() {
+    _scrollToSection(1);
+  }
+
+  Widget _buildAnchorNav() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          _buildAnchorItem(0, '🍽️', 'Gợi ý hôm nay'),
+          _buildAnchorItem(1, '🔍', 'Khám phá món ăn'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnchorItem(int index, String emoji, String label) {
+    final isSelected = _activeAnchorIndex == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _scrollToSection(index),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _openIngredientsFridgeSheet() {
@@ -98,15 +170,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. KẾ HOẠCH TUẦN
-          _buildWeeklyPlanSection(),
+          // ── Thanh điều hướng Section (chuẩn format Web DiscoverPage) ──
+          _buildAnchorNav(),
+
+          // 1. KẾ HOẠCH BỮA ĂN BANNER (Liên kết sang MealPlanScreen)
+          _buildMealPlanBanner(),
           const SizedBox(height: 20),
 
           // 2. GỢI Ý MÓN ĂN (Sáng, Trưa, Tối)
           _buildMealSuggestionsSection(recipeProvider),
-          const SizedBox(height: 26),
-
-          // 3. PHẦN TIẾP THEO (Chuyển tiếp xuống Khám phá món ăn)
+          const SizedBox(height: 24),
           Center(
             child: InkWell(
               onTap: _scrollToExplore,
@@ -156,158 +229,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // WIDGET KẾ HOẠCH TUẦN
-  Widget _buildWeeklyPlanSection() {
+  // BANNER LIÊN KẾT KẾ HOẠCH BỮA ĂN (Tránh trùng lặp với MealPlanScreen)
+  Widget _buildMealPlanBanner() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1E293B), Color(0xFF334155)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Text(
-                  'Kế hoạch tuần',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                      minimumSize: const Size(48, 30),
-                      side: const BorderSide(color: AppColors.border),
-                    ),
-                    onPressed: () => setState(() => _isWeeklyPlanVisible = !_isWeeklyPlanVisible),
-                    child: Text(
-                      _isWeeklyPlanVisible ? 'Ẩn' : 'Hiện',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                      minimumSize: const Size(84, 30),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () => context.push('/meal-plan/preview', extra: 7),
-                    child: const Text(
-                      'Tạo thực đơn',
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.calendar_month, color: AppColors.primaryLight, size: 28),
           ),
-          if (_isWeeklyPlanVisible) ...[
-            const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    minimumSize: const Size(54, 30),
-                    side: const BorderSide(color: AppColors.border),
-                  ),
-                  onPressed: () {},
-                  icon: const Icon(Icons.chevron_left, size: 14, color: AppColors.textSecondary),
-                  label: const Text('Trước', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Kế hoạch bữa ăn cá nhân hóa',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                 ),
-                const Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      'Tuần này (12/10 - 18/10)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.textPrimary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    minimumSize: const Size(54, 30),
-                    side: const BorderSide(color: AppColors.border),
-                  ),
-                  onPressed: () {},
-                  icon: const Icon(Icons.chevron_right, size: 14, color: AppColors.textSecondary),
-                  label: const Text('Sau', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                SizedBox(height: 2),
+                Text(
+                  'Thực đơn 3 - 7 - 14 ngày chuẩn khoa học',
+                  style: TextStyle(fontSize: 12, color: Colors.white70),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            Row(
-              children: List.generate(_days.length, (index) {
-                final isSelected = _selectedDayIndex == index;
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: index == 0 || index == _days.length - 1 ? 1 : 2),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: () => setState(() => _selectedDayIndex = index),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : AppColors.surfaceHover,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: isSelected ? AppColors.primary : Colors.transparent,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              _days[index],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: isSelected ? Colors.white : AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${12 + index}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isSelected ? Colors.white70 : AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-          ],
+            onPressed: () => context.push('/meal-plan'),
+            child: const Text('Xem ngay', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
         ],
       ),
     );
@@ -364,40 +342,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      mealMeta['title']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        height: 72,
-                        width: double.infinity,
-                        color: AppColors.surfaceHover,
-                        child: imageUrl.isNotEmpty
-                            ? Image.network(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const Icon(Icons.restaurant, color: Colors.grey, size: 28),
-                              )
-                            : const Icon(Icons.restaurant, color: Colors.grey, size: 28),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        if (recipe != null) {
+                          context.push('/recipe-detail/${recipe.recipeId}');
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          Text(
+                            mealMeta['title']!,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              height: 72,
+                              width: double.infinity,
+                              color: AppColors.surfaceHover,
+                              child: imageUrl.isNotEmpty
+                                  ? Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const Icon(Icons.restaurant, color: Colors.grey, size: 28),
+                                    )
+                                  : const Icon(Icons.restaurant, color: Colors.grey, size: 28),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            dishName,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            dishCalo,
+                            style: const TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dishName,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dishCalo,
-                      style: const TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -406,13 +395,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       ),
                       onPressed: () {
+                        final mealSlot = index == 0 ? 'breakfast' : (index == 1 ? 'lunch' : 'dinner');
                         if (recipe != null) {
-                          context.push('/recipe-detail/${recipe.recipeId}');
+                          _executeAddLog(recipe, mealSlot);
                         } else {
-                          context.push('/meal-plan/preview', extra: 7);
+                          _executeAddCustomLog(dishName, dishCalo, mealSlot);
                         }
                       },
-                      child: const Text('Tạo thực đơn', style: TextStyle(fontSize: 11, color: Colors.white)),
+                      child: const Text('+ Ghi nhật ký', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -562,7 +552,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ? Image.network(
                                       recipe.imageUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(Icons.fastfood, size: 36, color: Colors.grey),
+                                      errorBuilder: (_, _, _) => const Icon(Icons.fastfood, size: 36, color: Colors.grey),
                                     )
                                   : const Icon(Icons.fastfood, size: 36, color: Colors.grey),
                             ),
@@ -606,19 +596,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   isFav ? Icons.favorite : Icons.favorite_border,
                                   color: isFav ? Colors.redAccent : AppColors.textSecondary,
                                 ),
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(isFav ? 'Đã xóa khỏi yêu thích' : 'Đã thêm vào yêu thích')),
-                                  );
+                                onPressed: () async {
+                                  final accountId = context.read<AuthProvider>().accountId;
+                                  if (accountId != null) {
+                                    await favoriteProvider.toggleFavorite(recipe, accountId);
+                                    if (context.mounted) {
+                                      final nowFav = favoriteProvider.isFavorite(recipe.recipeId);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(nowFav ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích'),
+                                          backgroundColor: nowFav ? AppColors.success : null,
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Vui lòng đăng nhập để lưu món yêu thích!')),
+                                    );
+                                  }
                                 },
                               ),
                               IconButton(
                                 icon: const Icon(Icons.add_circle, color: AppColors.primary, size: 28),
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Đã thêm "${recipe.recipeName}" vào thực đơn')),
-                                  );
-                                },
+                                tooltip: 'Ghi vào nhật ký',
+                                onPressed: () => _logRecipeToDiary(recipe),
                               ),
                             ],
                           ),
@@ -632,5 +633,207 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
       ],
     );
+  }
+
+  void _logRecipeToDiary(dynamic recipe, {String? defaultSlot}) {
+    final auth = context.read<AuthProvider>();
+    final accountId = auth.accountId;
+    if (accountId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng đăng nhập để lưu vào nhật ký!'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    if (defaultSlot != null) {
+      _executeAddLog(recipe, defaultSlot);
+      return;
+    }
+
+    final hour = DateTime.now().hour;
+    String suggestedSlot = 'breakfast';
+    if (hour >= 10 && hour < 14) {
+      suggestedSlot = 'lunch';
+    } else if (hour >= 14 && hour < 17) {
+      suggestedSlot = 'snack';
+    } else if (hour >= 17) {
+      suggestedSlot = 'dinner';
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  const Icon(Icons.menu_book, color: AppColors.primaryDark),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Lưu "${recipe.recipeName}" vào nhật ký',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Chọn bữa ăn hôm nay:', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              const SizedBox(height: 12),
+              _buildMealSlotChoice(ctx, recipe, 'breakfast', 'Bữa sáng', Icons.wb_sunny_outlined, suggestedSlot == 'breakfast'),
+              const SizedBox(height: 8),
+              _buildMealSlotChoice(ctx, recipe, 'lunch', 'Bữa trưa', Icons.wb_cloudy_outlined, suggestedSlot == 'lunch'),
+              const SizedBox(height: 8),
+              _buildMealSlotChoice(ctx, recipe, 'dinner', 'Bữa tối', Icons.nights_stay_outlined, suggestedSlot == 'dinner'),
+              const SizedBox(height: 8),
+              _buildMealSlotChoice(ctx, recipe, 'snack', 'Bữa phụ / Ăn xế', Icons.cookie_outlined, suggestedSlot == 'snack'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMealSlotChoice(BuildContext ctx, dynamic recipe, String slot, String label, IconData icon, bool isSuggested) {
+    return InkWell(
+      onTap: () {
+        Navigator.of(ctx).pop();
+        _executeAddLog(recipe, slot);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSuggested ? AppColors.primaryLight.withValues(alpha: 0.15) : AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSuggested ? AppColors.primary : AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isSuggested ? AppColors.primaryDark : AppColors.textSecondary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: isSuggested ? FontWeight.bold : FontWeight.w500,
+                  color: isSuggested ? AppColors.primaryDark : AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            if (isSuggested)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
+                child: const Text('Hiện tại', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _executeAddLog(dynamic recipe, String slot) async {
+    final auth = context.read<AuthProvider>();
+    final accountId = auth.accountId;
+    if (accountId == null) return;
+
+    final slotLabels = {
+      'breakfast': 'Bữa sáng',
+      'lunch': 'Bữa trưa',
+      'dinner': 'Bữa tối',
+      'snack': 'Bữa phụ',
+    };
+
+    try {
+      await context.read<NutritionProvider>().addLog({
+        'account_id': accountId,
+        'recipe_id': recipe.recipeId,
+        'recipe_name': recipe.recipeName,
+        'recipeName': recipe.recipeName,
+        'logDate': DateTime.now().toUtc().toIso8601String(),
+        'mealType': slot,
+        'quantity': 1,
+        'unit': 'phần',
+        'totalCalories': recipe.calories,
+        'totalProtein': recipe.protein,
+        'totalCarbs': recipe.carbs,
+        'totalFat': recipe.fat,
+        'totalFiber': recipe.fiber,
+        'totalSugar': recipe.sugar,
+        'totalSalt': recipe.sodium,
+        'totalCholesterol': recipe.cholesterol,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã ghi "${recipe.recipeName}" vào ${slotLabels[slot] ?? slot} hôm nay!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi ghi nhật ký: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _executeAddCustomLog(String dishName, String dishCalo, String slot) async {
+    final auth = context.read<AuthProvider>();
+    final accountId = auth.accountId;
+    if (accountId == null) return;
+
+    final cal = double.tryParse(dishCalo.split(' ').first) ?? 350.0;
+    final slotLabels = {
+      'breakfast': 'Bữa sáng',
+      'lunch': 'Bữa trưa',
+      'dinner': 'Bữa tối',
+      'snack': 'Bữa phụ',
+    };
+
+    try {
+      await context.read<NutritionProvider>().addLog({
+        'account_id': accountId,
+        'recipe_name': dishName,
+        'recipeName': dishName,
+        'logDate': DateTime.now().toUtc().toIso8601String(),
+        'mealType': slot,
+        'quantity': 1,
+        'unit': 'phần',
+        'totalCalories': cal,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã ghi "$dishName" vào ${slotLabels[slot] ?? slot} hôm nay!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi ghi nhật ký: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 }

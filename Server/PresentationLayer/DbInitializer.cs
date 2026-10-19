@@ -234,11 +234,35 @@ public static class DbInitializer
     private static async Task UpsertRecipeTagsFromJsonAsync(AppDbContext context)
     {
         var tagDtos = await LoadJson<RecipeTagDto>("recipe_tags.json");
-        var existingNames = new HashSet<string>(await context.RecipeTags.Select(t => t.Name).ToListAsync());
+        var existingTags = await context.RecipeTags.ToListAsync();
+        var existingDict = existingTags.ToDictionary(t => t.Name, StringComparer.OrdinalIgnoreCase);
+
+        // 1. Dọn dẹp các thẻ không có tác dụng thực tế (Nhanh, Nhẹ, Lành mạnh)
+        var obsoleteNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Nhanh", "Nhẹ", "Lành mạnh" };
+        var obsoleteTags = existingTags.Where(t => obsoleteNames.Contains(t.Name)).ToList();
+        if (obsoleteTags.Any())
+        {
+            var obsoleteIds = obsoleteTags.Select(t => t.Rt_Id).ToList();
+            var associatedLabels = await context.RecipeLabels.Where(rl => obsoleteIds.Contains(rl.Rt_Id)).ToListAsync();
+            context.RecipeLabels.RemoveRange(associatedLabels);
+            context.RecipeTags.RemoveRange(obsoleteTags);
+        }
+
+        // 2. Thêm mới hoặc cập nhật Type cho các thẻ chuẩn từ seed
         foreach (var dto in tagDtos)
         {
-            if (existingNames.Contains(dto.Name)) continue;
-            context.RecipeTags.Add(new RecipeTag { Rt_Id = Guid.NewGuid(), Name = dto.Name, Type = dto.Type });
+            if (existingDict.TryGetValue(dto.Name, out var existing))
+            {
+                if (existing.Type != dto.Type || existing.IsDeleted)
+                {
+                    existing.Type = dto.Type;
+                    existing.IsDeleted = false;
+                }
+            }
+            else
+            {
+                context.RecipeTags.Add(new RecipeTag { Rt_Id = Guid.NewGuid(), Name = dto.Name, Type = dto.Type });
+            }
         }
         if (context.ChangeTracker.HasChanges())
             await context.SaveChangesAsync();

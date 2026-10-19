@@ -48,7 +48,11 @@ class Recipe {
     final name = json['recipe_name']?.toString() ??
         json['recipeName']?.toString() ??
         json['Recipe_name']?.toString() ??
+        json['RecipeName']?.toString() ??
+        json['name']?.toString() ??
+        json['Name']?.toString() ??
         json['title']?.toString() ??
+        json['Title']?.toString() ??
         '';
 
     final id = json['recipe_id']?.toString() ??
@@ -121,7 +125,10 @@ class Recipe {
 
     final rawImage = json['image_url']?.toString() ??
         json['imageUrl']?.toString() ??
+        json['ImageUrl']?.toString() ??
+        json['Image_url']?.toString() ??
         json['image']?.toString() ??
+        json['Image']?.toString() ??
         json['img']?.toString();
 
     final resolvedImg = RecipeImages.resolve(name, rawImage);

@@ -132,7 +132,7 @@ export default function RecipeEditorModal({
         prepTime: initialRecipe.prepTime || 0,
         servings: initialRecipe.servings || 1,
         difficulty: initialRecipe.difficulty || 'easy',
-        isPublic: initialRecipe.isPublic !== undefined ? initialRecipe.isPublic : true,
+        isPublic: true, // Admin recipes luôn công khai
         recipeTagIds: tagIds,
         account_id: initialRecipe.account_id || initialRecipe.Account_id || ''
       });
@@ -345,20 +345,17 @@ export default function RecipeEditorModal({
     e.preventDefault();
 
     if (!formData.recipe_name.trim()) {
-      alert('Vui lòng nhập tên công thức / món ăn');
       setActiveTab('info');
       return;
     }
 
     const validSteps = steps.filter(s => s.text && s.text.trim());
     if (validSteps.length === 0) {
-      alert('Vui lòng thêm ít nhất 1 bước hướng dẫn nấu ăn');
       setActiveTab('instructions');
       return;
     }
 
     if (selectedIngredients.length === 0) {
-      alert('Vui lòng thêm ít nhất 1 nguyên liệu cho món ăn');
       setActiveTab('ingredients');
       return;
     }
@@ -498,8 +495,7 @@ export default function RecipeEditorModal({
                     </div>
                   </div>
 
-                  <div className="grid-cols-2">
-                    <div className="form-group-custom">
+                  <div className="form-group-custom">
                       <label><FiAward size={13} style={{ marginRight: 4 }} /> Độ khó</label>
                       <select
                         value={formData.difficulty}
@@ -510,18 +506,6 @@ export default function RecipeEditorModal({
                         <option value="hard">Khó</option>
                       </select>
                     </div>
-
-                    <div className="form-group-custom">
-                      <label>Chế độ hiển thị</label>
-                      <select
-                        value={formData.isPublic ? 'true' : 'false'}
-                        onChange={(e) => setFormData({ ...formData, isPublic: e.target.value === 'true' })}
-                      >
-                        <option value="true">Công khai</option>
-                        <option value="false">Riêng tư</option>
-                      </select>
-                    </div>
-                  </div>
                 </div>
 
                 <div>
@@ -543,36 +527,102 @@ export default function RecipeEditorModal({
                         </span>
                       )}
                     </label>
-                    <div className="tag-chips-container">
-                      {availableRecipeTags.map((tag) => {
-                        const tagId = tag.id || tag.rt_Id;
-                        const isSelected = formData.recipeTagIds.includes(tagId);
-                        return (
-                          <div
-                            key={tagId}
-                            className={`tag-chip-item ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              if (isSelected) {
-                                setFormData({
-                                  ...formData,
-                                  recipeTagIds: formData.recipeTagIds.filter(id => id !== tagId)
-                                });
-                              } else {
-                                setFormData({
-                                  ...formData,
-                                  recipeTagIds: [...formData.recipeTagIds, tagId]
-                                });
-                              }
-                            }}
-                          >
-                            {isSelected && <FiCheck size={12} />}
-                            <span>{tag.name}</span>
-                          </div>
-                        );
-                      })}
-                      {availableRecipeTags.length === 0 && (
+                    <div className="tag-chips-grouped">
+                      {availableRecipeTags.length === 0 ? (
                         <span style={{ fontSize: 12, color: '#94a3b8' }}>Chưa có thẻ công thức nào</span>
-                      )}
+                      ) : (() => {
+                        // 1. Loại bỏ các thẻ thừa / gây sai lệch (Nhanh, Nhẹ, Lành mạnh)
+                        const EXCLUDED_TAGS = ['nhanh', 'nhẹ', 'lành mạnh'];
+                        const validTags = availableRecipeTags.filter(tag => {
+                          const n = (tag.name || '').trim().toLowerCase();
+                          return !EXCLUDED_TAGS.includes(n);
+                        });
+
+                        // 2. Định nghĩa các nhóm chuẩn hóa theo yêu cầu
+                        const GROUPS = [
+                          {
+                            key: 'meal',
+                            title: 'Bữa ăn (4 bữa)',
+                            match: (tag) => {
+                              const n = (tag.name || '').trim().toLowerCase();
+                              return ['bữa sáng', 'bữa trưa', 'bữa tối', 'bữa phụ'].includes(n);
+                            }
+                          },
+                          {
+                            key: 'cook',
+                            title: 'Phương pháp nấu ăn',
+                            match: (tag) => {
+                              const n = (tag.name || '').trim().toLowerCase();
+                              const t = (tag.type || '').trim().toLowerCase();
+                              const cookKeywords = [
+                                'canh', 'súp', 'đồ uống', 'tráng miệng', 'chiên', 'rán', 'nướng',
+                                'xào', 'luộc', 'hấp', 'kho', 'rim', 'salad', 'trộn', 'hầm', 'ninh', 'bánh'
+                              ];
+                              return t === 'cook' || cookKeywords.some(kw => n.includes(kw));
+                            }
+                          }
+                        ];
+
+                        const grouped = {
+                          meal: { title: 'Bữa ăn (4 bữa chuẩn)', tags: [] },
+                          cook: { title: 'Phương pháp nấu ăn', tags: [] },
+                          other: { title: 'Chế độ ăn & Khác', tags: [] }
+                        };
+
+                        validTags.forEach(tag => {
+                          if (GROUPS[0].match(tag)) {
+                            grouped.meal.tags.push(tag);
+                          } else if (GROUPS[1].match(tag)) {
+                            grouped.cook.tags.push(tag);
+                          } else {
+                            grouped.other.tags.push(tag);
+                          }
+                        });
+
+                        // Sắp xếp thứ tự 4 bữa cho chuẩn: Sáng -> Trưa -> Tối -> Phụ
+                        const mealOrder = ['bữa sáng', 'bữa trưa', 'bữa tối', 'bữa phụ'];
+                        grouped.meal.tags.sort((a, b) => {
+                          const idxA = mealOrder.indexOf((a.name || '').toLowerCase());
+                          const idxB = mealOrder.indexOf((b.name || '').toLowerCase());
+                          return (idxA !== -1 ? idxA : 99) - (idxB !== -1 ? idxB : 99);
+                        });
+
+                        return Object.entries(grouped)
+                          .filter(([_, grp]) => grp.tags.length > 0)
+                          .map(([groupKey, grp]) => (
+                            <div key={groupKey} className="tag-group">
+                              <div className="tag-group-label">{grp.title}</div>
+                              <div className="tag-group-chips">
+                                {grp.tags.map(tag => {
+                                  const tagId = tag.id || tag.rt_Id;
+                                  const isSelected = formData.recipeTagIds.includes(tagId);
+                                  return (
+                                    <div
+                                      key={tagId}
+                                      className={`tag-chip-item ${isSelected ? 'selected' : ''}`}
+                                      onClick={() => {
+                                        if (isSelected) {
+                                          setFormData({
+                                            ...formData,
+                                            recipeTagIds: formData.recipeTagIds.filter(id => id !== tagId)
+                                          });
+                                        } else {
+                                          setFormData({
+                                            ...formData,
+                                            recipeTagIds: [...formData.recipeTagIds, tagId]
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      {isSelected && <FiCheck size={12} />}
+                                      <span>{tag.name}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ));
+                      })()}
                     </div>
                   </div>
                 </div>

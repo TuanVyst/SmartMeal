@@ -5,6 +5,8 @@ import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/core/theme/app_typography.dart';
 import 'package:smart_meal/features/recipes/domain/recipe_model.dart';
 import 'package:smart_meal/features/recipes/presentation/providers/recipe_provider.dart';
+import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
+import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
 
 /// Meal detail screen – matching web's MealDetail.jsx
 class MealDetailScreen extends StatefulWidget {
@@ -183,7 +185,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
       // Floating action button – Log meal
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => _showMealSlotPicker(recipe),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text('Ghi nhật ký', style: AppTypography.button.copyWith(fontSize: 14)),
@@ -218,16 +220,182 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   (String, dynamic, dynamic) _ingredientView(dynamic ri) {
     if (ri is Map) {
-      final ingredient = ri['ingredient'];
+      final ingredient = ri['ingredient'] ?? ri['Ingredient'];
       final nestedName = ingredient is Map
-          ? (ingredient['ingredientName'] ?? ingredient['ingredient_name'])
+          ? (ingredient['name'] ??
+              ingredient['Name'] ??
+              ingredient['ingredientName'] ??
+              ingredient['ingredient_name'] ??
+              ingredient['IngredientName'])
           : null;
-      return (
-        (ri['ingredientName'] ?? ri['ingredient_name'] ?? nestedName ?? 'Nguyên liệu').toString(),
-        ri['quantity'],
-        ri['unit'],
-      );
+      final ingName = (ri['name'] ??
+              ri['Name'] ??
+              ri['ingredientName'] ??
+              ri['ingredient_name'] ??
+              nestedName ??
+              'Nguyên liệu')
+          .toString();
+      final qty = ri['quantity'] ?? ri['Quantity'];
+      final unit = ri['unit'] ?? ri['Unit'] ?? ri['servingUnit'] ?? ri['ServingUnit'];
+      return (ingName, qty, unit);
     }
     return ('Nguyên liệu', null, null);
+  }
+
+  void _showMealSlotPicker(Recipe recipe) {
+    final auth = context.read<AuthProvider>();
+    final accountId = auth.accountId;
+    if (accountId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng đăng nhập để lưu vào nhật ký!'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    final hour = DateTime.now().hour;
+    String suggestedSlot = 'breakfast';
+    if (hour >= 10 && hour < 14) {
+      suggestedSlot = 'lunch';
+    } else if (hour >= 14 && hour < 17) {
+      suggestedSlot = 'snack';
+    } else if (hour >= 17) {
+      suggestedSlot = 'dinner';
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  const Icon(Icons.menu_book, color: AppColors.primaryDark),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Ghi "${recipe.recipeName}" vào nhật ký',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Chọn bữa ăn hôm nay:', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              const SizedBox(height: 12),
+              _buildMealSlotChoice(ctx, recipe, 'breakfast', 'Bữa sáng', Icons.wb_sunny_outlined, suggestedSlot == 'breakfast'),
+              const SizedBox(height: 8),
+              _buildMealSlotChoice(ctx, recipe, 'lunch', 'Bữa trưa', Icons.wb_cloudy_outlined, suggestedSlot == 'lunch'),
+              const SizedBox(height: 8),
+              _buildMealSlotChoice(ctx, recipe, 'dinner', 'Bữa tối', Icons.nights_stay_outlined, suggestedSlot == 'dinner'),
+              const SizedBox(height: 8),
+              _buildMealSlotChoice(ctx, recipe, 'snack', 'Bữa phụ / Ăn xế', Icons.cookie_outlined, suggestedSlot == 'snack'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMealSlotChoice(BuildContext ctx, Recipe recipe, String slot, String label, IconData icon, bool isSuggested) {
+    return InkWell(
+      onTap: () {
+        Navigator.of(ctx).pop();
+        _executeAddLog(recipe, slot);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSuggested ? AppColors.primaryLight.withValues(alpha: 0.15) : AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSuggested ? AppColors.primary : AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isSuggested ? AppColors.primaryDark : AppColors.textSecondary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: isSuggested ? FontWeight.bold : FontWeight.w500,
+                  color: isSuggested ? AppColors.primaryDark : AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            if (isSuggested)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
+                child: const Text('Hiện tại', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _executeAddLog(Recipe recipe, String slot) async {
+    final auth = context.read<AuthProvider>();
+    final accountId = auth.accountId;
+    if (accountId == null) return;
+
+    final slotLabels = {
+      'breakfast': 'Bữa sáng',
+      'lunch': 'Bữa trưa',
+      'dinner': 'Bữa tối',
+      'snack': 'Bữa phụ',
+    };
+
+    try {
+      await context.read<NutritionProvider>().addLog({
+        'account_id': accountId,
+        'recipe_id': recipe.recipeId,
+        'recipe_name': recipe.recipeName,
+        'recipeName': recipe.recipeName,
+        'logDate': DateTime.now().toUtc().toIso8601String(),
+        'mealType': slot,
+        'quantity': 1,
+        'unit': 'phần',
+        'totalCalories': recipe.calories,
+        'totalProtein': recipe.protein,
+        'totalCarbs': recipe.carbs,
+        'totalFat': recipe.fat,
+        'totalFiber': recipe.fiber,
+        'totalSugar': recipe.sugar,
+        'totalSalt': recipe.sodium,
+        'totalCholesterol': recipe.cholesterol,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã ghi "${recipe.recipeName}" vào ${slotLabels[slot] ?? slot} hôm nay!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi ghi nhật ký: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 }

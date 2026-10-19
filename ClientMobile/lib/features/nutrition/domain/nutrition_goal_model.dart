@@ -27,18 +27,23 @@ class NutritionGoal {
   factory NutritionGoal.fromJson(Map<String, dynamic> json) {
     return NutritionGoal(
       id: json['goal_id']?.toString() ??
+          json['Goal_id']?.toString() ??
           json['goalId']?.toString() ??
+          json['GoalId']?.toString() ??
           json['nutrition_goal_id']?.toString() ??
           json['id']?.toString(),
-      accountId: json['account_id']?.toString() ?? json['accountId']?.toString(),
-      calories: _toDouble(json['targetCalories'] ?? json['target_calories'] ?? json['calories']),
-      protein: _toDouble(json['targetProtein'] ?? json['target_protein'] ?? json['protein']),
-      carbs: _toDouble(json['targetCarbs'] ?? json['target_carbs'] ?? json['carbs']),
-      fat: _toDouble(json['targetFat'] ?? json['target_fat'] ?? json['fat']),
-      fiber: _toDouble(json['targetFiber'] ?? json['target_fiber'] ?? json['fiber']),
-      sugarLimit: _toDouble(json['targetSugar'] ?? json['target_sugar'] ?? json['sugarLimit'] ?? json['sugar_limit']),
-      saltLimit: _toDouble(json['targetSalt'] ?? json['target_salt'] ?? json['saltLimit'] ?? json['salt_limit']),
-      cholesterolLimit: _toDouble(json['targetCholesterol'] ?? json['target_cholesterol'] ?? json['cholesterolLimit'] ?? json['cholesterol_limit']),
+      accountId: json['account_id']?.toString() ??
+          json['Account_id']?.toString() ??
+          json['accountId']?.toString() ??
+          json['AccountId']?.toString(),
+      calories: _toDouble(json['targetCalories'] ?? json['TargetCalories'] ?? json['target_calories'] ?? json['calories'] ?? json['Calories']),
+      protein: _toDouble(json['targetProtein'] ?? json['TargetProtein'] ?? json['target_protein'] ?? json['protein'] ?? json['Protein']),
+      carbs: _toDouble(json['targetCarbs'] ?? json['TargetCarbs'] ?? json['target_carbs'] ?? json['carbs'] ?? json['Carbs'] ?? json['carbohydrates'] ?? json['Carbohydrates']),
+      fat: _toDouble(json['targetFat'] ?? json['TargetFat'] ?? json['target_fat'] ?? json['fat'] ?? json['Fat']),
+      fiber: _toDouble(json['targetFiber'] ?? json['TargetFiber'] ?? json['target_fiber'] ?? json['fiber'] ?? json['Fiber']),
+      sugarLimit: _toDouble(json['targetSugar'] ?? json['TargetSugar'] ?? json['target_sugar'] ?? json['sugarLimit'] ?? json['sugar_limit'] ?? json['sugar'] ?? json['Sugar']),
+      saltLimit: _toDouble(json['targetSalt'] ?? json['TargetSalt'] ?? json['target_salt'] ?? json['saltLimit'] ?? json['salt_limit'] ?? json['salt'] ?? json['Salt'] ?? json['sodium'] ?? json['Sodium']),
+      cholesterolLimit: _toDouble(json['targetCholesterol'] ?? json['TargetCholesterol'] ?? json['target_cholesterol'] ?? json['cholesterolLimit'] ?? json['cholesterol_limit'] ?? json['cholesterol'] ?? json['Cholesterol']),
     );
   }
 

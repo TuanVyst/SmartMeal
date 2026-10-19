@@ -20,8 +20,13 @@ class HealthProfileProvider extends ChangeNotifier {
   bool get submitting => _submitting;
   bool get surveyCompleted => _surveyCompleted;
 
-  HealthProfileProvider() {
-    _loadProfile();
+  HealthProfileProvider({HealthProfile? initialProfile, bool? loading})
+      : _profile = initialProfile,
+        _loading = loading ?? (initialProfile == null),
+        _surveyCompleted = initialProfile != null {
+    if (initialProfile == null) {
+      _loadProfile();
+    }
   }
 
   Future<void> loadProfile() async {

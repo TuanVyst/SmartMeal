@@ -17,13 +17,29 @@ class SubscriptionPlan {
   });
 
   factory SubscriptionPlan.fromJson(Map<String, dynamic> json) {
+    List<String> parsedFeatures = [];
+    final rawFeatures = json['features'] ?? json['Features'];
+    if (rawFeatures is List) {
+      parsedFeatures = rawFeatures.map((e) => e.toString()).toList();
+    } else if (rawFeatures is String && rawFeatures.trim().isNotEmpty) {
+      parsedFeatures = rawFeatures.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+
     return SubscriptionPlan(
-      planId: json['plan_id']?.toString() ?? json['planId']?.toString(),
-      name: json['name'] as String?,
-      description: json['description'] as String?,
-      price: _toDouble(json['price']),
-      durationDays: json['durationDays'] as int? ?? json['duration_days'] as int?,
-      features: (json['features'] as List?)?.map((e) => e.toString()).toList() ?? [],
+      planId: json['plan_id']?.toString() ??
+          json['Plan_id']?.toString() ??
+          json['planId']?.toString() ??
+          json['id']?.toString() ??
+          json['Id']?.toString(),
+      name: (json['name'] ?? json['Name']) as String?,
+      description: (json['description'] ?? json['Description']) as String?,
+      price: _toDouble(json['price'] ?? json['Price']),
+      durationDays: (json['duration'] ??
+              json['Duration'] ??
+              json['durationDays'] ??
+              json['duration_days'] ??
+              json['DurationDays']) as int?,
+      features: parsedFeatures,
     );
   }
 
@@ -58,12 +74,20 @@ class Subscription {
 
   factory Subscription.fromJson(Map<String, dynamic> json) {
     return Subscription(
-      subscriptionId: json['subscription_id']?.toString() ?? json['subscriptionId']?.toString(),
-      accountId: json['account_id']?.toString() ?? json['accountId']?.toString(),
-      planId: json['plan_id']?.toString() ?? json['planId']?.toString(),
-      status: json['status'] as String?,
-      startDate: _parseDate(json['startDate'] ?? json['start_date']),
-      endDate: _parseDate(json['endDate'] ?? json['end_date']),
+      subscriptionId: json['sub_id']?.toString() ??
+          json['Sub_id']?.toString() ??
+          json['subscription_id']?.toString() ??
+          json['subscriptionId']?.toString() ??
+          json['id']?.toString(),
+      accountId: json['account_id']?.toString() ??
+          json['Account_id']?.toString() ??
+          json['accountId']?.toString(),
+      planId: json['plan_id']?.toString() ??
+          json['Plan_id']?.toString() ??
+          json['planId']?.toString(),
+      status: (json['status'] ?? json['Status']) as String?,
+      startDate: _parseDate(json['startDate'] ?? json['start_date'] ?? json['StartDate']),
+      endDate: _parseDate(json['endDate'] ?? json['end_date'] ?? json['EndDate']),
     );
   }
 

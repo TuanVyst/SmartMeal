@@ -12,7 +12,7 @@ import 'package:smart_meal/features/diary/presentation/providers/nutrition_provi
 import 'package:smart_meal/features/onboarding/presentation/providers/health_profile_provider.dart';
 import 'package:smart_meal/features/favorites/presentation/providers/favorite_provider.dart';
 import 'package:smart_meal/features/meal_plan/presentation/providers/meal_plan_provider.dart';
-
+import 'package:smart_meal/features/notifications/presentation/providers/notification_provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -39,8 +39,8 @@ class _SmartMealAppState extends State<SmartMealApp> {
   late final NutritionProvider _nutritionProvider;
   late final FavoriteProvider _favoriteProvider;
   late final MealPlanProvider _mealPlanProvider;
+  late final NotificationProvider _notificationProvider;
   late final GoRouter _router;
-
   @override
   void initState() {
     super.initState();
@@ -50,6 +50,7 @@ class _SmartMealAppState extends State<SmartMealApp> {
     _nutritionProvider = NutritionProvider();
     _favoriteProvider = FavoriteProvider();
     _mealPlanProvider = MealPlanProvider();
+    _notificationProvider = NotificationProvider()..initialize();
 
     _router = createAppRouter(_authProvider, _healthProfileProvider);
   }
@@ -62,6 +63,7 @@ class _SmartMealAppState extends State<SmartMealApp> {
     _nutritionProvider.dispose();
     _favoriteProvider.dispose();
     _mealPlanProvider.dispose();
+    _notificationProvider.dispose();
     _router.dispose();
     super.dispose();
   }
@@ -76,6 +78,7 @@ class _SmartMealAppState extends State<SmartMealApp> {
         ChangeNotifierProvider.value(value: _healthProfileProvider),
         ChangeNotifierProvider.value(value: _favoriteProvider),
         ChangeNotifierProvider.value(value: _mealPlanProvider),
+        ChangeNotifierProvider.value(value: _notificationProvider),
       ],
       child: MaterialApp.router(
         title: 'SmartMeal',
