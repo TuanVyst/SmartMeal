@@ -112,20 +112,40 @@ export default function AdminRecipeTags() {
                 </td>
               </tr>
             )}
-            {filteredTags.map((tag) => (
-              <tr key={tag.id}>
-                <td>{tag.name}</td>
-                <td>{tag.type || '-'}</td>
-                <td>
-                  <button className="action-btn edit" onClick={() => handleEdit(tag)} title="Chỉnh sửa">
-                    <FiEdit size={16} />
-                  </button>
-                  <button className="action-btn delete" onClick={() => handleDelete(tag.id)} title="Xóa">
-                    <FiTrash2 size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {filteredTags.map((tag) => {
+              const typeLabels = {
+                meal: 'Bữa ăn',
+                cook: 'Phương pháp nấu',
+                diet: 'Chế độ ăn',
+                taste: 'Khẩu vị',
+              };
+              const displayType = typeLabels[tag.type] || tag.type || 'Khác';
+              return (
+                <tr key={tag.id}>
+                  <td><strong>{tag.name}</strong></td>
+                  <td>
+                    <span className="status-badge" style={{
+                      background: tag.type === 'meal' ? '#ecfdf5' : tag.type === 'cook' ? '#eff6ff' : '#f8fafc',
+                      color: tag.type === 'meal' ? '#059669' : tag.type === 'cook' ? '#2563eb' : '#64748b',
+                      padding: '4px 8px',
+                      borderRadius: 6,
+                      fontSize: 12,
+                      fontWeight: 600
+                    }}>
+                      {displayType}
+                    </span>
+                  </td>
+                  <td>
+                    <button className="action-btn edit" onClick={() => handleEdit(tag)} title="Chỉnh sửa">
+                      <FiEdit size={16} />
+                    </button>
+                    <button className="action-btn delete" onClick={() => handleDelete(tag.id)} title="Xóa">
+                      <FiTrash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -147,19 +167,25 @@ export default function AdminRecipeTags() {
                   className="form-control"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="VD: Bữa sáng, Eat Clean, Nhanh gọn..."
+                  placeholder="VD: Bữa sáng, Xào, Chiên..."
                   required
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Phân loại</label>
-                <input
-                  type="text"
+                <label className="form-label">Phân loại thẻ</label>
+                <select
                   className="form-control"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  placeholder="VD: Bữa ăn, Chế độ dinh dưỡng..."
-                />
+                  required
+                >
+                  <option value="">-- Chọn phân loại thẻ --</option>
+                  <option value="meal">Bữa ăn (Sáng, Trưa, Tối, Phụ)</option>
+                  <option value="cook">Phương pháp nấu ăn (Canh&Súp, Nướng, Chiên, Đồ uống, Tráng miệng...)</option>
+                  <option value="diet">Chế độ ăn (Ăn chay, Eat clean...)</option>
+                  <option value="taste">Khẩu vị / Hương vị (Cay, Ngọt...)</option>
+                  <option value="other">Khác</option>
+                </select>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={closeModal}>

@@ -67,8 +67,7 @@ export default function AppRoutes() {
         <Route path="/meal-suggestions" element={<Navigate to="/home?tab=discover" replace />} />
         <Route path="/meal-suggestion" element={<Navigate to="/home?tab=plan" replace />} />
         <Route path="/favorites" element={<Favorites />} />
-        {/* Tạm ẩn /ingredient-detection cho demo, chuyển hướng về /home */}
-        <Route path="/ingredient-detection" element={<Navigate to="/home" replace />} />
+        <Route path="/ingredient-detection" element={<IngredientDetection />}/>
 
         {/* ── TRANG 2: Journal (Nhật ký + Tra cứu nguyên liệu) ── */}
         <Route path="/journal" element={<JournalPage />} />
