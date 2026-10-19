@@ -99,7 +99,7 @@ export default function AdminRecipes() {
           }
         }
 
-        dialog.alert('Thành công', 'Đã cập nhật công thức thành công!');
+        dialog.success('Thành công', 'Đã cập nhật công thức thành công!');
       } else {
         // Create Recipe
         baseRecipeData.Account_id = accountId || '00000000-0000-0000-0000-000000000000';
@@ -121,7 +121,7 @@ export default function AdminRecipes() {
           }
         }
 
-        dialog.alert('Thành công', 'Đã tạo công thức mới thành công!');
+        dialog.success('Thành công', 'Đã tạo công thức mới thành công!');
       }
 
       await fetchAllData();
@@ -207,7 +207,6 @@ export default function AdminRecipes() {
             <tr>
               <th>Tên món ăn</th>
               <th>Độ khó</th>
-              <th>Hiển thị</th>
               <th>Thời gian (Chuẩn bị / Nấu)</th>
               <th>Thẻ phân loại</th>
               <th>Hành động</th>
@@ -216,7 +215,7 @@ export default function AdminRecipes() {
           <tbody>
             {filteredRecipes.length === 0 && (
               <tr>
-                <td colSpan={6} className="empty-state">
+                <td colSpan={5} className="empty-state">
                   <p>Không tìm thấy công thức nào</p>
                 </td>
               </tr>
@@ -229,7 +228,7 @@ export default function AdminRecipes() {
                     {recipe.difficulty === 'easy' ? 'Dễ' : recipe.difficulty === 'medium' ? 'Trung bình' : recipe.difficulty === 'hard' ? 'Khó' : (recipe.difficulty || 'Dễ')}
                   </span>
                 </td>
-                <td>{recipe.isPublic ? 'Công khai' : 'Riêng tư'}</td>
+
                 <td>{recipe.prepTime} phút / {recipe.cookTime} phút</td>
                 <td>
                   <div className="tags-flex">
