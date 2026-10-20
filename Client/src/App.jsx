@@ -6,7 +6,7 @@ import { DialogProvider } from './context/DialogContext';
 import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 import './App.css';
-
+import './assets/styles/auth.css';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { useActivityTracker } from './hooks/useActivityTracker';
 

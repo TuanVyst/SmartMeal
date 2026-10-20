@@ -1,7 +1,7 @@
 import { Outlet, Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/SmartMealLogo.png';
-
+import '../assets/styles/auth.css';
 export default function AuthLayout() {
   const { user, loading } = useAuth();
 
