@@ -39,8 +39,1509 @@ BEGIN
     INSERT INTO "Recipe_tag" ("Rt_Id", "Name", "Type", "IsDeleted") VALUES (gen_random_uuid(), 'Ăn kèm', 'meal', false) ON CONFLICT ("Name") DO NOTHING;
     INSERT INTO "Recipe_tag" ("Rt_Id", "Name", "Type", "IsDeleted") VALUES (gen_random_uuid(), 'Ăn vặt', 'meal', false) ON CONFLICT ("Name") DO NOTHING;
 
-    -- 3. Upsert Recipes, Tags & Ingredients
-    -- Recipe #1: Rau lang xào tỏi
+    -- 3. Upsert Ingredients & Complete NutritionalValues
+    -- Ensures accurate calorie calculation (serving size 100g/ml or standard piece)
+    UPDATE "Ingredients" SET "Name" = 'Chao' WHERE LOWER("Name") = LOWER('Chao trắng/đỏ');
+    UPDATE "Ingredients" SET "Name" = 'Mắm nêm' WHERE LOWER("Name") = LOWER('Mắm nêm hoặc nước mắm chua ngọt');
+    UPDATE "Ingredients" SET "Name" = 'Tóp mỡ' WHERE LOWER("Name") = LOWER('Mỡ heo/Tóp mỡ');
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau lang') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Rau lang', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 22, 2.6, 2.8, 0.3, 1.4, 0.5, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Tỏi', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 149, 6.4, 33.1, 0.5, 2.1, 1.0, 0.017, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Dầu ăn', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 884, 0, 0, 100, 0, 0, 0, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Nước mắm', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 35, 5.1, 3.7, 0, 0, 3.5, 12.0, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Hạt nêm', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 120, 12.0, 18.0, 0.5, 0, 5.0, 45.0, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà pháo trắng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Cà pháo trắng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 20, 1.5, 3.8, 0.2, 1.6, 1.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Ớt tươi', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 40, 1.9, 8.8, 0.4, 1.5, 5.3, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Chanh', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 29, 1.1, 9.3, 0.3, 2.8, 2.5, 0.002, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Đường', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 387, 0, 100, 0, 0, 100, 0, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Muối', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 0, 0, 0, 0, 0, 0, 98.0, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau muống') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Rau muống', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 19, 2.6, 3.1, 0.2, 1.0, 0.8, 0.05, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Sấu xanh') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Sấu xanh', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 38, 1.3, 8.2, 0.2, 1.2, 4.0, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giá đỗ') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Giá đỗ', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 30, 3.0, 4.1, 0.2, 1.8, 1.8, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Hẹ', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 25, 2.2, 4.3, 0.3, 1.5, 1.2, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà rốt') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Cà rốt', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 41, 0.9, 9.6, 0.2, 2.8, 4.7, 0.07, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giấm') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Giấm', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 18, 0.1, 0.9, 0, 0, 0.4, 0.01, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau tập tàng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Rau tập tàng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 22, 2.5, 3.0, 0.3, 1.5, 0.8, 0.03, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Tôm', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 99, 24.0, 0.2, 0.3, 0, 0, 0.11, 189, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Hành tím', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 40, 1.1, 9.3, 0.1, 1.7, 4.2, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hủ') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Đậu hủ', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 76, 8.1, 1.9, 4.8, 0.3, 0.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Thịt heo', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 242, 27.0, 0, 14.0, 0, 0, 0.06, 80, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Tiêu đen', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 251, 10.4, 64.0, 3.3, 25.3, 0.6, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu bắp') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Đậu bắp', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 33, 1.9, 7.5, 0.2, 3.2, 1.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chao') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Chao', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 116, 10.5, 5.2, 6.1, 0.5, 1.0, 3.5, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bánh tráng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Bánh tráng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 333, 4.0, 78.0, 0.5, 1.0, 0.5, 0.8, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bún') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Bún', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 110, 1.7, 25.0, 0.2, 0.5, 0.1, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá xà lách') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Lá xà lách', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 15, 1.4, 2.9, 0.2, 1.3, 0.8, 0.03, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Dưa leo', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 15, 0.7, 3.6, 0.1, 0.5, 1.7, 0.002, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mắm nêm') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Mắm nêm', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 65, 7.5, 8.0, 0.3, 0, 6.0, 8.0, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Su su') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Su su', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 19, 0.8, 4.5, 0.1, 1.7, 1.7, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bí đao') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Bí đao', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 14, 0.4, 3.0, 0.1, 1.0, 1.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Sườn sụn') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Sườn sụn', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 220, 18.0, 0, 16.0, 0, 0, 0.07, 75, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Hành lá', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 32, 1.8, 7.3, 0.2, 2.6, 2.3, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ngò rí') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Ngò rí', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 23, 2.1, 3.7, 0.5, 2.8, 0.9, 0.05, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu phộng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Đậu phộng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 567, 25.8, 16.1, 49.2, 8.5, 4.7, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Trứng gà') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Trứng gà', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 155, 13.0, 1.1, 11.0, 0, 1.1, 0.12, 372, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tây') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Hành tây', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 40, 1.1, 9.3, 0.1, 1.7, 4.2, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gạo') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Gạo', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 130, 2.7, 28.2, 0.3, 0.4, 0.1, 0.001, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Tôm khô', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 269, 60.0, 2.0, 2.2, 0, 0, 3.0, 400, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cá basa') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Cá basa', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 124, 17.0, 0, 6.0, 0, 0, 0.05, 65, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Măng chua') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Măng chua', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 19, 1.5, 3.2, 0.2, 1.4, 0.8, 1.2, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà chua') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Cà chua', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 18, 0.9, 3.9, 0.2, 1.2, 2.6, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau thơm') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Rau thơm', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 23, 2.0, 3.5, 0.4, 2.5, 0.5, 0.03, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bầu non') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Bầu non', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 15, 0.6, 3.4, 0.1, 1.1, 1.8, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau dền đỏ') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Rau dền đỏ', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 23, 2.5, 4.0, 0.3, 1.8, 0.5, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa chua') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Dưa chua', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 19, 1.2, 3.5, 0.2, 1.5, 1.0, 2.0, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tóp mỡ') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Tóp mỡ', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 650, 15.0, 0, 65.0, 0, 0, 0.05, 90, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mướp đắng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Mướp đắng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 17, 1.0, 3.7, 0.2, 2.8, 1.0, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bắp') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Bắp', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 86, 3.2, 19.0, 1.2, 2.0, 3.2, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bơ thực vật') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Bơ thực vật', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 717, 0.9, 0.7, 81.0, 0, 0.1, 0.7, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khoai lang') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Khoai lang', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 86, 1.6, 20.1, 0.1, 3.0, 4.2, 0.05, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khoai mì') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Khoai mì', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 160, 1.4, 38.0, 0.3, 1.8, 1.7, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước cốt dừa') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Nước cốt dừa', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 230, 2.3, 5.5, 24.0, 0, 3.3, 0.015, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá dứa') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Lá dứa', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 15, 0.5, 3.0, 0.1, 1.0, 0.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hột vịt muối') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Hột vịt muối', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 185, 14.0, 1.5, 13.5, 0, 0.5, 4.5, 450, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước tương') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Nước tương', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 53, 8.1, 4.9, 0, 0.8, 0.4, 5.5, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà tím') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Cà tím', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 25, 1.0, 6.0, 0.2, 3.0, 3.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá lốt') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Lá lốt', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 39, 4.3, 5.2, 0.5, 2.5, 0.5, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cải bẹ xanh') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Cải bẹ xanh', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 27, 2.7, 4.7, 0.4, 3.2, 1.3, 0.03, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gừng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Gừng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 80, 1.8, 18.0, 0.8, 2.0, 1.7, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu que') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Đậu que', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 31, 1.8, 7.0, 0.2, 2.7, 3.3, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu hào') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Dầu hào', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 51, 1.4, 11.0, 0.2, 0, 8.0, 7.0, 0, 100, 'ml', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Củ cải trắng') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Củ cải trắng', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 18, 0.7, 4.1, 0.1, 1.6, 2.5, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mướp hương') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Mướp hương', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 16, 0.9, 3.3, 0.1, 1.1, 1.5, 0.01, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau mồng tơi') LIMIT 1;
+    IF v_ing_id IS NULL THEN
+        v_ing_id := gen_random_uuid();
+        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
+        VALUES (v_ing_id, 'Rau mồng tơi', 15000, '/images/default-ingredient.jpg', false);
+    ELSE
+        UPDATE "Ingredients" SET "IsDeleted" = false WHERE "Ingredient_id" = v_ing_id;
+    END IF;
+    INSERT INTO "NutritionalValues" ("Nv_id", "Ingredient_id", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Sugar", "Salt", "Cholesterol", "ServingSize", "ServingUnit", "IsDeleted")
+    VALUES (gen_random_uuid(), v_ing_id, 19, 1.8, 3.4, 0.3, 1.5, 0.5, 0.02, 0, 100, 'g', false)
+    ON CONFLICT ("Ingredient_id") DO UPDATE SET
+        "Calories" = EXCLUDED."Calories",
+        "Protein" = EXCLUDED."Protein",
+        "Carbs" = EXCLUDED."Carbs",
+        "Fat" = EXCLUDED."Fat",
+        "Fiber" = EXCLUDED."Fiber",
+        "Sugar" = EXCLUDED."Sugar",
+        "Salt" = EXCLUDED."Salt",
+        "Cholesterol" = EXCLUDED."Cholesterol",
+        "ServingSize" = EXCLUDED."ServingSize",
+        "ServingUnit" = EXCLUDED."ServingUnit",
+        "IsDeleted" = false;
+
+    -- 4. Upsert Recipes, Tags & Ingredients with standard system units ('g', 'ml', 'tbsp', 'tsp', 'piece', 'clove')
+    -- Recipe: Rau lang xào tỏi
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Rau lang xào tỏi' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -78,53 +1579,36 @@ Bước 3 (Xào rau): Cho dầu ăn vào chảo, phi thơm tỏi. Cho rau lang v
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau lang') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau lang', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'mớ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'củ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #2: Cà pháo muối xổi
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau lang') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 4, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Cà pháo muối xổi
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Cà pháo muối xổi' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -156,71 +1640,46 @@ Bước 3 (Trộn cà): Cho cà pháo vào âu, đổ hỗn hợp nước mắm 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà pháo trắng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cà pháo trắng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ớt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Chanh', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối hạt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối hạt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #3: Rau muống luộc dầm sấu
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà pháo trắng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Rau muống luộc dầm sấu
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Rau muống luộc dầm sấu' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -252,62 +1711,41 @@ Bước 3 (Dầm sấu): Thả sấu vào phần nước luộc rau đun thêm 3
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau muống') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau muống', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'mớ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Sấu xanh') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Sấu xanh', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ớt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #4: Dưa giá muối chua
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau muống') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 350, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Sấu xanh') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+
+    -- Recipe: Dưa giá muối chua
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Dưa giá muối chua' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -339,62 +1777,41 @@ Bước 3 (Muối chua): Cho hỗn hợp giá vào hũ thủy tinh, đổ ngập
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giá đỗ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Giá đỗ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hẹ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 50, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà rốt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cà rốt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'củ nhỏ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giấm trắng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Giấm trắng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #5: Canh rau tập tàng nấu tôm
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giá đỗ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 50, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà rốt') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 50, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giấm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+
+    -- Recipe: Canh rau tập tàng nấu tôm
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh rau tập tàng nấu tôm' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -426,53 +1843,36 @@ Bước 3 (Nấu canh): Đổ nước lọc vừa đủ vào nồi tôm xào đu
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau tập tàng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau tập tàng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm tươi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tôm tươi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành tím', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #6: Canh hẹ đậu hũ non
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau tập tàng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Canh hẹ đậu hũ non
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh hẹ đậu hũ non' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -510,53 +1910,36 @@ Bước 3 (Nấu canh): Thả đậu hũ non vào nồi đun sôi lăn tăn kho�
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hũ non') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu hũ non', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, '1-2 hộp/miếng', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ tươi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hẹ tươi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt băm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Thịt băm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #7: Đậu bắp luộc chấm chao
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hủ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 50, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Đậu bắp luộc chấm chao
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Đậu bắp luộc chấm chao' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -588,62 +1971,41 @@ Bước 3 (Pha chao): Tán nhuyễn viên chao cùng ít nước chao, thêm đ�
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu bắp') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu bắp', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chao trắng/đỏ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Chao trắng/đỏ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'viên', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ớt tươi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Chanh', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #8: Thịt luộc cuốn bánh tráng
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu bắp') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chao') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 30, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Thịt luộc cuốn bánh tráng
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Thịt luộc cuốn bánh tráng' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -675,71 +2037,46 @@ Bước 3 (Thưởng thức): Dọn thịt ra đĩa. Bày bánh tráng, bún, ra
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt ba chỉ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Thịt ba chỉ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 400, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bánh tráng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bánh tráng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bún tươi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bún tươi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau sống các loại') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau sống các loại', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dưa leo', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mắm nêm hoặc nước mắm chua ngọt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Mắm nêm hoặc nước mắm chua ngọt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #9: Su su xào tỏi
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 400, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bánh tráng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bún') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá xà lách') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mắm nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+
+    -- Recipe: Su su xào tỏi
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Su su xào tỏi' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -771,53 +2108,36 @@ Bước 3 (Xào su su): Đổ su su vào xào nhanh trên lửa lớn. Nêm hạ
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Su su') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Su su', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'củ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #10: Canh bí đao nấu sườn non
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Su su') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 4, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Canh bí đao nấu sườn non
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh bí đao nấu sườn non' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -849,71 +2169,46 @@ Bước 3 (Nấu canh): Thả bí đao vào nồi sườn, đun đến khi miế
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bí đao') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bí đao', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Sườn non') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Sườn non', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành lá', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ngò rí') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ngò rí', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #11: Đậu phộng rang muối
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bí đao') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Sườn sụn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 15, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ngò rí') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 10, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Đậu phộng rang muối
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Đậu phộng rang muối' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -945,35 +2240,26 @@ Bước 3 (Trộn muối): Chờ đậu nguội bớt (còn hơi ấm), cho mu�
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu phộng hạt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu phộng hạt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'Lạc - 200g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối bột canh hoặc muối tinh') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối bột canh hoặc muối tinh', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #12: Trứng chiên hành tây
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu phộng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+
+    -- Recipe: Trứng chiên hành tây
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Trứng chiên hành tây' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1011,53 +2297,36 @@ Bước 3 (Chiên trứng): Đun nóng dầu ăn trong chảo, đổ bát trứn
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Trứng gà') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Trứng gà', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tây') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành tây', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, '1/2 củ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #13: Cơm cháy kho quẹt
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Trứng gà') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'piece', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tây') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 80, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+
+    -- Recipe: Cơm cháy kho quẹt
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Cơm cháy kho quẹt' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1089,80 +2358,51 @@ Bước 3 (Rim mắm): Pha mắm, đường, nước lọc đổ vào chảo tô
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cơm nguội') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cơm nguội', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt ba chỉ nhiều mỡ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Thịt ba chỉ nhiều mỡ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tôm khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 30, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ớt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #14: Canh măng chua cá hú
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gạo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 30, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+
+    -- Recipe: Canh măng chua cá hú
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh măng chua cá hú' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1194,80 +2434,46 @@ Bước 3 (Nấu canh): Xào qua măng và cà chua rồi trút vào nồi canh 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khúc cá hú') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Khúc cá hú', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Măng chua') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Măng chua', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà chua') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cà chua', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ngò gai') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ngò gai', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau ngổ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau ngổ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi băm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi băm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #15: Bầu luộc chấm kho quẹt
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cá basa') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Măng chua') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà chua') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau thơm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 20, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Bầu luộc chấm kho quẹt
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Bầu luộc chấm kho quẹt' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1299,35 +2505,36 @@ Bước 3 (Thưởng thức): Vớt bầu ra đĩa để ráo. Làm nóng lại 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bầu non') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bầu non', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'trái', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Kho quẹt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Kho quẹt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #16: Canh rau dền nấu thịt băm
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bầu non') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 350, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 50, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 15, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Canh rau dền nấu thịt băm
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh rau dền nấu thịt băm' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1359,53 +2566,36 @@ Bước 3 (Nấu canh): Đổ nước đun sôi vào nồi thịt, hớt bọt. 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau dền đỏ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau dền đỏ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'mớ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo băm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Thịt heo băm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành tím', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gia vị') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Gia vị', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #17: Dưa cải chua xào tóp mỡ
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau dền đỏ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Dưa cải chua xào tóp mỡ
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Dưa cải chua xào tóp mỡ' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1437,62 +2627,41 @@ Bước 3 (Xào dưa): Cho dưa chua vào xào kỹ cho thấm mỡ. Nêm xíu m
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa cải chua') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dưa cải chua', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mỡ heo/Tóp mỡ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Mỡ heo/Tóp mỡ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà chua') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cà chua', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #18: Mướp đắng xào trứng
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa chua') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 250, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tóp mỡ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 80, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà chua') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Mướp đắng xào trứng
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Mướp đắng xào trứng' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1524,62 +2693,41 @@ Bước 3 (Đổ trứng): Rưới đều bát trứng lên mướp đắng, đ�
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mướp đắng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Mướp đắng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'Khổ qua - 2 trái', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Trứng gà') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Trứng gà', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #19: Bắp xào mỡ hành
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mướp đắng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 250, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Trứng gà') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'piece', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Bắp xào mỡ hành
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Bắp xào mỡ hành' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1611,62 +2759,41 @@ Bước 3 (Xào bắp): Đổ bắp vào đảo đều, nêm chút nước mắm
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bắp ngọt hoặc bắp nếp lẩy hạt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bắp ngọt hoặc bắp nếp lẩy hạt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'trái', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tôm khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bơ thực vật') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bơ thực vật', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành lá', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #20: Khoai lang luộc
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bắp') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 250, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 20, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bơ thực vật') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 15, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 20, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+
+    -- Recipe: Khoai lang luộc
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Khoai lang luộc' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1698,35 +2825,21 @@ Bước 3 (Kiểm tra độ chín): Luộc sôi, sau đó hạ nhỏ lửa đun 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khoai lang củ vừa') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Khoai lang củ vừa', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 500, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chút muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Chút muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #21: Khoai mì hấp cốt dừa
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khoai lang') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 400, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Khoai mì hấp cốt dừa
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Khoai mì hấp cốt dừa' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1758,53 +2871,36 @@ Bước 3 (Chan cốt dừa): Rưới từ từ nước cốt dừa pha chút đ
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khoai mì') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Khoai mì', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'Sắn - 500g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước cốt dừa') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước cốt dừa', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'bát con', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá dứa') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Lá dứa', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối mè đậu phộng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối mè đậu phộng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #22: Cháo trắng hột vịt muối
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Khoai mì') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 400, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước cốt dừa') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'ml', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá dứa') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 10, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu phộng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 20, 'g', false, false);
+    END IF;
+
+    -- Recipe: Cháo trắng hột vịt muối
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Cháo trắng hột vịt muối' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1842,44 +2938,31 @@ Bước 3 (Thưởng thức): Múc cháo nóng ra bát, rắc hành lá nếu th
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gạo tẻ trộn chút nếp') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Gạo tẻ trộn chút nếp', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, '1/2 bát', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hột vịt muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hột vịt muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá dứa') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Lá dứa', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành lá', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #23: Bún nước tương
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gạo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 80, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hột vịt muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'piece', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá dứa') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 10, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành lá') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 10, 'g', false, false);
+    END IF;
+
+    -- Recipe: Bún nước tương
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Bún nước tương' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -1917,89 +3000,56 @@ Bước 3 (Trộn bún): Cho bún ra tô, xếp rau, dưa leo, đậu hũ lên t
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bún tươi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Bún tươi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hũ chiên') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu hũ chiên', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'bìa', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dưa leo', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau xà lách') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau xà lách', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau thơm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau thơm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước tương') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước tương', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'xì dầu', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ớt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #24: Cà tím xào lá lốt
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Bún') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hủ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá xà lách') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 80, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau thơm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 20, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước tương') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Cà tím xào lá lốt
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Cà tím xào lá lốt' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2025,62 +3075,41 @@ Bước 3 (Xào cà): Trút cà tím vào chảo thịt, đảo đều. Có th�
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà tím') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cà tím', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'quả dài', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt ba chỉ băm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Thịt ba chỉ băm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá lốt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Lá lốt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'nắm', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gia vị') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Gia vị', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #25: Canh cải xanh nấu gừng
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cà tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Lá lốt') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 30, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Canh cải xanh nấu gừng
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh cải xanh nấu gừng' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2112,44 +3141,31 @@ Bước 3 (Nấu canh): Thả rau cải vào nồi đun sôi trên lửa lớn �
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cải bẹ xanh') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Cải bẹ xanh', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'bó', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gừng tươi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Gừng tươi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'nhánh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #26: Giá hẹ xào đậu hũ
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Cải bẹ xanh') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gừng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 15, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Giá hẹ xào đậu hũ
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Giá hẹ xào đậu hũ' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2181,62 +3197,41 @@ Bước 3 (Xào nguyên liệu): Cho đậu hũ vào đảo sơ. Cho giá và h�
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giá đỗ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Giá đỗ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hẹ', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hũ chiên') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu hũ chiên', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'bìa', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước tương') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước tương', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm chay') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm chay', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi đập dập') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi đập dập', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #27: Đậu cove xào thịt heo
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Giá đỗ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hẹ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 100, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu hủ') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước tương') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'clove', false, false);
+    END IF;
+
+    -- Recipe: Đậu cove xào thịt heo
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Đậu cove xào thịt heo' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2268,71 +3263,46 @@ Bước 3 (Xào đậu): Dùng lại chảo, thêm dầu ăn xào đậu cove. K
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu cove') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu cove', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 250, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt thăn/nạc dăm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Thịt thăn/nạc dăm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu hào') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu hào', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hạt nêm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tiêu', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #28: Gỏi dưa leo
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu que') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 250, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Thịt heo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 150, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu hào') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tiêu đen') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Gỏi dưa leo
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Gỏi dưa leo' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2364,80 +3334,51 @@ Bước 3 (Trộn gỏi): Cho dưa leo, rau thơm thái nhỏ vào thố. Đổ 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dưa leo', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 3, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau thơm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau thơm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'húng lủi/kinh giới', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu phộng rang') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đậu phộng rang', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Chanh', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Đường', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Nước mắm', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tỏi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Ớt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #29: Củ cải trắng luộc chấm mắm quẹt
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dưa leo') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 300, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau thơm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 20, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đậu phộng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 30, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Chanh') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Đường') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Nước mắm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tỏi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'clove', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Ớt tươi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+
+    -- Recipe: Củ cải trắng luộc chấm mắm quẹt
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Củ cải trắng luộc chấm mắm quẹt' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2469,35 +3410,26 @@ Bước 3 (Kiểm tra): Khi thấy củ cải chuyển sang màu hơi trong là 
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Củ cải trắng') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Củ cải trắng', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 2, 'củ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Kho quẹt hoặc Mắm ruốc xào thịt') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Kho quẹt hoặc Mắm ruốc xào thịt', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Xíu muối') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Xíu muối', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    -- Recipe #30: Canh mướp nấu mồng tơi
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Củ cải trắng') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 350, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mắm nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Muối') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
+    -- Recipe: Canh mướp nấu mồng tơi
     SELECT "Recipe_id" INTO v_recipe_id FROM "Recipe" WHERE "Recipe_name" = 'Canh mướp nấu mồng tơi' AND NOT "IsDeleted" LIMIT 1;
     IF v_recipe_id IS NULL THEN
         v_recipe_id := gen_random_uuid();
@@ -2529,60 +3461,38 @@ Bước 3 (Nấu canh): Thả mướp vào trước đun 2 phút, tiếp đó th
         SELECT gen_random_uuid(), v_recipe_id, v_tag_id, false
         WHERE NOT EXISTS (SELECT 1 FROM "RecipeLabel" WHERE "Recipe_Id" = v_recipe_id AND "Rt_Id" = v_tag_id);
     END IF;
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mướp hương') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Mướp hương', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'quả', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau mồng tơi') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Rau mồng tơi', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'mớ', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Tôm khô', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Hành tím', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'phần', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Dầu ăn', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng canh', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
-    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Gia vị') AND NOT "IsDeleted" LIMIT 1;
-    IF v_ing_id IS NULL THEN
-        v_ing_id := gen_random_uuid();
-        INSERT INTO "Ingredients" ("Ingredient_id", "Name", "AveragePrice", "ImageUrl", "IsDeleted")
-        VALUES (v_ing_id, 'Gia vị', 15000, 'https://images.unsplash.com/photo-1540420773420-3366772f4999', false);
-    END IF;
-    INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
-    SELECT gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'muỗng cà phê', false, false
-    WHERE NOT EXISTS (SELECT 1 FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id AND "Ingredient_id" = v_ing_id);
 
-    RAISE NOTICE 'Successfully seeded 30 recipes with ingredients and tags into Supabase!';
+    -- Clear old/duplicate recipe ingredients and insert standard units
+    DELETE FROM "RecipeIngredients" WHERE "Recipe_id" = v_recipe_id;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Mướp hương') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 200, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Rau mồng tơi') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 250, 'g', true, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Tôm khô') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 30, 'g', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hành tím') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'piece', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Dầu ăn') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tbsp', false, false);
+    END IF;
+    SELECT "Ingredient_id" INTO v_ing_id FROM "Ingredients" WHERE LOWER("Name") = LOWER('Hạt nêm') LIMIT 1;
+    IF v_ing_id IS NOT NULL THEN
+        INSERT INTO "RecipeIngredients" ("RI_id", "Recipe_id", "Ingredient_id", "Quantity", "UOM", "IsPrimary", "IsDeleted")
+        VALUES (gen_random_uuid(), v_recipe_id, v_ing_id, 1, 'tsp', false, false);
+    END IF;
+
 END $$;

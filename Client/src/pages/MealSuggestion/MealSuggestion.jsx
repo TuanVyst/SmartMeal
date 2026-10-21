@@ -10,6 +10,7 @@ import RecipeHealthScore from '../../components/common/RecipeHealthScore';
 import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
 import HealthWarningPopup from '../../components/common/HealthWarningPopup';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
+import { getMultiplier } from '../../utils/unitConverter';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
@@ -334,8 +335,9 @@ export default function MealSuggestion() {
         let nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
         const nv = ri.nutritionalValue || ri.NutritionalValue;
         if (nv) {
-          const servingSize = nv.servingSize || nv.ServingSize || 1;
-          const multiplier = quantityVal / servingSize;
+          const servingSize = nv.servingSize || nv.ServingSize || 100;
+          const servingUnit = nv.servingUnit || nv.ServingUnit || 'g';
+          const multiplier = getMultiplier(quantityVal, uom, servingSize, servingUnit, ingName, nv.everydayWeight || nv.EverydayWeight);
           nutrition = {
             calories: Math.round((nv.calories || nv.Calories || 0) * multiplier * 10) / 10,
             protein: Math.round((nv.protein || nv.Protein || 0) * multiplier * 10) / 10,

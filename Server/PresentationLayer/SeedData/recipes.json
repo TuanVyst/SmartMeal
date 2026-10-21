@@ -2949,28 +2949,33 @@
     "Ingredients": [
       {
         "Name": "Rau lang",
-        "Quantity": 1,
-        "UOM": "mớ"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "củ"
+        "Quantity": 4,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -2995,37 +3000,44 @@
       {
         "Name": "Cà pháo trắng",
         "Quantity": 300,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 3,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
-        "Name": "Ớt",
+        "Name": "Ớt tươi",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Chanh",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Muối hạt",
+        "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3048,33 +3060,39 @@
     "Ingredients": [
       {
         "Name": "Rau muống",
-        "Quantity": 1,
-        "UOM": "mớ"
+        "Quantity": 350,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Sấu xanh",
         "Quantity": 3,
-        "UOM": "quả"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
-        "Name": "Ớt",
+        "Name": "Ớt tươi",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3098,32 +3116,38 @@
       {
         "Name": "Giá đỗ",
         "Quantity": 300,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Hẹ",
         "Quantity": 50,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Cà rốt",
-        "Quantity": 1,
-        "UOM": "củ nhỏ"
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Giấm trắng",
+        "Name": "Giấm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3146,28 +3170,33 @@
     "Ingredients": [
       {
         "Name": "Rau tập tàng",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Tôm tươi",
+        "Name": "Tôm",
         "Quantity": 150,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3189,29 +3218,34 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Đậu hũ non",
-        "Quantity": 1,
-        "UOM": "1-2 hộp/miếng"
+        "Name": "Đậu hủ",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Hẹ tươi",
+        "Name": "Hẹ",
         "Quantity": 100,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Thịt băm",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Thịt heo",
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3236,32 +3270,38 @@
       {
         "Name": "Đậu bắp",
         "Quantity": 300,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Chao trắng/đỏ",
-        "Quantity": 2,
-        "UOM": "viên"
+        "Name": "Chao",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Ớt tươi",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Chanh",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3283,39 +3323,46 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Thịt ba chỉ",
+        "Name": "Thịt heo",
         "Quantity": 400,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Bánh tráng",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Bún tươi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Bún",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Rau sống các loại",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Lá xà lách",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Dưa leo",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Mắm nêm hoặc nước mắm chua ngọt",
-        "Quantity": 1,
-        "UOM": "muỗng canh"
+        "Name": "Mắm nêm",
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Hành khô",
+        "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3338,28 +3385,33 @@
     "Ingredients": [
       {
         "Name": "Su su",
-        "Quantity": 2,
-        "UOM": "quả"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "củ"
+        "Quantity": 4,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3383,37 +3435,44 @@
       {
         "Name": "Bí đao",
         "Quantity": 300,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Sườn non",
+        "Name": "Sườn sụn",
         "Quantity": 200,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Hành lá",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Ngò rí",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3435,19 +3494,22 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Đậu phộng hạt",
-        "Quantity": 1,
-        "UOM": "Lạc - 200g"
+        "Name": "Đậu phộng",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Muối bột canh hoặc muối tinh",
+        "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3471,27 +3533,32 @@
       {
         "Name": "Trứng gà",
         "Quantity": 3,
-        "UOM": "quả"
+        "UOM": "piece",
+        "IsPrimary": true
       },
       {
         "Name": "Hành tây",
-        "Quantity": 1,
-        "UOM": "1/2 củ"
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3514,44 +3581,52 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Cơm nguội",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Gạo",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Thịt ba chỉ nhiều mỡ",
+        "Name": "Thịt heo",
         "Quantity": 100,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Tôm khô",
         "Quantity": 30,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
-        "Quantity": 1,
-        "UOM": "muỗng canh"
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Ớt",
+        "Name": "Ớt tươi",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
-        "Name": "Hành khô",
+        "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3573,44 +3648,46 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Khúc cá hú",
+        "Name": "Cá basa",
         "Quantity": 300,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Măng chua",
         "Quantity": 200,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Cà chua",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
-        "Name": "Ngò gai",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Rau thơm",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Rau ngổ",
-        "Quantity": 1,
-        "UOM": "phần"
-      },
-      {
-        "Name": "Tỏi băm",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3633,18 +3710,33 @@
     "Ingredients": [
       {
         "Name": "Bầu non",
-        "Quantity": 1,
-        "UOM": "trái"
+        "Quantity": 350,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Kho quẹt",
+        "Name": "Thịt heo",
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tôm khô",
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3667,28 +3759,33 @@
     "Ingredients": [
       {
         "Name": "Rau dền đỏ",
-        "Quantity": 1,
-        "UOM": "mớ"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Thịt heo băm",
+        "Name": "Thịt heo",
         "Quantity": 100,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Gia vị",
+        "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3710,34 +3807,40 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Dưa cải chua",
-        "Quantity": 200,
-        "UOM": "g"
+        "Name": "Dưa chua",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Mỡ heo/Tóp mỡ",
-        "Quantity": 100,
-        "UOM": "g"
+        "Name": "Tóp mỡ",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Cà chua",
         "Quantity": 1,
-        "UOM": "quả"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
-        "Name": "Hành khô",
+        "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3760,33 +3863,39 @@
     "Ingredients": [
       {
         "Name": "Mướp đắng",
-        "Quantity": 1,
-        "UOM": "Khổ qua - 2 trái"
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Trứng gà",
         "Quantity": 2,
-        "UOM": "quả"
+        "UOM": "piece",
+        "IsPrimary": true
       },
       {
-        "Name": "Hành khô",
+        "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3808,34 +3917,40 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Bắp ngọt hoặc bắp nếp lẩy hạt",
-        "Quantity": 2,
-        "UOM": "trái"
+        "Name": "Bắp",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Tôm khô",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Bơ thực vật",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Hành lá",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3857,19 +3972,16 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Khoai lang củ vừa",
-        "Quantity": 500,
-        "UOM": "g"
+        "Name": "Khoai lang",
+        "Quantity": 400,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Nước",
+        "Name": "Muối",
         "Quantity": 1,
-        "UOM": "phần"
-      },
-      {
-        "Name": "Chút muối",
-        "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3892,28 +4004,33 @@
     "Ingredients": [
       {
         "Name": "Khoai mì",
-        "Quantity": 1,
-        "UOM": "Sắn - 500g"
+        "Quantity": 400,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Nước cốt dừa",
-        "Quantity": 1,
-        "UOM": "bát con"
+        "Quantity": 150,
+        "UOM": "ml",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
-        "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Lá dứa",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Muối mè đậu phộng",
-        "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "Name": "Đậu phộng",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3935,24 +4052,28 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Gạo tẻ trộn chút nếp",
-        "Quantity": 1,
-        "UOM": "1/2 bát"
+        "Name": "Gạo",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Hột vịt muối",
         "Quantity": 2,
-        "UOM": "quả"
+        "UOM": "piece",
+        "IsPrimary": true
       },
       {
         "Name": "Lá dứa",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Hành lá",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -3975,49 +4096,58 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Bún tươi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Bún",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Đậu hũ chiên",
-        "Quantity": 2,
-        "UOM": "bìa"
+        "Name": "Đậu hủ",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Dưa leo",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Rau xà lách",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Lá xà lách",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Rau thơm",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Nước tương",
-        "Quantity": 1,
-        "UOM": "xì dầu"
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
-        "Name": "Ớt",
+        "Name": "Ớt tươi",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4041,33 +4171,39 @@
     "Ingredients": [
       {
         "Name": "Cà tím",
-        "Quantity": 2,
-        "UOM": "quả dài"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Thịt ba chỉ băm",
+        "Name": "Thịt heo",
         "Quantity": 100,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Lá lốt",
-        "Quantity": 1,
-        "UOM": "nắm"
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 3,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Gia vị",
+        "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4089,23 +4225,27 @@
     "Ingredients": [
       {
         "Name": "Cải bẹ xanh",
-        "Quantity": 1,
-        "UOM": "bó"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Gừng tươi",
-        "Quantity": 1,
-        "UOM": "nhánh"
+        "Name": "Gừng",
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4129,32 +4269,38 @@
       {
         "Name": "Giá đỗ",
         "Quantity": 200,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Hẹ",
         "Quantity": 100,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Đậu hũ chiên",
-        "Quantity": 1,
-        "UOM": "bìa"
+        "Name": "Đậu hủ",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Nước tương",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Hạt nêm chay",
+        "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tỏi đập dập",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4176,39 +4322,46 @@
     "AccountUsername": "admin",
     "Ingredients": [
       {
-        "Name": "Đậu cove",
+        "Name": "Đậu que",
         "Quantity": 250,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Thịt thăn/nạc dăm",
+        "Name": "Thịt heo",
         "Quantity": 150,
-        "UOM": "g"
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Hành khô",
+        "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu hào",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Tiêu",
+        "Name": "Tiêu đen",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4231,43 +4384,51 @@
     "Ingredients": [
       {
         "Name": "Dưa leo",
-        "Quantity": 3,
-        "UOM": "quả"
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Rau thơm",
-        "Quantity": 1,
-        "UOM": "húng lủi/kinh giới"
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
-        "Name": "Đậu phộng rang",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Name": "Đậu phộng",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Chanh",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Đường",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       },
       {
         "Name": "Nước mắm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
         "Name": "Tỏi",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
       },
       {
-        "Name": "Ớt",
+        "Name": "Ớt tươi",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4290,18 +4451,21 @@
     "Ingredients": [
       {
         "Name": "Củ cải trắng",
-        "Quantity": 2,
-        "UOM": "củ"
+        "Quantity": 350,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
-        "Name": "Kho quẹt hoặc Mắm ruốc xào thịt",
+        "Name": "Mắm nêm",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Xíu muối",
+        "Name": "Muối",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [
@@ -4324,33 +4488,39 @@
     "Ingredients": [
       {
         "Name": "Mướp hương",
-        "Quantity": 1,
-        "UOM": "quả"
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Rau mồng tơi",
-        "Quantity": 1,
-        "UOM": "mớ"
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
       },
       {
         "Name": "Tôm khô",
-        "Quantity": 1,
-        "UOM": "phần"
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
       },
       {
         "Name": "Hành tím",
         "Quantity": 1,
-        "UOM": "phần"
+        "UOM": "piece",
+        "IsPrimary": false
       },
       {
         "Name": "Dầu ăn",
         "Quantity": 1,
-        "UOM": "muỗng canh"
+        "UOM": "tbsp",
+        "IsPrimary": false
       },
       {
-        "Name": "Gia vị",
+        "Name": "Hạt nêm",
         "Quantity": 1,
-        "UOM": "muỗng cà phê"
+        "UOM": "tsp",
+        "IsPrimary": false
       }
     ],
     "TagNames": [

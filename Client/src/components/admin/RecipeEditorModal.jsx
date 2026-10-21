@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fi';
 import ImageUpload from '../common/ImageUpload';
 import { resolveRecipeImageUrl, FALLBACK_MEAL_IMAGE } from '../../utils/recipeImages';
+import { getMultiplier } from '../../utils/unitConverter';
 import './RecipeEditorModal.css';
 
 const COMMON_UOMS = [
@@ -338,8 +339,10 @@ export default function RecipeEditorModal({
     const nv = item.nutritionalValue;
     if (!nv || !nv.calories) return sum;
     const servingSize = nv.servingSize || 100;
+    const servingUnit = nv.servingUnit || 'g';
     const qty = parseFloat(item.quantity) || 0;
-    const cal = (nv.calories * qty) / servingSize;
+    const multiplier = getMultiplier(qty, item.uom, servingSize, servingUnit, item.name, nv.everydayWeight);
+    const cal = nv.calories * multiplier;
     return sum + (isNaN(cal) ? 0 : cal);
   }, 0);
 
@@ -738,8 +741,10 @@ export default function RecipeEditorModal({
                   selectedIngredients.map((item, index) => {
                     const nv = item.nutritionalValue;
                     const servingSize = nv?.servingSize || 100;
+                    const servingUnit = nv?.servingUnit || 'g';
                     const qty = parseFloat(item.quantity) || 0;
-                    const itemCal = nv?.calories ? Math.round((nv.calories * qty) / servingSize) : null;
+                    const multiplier = nv?.calories ? getMultiplier(qty, item.uom, servingSize, servingUnit, item.name, nv?.everydayWeight) : 0;
+                    const itemCal = nv?.calories ? Math.round(nv.calories * multiplier) : null;
 
                     return (
                       <div

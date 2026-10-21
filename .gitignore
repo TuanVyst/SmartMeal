@@ -368,3 +368,6 @@ FodyWeavers.xsd
 /Server/PresentationLayer/appsettings.json
 /PresentationLayer/appsettings.json
 .omp/mcp.json
+scripts/fix_units_and_nutrition_30_recipes.sql
+/docs
+*.md

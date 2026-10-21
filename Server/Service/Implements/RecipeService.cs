@@ -1,4 +1,5 @@
 
+using BusinessObject.Helpers;
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
@@ -307,12 +308,17 @@ namespace Service.Implements
                             continue;
 
                         var servingSize = nv.ServingSize ?? 100.0;
-
                         if (servingSize <= 0)
                             servingSize = 100.0;
 
-                        var multiplier = ri.Quantity / servingSize;
-
+                        var multiplier = UnitConverter.GetMultiplier(
+                            ri.Quantity,
+                            ri.UOM,
+                            servingSize,
+                            nv.ServingUnit,
+                            ri.Ingredient?.Name,
+                            nv.EverydayWeight
+                        );
                         totalCal += nv.Calories * multiplier;
                         totalPro += (nv.Protein ?? 0) * multiplier;
                         totalCarb += (nv.Carbs ?? 0) * multiplier;

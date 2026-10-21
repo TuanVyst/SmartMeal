@@ -418,6 +418,18 @@
   background: #e2e8f0;
 }
 
+.google-login-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.google-login-wrapper > div {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
 .btn-google {
   display: flex;
   align-items: center;

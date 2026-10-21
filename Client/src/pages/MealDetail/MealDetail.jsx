@@ -5,6 +5,7 @@ import { FaUtensils } from 'react-icons/fa';
 import { BsCheckCircle } from 'react-icons/bs';
 import { useFavorite } from '../../context/FavoriteContext';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
+import { getMultiplier } from '../../utils/unitConverter';
 import { recipeService } from '../../services/recipeService';
 import DiaryEntryDrawer from '../../components/common/DiaryEntryDrawer';
 import HealthWarningPopup from '../../components/common/HealthWarningPopup';
@@ -112,8 +113,9 @@ export default function MealDetail() {
             let nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0 };
             const nv = ri.nutritionalValue || ri.NutritionalValue;
             if (nv) {
-              const servingSize = nv.servingSize || nv.ServingSize || 1;
-              const multiplier = quantity / servingSize;
+              const servingSize = nv.servingSize || nv.ServingSize || 100;
+              const servingUnit = nv.servingUnit || nv.ServingUnit || 'g';
+              const multiplier = getMultiplier(quantity, uom, servingSize, servingUnit, ingName, nv.everydayWeight || nv.EverydayWeight);
               nutrition = {
                 calories: Math.round((nv.calories || nv.Calories || 0) * multiplier * 10) / 10,
                 protein: Math.round((nv.protein || nv.Protein || 0) * multiplier * 10) / 10,
