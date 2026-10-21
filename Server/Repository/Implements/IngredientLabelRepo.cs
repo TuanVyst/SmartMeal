@@ -35,6 +35,7 @@ namespace Repository.Implements
         {
             _ctx.IngredientLabels.Add(ingredientLabel);
             await _ctx.SaveChangesAsync();
+            IngredientRepo.InvalidateCache();
             return ingredientLabel;
         }
 
@@ -42,6 +43,7 @@ namespace Repository.Implements
         {
             _ctx.IngredientLabels.Update(ingredientLabel);
             await _ctx.SaveChangesAsync();
+            IngredientRepo.InvalidateCache();
             return ingredientLabel;
         }
 
@@ -53,6 +55,7 @@ namespace Repository.Implements
             ingredientLabel.IsDeleted = true;
             _ctx.IngredientLabels.Update(ingredientLabel);
             await _ctx.SaveChangesAsync();
+            IngredientRepo.InvalidateCache();
             return ingredientLabel;
         }
     }

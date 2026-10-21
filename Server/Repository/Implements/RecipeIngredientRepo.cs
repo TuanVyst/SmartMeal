@@ -41,6 +41,7 @@ namespace Repository.Implements
         {
             _ctx.RecipeIngredients.Add(recipeIngredient);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
             return recipeIngredient;
         }
 
@@ -50,12 +51,14 @@ namespace Repository.Implements
                 return;
             _ctx.RecipeIngredients.AddRange(recipeIngredients);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
         }
 
         public async Task<RecipeIngredient> UpdateRecipeIngredient(RecipeIngredient recipeIngredient)
         {
             _ctx.RecipeIngredients.Update(recipeIngredient);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
             return recipeIngredient;
         }
 
@@ -67,6 +70,7 @@ namespace Repository.Implements
             recipeIngredient.IsDeleted = true;
             _ctx.RecipeIngredients.Update(recipeIngredient);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
             return recipeIngredient;
         }
     }

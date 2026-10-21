@@ -20,16 +20,23 @@ namespace Repository.Implements
         public async Task<MealPlan> GetActivePlanByAccountId(Guid accountId)
         {
             return await _context.MealPlans
-                .Include(mp => mp.Days)
-                    .ThenInclude(d => d.Entries)
+                .AsSplitQuery()
+                .Include(mp => mp.Days.Where(d => !d.IsDeleted))
+                    .ThenInclude(d => d.Entries.Where(e => !e.IsDeleted))
                         .ThenInclude(e => e.Recipe)
-                            .ThenInclude(r => r.RecipeIngredients)
+                            .ThenInclude(r => r.RecipeIngredients.Where(ri => !ri.IsDeleted))
                                 .ThenInclude(ri => ri.Ingredient)
-                .Include(mp => mp.Days)
-                    .ThenInclude(d => d.Entries)
-                        .ThenInclude(e => e.Recipe)
-                            .ThenInclude(r => r.RecipeLabels)
-                                .ThenInclude(rl => rl.RecipeTag)
+                .Where(mp => mp.Account_id == accountId && mp.Status == "active" && !mp.IsDeleted)
+                .OrderByDescending(mp => mp.GeneratedAt)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<MealPlan> GetActivePlanLightByAccountId(Guid accountId)
+        {
+            return await _context.MealPlans
+                .AsSplitQuery()
+                .Include(mp => mp.Days.Where(d => !d.IsDeleted))
+                    .ThenInclude(d => d.Entries.Where(e => !e.IsDeleted))
                 .Where(mp => mp.Account_id == accountId && mp.Status == "active" && !mp.IsDeleted)
                 .OrderByDescending(mp => mp.GeneratedAt)
                 .FirstOrDefaultAsync();
@@ -38,24 +45,22 @@ namespace Repository.Implements
         public async Task<MealPlan> GetPlanById(Guid planId)
         {
             return await _context.MealPlans
-                .Include(mp => mp.Days)
-                    .ThenInclude(d => d.Entries)
+                .AsSplitQuery()
+                .Include(mp => mp.Days.Where(d => !d.IsDeleted))
+                    .ThenInclude(d => d.Entries.Where(e => !e.IsDeleted))
                         .ThenInclude(e => e.Recipe)
-                            .ThenInclude(r => r.RecipeIngredients)
+                            .ThenInclude(r => r.RecipeIngredients.Where(ri => !ri.IsDeleted))
                                 .ThenInclude(ri => ri.Ingredient)
-                .Include(mp => mp.Days)
-                    .ThenInclude(d => d.Entries)
-                        .ThenInclude(e => e.Recipe)
-                            .ThenInclude(r => r.RecipeLabels)
-                                .ThenInclude(rl => rl.RecipeTag)
                 .FirstOrDefaultAsync(mp => mp.MealPlan_id == planId && !mp.IsDeleted);
         }
 
         public async Task<List<MealPlan>> GetAllPlansByAccountId(Guid accountId)
         {
             return await _context.MealPlans
-                .Include(mp => mp.Days)
-                    .ThenInclude(d => d.Entries)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(mp => mp.Days.Where(d => !d.IsDeleted))
+                    .ThenInclude(d => d.Entries.Where(e => !e.IsDeleted))
                         .ThenInclude(e => e.Recipe)
                 .Where(mp => mp.Account_id == accountId && mp.Status == "active" && !mp.IsDeleted)
                 .OrderByDescending(mp => mp.GeneratedAt)
@@ -71,13 +76,6 @@ namespace Repository.Implements
 
         public async Task UpdatePlan(MealPlan plan)
         {
-            foreach (var entry in _context.ChangeTracker.Entries())
-            {
-                if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
-                {
-                    Console.WriteLine($"[DEBUG EF] Entity: {entry.Entity.GetType().Name}, State: {entry.State}");
-                }
-            }
             await _context.SaveChangesAsync();
         }
 
@@ -102,7 +100,6 @@ namespace Repository.Implements
         public async Task AddEntry(MealPlanEntry entry)
         {
             await _context.MealPlanEntries.AddAsync(entry);
-            // Don't call SaveChangesAsync here because MealPlanningService handles it
         }
 
         public async Task<List<MealPlanDay>> GetDaysByDateRange(Guid accountId, DateTime startDate, DateTime endDate)
@@ -110,15 +107,9 @@ namespace Repository.Implements
             var startOnly = startDate.Date;
             var endOnly = endDate.Date;
             return await _context.MealPlanDays
-                .Include(d => d.MealPlan)
-                .Include(d => d.Entries)
-                    .ThenInclude(e => e.Recipe)
-                        .ThenInclude(r => r.RecipeIngredients)
-                            .ThenInclude(ri => ri.Ingredient)
-                .Include(d => d.Entries)
-                    .ThenInclude(e => e.Recipe)
-                        .ThenInclude(r => r.RecipeLabels)
-                            .ThenInclude(rl => rl.RecipeTag)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(d => d.Entries.Where(e => !e.IsDeleted))
                 .Where(d => !d.IsDeleted
                          && !d.MealPlan.IsDeleted
                          && d.MealPlan.Status == "active"
@@ -138,6 +129,19 @@ namespace Repository.Implements
         public async Task AddDay(MealPlanDay day)
         {
             await _context.MealPlanDays.AddAsync(day);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveBatchAsync(List<MealPlanDay> newDays, List<MealPlanEntry> newEntries)
+        {
+            if (newDays != null && newDays.Count > 0)
+            {
+                await _context.MealPlanDays.AddRangeAsync(newDays);
+            }
+            if (newEntries != null && newEntries.Count > 0)
+            {
+                await _context.MealPlanEntries.AddRangeAsync(newEntries);
+            }
             await _context.SaveChangesAsync();
         }
     }

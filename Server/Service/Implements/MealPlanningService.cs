@@ -684,10 +684,10 @@ namespace Service.Implements
             double lunchCal = targetCalories * 0.40;
             double dinnerCal = targetCalories * 0.35;
 
-            // Find or create a plan for this date range
-            var existingPlan = await _mealPlanRepo.GetActivePlanByAccountId(accountId);
+            // Find or create a plan for this date range (lightweight query without 7-table join)
+            var existingPlan = await _mealPlanRepo.GetActivePlanLightByAccountId(accountId);
             
-            // Collect already used recipe ids for this date
+            // Collect already used recipe ids
             var usedRecipeIds = new HashSet<Guid>();
             if (existingPlan?.Days != null)
             {
@@ -706,7 +706,6 @@ namespace Service.Implements
             var random = new Random();
             var dateOnly = targetDate.Date;
             
-            // Check if there's already a day for this date in the existing plan
             MealPlanDay existingDay = null;
             if (existingPlan?.Days != null)
             {
@@ -717,8 +716,7 @@ namespace Service.Implements
 
             if (existingDay == null)
             {
-                // Create new day
-                int nextDayIndex = (existingPlan?.Days?.Max(d => d.DayIndex) ?? 0) + 1;
+                int nextDayIndex = (existingPlan?.Days?.Any() == true ? existingPlan.Days.Max(d => d.DayIndex) : 0) + 1;
                 DateTime dayDate = DateTime.SpecifyKind(dateOnly, DateTimeKind.Utc);
 
                 var newDay = new MealPlanDay
@@ -774,28 +772,25 @@ namespace Service.Implements
                 }
                 else
                 {
-                    await _mealPlanRepo.AddDay(newDay);
-                    
                     if (dayDate > existingPlan.EndDate || !existingPlan.EndDate.HasValue)
                     {
                         existingPlan.EndDate = dayDate;
                     }
                     existingPlan.TotalDays = Math.Max(existingPlan.TotalDays, nextDayIndex);
-                    await _mealPlanRepo.UpdatePlan(existingPlan);
+                    await _mealPlanRepo.SaveBatchAsync(new List<MealPlanDay> { newDay }, null);
                 }
             }
             else
             {
-                // existingDay already exists in DB - insert new entries directly without modifying existingDay in memory
                 var existingSlots = existingDay.Entries?.Select(e => e.MealSlot).ToHashSet() ?? new HashSet<string>();
+                var newEntries = new List<MealPlanEntry>();
 
                 if (selectedMeals.Contains("breakfast") && !existingSlots.Contains("breakfast"))
                 {
                     var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random, focus);
                     if (bRecipe != null)
                     {
-                        var entry = CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1);
-                        await _mealPlanRepo.SaveEntryDirectly(entry);
+                        newEntries.Add(CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1));
                         usedRecipeIds.Add(bRecipe.Recipe_id);
                     }
                 }
@@ -805,8 +800,7 @@ namespace Service.Implements
                     var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random, focus);
                     if (lRecipe != null)
                     {
-                        var entry = CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2);
-                        await _mealPlanRepo.SaveEntryDirectly(entry);
+                        newEntries.Add(CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2));
                         usedRecipeIds.Add(lRecipe.Recipe_id);
                     }
                 }
@@ -816,10 +810,14 @@ namespace Service.Implements
                     var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random, focus);
                     if (dRecipe != null)
                     {
-                        var entry = CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3);
-                        await _mealPlanRepo.SaveEntryDirectly(entry);
+                        newEntries.Add(CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3));
                         usedRecipeIds.Add(dRecipe.Recipe_id);
                     }
+                }
+
+                if (newEntries.Count > 0)
+                {
+                    await _mealPlanRepo.SaveBatchAsync(null, newEntries);
                 }
             }
 
@@ -879,7 +877,7 @@ namespace Service.Implements
             double lunchCal = targetCalories * 0.40;
             double dinnerCal = targetCalories * 0.35;
 
-            var existingPlan = await _mealPlanRepo.GetActivePlanByAccountId(accountId);
+            var existingPlan = await _mealPlanRepo.GetActivePlanLightByAccountId(accountId);
             var usedRecipeIds = new HashSet<Guid>();
             if (existingPlan?.Days != null)
             {
@@ -898,23 +896,39 @@ namespace Service.Implements
             var random = new Random();
             var selectedMeals = meals?.Select(m => m.ToLower()).ToHashSet() ?? new HashSet<string> { "breakfast", "lunch", "dinner" };
 
+            bool isNewPlan = existingPlan == null;
+            if (isNewPlan)
+            {
+                var firstDayDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
+                existingPlan = new MealPlan
+                {
+                    MealPlan_id = Guid.NewGuid(),
+                    Account_id = accountId,
+                    Status = "active",
+                    StartDate = firstDayDate,
+                    EndDate = firstDayDate,
+                    TotalDays = 0,
+                    Days = new List<MealPlanDay>()
+                };
+            }
+
+            int currentMaxDayIndex = existingPlan.Days?.Any() == true ? existingPlan.Days.Max(d => d.DayIndex) : 0;
+            var newDaysToInsert = new List<MealPlanDay>();
+            var newEntriesToInsert = new List<MealPlanEntry>();
+
             for (var curDate = startDate.Date; curDate <= endDate.Date; curDate = curDate.AddDays(1))
             {
                 DateTime dayDate = DateTime.SpecifyKind(curDate, DateTimeKind.Utc);
-                MealPlanDay existingDay = null;
-                if (existingPlan?.Days != null)
-                {
-                    existingDay = existingPlan.Days.FirstOrDefault(d => d.DayDate.Date == curDate);
-                }
+                MealPlanDay existingDay = existingPlan.Days?.FirstOrDefault(d => d.DayDate.Date == curDate);
 
                 if (existingDay == null)
                 {
-                    int nextDayIndex = (existingPlan?.Days?.Max(d => d.DayIndex) ?? 0) + 1;
+                    currentMaxDayIndex++;
                     var newDay = new MealPlanDay
                     {
                         Day_id = Guid.NewGuid(),
-                        MealPlan_id = existingPlan?.MealPlan_id ?? Guid.NewGuid(),
-                        DayIndex = nextDayIndex,
+                        MealPlan_id = existingPlan.MealPlan_id,
+                        DayIndex = currentMaxDayIndex,
                         DayDate = dayDate,
                         Entries = new List<MealPlanEntry>()
                     };
@@ -947,38 +961,24 @@ namespace Service.Implements
                         }
                     }
 
-                    if (existingPlan == null)
+                    if (isNewPlan)
                     {
-                        existingPlan = new MealPlan
-                        {
-                            MealPlan_id = newDay.MealPlan_id,
-                            Account_id = accountId,
-                            Status = "active",
-                            StartDate = dayDate,
-                            EndDate = dayDate,
-                            TotalDays = 1,
-                            Days = new List<MealPlanDay> { newDay }
-                        };
-                        await _mealPlanRepo.AddPlan(existingPlan);
+                        existingPlan.Days.Add(newDay);
                     }
                     else
                     {
-                        newDay.MealPlan_id = existingPlan.MealPlan_id;
-                        await _mealPlanRepo.AddDay(newDay);
-                        if (existingPlan.Days == null) existingPlan.Days = new List<MealPlanDay>();
-                        existingPlan.Days.Add(newDay);
-
-                        if (dayDate > existingPlan.EndDate || !existingPlan.EndDate.HasValue)
-                        {
-                            existingPlan.EndDate = dayDate;
-                        }
-                        if (dayDate < existingPlan.StartDate || !existingPlan.StartDate.HasValue)
-                        {
-                            existingPlan.StartDate = dayDate;
-                        }
-                        existingPlan.TotalDays = Math.Max(existingPlan.TotalDays, nextDayIndex);
-                        await _mealPlanRepo.UpdatePlan(existingPlan);
+                        newDaysToInsert.Add(newDay);
                     }
+
+                    if (dayDate > existingPlan.EndDate || !existingPlan.EndDate.HasValue)
+                    {
+                        existingPlan.EndDate = dayDate;
+                    }
+                    if (dayDate < existingPlan.StartDate || !existingPlan.StartDate.HasValue)
+                    {
+                        existingPlan.StartDate = dayDate;
+                    }
+                    existingPlan.TotalDays = Math.Max(existingPlan.TotalDays, currentMaxDayIndex);
                 }
                 else
                 {
@@ -989,8 +989,7 @@ namespace Service.Implements
                         var bRecipe = SelectBestRecipe(validRecipes, breakfastCal, profile, usedRecipeIds, random, focus);
                         if (bRecipe != null)
                         {
-                            var entry = CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1);
-                            await _mealPlanRepo.SaveEntryDirectly(entry);
+                            newEntriesToInsert.Add(CreateEntry(existingDay.Day_id, bRecipe, "breakfast", 1));
                             usedRecipeIds.Add(bRecipe.Recipe_id);
                         }
                     }
@@ -1000,8 +999,7 @@ namespace Service.Implements
                         var lRecipe = SelectBestRecipe(validRecipes, lunchCal, profile, usedRecipeIds, random, focus);
                         if (lRecipe != null)
                         {
-                            var entry = CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2);
-                            await _mealPlanRepo.SaveEntryDirectly(entry);
+                            newEntriesToInsert.Add(CreateEntry(existingDay.Day_id, lRecipe, "lunch", 2));
                             usedRecipeIds.Add(lRecipe.Recipe_id);
                         }
                     }
@@ -1011,12 +1009,20 @@ namespace Service.Implements
                         var dRecipe = SelectBestRecipe(validRecipes, dinnerCal, profile, usedRecipeIds, random, focus);
                         if (dRecipe != null)
                         {
-                            var entry = CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3);
-                            await _mealPlanRepo.SaveEntryDirectly(entry);
+                            newEntriesToInsert.Add(CreateEntry(existingDay.Day_id, dRecipe, "dinner", 3));
                             usedRecipeIds.Add(dRecipe.Recipe_id);
                         }
                     }
                 }
+            }
+
+            if (isNewPlan)
+            {
+                await _mealPlanRepo.AddPlan(existingPlan);
+            }
+            else if (newDaysToInsert.Count > 0 || newEntriesToInsert.Count > 0)
+            {
+                await _mealPlanRepo.SaveBatchAsync(newDaysToInsert, newEntriesToInsert);
             }
 
             return await GetWeekPlanAsync(accountId, startDate);
@@ -1030,6 +1036,8 @@ namespace Service.Implements
             DateTime sunday = DateTime.SpecifyKind(monday.AddDays(6), DateTimeKind.Utc);
 
             var daysInRange = await _mealPlanRepo.GetDaysByDateRange(accountId, monday, sunday);
+            var allRecipes = await _recipeRepo.GetAllRecipes();
+            var recipeMap = allRecipes.ToDictionary(r => r.Recipe_id);
 
             var userPantry = await _pantryRepo.GetPantryByAccountId(accountId);
             var pantryIngredients = userPantry.Select(p => p.Ingredient_id).ToHashSet();
@@ -1041,20 +1049,14 @@ namespace Service.Implements
 
             for (int i = 0; i < 7; i++)
             {
-                // IMPORTANT: .Date strips DateTimeKind, causing JSON to serialize without Z.
-                // JS then parses as local time (UTC+7), and toISOString shifts back 7h to previous day.
-                // Re-apply Utc kind to ensure "Z" suffix in JSON output.
                 var curDate = DateTime.SpecifyKind(monday.AddDays(i).Date, DateTimeKind.Utc);
                 var matchingDays = daysInRange.Where(d => d.DayDate.Date == curDate).ToList();
 
-                // Collect all non-deleted entries from all matching days, then deduplicate by MealSlot
-                // (keep the latest entry per slot to avoid showing duplicates when multiple MealPlanDay rows
-                // exist for the same date, which can happen if the user generated suggestions multiple times)
                 var allRawEntries = matchingDays
                     .SelectMany(d => d.Entries ?? new List<MealPlanEntry>())
                     .Where(e => !e.IsDeleted)
                     .GroupBy(e => (e.MealSlot ?? "").ToLower())
-                    .Select(g => g.OrderByDescending(e => e.Entry_id).First()) // keep newest per slot
+                    .Select(g => g.OrderByDescending(e => e.Entry_id).First())
                     .OrderBy(e => e.SortOrder)
                     .ToList();
 
@@ -1069,9 +1071,11 @@ namespace Service.Implements
                     dayFat += e.SlotFat;
                     dayFiber += e.SlotFiber;
 
-                    if (e.Recipe?.RecipeIngredients != null)
+                    var recipe = e.Recipe ?? (recipeMap.TryGetValue(e.Recipe_id, out var cachedRec) ? cachedRec : null);
+
+                    if (recipe?.RecipeIngredients != null)
                     {
-                        foreach (var ri in e.Recipe.RecipeIngredients)
+                        foreach (var ri in recipe.RecipeIngredients)
                         {
                             if (ri.Ingredient != null)
                             {
@@ -1103,16 +1107,16 @@ namespace Service.Implements
                     {
                         Entry_id = e.Entry_id,
                         Recipe_id = e.Recipe_id,
-                        RecipeName = e.Recipe?.Recipe_name ?? "Unknown",
-                        RecipeImage = !string.IsNullOrWhiteSpace(e.Recipe?.ImageUrl) ? e.Recipe.ImageUrl : e.Recipe?.Recipe_name,
+                        RecipeName = recipe?.Recipe_name ?? "Unknown",
+                        RecipeImage = !string.IsNullOrWhiteSpace(recipe?.ImageUrl) ? recipe.ImageUrl : recipe?.Recipe_name,
                         MealSlot = e.MealSlot,
                         SlotCalories = Math.Round(e.SlotCalories),
                         SlotProtein = Math.Round(e.SlotProtein),
                         SlotCarbs = Math.Round(e.SlotCarbs),
                         SlotFat = Math.Round(e.SlotFat),
                         SlotFiber = Math.Round(e.SlotFiber),
-                        CookTime = e.Recipe?.CookTime ?? 0,
-                        Difficulty = e.Recipe?.Difficulty ?? "easy",
+                        CookTime = recipe?.CookTime ?? 0,
+                        Difficulty = recipe?.Difficulty ?? "easy",
                         IsLogged = isLogged
                     });
                 }

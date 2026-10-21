@@ -35,6 +35,7 @@ namespace Repository.Implements
         public async Task<List<Pantry>> GetPantryByAccountId(Guid accountId)
         {
             return await _ctx.Pantries
+                .AsNoTracking()
                 .Include(p => p.Ingredient)
                 .Where(p => p.Account_id == accountId)
                 .ToListAsync();

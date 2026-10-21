@@ -7,6 +7,7 @@ namespace Repository.Interfaces
     public interface IAllergyRepo
     {
         Task<List<Allergy>> GetAllAllergies();
+        Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId);
         Task<Allergy?> GetAllergyById(Guid id);
         Task<Allergy> CreateAllergy(Allergy allergy);
         Task<Allergy> UpdateAllergy(Allergy allergy);

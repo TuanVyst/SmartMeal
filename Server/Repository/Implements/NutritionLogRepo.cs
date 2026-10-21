@@ -17,16 +17,28 @@ namespace Repository.Implements
         public async Task<List<NutritionLog>> GetAllNutritionLogs()
         {
             return await _ctx.NutritionLogs
-                .Include(x => x.Account)
+                .AsNoTracking()
                 .Include(x => x.Recipe)
                 .Include(x => x.Ingredient)
                 .Where(x => x.IsDeleted == false)
                 .ToListAsync();
         }
 
+        public async Task<List<NutritionLog>> GetNutritionLogsByAccountId(Guid accountId)
+        {
+            return await _ctx.NutritionLogs
+                .AsNoTracking()
+                .Include(x => x.Recipe)
+                .Include(x => x.Ingredient)
+                .Where(x => x.IsDeleted == false && x.Account_id == accountId)
+                .OrderByDescending(x => x.LogDate)
+                .ToListAsync();
+        }
+
         public async Task<List<NutritionLog>> GetNutritionLogsByAccountAndDate(Guid accountId, DateTime date)
         {
             return await _ctx.NutritionLogs
+                .AsNoTracking()
                 .Include(x => x.Recipe)
                 .Where(x => x.IsDeleted == false
                     && x.Account_id == accountId
@@ -37,7 +49,7 @@ namespace Repository.Implements
         public async Task<List<NutritionLog>> GetNutritionLogsByAccountAndDateRange(Guid accountId, DateTime startDate, DateTime endDate)
         {
             return await _ctx.NutritionLogs
-                .Include(x => x.Recipe)
+                .AsNoTracking()
                 .Where(x => x.IsDeleted == false
                     && x.Account_id == accountId
                     && x.LogDate.Date >= startDate.Date

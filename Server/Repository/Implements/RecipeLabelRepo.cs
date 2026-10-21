@@ -33,6 +33,7 @@ namespace Repository.Implements
         {
             _ctx.RecipeLabels.Add(recipeLabel);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
             return recipeLabel;
         }
 
@@ -42,12 +43,14 @@ namespace Repository.Implements
                 return;
             _ctx.RecipeLabels.AddRange(recipeLabels);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
         }
 
         public async Task<RecipeLabel> UpdateRecipeLabel(RecipeLabel recipeLabel)
         {
             _ctx.RecipeLabels.Update(recipeLabel);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
             return recipeLabel;
         }
 
@@ -59,6 +62,7 @@ namespace Repository.Implements
             recipeLabel.IsDeleted = true;
             _ctx.RecipeLabels.Update(recipeLabel);
             await _ctx.SaveChangesAsync();
+            RecipeRepo.InvalidateCache();
             return recipeLabel;
         }
     }

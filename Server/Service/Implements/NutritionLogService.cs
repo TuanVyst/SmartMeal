@@ -34,6 +34,10 @@ namespace Service.Implements
             return await _nutritionLogRepo.GetAllNutritionLogs();
         }
 
+        public async Task<List<NutritionLog>> GetNutritionLogsByAccountId(Guid accountId)
+        {
+            return await _nutritionLogRepo.GetNutritionLogsByAccountId(accountId);
+        }
         public async Task<List<NutritionLog>> GetNutritionLogsByAccountAndDate(Guid accountId, DateTime date)
         {
             return await _nutritionLogRepo.GetNutritionLogsByAccountAndDate(accountId, date);

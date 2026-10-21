@@ -6,9 +6,8 @@ namespace Service.Interfaces
     public interface INutritionLogService
     {
         Task<List<NutritionLog>> GetAllNutritionLogs();
-
+        Task<List<NutritionLog>> GetNutritionLogsByAccountId(Guid accountId);
         Task<NutritionLog> GetNutritionLogById(Guid id);
-
         Task<List<NutritionLog>> GetNutritionLogsByAccountAndDate(Guid accountId, DateTime date);
 
         Task<List<NutritionLog>> GetNutritionLogsByAccountAndDateRange(Guid accountId, DateTime startDate, DateTime endDate);

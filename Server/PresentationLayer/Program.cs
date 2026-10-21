@@ -248,6 +248,11 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<DataAccessLayer.AppDbContext>();
     await DbInitializer.Initialize(dbContext);
+
+    var recipeRepo = scope.ServiceProvider.GetRequiredService<Repository.Interfaces.IRecipeRepo>();
+    var ingredientRepo = scope.ServiceProvider.GetRequiredService<Repository.Interfaces.IIngredientRepo>();
+    await recipeRepo.GetAllRecipes();
+    await ingredientRepo.GetAllIngredients();
 }
 
 

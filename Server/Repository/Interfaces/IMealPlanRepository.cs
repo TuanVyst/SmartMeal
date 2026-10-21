@@ -8,6 +8,7 @@ namespace Repository.Interfaces
     public interface IMealPlanRepository
     {
         Task<MealPlan> GetActivePlanByAccountId(Guid accountId);
+        Task<MealPlan> GetActivePlanLightByAccountId(Guid accountId);
         Task<MealPlan> GetPlanById(Guid planId);
         Task<List<MealPlan>> GetAllPlansByAccountId(Guid accountId);
         Task<MealPlan> AddPlan(MealPlan plan);
@@ -19,5 +20,6 @@ namespace Repository.Interfaces
         Task<List<MealPlanDay>> GetDaysByDateRange(Guid accountId, DateTime startDate, DateTime endDate);
         Task SaveEntryDirectly(MealPlanEntry entry);
         Task AddDay(MealPlanDay day);
+        Task SaveBatchAsync(List<MealPlanDay> newDays, List<MealPlanEntry> newEntries);
     }
 }

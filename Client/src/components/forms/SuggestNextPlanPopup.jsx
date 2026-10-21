@@ -15,7 +15,6 @@ import {
   FiSun,
   FiMoon,
   FiPlus,
-  FiCheck,
 } from 'react-icons/fi';
 
 const ACTIVITY_OPTIONS = [
@@ -237,6 +236,7 @@ export default function SuggestNextPlanPopup({ onClose }) {
           date: startDate,
           endDate: endDate,
           numDays: numDays,
+          planData: res.data.data,
         });
       }
     } catch (err) {

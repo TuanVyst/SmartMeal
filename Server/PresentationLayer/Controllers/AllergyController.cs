@@ -26,11 +26,9 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var items = await _allergyService.GetAllAllergies();
-                if (accountId.HasValue)
-                {
-                    items = items.Where(x => x.Account_id == accountId.Value).ToList();
-                }
+                var items = accountId.HasValue
+                    ? await _allergyService.GetAllergiesByAccountId(accountId.Value)
+                    : await _allergyService.GetAllAllergies();
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
