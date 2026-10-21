@@ -23,7 +23,7 @@ namespace Repository.Implements
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Include(i => i.Nutritional_value)
-                .Include(i => i.IngredientLabels).ThenInclude(il => il.Ingredient_tag)
+                .Include(i => i.IngredientLabels.Where(il => !il.IsDeleted)).ThenInclude(il => il.Ingredient_tag)
                 .Where(i => i.IsDeleted == false)
                 .OrderBy(i => i.Name)
                 .ToListAsync();
@@ -44,7 +44,10 @@ namespace Repository.Implements
 
         public async Task<Ingredient> UpdateIngredient(Ingredient ingredient)
         {
-            _ctx.Ingredients.Update(ingredient);
+            if (_ctx.Entry(ingredient).State == EntityState.Detached)
+            {
+                _ctx.Ingredients.Update(ingredient);
+            }
             await _ctx.SaveChangesAsync();
             return ingredient;
         }

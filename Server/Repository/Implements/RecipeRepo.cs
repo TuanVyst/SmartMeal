@@ -23,8 +23,8 @@ namespace Repository.Implements
             return await _ctx.Recipes
                 .AsNoTracking()
                 .AsSplitQuery()
-                .Include(r => r.RecipeLabels).ThenInclude(rl => rl.RecipeTag)
-                .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient).ThenInclude(i => i.Nutritional_value)
+                .Include(r => r.RecipeLabels.Where(rl => !rl.IsDeleted)).ThenInclude(rl => rl.RecipeTag)
+                .Include(r => r.RecipeIngredients.Where(ri => !ri.IsDeleted)).ThenInclude(ri => ri.Ingredient).ThenInclude(i => i.Nutritional_value)
                 .Where(i => i.IsDeleted == false)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -47,7 +47,10 @@ namespace Repository.Implements
 
         public async Task<Recipe> UpdateRecipe(Recipe recipe)
         {
-            _ctx.Recipes.Update(recipe);
+            if (_ctx.Entry(recipe).State == EntityState.Detached)
+            {
+                _ctx.Recipes.Update(recipe);
+            }
             await _ctx.SaveChangesAsync();
             return recipe;
         }
