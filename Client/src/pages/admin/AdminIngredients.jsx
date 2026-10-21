@@ -10,6 +10,7 @@ export default function AdminIngredients() {
   const [ingredients, setIngredients] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
   const [ingredientFormData, setIngredientFormData] = useState({
     name: '',
@@ -33,27 +34,34 @@ export default function AdminIngredients() {
   const [availableIngredientTags, setAvailableIngredientTags] = useState([]);
 
   useEffect(() => {
-    fetchAllData(true);
-  }, []);
+    let ignore = false;
+    const loadInitialData = async () => {
+      try {
+        const [ingredientsData, tagsData] = await Promise.all([
+          adminService.getAllIngredients(),
+          adminService.getAllIngredientTags()
+        ]);
+        if (!ignore) {
+          setIngredients(ingredientsData || []);
+          setAvailableIngredientTags(tagsData || []);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
 
-  const fetchAllData = async (isInitial = false) => {
-    try {
-      if (isInitial) setLoading(true);
-      const [ingredientsData, tagsData] = await Promise.all([
-        adminService.getAllIngredients(),
-        adminService.getAllIngredientTags()
-      ]);
-      setIngredients(ingredientsData || []);
-      setAvailableIngredientTags(tagsData || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      if (isInitial) setLoading(false);
-    }
-  };
+    loadInitialData();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleIngredientSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
     try {
       const payload = {
         name: ingredientFormData.name,
@@ -77,15 +85,29 @@ export default function AdminIngredients() {
       };
 
       if (editingIngredient) {
-        await adminService.updateIngredient(editingIngredient.ingredient_id || editingIngredient.id, payload);
+        const targetId = editingIngredient.ingredient_id || editingIngredient.id;
+        const res = await adminService.updateIngredient(targetId, payload);
+        const updatedIngredient = res?.data || res;
+        if (updatedIngredient) {
+          setIngredients((prev) =>
+            prev.map((ing) =>
+              (ing.ingredient_id || ing.id) === targetId ? updatedIngredient : ing
+            )
+          );
+        }
       } else {
-        await adminService.createIngredient(payload);
+        const res = await adminService.createIngredient(payload);
+        const createdIngredient = res?.data || res;
+        if (createdIngredient) {
+          setIngredients((prev) => [...prev, createdIngredient]);
+        }
       }
-      fetchAllData();
       closeIngredientModal();
     } catch (error) {
       console.error('Error saving ingredient:', error);
       dialog.error('Lỗi', 'Lỗi khi lưu nguyên liệu. Xem console để biết thêm chi tiết.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -120,13 +142,17 @@ export default function AdminIngredients() {
   };
 
   const handleDeleteIngredient = async (id) => {
+    if (saving) return;
     const ok = await dialog.confirm({ title: 'Xóa nguyên liệu?', message: 'Bạn có chắc chắn muốn xóa nguyên liệu này?', confirmLabel: 'Xóa', danger: true });
     if (!ok) return;
+    setSaving(true);
     try {
       await adminService.deleteIngredient(id);
-      fetchAllData();
+      setIngredients((prev) => prev.filter((ing) => (ing.ingredient_id || ing.id) !== id));
     } catch (error) {
       console.error('Error deleting ingredient:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -419,11 +445,11 @@ export default function AdminIngredients() {
               </div>
 
               <div className="modal-actions" style={{ marginTop: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={closeIngredientModal}>
+                <button type="button" className="btn btn-secondary" onClick={closeIngredientModal} disabled={saving}>
                   Hủy
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingIngredient ? 'Cập nhật' : 'Thêm mới'}
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? 'Đang lưu...' : (editingIngredient ? 'Cập nhật' : 'Thêm mới')}
                 </button>
               </div>
             </form>

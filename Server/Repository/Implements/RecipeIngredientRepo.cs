@@ -44,6 +44,14 @@ namespace Repository.Implements
             return recipeIngredient;
         }
 
+        public async Task CreateRecipeIngredients(List<RecipeIngredient> recipeIngredients)
+        {
+            if (recipeIngredients == null || recipeIngredients.Count == 0)
+                return;
+            _ctx.RecipeIngredients.AddRange(recipeIngredients);
+            await _ctx.SaveChangesAsync();
+        }
+
         public async Task<RecipeIngredient> UpdateRecipeIngredient(RecipeIngredient recipeIngredient)
         {
             _ctx.RecipeIngredients.Update(recipeIngredient);

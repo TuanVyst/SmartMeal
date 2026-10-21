@@ -36,6 +36,14 @@ namespace Repository.Implements
             return recipeLabel;
         }
 
+        public async Task CreateRecipeLabels(List<RecipeLabel> recipeLabels)
+        {
+            if (recipeLabels == null || recipeLabels.Count == 0)
+                return;
+            _ctx.RecipeLabels.AddRange(recipeLabels);
+            await _ctx.SaveChangesAsync();
+        }
+
         public async Task<RecipeLabel> UpdateRecipeLabel(RecipeLabel recipeLabel)
         {
             _ctx.RecipeLabels.Update(recipeLabel);

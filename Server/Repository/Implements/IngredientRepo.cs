@@ -20,13 +20,10 @@ namespace Repository.Implements
         public async Task<List<Ingredient>> GetAllIngredients()
         {
             return await _ctx.Ingredients
+                .AsNoTracking()
+                .AsSplitQuery()
                 .Include(i => i.Nutritional_value)
-                .Include(i => i.AffiliateProducts)
-                .Include(i => i.Recipe_Ingredients)
                 .Include(i => i.IngredientLabels).ThenInclude(il => il.Ingredient_tag)
-                .Include(i => i.GroceryItems)
-                .Include(i => i.Pantries)
-                .Include(i => i.Allergy)
                 .Where(i => i.IsDeleted == false)
                 .OrderBy(i => i.Name)
                 .ToListAsync();
@@ -35,15 +32,9 @@ namespace Repository.Implements
         public async Task<Ingredient?> GetIngredientById(Guid id)
             => await _ctx.Ingredients
                 .Include(i => i.Nutritional_value)
-                .Include(i => i.AffiliateProducts)
-                .Include(i => i.Recipe_Ingredients)
                 .Include(i => i.IngredientLabels).ThenInclude(il => il.Ingredient_tag)
-                .Include(i => i.GroceryItems)
-                .Include(i => i.Pantries)
-                .Include(i => i.Allergy)
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.Ingredient_id == id);
-
         public async Task<Ingredient> CreateIngredient(Ingredient ingredient)
         {
             _ctx.Ingredients.Add(ingredient);
