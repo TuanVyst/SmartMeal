@@ -9,6 +9,7 @@ import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 import UpgradePaywallModal from '../../components/common/UpgradePaywallModal';
 import { useNutrientFocus, focusQueryParam, NUTRIENT_FOCUS_LABELS } from '../../utils/nutrientFocus';
+import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
 import './MealPlanSuggestion.css';
 
 const SLOT_LABELS = { breakfast: 'Bữa Sáng', lunch: 'Bữa Trưa', dinner: 'Bữa Tối' };
@@ -185,6 +186,43 @@ export default function MealPlanSuggestion() {
   };
 
   const handleLogMeal = async (entry, date) => {
+    const tempLogId = `optimistic-${entry.entry_id || entry.recipe_id || 'meal'}`;
+    const logDateIso = typeof date === 'string' ? date : new Date().toISOString();
+
+    // 1. Optimistic UI update on meal card (0ms)
+    setWeekPlan((prevPlan) => {
+      if (!prevPlan) return prevPlan;
+      const updated = {
+        ...prevPlan,
+        days: prevPlan.days.map((day) => ({
+          ...day,
+          entries: day.entries.map((e) =>
+            e.entry_id === entry.entry_id ? { ...e, isLogged: true } : e
+          ),
+        })),
+      };
+      writeCachedWeekPlan(accountId, currentWeekDate, updated);
+      return updated;
+    });
+
+    // 2. Optimistic update on macro circles & sidebar ring (0ms)
+    notifyNutritionUpdated({
+      deltaCalories: entry.slotCalories || 0,
+      optimisticLog: {
+        log_id: tempLogId,
+        recipe_id: entry.recipe_id,
+        mealType: entry.mealSlot,
+        quantity: 1,
+        logDate: logDateIso,
+        totalCalories: entry.slotCalories || 0,
+        totalProtein: entry.slotProtein || 0,
+        totalCarbs: entry.slotCarbs || 0,
+        totalFat: entry.slotFat || 0,
+        totalFiber: entry.slotFiber || null,
+      },
+    });
+    toast.success('Đã lưu vào nhật ký ăn uống!');
+
     try {
       const payload = {
         recipeId: entry.recipe_id,
@@ -199,28 +237,26 @@ export default function MealPlanSuggestion() {
       };
 
       await api.post('/nutrition-diary', payload);
-      toast.success('Đã lưu vào nhật ký ăn uống!');
-
-      setWeekPlan((prevPlan) => {
-        if (!prevPlan) return prevPlan;
-        return {
-          ...prevPlan,
-          days: prevPlan.days.map((day) => {
-            return {
-              ...day,
-              entries: day.entries.map((e) => {
-                if (e.entry_id === entry.entry_id) {
-                  return { ...e, isLogged: true };
-                }
-                return e;
-              }),
-            };
-          }),
-        };
-      });
+      notifyNutritionUpdated({ syncOnly: true });
     } catch (error) {
       console.error('Error logging meal:', error);
       toast.error(error.response?.data?.message || 'Không thể lưu vào nhật ký.');
+      // Rollback on failure
+      setWeekPlan((prevPlan) => {
+        if (!prevPlan) return prevPlan;
+        const rolledBack = {
+          ...prevPlan,
+          days: prevPlan.days.map((day) => ({
+            ...day,
+            entries: day.entries.map((e) =>
+              e.entry_id === entry.entry_id ? { ...e, isLogged: false } : e
+            ),
+          })),
+        };
+        writeCachedWeekPlan(accountId, currentWeekDate, rolledBack);
+        return rolledBack;
+      });
+      notifyNutritionUpdated({ rollbackLogId: tempLogId, syncOnly: true });
     }
   };
 

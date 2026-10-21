@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import Header from '../../components/layout/Header';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
-
+import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
 const s = {
   page: { minHeight: '100vh', background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%)', color: '#1E293B', fontFamily: "'Inter', sans-serif" },
   container: { maxWidth: 1200, margin: '0 auto', padding: '32px 24px' },
@@ -73,6 +73,39 @@ const MealPlanPage = () => {
   }, [navigate]);
 
   const handleLogMeal = async (entry, date) => {
+    const tempLogId = `optimistic-${entry.entry_id || entry.recipe_id || 'meal'}`;
+    const logDateIso = typeof date === 'string' ? date : new Date().toISOString();
+
+    setPlan((prevPlan) => {
+      if (!prevPlan) return prevPlan;
+      return {
+        ...prevPlan,
+        days: prevPlan.days.map((day) => ({
+          ...day,
+          entries: day.entries.map((e) =>
+            e.entry_id === entry.entry_id ? { ...e, isLogged: true } : e
+          ),
+        })),
+      };
+    });
+
+    notifyNutritionUpdated({
+      deltaCalories: entry.slotCalories || 0,
+      optimisticLog: {
+        log_id: tempLogId,
+        recipe_id: entry.recipe_id,
+        mealType: entry.mealSlot,
+        quantity: 1,
+        logDate: logDateIso,
+        totalCalories: entry.slotCalories || 0,
+        totalProtein: entry.slotProtein || 0,
+        totalCarbs: entry.slotCarbs || 0,
+        totalFat: entry.slotFat || 0,
+        totalFiber: entry.slotFiber || null,
+      },
+    });
+    toast.success('Đã lưu vào nhật ký ăn uống!');
+
     try {
       const payload = {
         recipeId: entry.recipe_id,
@@ -87,26 +120,11 @@ const MealPlanPage = () => {
       };
 
       await api.post('/nutrition-diary', payload);
-      toast.success('Đã lưu vào nhật ký ăn uống!');
-
-      setPlan((prevPlan) => {
-        if (!prevPlan) return prevPlan;
-        return {
-          ...prevPlan,
-          days: prevPlan.days.map((day) => ({
-            ...day,
-            entries: day.entries.map((e) => {
-              if (e.entry_id === entry.entry_id) {
-                return { ...e, isLogged: true };
-              }
-              return e;
-            }),
-          })),
-        };
-      });
+      notifyNutritionUpdated({ syncOnly: true });
     } catch (error) {
       console.error('Error logging meal:', error);
       toast.error(error.response?.data?.message || 'Không thể lưu vào nhật ký.');
+      notifyNutritionUpdated({ rollbackLogId: tempLogId, syncOnly: true });
     }
   };
 

@@ -116,95 +116,95 @@ namespace Service.Implements
 
         private async Task CalculateNutritionTotals(NutritionLog entity)
         {
-            if (entity.TotalCalories == null || entity.TotalCalories == 0)
+            bool missingCalories = entity.TotalCalories == null || entity.TotalCalories == 0;
+            bool missingMicros = entity.TotalFiber == null || entity.TotalSugar == null || entity.TotalSalt == null || entity.TotalCholesterol == null;
+
+            if (!missingCalories && !missingMicros)
+                return;
+
+            if (entity.Ingredient_id.HasValue)
             {
-                if (entity.Ingredient_id.HasValue)
+                var allIngredients = await _ingredientRepo.GetAllIngredients();
+                var ingredient = allIngredients.FirstOrDefault(i => i.Ingredient_id == entity.Ingredient_id.Value)
+                    ?? await _ingredientRepo.GetIngredientById(entity.Ingredient_id.Value);
+
+                if (ingredient?.Nutritional_value != null)
                 {
-                    var ingredient = await _ingredientRepo.GetIngredientById(entity.Ingredient_id.Value);
+                    var multiplier = UnitConverter.GetMultiplier(
+                        entity.Quantity ?? 100.0,
+                        entity.Unit,
+                        ingredient.Nutritional_value.ServingSize ?? 100.0,
+                        ingredient.Nutritional_value.ServingUnit,
+                        ingredient.Name,
+                        ingredient.Nutritional_value.EverydayWeight
+                    );
+                    if (multiplier <= 0) multiplier = 1.0;
 
-                    if (ingredient?.Nutritional_value != null)
+                    if (missingCalories)
                     {
-                        var multiplier = UnitConverter.GetMultiplier(
-                            entity.Quantity ?? 100.0,
-                            entity.Unit,
-                            ingredient.Nutritional_value.ServingSize ?? 100.0,
-                            ingredient.Nutritional_value.ServingUnit,
-                            ingredient.Name,
-                            ingredient.Nutritional_value.EverydayWeight
-                        );
-                        if (multiplier <= 0) multiplier = 1.0;
-
                         entity.TotalCalories = ingredient.Nutritional_value.Calories * multiplier;
                         entity.TotalProtein = (ingredient.Nutritional_value.Protein ?? 0) * multiplier;
                         entity.TotalCarbs = (ingredient.Nutritional_value.Carbs ?? 0) * multiplier;
                         entity.TotalFat = (ingredient.Nutritional_value.Fat ?? 0) * multiplier;
-                        entity.TotalFiber = (ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
-                        entity.TotalSugar = (ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
-                        entity.TotalSalt = (ingredient.Nutritional_value.Salt ?? 0) * multiplier;
-                        entity.TotalCholesterol = (ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
+                    }
+                    entity.TotalFiber ??= (ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
+                    entity.TotalSugar ??= (ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
+                    entity.TotalSalt ??= (ingredient.Nutritional_value.Salt ?? 0) * multiplier;
+                    entity.TotalCholesterol ??= (ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
+                }
+            }
+            else if (entity.Recipe_id.HasValue)
+            {
+                var allRecipes = await _recipeRepo.GetAllRecipes();
+                var recipe = allRecipes.FirstOrDefault(r => r.Recipe_id == entity.Recipe_id.Value)
+                    ?? await _recipeRepo.GetRecipeById(entity.Recipe_id.Value);
+
+                var recipeIngredients = recipe?.RecipeIngredients?.Where(ri => !ri.IsDeleted).ToList()
+                    ?? await _recipeIngredientRepo.GetRecipeIngredientsByRecipeId(entity.Recipe_id.Value);
+
+                double servings = recipe?.Servings ?? 1.0;
+                if (servings <= 0) servings = 1.0;
+
+                double totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+                double totalFib = 0, totalSug = 0, totalSod = 0, totalChol = 0;
+
+                foreach (var ri in recipeIngredients)
+                {
+                    if (ri.Ingredient?.Nutritional_value != null)
+                    {
+                        var multiplier = UnitConverter.GetMultiplier(
+                            ri.Quantity,
+                            ri.UOM,
+                            ri.Ingredient.Nutritional_value.ServingSize ?? 100.0,
+                            ri.Ingredient.Nutritional_value.ServingUnit,
+                            ri.Ingredient.Name,
+                            ri.Ingredient.Nutritional_value.EverydayWeight
+                        );
+                        if (multiplier <= 0) multiplier = 1.0;
+
+                        totalCal += ri.Ingredient.Nutritional_value.Calories * multiplier;
+                        totalPro += (ri.Ingredient.Nutritional_value.Protein ?? 0) * multiplier;
+                        totalCarb += (ri.Ingredient.Nutritional_value.Carbs ?? 0) * multiplier;
+                        totalFat += (ri.Ingredient.Nutritional_value.Fat ?? 0) * multiplier;
+                        totalFib += (ri.Ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
+                        totalSug += (ri.Ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
+                        totalSod += (ri.Ingredient.Nutritional_value.Salt ?? 0) * multiplier;
+                        totalChol += (ri.Ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
                     }
                 }
-                else if (entity.Recipe_id.HasValue)
+
+                var portion = (entity.Quantity ?? 1.0) / servings;
+                if (missingCalories)
                 {
-                    var recipeIngredients = await _recipeIngredientRepo.GetRecipeIngredientsByRecipeId(entity.Recipe_id.Value);
-                    var recipe = await _recipeRepo.GetRecipeById(entity.Recipe_id.Value);
-                    double servings = recipe?.Servings ?? 1.0;
-                    if (servings <= 0) servings = 1.0;
-
-                    double totalCal = 0;
-                    double totalPro = 0;
-                    double totalCarb = 0;
-                    double totalFat = 0;
-                    double totalFib = 0;
-                    double totalSug = 0;
-                    double totalSod = 0;
-                    double totalChol = 0;
-
-                    foreach (var ri in recipeIngredients)
-                    {
-                        if (ri.Ingredient?.Nutritional_value != null)
-                        {
-                            var multiplier = UnitConverter.GetMultiplier(
-                                ri.Quantity,
-                                ri.UOM,
-                                ri.Ingredient.Nutritional_value.ServingSize ?? 100.0,
-                                ri.Ingredient.Nutritional_value.ServingUnit,
-                                ri.Ingredient.Name,
-                                ri.Ingredient.Nutritional_value.EverydayWeight
-                            );
-                            if (multiplier <= 0) multiplier = 1.0;
-
-                            totalCal += ri.Ingredient.Nutritional_value.Calories * multiplier;
-                            totalPro += (ri.Ingredient.Nutritional_value.Protein ?? 0) * multiplier;
-                            totalCarb += (ri.Ingredient.Nutritional_value.Carbs ?? 0) * multiplier;
-                            totalFat += (ri.Ingredient.Nutritional_value.Fat ?? 0) * multiplier;
-                            totalFib += (ri.Ingredient.Nutritional_value.Fiber ?? 0) * multiplier;
-                            totalSug += (ri.Ingredient.Nutritional_value.Sugar ?? 0) * multiplier;
-                            totalSod += (ri.Ingredient.Nutritional_value.Salt ?? 0) * multiplier;
-                            totalChol += (ri.Ingredient.Nutritional_value.Cholesterol ?? 0) * multiplier;
-                        }
-                    }
-
-                    // Divide by Servings to get nutrition per 1 serving/portion
-                    totalCal /= servings;
-                    totalPro /= servings;
-                    totalCarb /= servings;
-                    totalFat /= servings;
-                    totalFib /= servings;
-                    totalSug /= servings;
-                    totalSod /= servings;
-                    totalChol /= servings;
-
-                    var portion = entity.Quantity ?? 1.0;
                     entity.TotalCalories = totalCal * portion;
                     entity.TotalProtein = totalPro * portion;
                     entity.TotalCarbs = totalCarb * portion;
                     entity.TotalFat = totalFat * portion;
-                    entity.TotalFiber = totalFib * portion;
-                    entity.TotalSugar = totalSug * portion;
-                    entity.TotalSalt = totalSod * portion;
-                    entity.TotalCholesterol = totalChol * portion;
                 }
+                entity.TotalFiber ??= totalFib * portion;
+                entity.TotalSugar ??= totalSug * portion;
+                entity.TotalSalt ??= totalSod * portion;
+                entity.TotalCholesterol ??= totalChol * portion;
             }
         }
 
