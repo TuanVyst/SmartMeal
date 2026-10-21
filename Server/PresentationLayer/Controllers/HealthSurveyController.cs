@@ -351,8 +351,8 @@ namespace PresentationLayer.Controllers
                         TargetSalt = targets.SaltLimit
                     });
                     await _ctx.SaveChangesAsync();
+                    Repository.Implements.NutritionGoalRepo.InvalidateCache(accountId);
                 }
-
                 return Ok(new
                 {
                     success = true,
@@ -568,6 +568,8 @@ namespace PresentationLayer.Controllers
                     });
                 }
                 await _ctx.SaveChangesAsync();
+                Repository.Implements.HealthProfileRepo.InvalidateCache(accountId);
+                Repository.Implements.NutritionGoalRepo.InvalidateCache(accountId);
 
                 return Ok(new
                 {

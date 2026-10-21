@@ -34,7 +34,6 @@ namespace Repository.Implements
         public async Task<MealPlan> GetActivePlanLightByAccountId(Guid accountId)
         {
             return await _context.MealPlans
-                .AsSplitQuery()
                 .Include(mp => mp.Days.Where(d => !d.IsDeleted))
                     .ThenInclude(d => d.Entries.Where(e => !e.IsDeleted))
                 .Where(mp => mp.Account_id == accountId && mp.Status == "active" && !mp.IsDeleted)
@@ -108,7 +107,6 @@ namespace Repository.Implements
             var endOnly = endDate.Date;
             return await _context.MealPlanDays
                 .AsNoTracking()
-                .AsSplitQuery()
                 .Include(d => d.Entries.Where(e => !e.IsDeleted))
                 .Where(d => !d.IsDeleted
                          && !d.MealPlan.IsDeleted

@@ -86,7 +86,7 @@ function formatShortDate(dateStr) {
 }
 
 export default function SuggestNextPlanPopup({ onClose }) {
-  const { healthProfile } = useHealthProfile();
+  const { healthProfile, updateProfile } = useHealthProfile();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -207,11 +207,12 @@ export default function SuggestNextPlanPopup({ onClose }) {
         if (isStep2Changed) {
           updateData.activityLevel = activityLevel;
         }
-        try {
-          await healthSurveyService.updateHealthProfile(updateData);
-        } catch (profileErr) {
+        const syncPromise = updateProfile
+          ? updateProfile(updateData)
+          : healthSurveyService.updateHealthProfile(updateData);
+        syncPromise.catch((profileErr) => {
           console.warn('Could not update health profile:', profileErr);
-        }
+        });
       }
 
       const mealsParam = selectedMeals.join(',');
