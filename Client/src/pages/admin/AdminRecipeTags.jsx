@@ -9,8 +9,11 @@ export default function AdminRecipeTags() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({ name: '', type: '' });
   const [editingTag, setEditingTag] = useState(null);
+
+  const getTagId = (tag) => tag?.rt_Id || tag?.rt_id || tag?.id;
 
   useEffect(() => {
     fetchTags();
@@ -29,33 +32,46 @@ export default function AdminRecipeTags() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = {
+      name: formData.name.trim(),
+      type: formData.type,
+    };
+    if (!payload.name) return;
+
+    setIsSaving(true);
     try {
       if (editingTag) {
-        await adminService.updateRecipeTag(editingTag.id, formData);
+        const tagId = getTagId(editingTag);
+        await adminService.updateRecipeTag(tagId, payload);
       } else {
-        await adminService.createRecipeTag(formData);
+        await adminService.createRecipeTag(payload);
       }
-      fetchTags();
+      await fetchTags();
       closeModal();
     } catch (error) {
       console.error('Error saving tag:', error);
+      dialog.error('Lỗi', error?.message || 'Không thể lưu thẻ công thức. Vui lòng thử lại.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleEdit = (tag) => {
     setEditingTag(tag);
-    setFormData({ name: tag.name, type: tag.type || '' });
+    setFormData({ name: tag.name || '', type: tag.type || '' });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (tag) => {
+    const tagId = getTagId(tag);
     const ok = await dialog.confirm({ title: 'Xóa thẻ công thức?', message: 'Bạn có chắc chắn muốn xóa thẻ công thức này không?', confirmLabel: 'Xóa', danger: true });
     if (!ok) return;
     try {
-      await adminService.deleteRecipeTag(id);
-      fetchTags();
+      await adminService.deleteRecipeTag(tagId);
+      await fetchTags();
     } catch (error) {
       console.error('Error deleting tag:', error);
+      dialog.error('Lỗi', error?.message || 'Không thể xóa thẻ công thức.');
     }
   };
 
@@ -120,8 +136,9 @@ export default function AdminRecipeTags() {
                 taste: 'Khẩu vị',
               };
               const displayType = typeLabels[tag.type] || tag.type || 'Khác';
+              const tagId = getTagId(tag);
               return (
-                <tr key={tag.id}>
+                <tr key={tagId || tag.name}>
                   <td><strong>{tag.name}</strong></td>
                   <td>
                     <span className="status-badge" style={{
@@ -139,7 +156,7 @@ export default function AdminRecipeTags() {
                     <button className="action-btn edit" onClick={() => handleEdit(tag)} title="Chỉnh sửa">
                       <FiEdit size={16} />
                     </button>
-                    <button className="action-btn delete" onClick={() => handleDelete(tag.id)} title="Xóa">
+                    <button className="action-btn delete" onClick={() => handleDelete(tag)} title="Xóa">
                       <FiTrash2 size={16} />
                     </button>
                   </td>
@@ -151,11 +168,11 @@ export default function AdminRecipeTags() {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingTag ? 'Chỉnh sửa Thẻ Công thức' : 'Thêm mới Thẻ Công thức'}</h3>
-              <button className="modal-close" onClick={closeModal}>
+              <button type="button" className="btn-close" onClick={closeModal} aria-label="Đóng">
                 <FiX size={20} />
               </button>
             </div>
@@ -169,6 +186,7 @@ export default function AdminRecipeTags() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="VD: Bữa sáng, Xào, Chiên..."
                   required
+                  disabled={isSaving}
                 />
               </div>
               <div className="form-group">
@@ -178,6 +196,7 @@ export default function AdminRecipeTags() {
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   required
+                  disabled={isSaving}
                 >
                   <option value="">-- Chọn phân loại thẻ --</option>
                   <option value="meal">Bữa ăn (Sáng, Trưa, Tối, Phụ)</option>
@@ -187,12 +206,12 @@ export default function AdminRecipeTags() {
                   <option value="other">Khác</option>
                 </select>
               </div>
-              <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={closeModal}>
+              <div className="modal-actions border-top">
+                <button type="button" className="btn btn-secondary" onClick={closeModal} disabled={isSaving}>
                   Hủy
                 </button>
-                <button type="submit" className="btn-primary">
-                  {editingTag ? 'Cập nhật' : 'Tạo mới'}
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Đang lưu...' : (editingTag ? 'Cập nhật' : 'Tạo mới')}
                 </button>
               </div>
             </form>
