@@ -8,9 +8,9 @@
 .dashboard-page {
   font-family: 'Inter', sans-serif;
   background: #F8FBF7;
-  min-height: 100vh;
   padding: 24px 28px 40px;
-  max-width: 1400px;
+  width: 100%;
+  box-sizing: border-box;
   animation: page-fade-in 0.5s ease;
 }
 
@@ -183,12 +183,13 @@
   right: 0;
   top: 0;
   bottom: 0;
-  width: 420px;
+  width: clamp(180px, 35%, 420px);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   z-index: 1;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .hero-food-img {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { subscriptionService } from '../../services/subscriptionService';
-import { FiUser, FiAward, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiUser, FiAward, FiLock, FiEye, FiEyeOff, FiExternalLink, FiShield } from 'react-icons/fi';
 import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
 import './Profile.css';
@@ -316,6 +316,24 @@ export default function Profile() {
               </button>
             </div>
           </form>
+
+          {/* ── Policy & Legal Section ── */}
+          <div className="policy-section">
+            <div className="policy-section-header">
+              <FiShield size={16} className="policy-icon" />
+              <span>Chính sách &amp; Pháp lý</span>
+            </div>
+            <a
+              href="https://smart-meal-three.vercel.app/privacy-policy.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="policy-link-btn"
+            >
+              <FiShield size={15} />
+              Chính sách quyền riêng tư SmartMeal
+              <FiExternalLink size={13} className="policy-external-icon" />
+            </a>
+          </div>
         </div>
       ) : activeTab === 'password' ? (
         <div className="profile-card">
