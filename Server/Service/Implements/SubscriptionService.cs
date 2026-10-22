@@ -148,6 +148,100 @@ namespace Service.Implements
             return MapToDto(result);
         }
 
+        public async Task<SubscriptionResponseDto> GrantSubscriptionByAdminAsync(AdminGrantSubscriptionRequest request)
+        {
+            if (request.Account_id == Guid.Empty)
+                throw new ArgumentException("Account_id không hợp lệ");
+
+            var plan = await _planRepo.GetPlanById(request.Plan_id);
+            if (plan == null)
+                throw new InvalidOperationException("Không tìm thấy gói cước (Plan)");
+
+            var now = DateTime.UtcNow;
+            int rolloverDays = 0;
+
+            var userSubs = await _subscriptionRepo.GetSubscriptionsByAccountId(request.Account_id);
+
+            // Cộng dồn ngày còn lại từ gói active hiện tại (nếu có) và đánh dấu superseded
+            var activeSubs = userSubs
+                .Where(s => !s.IsDeleted && string.Equals(s.Status, "active", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var activeSub in activeSubs)
+            {
+                if (activeSub.EndDate.HasValue && activeSub.EndDate.Value > now)
+                {
+                    double remaining = (activeSub.EndDate.Value - now).TotalDays;
+                    if (remaining > 0)
+                    {
+                        rolloverDays += (int)Math.Ceiling(remaining);
+                    }
+                }
+                activeSub.Status = "superseded";
+                await _subscriptionRepo.UpdateSubscription(activeSub);
+            }
+
+            // Hủy các giao dịch pending đang bị treo của người dùng
+            var pendingSubs = userSubs
+                .Where(s => !s.IsDeleted && string.Equals(s.Status, "pending", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var pendingSub in pendingSubs)
+            {
+                pendingSub.Status = "cancelled";
+                await _subscriptionRepo.UpdateSubscription(pendingSub);
+            }
+
+            DateTime? endDate = null;
+            if (plan.Duration > 0)
+            {
+                endDate = now.AddDays(plan.Duration + rolloverDays);
+            }
+
+            var newSub = new Subscription
+            {
+                Sub_id = Guid.NewGuid(),
+                Account_id = request.Account_id,
+                Plan_id = request.Plan_id,
+                StartDate = now,
+                EndDate = endDate,
+                Status = "active",
+                PaymentRef = string.IsNullOrWhiteSpace(request.PaymentRef)
+                    ? $"ADMIN_GRANT_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+                    : request.PaymentRef.Trim(),
+                PricePaid = request.PricePaid ?? plan.Price,
+                IsDeleted = false
+            };
+
+            var created = await _subscriptionRepo.CreateSubscription(newSub);
+            _logger.LogInformation(
+                "Admin granted subscription {SubId} (Plan={PlanId}) to account {AccountId}. Duration={Duration}d, Rollover={Rollover}d, EndDate={EndDate}",
+                created.Sub_id, request.Plan_id, request.Account_id, plan.Duration, rolloverDays, endDate);
+
+            return MapToDto(created);
+        }
+
+        public async Task<bool> RevokeActiveSubscriptionByAdminAsync(Guid accountId)
+        {
+            var now = DateTime.UtcNow;
+            var userSubs = await _subscriptionRepo.GetSubscriptionsByAccountId(accountId);
+            var activeSubs = userSubs
+                .Where(s => !s.IsDeleted && string.Equals(s.Status, "active", StringComparison.OrdinalIgnoreCase) && (!s.EndDate.HasValue || s.EndDate.Value > now))
+                .ToList();
+
+            if (activeSubs.Count == 0)
+                return false;
+
+            foreach (var sub in activeSubs)
+            {
+                sub.Status = "cancelled";
+                sub.EndDate = now;
+                await _subscriptionRepo.UpdateSubscription(sub);
+            }
+
+            _logger.LogInformation("Admin revoked {Count} active subscription(s) for account {AccountId}", activeSubs.Count, accountId);
+            return true;
+        }
         private SubscriptionResponseDto MapToDto(Subscription entity)
         {
             if (entity == null) return null;

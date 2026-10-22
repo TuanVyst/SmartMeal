@@ -154,5 +154,67 @@ namespace PresentationLayer.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet("admin/all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllForAdmin()
+        {
+            try
+            {
+                var items = await _subscriptionService.GetAllSubscriptions();
+                return Ok(new { success = true, data = items });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all subscriptions for admin");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("admin/grant")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GrantByAdmin([FromBody] AdminGrantSubscriptionRequest request)
+        {
+            try
+            {
+                if (request == null || request.Account_id == Guid.Empty || request.Plan_id == Guid.Empty)
+                {
+                    return BadRequest(new { success = false, message = "Thiếu thông tin người dùng hoặc gói cước." });
+                }
+
+                var item = await _subscriptionService.GrantSubscriptionByAdminAsync(request);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Đã cấp/kích hoạt gói Pro cho người dùng thành công.",
+                    data = item
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error granting subscription by admin for account {AccountId}", request?.Account_id);
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("admin/revoke/{accountId:guid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RevokeByAdmin(Guid accountId)
+        {
+            try
+            {
+                var revoked = await _subscriptionService.RevokeActiveSubscriptionByAdminAsync(accountId);
+                if (!revoked)
+                {
+                    return NotFound(new { success = false, message = "Người dùng hiện không có gói Pro nào đang hoạt động." });
+                }
+                return Ok(new { success = true, message = "Đã thu hồi gói Pro của người dùng." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error revoking subscription by admin for account {AccountId}", accountId);
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

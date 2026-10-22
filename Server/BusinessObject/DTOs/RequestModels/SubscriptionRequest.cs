@@ -12,4 +12,12 @@ namespace BusinessObject.Dtos.RequestModels
         public string PaymentRef { get; set; }
         public double PricePaid { get; set; }
     }
+
+    public class AdminGrantSubscriptionRequest
+    {
+        public Guid Account_id { get; set; }
+        public Guid Plan_id { get; set; }
+        public string? PaymentRef { get; set; }
+        public double? PricePaid { get; set; }
+    }
 }

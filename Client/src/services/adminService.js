@@ -245,6 +245,27 @@ export const adminService = {
     return res.data;
   },
 
+  // Admin Subscription operations (Grant / Revoke / List)
+  getAllSubscriptionsAdmin: async () => {
+    const res = await api.get('/Subscription/admin/all');
+    return res.data?.data || [];
+  },
+
+  getUserSubscriptions: async (accountId) => {
+    const res = await api.get(`/Subscription?accountId=${accountId}`);
+    return res.data?.data || [];
+  },
+
+  grantUserSubscription: async (payload) => {
+    const res = await api.post('/Subscription/admin/grant', payload);
+    return res.data;
+  },
+
+  revokeUserSubscription: async (accountId) => {
+    const res = await api.post(`/Subscription/admin/revoke/${accountId}`);
+    return res.data;
+  },
+
   // Statistics
   getSubscriptionStatistics: async (startDate, endDate) => {
     let url = '/Statistic/subscriptions';
