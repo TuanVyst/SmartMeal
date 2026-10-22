@@ -11,6 +11,8 @@ export const recipeService = {
     return api.get(`/recipe/ingredients?${qs}`);
   },
   suggestFromPantry: (accountId) => api.get(`/recipe/suggest/pantry/${accountId}`),
+  suggestByDetectedIngredients: (ingredients) =>
+    api.post('/recipe/suggest/detected-ingredients', { ingredients }),
   getTags: () => api.get('/RecipeTag'),
   suggestByCalories: (targetCalories, tolerancePercent = 20) =>
     api.get(`/recipe/suggest-by-calories?targetCalories=${targetCalories}&tolerancePercent=${tolerancePercent}`),

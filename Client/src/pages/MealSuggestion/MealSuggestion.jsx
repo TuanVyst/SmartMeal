@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FiSearch } from 'react-icons/fi';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { FiSearch, FiCamera } from 'react-icons/fi';
 import { getIngredients } from '../../services/foodService';
 import { recipeService } from '../../services/recipeService';
 import { allergyService } from '../../services/allergyService';
@@ -14,6 +14,7 @@ import { getMultiplier } from '../../utils/unitConverter';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
+import { matchDetectedToSystemIngredients } from '../../utils/ingredientMapping';
 import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning, MdLocalFireDepartment,
@@ -25,7 +26,8 @@ import CalorieSuggester from './CalorieSuggester';
 export default function MealSuggestion() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const accountId = user?.accountId || user?.account_id;
   const { 
     lockedIngredients = [], 
@@ -51,7 +53,7 @@ export default function MealSuggestion() {
   const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
   const [pantryMode, setPantryMode] = useState('explore'); // 'explore' | 'cook'
   const [selectedCookingMethod, setSelectedCookingMethod] = useState(null);
-  
+  const [detectedBanner, setDetectedBanner] = useState(null);
   // Advanced Filter States
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth > 992);
   const [isMobileIngredientOpen, setIsMobileIngredientOpen] = useState(false);
@@ -173,6 +175,57 @@ export default function MealSuggestion() {
     }
   }, [pantryItems, accountId]);
 
+  // Nhận danh sách nguyên liệu từ trang Nhận diện nguyên liệu (/ingredient-detection)
+  useEffect(() => {
+    const fromDetectionParam = searchParams.get('fromDetection') === '1';
+    const statePayload = location.state?.detectedIngredients;
+    if (!fromDetectionParam && !statePayload) return;
+    if (ingredients.length === 0) return;
+
+    let payload = statePayload;
+    if (!payload) {
+      try {
+        const raw = sessionStorage.getItem('smartmeal_detected_ingredients');
+        if (raw) payload = JSON.parse(raw);
+      } catch (e) {
+        console.error('Không thể đọc dữ liệu nguyên liệu nhận diện:', e);
+      }
+    }
+
+    if (!payload || !Array.isArray(payload.items) || payload.items.length === 0) return;
+
+    const matchedSys = matchDetectedToSystemIngredients(payload.items, ingredients);
+    const validMatchedIds = matchedSys
+      .map((ing) => ing.ingredient_id || ing.Ingredient_id)
+      .filter((id) => id && !allergies.some((a) => a.ingredient_id == id));
+
+    setLeftTab('pantry');
+    setPantryMode('explore');
+    setSelectedCookingMethod(null);
+
+    if (validMatchedIds.length > 0) {
+      setPantryItems(validMatchedIds);
+      if (accountId) {
+        localStorage.setItem(`pantry_${accountId}`, JSON.stringify(validMatchedIds));
+      }
+    }
+
+    setDetectedBanner({
+      items: payload.items,
+      matchedNames: matchedSys.map((ing) => ing.name || ing.Name).filter(Boolean),
+      matchedCount: validMatchedIds.length,
+    });
+
+    try {
+      sessionStorage.removeItem('smartmeal_detected_ingredients');
+    } catch {}
+
+    if (fromDetectionParam) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('fromDetection');
+      setSearchParams(nextParams, { replace: true, state: {} });
+    }
+  }, [ingredients, allergies, searchParams, location.state, accountId, setSearchParams]);
   const handleTogglePantry = (ingId) => {
     setPantryItems(prev => {
       if (prev.includes(ingId)) {
@@ -284,7 +337,7 @@ export default function MealSuggestion() {
     // 2. Substring/word-boundary match: dbName is whole word inside rName
     const subMatches = allSysIngredients.filter(sysIng => {
       const dbName = normalizeText(sysIng.name);
-      return safeTestWord(rName, dbName);
+      return safeTestWord(rName, dbName) || safeTestWord(dbName, rName);
     });
     if (subMatches.length === 0) return null;
     // Pick longest name match to prefer specific (e.g. "Banh pho" over "Pho")
@@ -370,15 +423,14 @@ export default function MealSuggestion() {
       allIngredients = mappedIngredients;
       requiredIngredients = mappedIngredients.map(i => i.name);
       missingIngredients = mappedIngredients.filter(i => !i.possessed).map(i => i.name);
+      const possessedCount = mappedIngredients.filter(i => i.possessed).length;
       const hasMissingPrimary = mappedIngredients.some(i => i.isPrimary && !i.possessed);
-      if (hasMissingPrimary) {
+      if (pantryMode === 'cook' && hasMissingPrimary) {
         matchPercentage = 0;
       } else {
-        const possessedCount = mappedIngredients.filter(i => i.possessed).length;
         matchPercentage = requiredIngredients.length > 0 ? Math.round((possessedCount / requiredIngredients.length) * 100) : 0;
       }
     }
-
     const calculatedCalories = Math.round(totalCalories / servings);
 
     // --- Allergy check (always client-side) ---
@@ -435,7 +487,7 @@ export default function MealSuggestion() {
       healthDetails,
       cookingMethod: detectCookingMethod(rec, normalizeText(recipeName))
     };
-  }), [recipes, lockedIngredients, reducedIngredients, pantryItems, getHealthScoreDetails, ingredients, allergies]);
+  }), [recipes, lockedIngredients, reducedIngredients, pantryItems, pantryMode, getHealthScoreDetails, ingredients, allergies]);
 
   const baseFilteredRecipes = useMemo(() => {
     return mappedRecipes
@@ -528,6 +580,11 @@ export default function MealSuggestion() {
           if (cA !== cB) return cA - cB;
         }
         
+        if (pantryItems.length > 0) {
+          const possessedA = (a.allIngredients || []).filter(i => i.possessed).length;
+          const possessedB = (b.allIngredients || []).filter(i => i.possessed).length;
+          if (possessedA !== possessedB) return possessedB - possessedA;
+        }
         const scoreA = (a.healthDetails?.score || 0) * 0.6 + (a.matchPercentage || 0) * 0.4;
         const scoreB = (b.healthDetails?.score || 0) * 0.6 + (b.matchPercentage || 0) * 0.4;
         return scoreB - scoreA;
@@ -786,17 +843,28 @@ export default function MealSuggestion() {
           {/* Hàng 1: Khám phá món ăn (trái) và Bộ lọc (phải) */}
           <div className="explore-header-row1">
             <h2 className="explore-page-title">Khám phá món ăn</h2>
-            <button 
-              type="button"
-              className="explore-filter-btn"
-              onClick={() => setIsFilterOpen(true)}
-            >
-              <FiFilter size={16} />
-              <span>Bộ lọc</span>
-              {(timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) && (
-                <span className="filter-badge-dot" />
-              )}
-            </button>
+            <div className="explore-header-actions">
+              <button
+                type="button"
+                className="explore-camera-btn"
+                onClick={() => navigate('/ingredient-detection')}
+                title="Chụp hoặc tải ảnh để nhận diện nguyên liệu"
+              >
+                <FiCamera size={16} />
+                <span>Nhận diện nguyên liệu</span>
+              </button>
+              <button 
+                type="button"
+                className="explore-filter-btn"
+                onClick={() => setIsFilterOpen(true)}
+              >
+                <FiFilter size={16} />
+                <span>Bộ lọc</span>
+                {(timeRange[0]!==0 || timeRange[1]!==180 || difficultyFilter.length>0 || caloriesRange[0]!==0 || caloriesRange[1]!==1000 || minHealthScore>0) && (
+                  <span className="filter-badge-dot" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Hàng 2: Hiện bảng nguyên liệu (trái) và Tìm kiếm tên món ăn (phải) */}
@@ -828,6 +896,42 @@ export default function MealSuggestion() {
           </div>
         </div>
 
+
+        {detectedBanner && (
+          <div className="detected-ingredients-banner" role="status">
+            <div className="detected-banner-info">
+              <span className="detected-banner-title">
+                📷 Đang gợi ý món ăn theo nguyên liệu vừa nhận diện:
+              </span>
+              <div className="detected-banner-tags">
+                {detectedBanner.items.map((item) => (
+                  <span key={item.rawName} className="detected-banner-tag">
+                    {item.vnName} ×{item.count}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="detected-banner-actions">
+              <button
+                type="button"
+                className="detected-banner-retake-btn"
+                onClick={() => navigate('/ingredient-detection')}
+              >
+                📷 Chụp lại
+              </button>
+              <button
+                type="button"
+                className="detected-banner-clear-btn"
+                onClick={() => {
+                  setDetectedBanner(null);
+                  setPantryItems([]);
+                }}
+              >
+                ✕ Xóa lọc
+              </button>
+            </div>
+          </div>
+        )}
         {isFilterOpen && (
           <AdvancedRecipeFilter 
             sortBy={sortBy} setSortBy={setSortBy}

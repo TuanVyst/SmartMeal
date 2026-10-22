@@ -503,18 +503,91 @@ namespace Service.Implements
             }
         }
 
+        private static readonly Dictionary<string, string[]> DetectedIngredientAliases =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Mushroom"] = new[] { "Nấm", "Nấm đông cô", "Mộc nhĩ" },
+                ["Egg"] = new[] { "Trứng gà", "Trứng", "Hột vịt muối" },
+                ["Trứng"] = new[] { "Trứng gà", "Trứng" },
+                ["Sweet Potato -Suthuni-"] = new[] { "Khoai lang" },
+                ["Taro Leaves -Karkalo-"] = new[] { "Lá khoai môn", "Rau lang" },
+                ["Beetroot"] = new[] { "Củ dền", "Rau dền đỏ" },
+                ["Potato"] = new[] { "Khoai tây" },
+                ["Capsicum"] = new[] { "Ớt chuông", "Ớt sừng", "Ớt tươi" },
+                ["Taro Root-Pidalu-"] = new[] { "Củ khoai môn", "Khoai môn" },
+                ["Turnip"] = new[] { "Củ cải trắng", "Củ cải" },
+                ["Green Mint -Pudina-"] = new[] { "Bạc hà", "Rau thơm" },
+                ["Pointed Gourd -Chuche Karela-"] = new[] { "Mướp đắng", "Khổ qua" },
+                ["Bitter Gourd"] = new[] { "Mướp đắng", "Khổ qua" },
+                ["Khổ qua"] = new[] { "Mướp đắng", "Khổ qua" },
+                ["Snake Gourd -Chichindo-"] = new[] { "Bầu non", "Bầu" },
+                ["Palungo -Nepali Spinach-"] = new[] { "Cải bó xôi", "Rau bina", "Rau mồng tơi" },
+                ["Rau bina"] = new[] { "Cải bó xôi", "Rau bina" },
+                ["Cabbage"] = new[] { "Bắp cải", "Bắp cải tím" },
+                ["Brinjal"] = new[] { "Cà tím", "Cà pháo trắng" },
+                ["Bottle Gourd -Lauka-"] = new[] { "Bầu non", "Bầu" },
+                ["Bầu"] = new[] { "Bầu non", "Bầu" },
+                ["Tomato"] = new[] { "Cà chua", "Tương cà" },
+                ["Tree Tomato -Rukh Tamatar-"] = new[] { "Cà chua" },
+                ["Onion"] = new[] { "Hành tây", "Hành tím" },
+                ["Radish"] = new[] { "Củ cải trắng", "Củ cải" },
+                ["Củ cải"] = new[] { "Củ cải trắng", "Củ cải" },
+                ["Sponge Gourd -Ghiraula-"] = new[] { "Mướp hương", "Mướp" },
+                ["Mướp"] = new[] { "Mướp hương", "Mướp" },
+                ["Red Lentils"] = new[] { "Đậu đỏ", "Đậu lăng đỏ" },
+                ["Okra -Bhindi-"] = new[] { "Đậu bắp" },
+                ["Chayote-iskus-"] = new[] { "Su su" },
+                ["Garden Peas"] = new[] { "Đậu xanh", "Đậu Hà Lan", "Đậu que" },
+                ["Cheese"] = new[] { "Phô mai" },
+                ["Rayo ko Saag"] = new[] { "Cải bẹ xanh" },
+                ["Lapsi -Nepali Hog Plum-"] = new[] { "Sấu xanh" },
+                ["Artichoke"] = new[] { "Bông atisô", "Atisô" },
+                ["Atisô"] = new[] { "Bông atisô", "Atisô" },
+                ["Banana"] = new[] { "Chuối", "Bắp chuối" },
+                ["Cinnamon"] = new[] { "Quế", "Ngũ vị hương" },
+                ["Bread"] = new[] { "Bánh mì", "Bánh mì sandwich" },
+                ["Jack Fruit"] = new[] { "Mít" },
+                ["Beans"] = new[] { "Đậu que", "Đậu xanh", "Đậu đỏ" },
+                ["Asparagus -Kurilo-"] = new[] { "Măng tây" },
+                ["Gundruk"] = new[] { "Dưa chua" },
+                ["Avocado"] = new[] { "Bơ" },
+                ["Nutrela -Soya Chunks-"] = new[] { "Đậu hủ", "Đậu nành khô" },
+                ["Rice -Chamal-"] = new[] { "Gạo", "Gạo nếp" },
+                ["Corn"] = new[] { "Bắp" },
+                ["Onion Leaves"] = new[] { "Hành lá", "Hẹ" },
+                ["Carrot"] = new[] { "Cà rốt" },
+                ["Farsi ko Munta"] = new[] { "Bí đỏ", "Ngọn bí" },
+                ["Coriander -Dhaniya-"] = new[] { "Rau mùi", "Ngò rí" },
+                ["Lemon -Nimbu-"] = new[] { "Chanh" },
+                ["Cassava -Ghar Tarul-"] = new[] { "Khoai mì" },
+                ["Pork"] = new[] { "Thịt heo", "Sườn sụn", "Da heo" },
+                ["Cucumber"] = new[] { "Dưa leo" },
+                ["Ash Gourd -Kubhindo-"] = new[] { "Bí đao" },
+            };
+
         public async Task<List<RecipeSuggestionByDetectedIngredientsDto>>
             SuggestRecipesByDetectedIngredients(
                 List<DetectedIngredientDto> detectedIngredients)
         {
             try
             {
-                var detectedNames = (detectedIngredients ??
-                                     new List<DetectedIngredientDto>())
-                    .Where(x => x != null &&
-                                !string.IsNullOrWhiteSpace(x.Name))
-                    .Select(x => x.Name.Trim())
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var detectedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in detectedIngredients ?? new List<DetectedIngredientDto>())
+                {
+                    if (item == null || string.IsNullOrWhiteSpace(item.Name))
+                        continue;
+
+                    var trimmed = item.Name.Trim();
+                    detectedNames.Add(trimmed);
+
+                    if (DetectedIngredientAliases.TryGetValue(trimmed, out var aliases))
+                    {
+                        foreach (var alias in aliases)
+                        {
+                            detectedNames.Add(alias);
+                        }
+                    }
+                }
 
                 if (detectedNames.Count == 0)
                 {
@@ -565,10 +638,8 @@ namespace Service.Implements
                             missing.Add(ingredientName);
                         }
                     }
+
                     if (matched.Count == 0)
-                        continue;
-                    // Only suggest recipes missing at most two ingredients.
-                    if (missing.Count > 2)
                         continue;
 
                     double matchPercentage =
@@ -586,8 +657,9 @@ namespace Service.Implements
                 }
 
                 return suggestions
-                    .OrderBy(s => s.MissingCount)
+                    .OrderByDescending(s => s.MatchedIngredients.Count)
                     .ThenByDescending(s => s.MatchPercentage)
+                    .ThenBy(s => s.MissingCount)
                     .ToList();
             }
             catch (Exception ex)
