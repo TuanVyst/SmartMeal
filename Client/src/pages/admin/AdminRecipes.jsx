@@ -15,8 +15,6 @@ export default function AdminRecipes() {
   const { user } = useAuth();
   const accountId = user?.accountId || user?.account_id;
   const [recipes, setRecipes] = useState([]);
-  const [allRecipeIngredients, setAllRecipeIngredients] = useState([]);
-  // Filter & Search states
   const [search, setSearch] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const [tagFilter, setTagFilter] = useState('all');
@@ -37,36 +35,17 @@ export default function AdminRecipes() {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [availableRecipeTags, setAvailableRecipeTags] = useState([]);
   const [availableIngredients, setAvailableIngredients] = useState([]);
-  const fetchAllData = async () => {
-    try {
-      const [recipesData, recipeIngredientsData, tagsData, ingredientsData] = await Promise.all([
-        adminService.getAllRecipes(),
-        adminService.getAllRecipeIngredients(),
-        adminService.getAllRecipeTags(),
-        adminService.getAllIngredients()
-      ]);
-      setRecipes(recipesData || []);
-      setAllRecipeIngredients(recipeIngredientsData || []);
-      setAvailableRecipeTags(tagsData || []);
-      setAvailableIngredients(ingredientsData || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
   useEffect(() => {
     let ignore = false;
     const loadInitialData = async () => {
       try {
-        const [recipesData, recipeIngredientsData, tagsData, ingredientsData] = await Promise.all([
+        const [recipesData, tagsData, ingredientsData] = await Promise.all([
           adminService.getAllRecipes(),
-          adminService.getAllRecipeIngredients(),
           adminService.getAllRecipeTags(),
           adminService.getAllIngredients()
         ]);
         if (!ignore) {
           setRecipes(recipesData || []);
-          setAllRecipeIngredients(recipeIngredientsData || []);
           setAvailableRecipeTags(tagsData || []);
           setAvailableIngredients(ingredientsData || []);
         }
@@ -84,88 +63,44 @@ export default function AdminRecipes() {
   }, []);
 
   const handleSaveRecipe = async ({ baseRecipeData, ingredients }) => {
+    if (saving) return;
     setSaving(true);
     try {
-      baseRecipeData.account_id = baseRecipeData.account_id || accountId;
+      const formattedIngredients = (ingredients || [])
+        .filter(ing => ing.ingredient_id && Number(ing.quantity) > 0)
+        .map(ing => ({
+          ingredient_id: ing.ingredient_id,
+          quantity: Math.round(Number(ing.quantity)) || 1,
+          UOM: ing.uom || ing.UOM || 'g',
+          IsPrimary: !!(ing.isPrimary ?? ing.IsPrimary)
+        }));
+
+      const payload = {
+        ...baseRecipeData,
+        account_id: baseRecipeData.account_id || accountId || '00000000-0000-0000-0000-000000000000',
+        ingredients: formattedIngredients
+      };
 
       if (editingRecipe) {
-        // 1. Update Recipe
-        await adminService.updateRecipe(editingRecipe.recipe_id, baseRecipeData);
-
-        // 2. Identify all old ingredients to delete
-        const existingIds = new Set();
-        const oldIngredients = [];
-
-        (allRecipeIngredients || []).forEach(ri => {
-          if (ri.recipe_id === editingRecipe.recipe_id || ri.Recipe_id === editingRecipe.recipe_id) {
-            const id = ri.id || ri.ri_id || ri.RecipeIngredient_id || ri.recipeIngredient_id;
-            if (id && !existingIds.has(id)) {
-              existingIds.add(id);
-              oldIngredients.push(ri);
-            }
-          }
-        });
-
-        (editingRecipe.recipeIngredients || []).forEach(ri => {
-          const id = ri.id || ri.ri_id || ri.RecipeIngredient_id || ri.recipeIngredient_id;
-          if (id && !existingIds.has(id)) {
-            existingIds.add(id);
-            oldIngredients.push(ri);
-          }
-        });
-
-        // 3. Delete old ingredients
-        for (const oldIng of oldIngredients) {
-          const id = oldIng.id || oldIng.ri_id || oldIng.RecipeIngredient_id || oldIng.recipeIngredient_id;
-          if (id) {
-            try {
-              await adminService.deleteRecipeIngredient(id);
-            } catch (err) {
-              console.warn('Could not delete old recipe ingredient:', id, err);
-            }
-          }
+        const res = await adminService.updateRecipe(editingRecipe.recipe_id, payload);
+        const updatedRecipe = res?.data || res;
+        if (updatedRecipe && updatedRecipe.recipe_id) {
+          setRecipes(prev =>
+            prev.map(r => (r.recipe_id === updatedRecipe.recipe_id ? updatedRecipe : r))
+          );
         }
-
-        // 4. Create new ones
-        for (const ing of ingredients) {
-          if (ing.ingredient_id && ing.quantity > 0) {
-            await adminService.createRecipeIngredient({
-              recipe_id: editingRecipe.recipe_id,
-              ingredient_id: ing.ingredient_id,
-              quantity: Math.round(Number(ing.quantity)) || 1,
-              UOM: ing.uom || 'g',
-              IsPrimary: !!ing.isPrimary
-            });
-          }
-        }
-
+        closeRecipeModal();
         dialog.success('Thành công', 'Đã cập nhật công thức thành công!');
       } else {
-        // Create Recipe
-        baseRecipeData.Account_id = accountId || '00000000-0000-0000-0000-000000000000';
-
-        const newRecipeResponse = await adminService.createRecipe(baseRecipeData);
-        const createdRecipe = newRecipeResponse?.data || newRecipeResponse;
-
+        payload.Account_id = accountId || '00000000-0000-0000-0000-000000000000';
+        const res = await adminService.createRecipe(payload);
+        const createdRecipe = res?.data || res;
         if (createdRecipe && createdRecipe.recipe_id) {
-          for (const ing of ingredients) {
-            if (ing.ingredient_id && ing.quantity > 0) {
-              await adminService.createRecipeIngredient({
-                recipe_id: createdRecipe.recipe_id,
-                ingredient_id: ing.ingredient_id,
-                quantity: Math.round(Number(ing.quantity)) || 1,
-                UOM: ing.uom || 'g',
-                IsPrimary: !!ing.isPrimary
-              });
-            }
-          }
+          setRecipes(prev => [createdRecipe, ...prev]);
         }
-
+        closeRecipeModal();
         dialog.success('Thành công', 'Đã tạo công thức mới thành công!');
       }
-
-      await fetchAllData();
-      closeRecipeModal();
     } catch (error) {
       console.error('Error saving recipe:', error?.message || error);
       if (error?.data) console.error('Server response:', error.data);
@@ -190,7 +125,7 @@ export default function AdminRecipes() {
     if (!ok) return;
     try {
       await adminService.deleteRecipe(id);
-      fetchAllData();
+      setRecipes(prev => prev.filter(r => r.recipe_id !== id));
     } catch (error) {
       console.error('Error deleting recipe:', error);
       dialog.error('Lỗi', 'Không thể xóa công thức này.');
@@ -209,9 +144,7 @@ export default function AdminRecipes() {
 
   // Get current ingredients for editing recipe
   const currentRecipeIngredients = editingRecipe
-    ? (editingRecipe.recipeIngredients || allRecipeIngredients.filter(
-        ri => ri.recipe_id === editingRecipe.recipe_id || ri.Recipe_id === editingRecipe.recipe_id
-      ))
+    ? (editingRecipe.recipeIngredients || [])
     : [];
 
   // Handle sorting toggle by column click

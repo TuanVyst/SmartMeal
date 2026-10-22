@@ -33,6 +33,7 @@ namespace Repository.Implements
         {
             _ctx.NutritionalValues.Add(nutritionalValue);
             await _ctx.SaveChangesAsync();
+            IngredientRepo.InvalidateCache();
             return nutritionalValue;
         }
 
@@ -40,6 +41,7 @@ namespace Repository.Implements
         {
             _ctx.NutritionalValues.Update(nutritionalValue);
             await _ctx.SaveChangesAsync();
+            IngredientRepo.InvalidateCache();
             return nutritionalValue;
         }
 
@@ -51,6 +53,7 @@ namespace Repository.Implements
             nutritionalValue.IsDeleted = true;
             _ctx.NutritionalValues.Update(nutritionalValue);
             await _ctx.SaveChangesAsync();
+            IngredientRepo.InvalidateCache();
             return nutritionalValue;
         }
     }

@@ -20,6 +20,7 @@ namespace Repository.Implements
         public async Task<List<RecipeTag>> GetAllRecipeTags()
         {
             return await _ctx.RecipeTags
+                .AsNoTracking()
                 .Where(i => i.IsDeleted == false)
                 .OrderBy(i => i.Name)
                 .ToListAsync();

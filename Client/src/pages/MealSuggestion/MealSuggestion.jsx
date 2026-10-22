@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { FiSearch, FiCamera } from 'react-icons/fi';
-import { getIngredients } from '../../services/foodService';
-import { recipeService } from '../../services/recipeService';
+import { getIngredients, getCachedIngredientsSync } from '../../services/foodService';
+import { recipeService, getCachedRecipesSync } from '../../services/recipeService';
 import { allergyService } from '../../services/allergyService';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
@@ -37,9 +37,10 @@ export default function MealSuggestion() {
     dailyTargets
   } = useHealthProfile();
 
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, setIngredients] = useState(() => getCachedIngredientsSync() || []);
   const [allergies, setAllergies] = useState([]);
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes] = useState(() => getCachedRecipesSync() || []);
+  const [loadingRecipes, setLoadingRecipes] = useState(() => !getCachedRecipesSync());
   const [leftTab, setLeftTab] = useState('pantry');
   const [pantryItems, setPantryItems] = useState(() => {
     const saved = localStorage.getItem(`pantry_${accountId}`);
@@ -138,10 +139,15 @@ export default function MealSuggestion() {
 
   const fetchRecipes = async () => {
     try {
+      if (!getCachedRecipesSync()) {
+        setLoadingRecipes(true);
+      }
       const res = await recipeService.getAll();
       setRecipes(res.data.data || []);
     } catch (err) {
       console.error('Không thể tải công thức:', err);
+    } finally {
+      setLoadingRecipes(false);
     }
   };
 
@@ -156,11 +162,8 @@ export default function MealSuggestion() {
 
   useEffect(() => {
     fetchIngredients();
-  }, []);
-
-  useEffect(() => {
     fetchRecipes();
-  }, [pantryItems, accountId]);
+  }, []);
 
   useEffect(() => {
     if (accountId) {
@@ -944,7 +947,11 @@ export default function MealSuggestion() {
           />
         )}
 
-        {suggestedRecipes.length === 0 ? (
+        {loadingRecipes && recipes.length === 0 ? (
+          <div className="empty-suggestions-card">
+            <p>Đang tải danh sách công thức món ăn...</p>
+          </div>
+        ) : suggestedRecipes.length === 0 ? (
           <div className="empty-suggestions-card">
             {searchQuery.trim() ? (
               <>

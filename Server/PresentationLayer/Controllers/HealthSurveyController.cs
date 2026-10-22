@@ -351,8 +351,8 @@ namespace PresentationLayer.Controllers
                         TargetSalt = targets.SaltLimit
                     });
                     await _ctx.SaveChangesAsync();
+                    Repository.Implements.NutritionGoalRepo.InvalidateCache(accountId);
                 }
-
                 return Ok(new
                 {
                     success = true,
@@ -431,92 +431,96 @@ namespace PresentationLayer.Controllers
 
                 var profile = await _healthProfileService.UpdateHealthProfile(existing.Profile_id, profileRequest);
 
-                var allConditions = await _medicalConditionService.GetAllMedicalConditions();
-                var existingUserConditions = await _ctx.UserConditions
-                    .Where(uc => uc.Account_id == accountId && !uc.IsDeleted)
-                    .ToListAsync();
-                foreach (var uc in existingUserConditions)
+                if (request.Conditions != null)
                 {
-                    uc.IsDeleted = true;
-                    _ctx.UserConditions.Update(uc);
-                }
-                await _ctx.SaveChangesAsync();
-
-                if (request.Conditions != null && request.Conditions.Count > 0)
-                {
-                    foreach (var conditionKey in request.Conditions)
+                    var allConditions = await _medicalConditionService.GetAllMedicalConditions();
+                    var existingUserConditions = await _ctx.UserConditions
+                        .Where(uc => uc.Account_id == accountId && !uc.IsDeleted)
+                        .ToListAsync();
+                    foreach (var uc in existingUserConditions)
                     {
-                        var searchKeyword = ConditionKeywordMap.TryGetValue(conditionKey, out var kw2) ? kw2 : conditionKey;
-                        var matched = allConditions.FirstOrDefault(c =>
-                            c.Name != null && c.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
-                            
-                        if (matched == null)
-                        {
-                            string dbName = conditionKey switch
-                            {
-                                "diabetes" => "Tiểu đường type 2",
-                                "hypertension" => "Huyết áp cao",
-                                "cholesterol" => "Cholesterol cao",
-                                "heartDisease" => "Bệnh tim mạch",
-                                "gerd" => "Dạ dày / Trào ngược axit",
-                                "gout" => "Gout",
-                                _ => conditionKey
-                            };
-                            
-                            matched = new MedicalCondition 
-                            { 
-                                Condition_id = Guid.NewGuid(), 
-                                Name = dbName, 
-                                Category = "Bệnh lý nền" 
-                            };
-                            _ctx.MedicalConditions.Add(matched);
-                            await _ctx.SaveChangesAsync();
-                            allConditions.Add(matched);
-                        }
-
-                        if (matched != null)
-                        {
-                            await _userConditionService.CreateUserCondition(new UserConditionRequest
-                            {
-                                Account_id = accountId,
-                                Condition_id = matched.Condition_id,
-                            });
-                        }
-                    }
-                }
-                
-                // Auto-assign diet plans based on conditions
-                await AssignRecommendedDietPlansAsync(accountId);
-
-                var existingAllergies = await _ctx.Allergies
-                    .Where(a => a.Account_id == accountId && !a.IsDeleted)
-                    .ToListAsync();
-                foreach (var a in existingAllergies)
-                {
-                    a.IsDeleted = true;
-                    _ctx.Allergies.Update(a);
-                }
-                await _ctx.SaveChangesAsync();
-
-                if (request.Allergies != null && request.Allergies.Count > 0)
-                {
-                    var allIngredients = await _ctx.Ingredients.ToListAsync();
-                    foreach (var allergyName in request.Allergies)
-                    {
-                        var matchedIngredient = allIngredients.FirstOrDefault(i =>
-                            i.Name != null && i.Name.Contains(allergyName, StringComparison.OrdinalIgnoreCase));
-                        if (matchedIngredient != null)
-                        {
-                            _ctx.Allergies.Add(new Allergy
-                            {
-                                Allergy_id = Guid.NewGuid(),
-                                Account_id = accountId,
-                                Ingredient_id = matchedIngredient.Ingredient_id,
-                                IsDeleted = false
-                            });
-                        }
+                        uc.IsDeleted = true;
                     }
                     await _ctx.SaveChangesAsync();
+
+                    if (request.Conditions.Count > 0)
+                    {
+                        foreach (var conditionKey in request.Conditions)
+                        {
+                            var searchKeyword = ConditionKeywordMap.TryGetValue(conditionKey, out var kw2) ? kw2 : conditionKey;
+                            var matched = allConditions.FirstOrDefault(c =>
+                                c.Name != null && c.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                                
+                            if (matched == null)
+                            {
+                                string dbName = conditionKey switch
+                                {
+                                    "diabetes" => "Tiểu đường type 2",
+                                    "hypertension" => "Huyết áp cao",
+                                    "cholesterol" => "Cholesterol cao",
+                                    "heartDisease" => "Bệnh tim mạch",
+                                    "gerd" => "Dạ dày / Trào ngược axit",
+                                    "gout" => "Gout",
+                                    _ => conditionKey
+                                };
+                                
+                                matched = new MedicalCondition 
+                                { 
+                                    Condition_id = Guid.NewGuid(), 
+                                    Name = dbName, 
+                                    Category = "Bệnh lý nền" 
+                                };
+                                _ctx.MedicalConditions.Add(matched);
+                                await _ctx.SaveChangesAsync();
+                                allConditions.Add(matched);
+                            }
+
+                            if (matched != null)
+                            {
+                                await _userConditionService.CreateUserCondition(new UserConditionRequest
+                                {
+                                    Account_id = accountId,
+                                    Condition_id = matched.Condition_id,
+                                });
+                            }
+                        }
+                    }
+                    
+                    // Auto-assign diet plans based on conditions
+                    await AssignRecommendedDietPlansAsync(accountId);
+                }
+
+                if (request.Allergies != null)
+                {
+                    var existingAllergies = await _ctx.Allergies
+                        .Where(a => a.Account_id == accountId && !a.IsDeleted)
+                        .ToListAsync();
+                    foreach (var a in existingAllergies)
+                    {
+                        a.IsDeleted = true;
+                    }
+                    await _ctx.SaveChangesAsync();
+
+                    if (request.Allergies.Count > 0)
+                    {
+                        var allIngredients = await _ctx.Ingredients.AsNoTracking().ToListAsync();
+                        foreach (var allergyName in request.Allergies)
+                        {
+                            var matchedIngredient = allIngredients.FirstOrDefault(i =>
+                                i.Name != null && i.Name.Contains(allergyName, StringComparison.OrdinalIgnoreCase));
+                            if (matchedIngredient != null)
+                            {
+                                _ctx.Allergies.Add(new Allergy
+                                {
+                                    Allergy_id = Guid.NewGuid(),
+                                    Account_id = accountId,
+                                    Ingredient_id = matchedIngredient.Ingredient_id,
+                                    IsDeleted = false
+                                });
+                            }
+                        }
+                        await _ctx.SaveChangesAsync();
+                    }
                 }
 
                 if (request.Height > 0 && request.Weight > 0)
@@ -564,6 +568,8 @@ namespace PresentationLayer.Controllers
                     });
                 }
                 await _ctx.SaveChangesAsync();
+                Repository.Implements.HealthProfileRepo.InvalidateCache(accountId);
+                Repository.Implements.NutritionGoalRepo.InvalidateCache(accountId);
 
                 return Ok(new
                 {

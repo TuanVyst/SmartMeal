@@ -101,7 +101,30 @@ export function HealthProfileProvider({ children }) {
       return;
     }
 
-    setLoading(true);
+    // Hydrate immediately from localStorage (Stale-While-Revalidate) so ProtectedRoute never blocks initial render
+    let hydratedFromStorage = false;
+    try {
+      const storedProfileStr = localStorage.getItem('userHealthProfile');
+      const completed = localStorage.getItem('healthSurveyCompleted') === 'true';
+      if (storedProfileStr && completed) {
+        const parsedProfile = JSON.parse(storedProfileStr);
+        const storedAccId = parsedProfile?.account_id || parsedProfile?.accountId;
+        if (parsedProfile && (!storedAccId || !currentAccId || storedAccId === currentAccId)) {
+          setHealthProfile(parsedProfile);
+          setSurveyCompleted(true);
+          computeDerivedState(parsedProfile);
+          setProfileLoadedForUser(currentAccId);
+          setLoading(false);
+          hydratedFromStorage = true;
+        }
+      }
+    } catch {
+      // ignore invalid JSON in localStorage
+    }
+
+    if (!hydratedFromStorage) {
+      setLoading(true);
+    }
 
     const fetchProfile = async () => {
       try {

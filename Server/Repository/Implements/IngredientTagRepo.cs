@@ -21,7 +21,7 @@ namespace Repository.Implements
         public async Task<List<IngredientTag>> GetAllIngredientTags()
         {
             return await _ctx.IngredientTags
-                .Include(i => i.IngredientLabels)
+                .AsNoTracking()
                 .Where(i => i.IsDeleted == false)
                 .OrderBy(i => i.Name)
                 .ToListAsync();
@@ -29,10 +29,8 @@ namespace Repository.Implements
 
         public async Task<IngredientTag?> GetIngredientTagById(Guid id)
             => await _ctx.IngredientTags
-                .Include(i => i.IngredientLabels)
                 .Where(i => !i.IsDeleted)
                 .FirstOrDefaultAsync(i => i.It_id == id);
-
         public async Task<IngredientTag> CreateIngredientTag(IngredientTag ingredientTag)
         {
             _ctx.IngredientTags.Add(ingredientTag);
