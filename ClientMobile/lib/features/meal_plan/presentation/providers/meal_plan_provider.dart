@@ -50,13 +50,23 @@ class MealPlanProvider extends ChangeNotifier {
     }
   }
 
+  String? get _previewPlanId =>
+      (_previewPlan?['mealPlan_id'] ??
+              _previewPlan?['MealPlan_id'] ??
+              _previewPlan?['mealPlanId'] ??
+              _previewPlan?['MealPlanId'] ??
+              _previewPlan?['id'] ??
+              _previewPlan?['Id'])
+          ?.toString();
+
   Future<void> confirmPlan() async {
-    if (_previewPlan == null || _previewPlan!['mealPlan_id'] == null) return;
+    final planId = _previewPlanId;
+    if (planId == null) return;
     
     _loading = true;
     notifyListeners();
     try {
-      await _service.confirmPlan(_previewPlan!['mealPlan_id']);
+      await _service.confirmPlan(planId);
       await fetchActivePlan(); // Refresh active plan
       _previewPlan = null; // Clear preview
     } catch (e) {
@@ -68,9 +78,10 @@ class MealPlanProvider extends ChangeNotifier {
   }
 
   Future<void> swapRecipe(String entryId, String newRecipeId) async {
-    if (_previewPlan == null) return;
+    final planId = _previewPlanId;
+    if (planId == null) return;
     try {
-      final res = await _service.swapRecipe(_previewPlan!['mealPlan_id'], entryId, newRecipeId);
+      final res = await _service.swapRecipe(planId, entryId, newRecipeId);
       _previewPlan = res['data'];
       notifyListeners();
     } catch (e) {

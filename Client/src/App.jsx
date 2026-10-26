@@ -1,18 +1,16 @@
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { FavoriteProvider } from './context/FavoriteContext';
 import { HealthProfileProvider } from './context/HealthProfileContext';
 import { DialogProvider } from './context/DialogContext';
 import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 import './App.css';
-import './assets/styles/landing.css';
-
+import './assets/styles/auth.css';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { useActivityTracker } from './hooks/useActivityTracker';
 
 function AppContent() {
-  const { user } = useAuth();
   useActivityTracker();
 
   return (
@@ -37,4 +35,4 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
   );
-}
+}

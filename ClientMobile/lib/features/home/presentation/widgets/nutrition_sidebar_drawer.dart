@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
 import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
@@ -186,6 +187,24 @@ class NutritionSidebarDrawer extends StatelessWidget {
                       ),
                     );
                   },
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryDark,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context.push('/health-profile');
+                  },
+                  icon: const Icon(Icons.monitor_heart_outlined, size: 18),
+                  label: const Text('Xem & Chỉnh sửa hồ sơ sức khỏe', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
               ),
             ],

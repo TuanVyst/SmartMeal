@@ -11,10 +11,12 @@ import {
   FiX, 
   FiStar, 
   FiExternalLink,
-  FiFilter
+  FiFilter,
+  FiAward
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { feedbackService } from '../../services/feedbackService';
+import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
 import './AdminFeedbacks.css';
 
@@ -52,9 +54,15 @@ export default function AdminFeedbacks() {
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
 
+  // Pro Subscription Grant states inside Feedback modal
+  const [proPlans, setProPlans] = useState([]);
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [userActiveSub, setUserActiveSub] = useState(null);
+  const [loadingUserSub, setLoadingUserSub] = useState(false);
+  const [isGrantingPro, setIsGrantingPro] = useState(false);
+
   // Fullscreen image preview modal
   const [previewImage, setPreviewImage] = useState(null);
-
   const fetchFeedbacks = useCallback(async () => {
     setLoading(true);
     try {
@@ -86,15 +94,111 @@ export default function AdminFeedbacks() {
   useEffect(() => {
     fetchFeedbacks();
   }, [fetchFeedbacks]);
+  useEffect(() => {
+    adminService
+      .getAllPlans()
+      .then((list) => {
+        const paidPlans = (list || [])
+          .filter((p) => (p.price || p.Price || 0) > 0)
+          .sort((a, b) => (a.price || 0) - (b.price || 0));
+        setProPlans(paidPlans);
+        if (paidPlans.length > 0) {
+          setSelectedPlanId(paidPlans[0].plan_id || paidPlans[0].Plan_id);
+        }
+      })
+      .catch((err) => console.error('Không thể tải danh sách gói Pro:', err));
+  }, []);
+
+  const loadUserActiveSubscription = async (accountId) => {
+    if (!accountId) {
+      setUserActiveSub(null);
+      return;
+    }
+    setLoadingUserSub(true);
+    try {
+      const subs = await adminService.getUserSubscriptions(accountId);
+      const now = new Date();
+      const active = (subs || [])
+        .filter((s) => {
+          const status = (s.status || s.Status || '').toLowerCase();
+          const endVal = s.endDate || s.EndDate;
+          return status === 'active' && (!endVal || new Date(endVal) > now);
+        })
+        .sort((a, b) => new Date(b.endDate || b.EndDate || 0) - new Date(a.endDate || a.EndDate || 0))[0] || null;
+      setUserActiveSub(active);
+    } catch {
+      setUserActiveSub(null);
+    } finally {
+      setLoadingUserSub(false);
+    }
+  };
 
   const handleOpenDetail = (item) => {
     setSelectedFeedback(item);
     setReplyText(item.adminReply || '');
+    loadUserActiveSubscription(item.account_id);
   };
 
   const handleCloseDetail = () => {
     setSelectedFeedback(null);
     setReplyText('');
+    setUserActiveSub(null);
+  };
+
+  const handleGrantProFromFeedback = async () => {
+    if (!selectedFeedback?.account_id) {
+      toast.error('Không xác định được tài khoản người gửi phản hồi.');
+      return;
+    }
+    if (!selectedPlanId) {
+      toast.error('Vui lòng chọn gói Pro cần cấp.');
+      return;
+    }
+
+    const chosenPlan = proPlans.find((p) => String(p.plan_id || p.Plan_id) === String(selectedPlanId));
+    const planName = chosenPlan?.name || chosenPlan?.Name || 'Pro';
+
+    const ok = await dialog.confirm({
+      title: 'Cấp / Kích hoạt gói Pro',
+      message: `Xác nhận kích hoạt gói "${planName}" cho người dùng "${selectedFeedback.userName || selectedFeedback.userEmail}"? (Nếu người dùng đang có gói còn hạn, số ngày còn lại sẽ được tự động cộng dồn).`,
+      confirmLabel: 'Cấp gói Pro ngay',
+    });
+    if (!ok) return;
+
+    setIsGrantingPro(true);
+    try {
+      const res = await adminService.grantUserSubscription({
+        account_id: selectedFeedback.account_id,
+        plan_id: selectedPlanId,
+        paymentRef: `FB_${String(selectedFeedback.feedback_id).slice(0, 8)}`,
+      });
+
+      if (res?.success) {
+        toast.success(res.message || `Đã cấp gói ${planName} thành công!`);
+        await loadUserActiveSubscription(selectedFeedback.account_id);
+
+        const endDateVal = res.data?.endDate || res.data?.EndDate;
+        const endDateStr = endDateVal
+          ? new Date(endDateVal).toLocaleDateString('vi-VN', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
+          : 'vĩnh viễn';
+
+        if (!replyText.trim()) {
+          setReplyText(
+            `Xin chào ${selectedFeedback.userName || 'bạn'},\n\nSmartMeal đã kiểm tra phản hồi thanh toán của bạn và kích hoạt thành công gói "${planName}" cho tài khoản của bạn (hạn sử dụng đến hết ngày ${endDateStr}).\n\nBạn vui lòng tải lại trang hoặc đăng nhập lại để sử dụng đầy đủ các tính năng Pro nhé. Cảm ơn bạn đã tin tưởng và đồng hành cùng SmartMeal!`
+          );
+        }
+      } else {
+        toast.error(res?.message || 'Không thể cấp gói Pro.');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Lỗi khi cấp gói Pro cho người dùng.');
+    } finally {
+      setIsGrantingPro(false);
+    }
   };
 
   const handleSendReply = async (e) => {
@@ -473,6 +577,63 @@ export default function AdminFeedbacks() {
                     )}
                   </div>
                   <p className="previous-reply-body">{selectedFeedback.adminReply}</p>
+                </div>
+              )}
+
+              {/* ── Admin Quick Grant Pro Box ── */}
+              {selectedFeedback.account_id && (
+                <div className="admin-grant-pro-box">
+                  <div className="grant-pro-header">
+                    <div className="grant-pro-title">
+                      <FiAward size={18} />
+                      <span>Hỗ trợ Cấp / Kích hoạt lại Gói Pro cho người dùng</span>
+                    </div>
+                    <div className="grant-pro-current-status">
+                      {loadingUserSub ? (
+                        <span>Đang kiểm tra gói...</span>
+                      ) : userActiveSub ? (
+                        <span className="sub-status-active">
+                          👑 Đang có Pro ({proPlans.find((p) => String(p.plan_id || p.Plan_id) === String(userActiveSub.plan_id || userActiveSub.Plan_id))?.name || 'Pro'} — Hạn:{' '}
+                          {userActiveSub.endDate || userActiveSub.EndDate
+                            ? new Date(userActiveSub.endDate || userActiveSub.EndDate).toLocaleDateString('vi-VN')
+                            : 'Vĩnh viễn'})
+                        </span>
+                      ) : (
+                        <span className="sub-status-free">Tài khoản thường (Chưa có gói Pro)</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grant-pro-controls">
+                    <select
+                      className="grant-pro-select"
+                      value={selectedPlanId}
+                      onChange={(e) => setSelectedPlanId(e.target.value)}
+                      disabled={isGrantingPro || proPlans.length === 0}
+                    >
+                      {proPlans.map((plan) => {
+                        const pId = plan.plan_id || plan.Plan_id;
+                        const pName = plan.name || plan.Name;
+                        const pPrice = Number(plan.price ?? plan.Price ?? 0).toLocaleString('vi-VN');
+                        const pDur = plan.duration ?? plan.Duration ?? 30;
+                        return (
+                          <option key={pId} value={pId}>
+                            {pName} — {pPrice}đ ({pDur === 0 ? 'Vĩnh viễn' : `${pDur} ngày`})
+                          </option>
+                        );
+                      })}
+                    </select>
+
+                    <button
+                      type="button"
+                      className="btn-grant-pro"
+                      onClick={handleGrantProFromFeedback}
+                      disabled={isGrantingPro || !selectedPlanId}
+                    >
+                      <FiAward size={15} />
+                      <span>{isGrantingPro ? 'Đang kích hoạt...' : userActiveSub ? 'Gia hạn / Cộng dồn Pro' : 'Cấp gói Pro ngay'}</span>
+                    </button>
+                  </div>
                 </div>
               )}
 

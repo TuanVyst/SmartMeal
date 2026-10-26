@@ -28,6 +28,11 @@ namespace Service.Implements
             return items.Select(MapToDto).ToList();
         }
 
+        public async Task<List<AllergyResponseDto>> GetAllergiesByAccountId(Guid accountId)
+        {
+            var items = await _allergyRepo.GetAllergiesByAccountId(accountId);
+            return items.Select(MapToDto).ToList();
+        }
         public async Task<AllergyResponseDto?> GetAllergyById(Guid id)
         {
             var item = await _allergyRepo.GetAllergyById(id);

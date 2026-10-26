@@ -10,8 +10,12 @@ import '../../features/onboarding/presentation/screens/survey_screen.dart';
 import 'package:smart_meal/features/home/presentation/screens/main_shell.dart';
 import '../../features/recipes/presentation/screens/meal_detail_screen.dart';
 import '../../features/diary/presentation/screens/diary_screen.dart';
-import '../../features/profile/presentation/screens/health_stats_screen.dart';
+import '../../features/profile/presentation/screens/health_profile_screen.dart';
 import '../../features/meal_plan/presentation/screens/meal_plan_preview_screen.dart';
+import '../../features/recipes/presentation/screens/ingredients/ingredient_list_screen.dart';
+import '../../features/recipes/presentation/screens/ingredients/ingredient_detail_screen.dart';
+import '../../features/meal_plan/presentation/screens/meal_plan_screen.dart';
+import '../../features/profile/presentation/screens/subscription/subscription_plans_screen.dart';
 
 GoRouter createAppRouter(AuthProvider authProvider, HealthProfileProvider healthProvider) {
   return GoRouter(
@@ -25,7 +29,8 @@ GoRouter createAppRouter(AuthProvider authProvider, HealthProfileProvider health
       }
 
       final isLoggedIn = authProvider.isLoggedIn;
-      final isSurveyCompleted = healthProvider.surveyCompleted;
+      final isAdmin = authProvider.user?.isAdmin ?? false;
+      final isSurveyCompleted = healthProvider.surveyCompleted || isAdmin;
 
       final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
       final isGoingToSurvey = state.matchedLocation == '/onboarding';
@@ -84,8 +89,35 @@ GoRouter createAppRouter(AuthProvider authProvider, HealthProfileProvider health
         builder: (context, state) => const DiaryScreen(),
       ),
       GoRoute(
+        path: '/health-profile',
+        builder: (context, state) => const HealthProfileScreen(),
+      ),
+      GoRoute(
         path: '/health-stats',
-        builder: (context, state) => const HealthStatsScreen(),
+        builder: (context, state) => const HealthProfileScreen(),
+      ),
+      GoRoute(
+        path: '/health-survey',
+        builder: (context, state) => const HealthProfileScreen(),
+      ),
+      GoRoute(
+        path: '/ingredients',
+        builder: (context, state) => const IngredientListScreen(),
+      ),
+      GoRoute(
+        path: '/ingredient-detail/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return IngredientDetailScreen(ingredientId: id);
+        },
+      ),
+      GoRoute(
+        path: '/meal-plan',
+        builder: (context, state) => const MealPlanScreen(),
+      ),
+      GoRoute(
+        path: '/subscription',
+        builder: (context, state) => const SubscriptionPlansScreen(),
       ),
     ],
   );

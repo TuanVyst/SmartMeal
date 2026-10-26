@@ -26,11 +26,9 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                var items = await _nutritionLogService.GetAllNutritionLogs();
-                if (accountId.HasValue)
-                {
-                    items = items.Where(x => x.Account_id == accountId.Value).ToList();
-                }
+                var items = accountId.HasValue
+                    ? await _nutritionLogService.GetNutritionLogsByAccountId(accountId.Value)
+                    : await _nutritionLogService.GetAllNutritionLogs();
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)

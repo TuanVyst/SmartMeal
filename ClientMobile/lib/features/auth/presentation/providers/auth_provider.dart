@@ -182,4 +182,34 @@ class AuthProvider extends ChangeNotifier {
       await _checkPremiumStatus(accountId!);
     }
   }
+
+  Future<bool> forgotPassword(String email) async {
+    return await _authRepository.forgotPassword(email);
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    return await _authRepository.resetPassword(
+      email: email,
+      otp: otp,
+      newPassword: newPassword,
+      confirmNewPassword: confirmNewPassword,
+    );
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    return await _authRepository.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmNewPassword: confirmNewPassword,
+    );
+  }
 }

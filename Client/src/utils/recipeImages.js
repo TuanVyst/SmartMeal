@@ -89,9 +89,18 @@ function buildRecipeImageUrl(filename) {
   return `${RECIPE_IMAGE_BASE}/${safe}`;
 }
 
-export function resolveRecipeImageUrl(recipeName) {
-  if (!recipeName) return FALLBACK_MEAL_IMAGE;
+export function resolveRecipeImageUrl(recipeName, explicitUrl) {
+  if (explicitUrl && typeof explicitUrl === 'string' && explicitUrl.trim()) {
+    const trimmed = explicitUrl.trim();
+    if (
+      (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/') || trimmed.startsWith('data:')) &&
+      !trimmed.includes('photo-1498837167922-ddd27525d352')
+    ) {
+      return trimmed;
+    }
+  }
 
+  if (!recipeName) return FALLBACK_MEAL_IMAGE;
   const normalizedName = recipeName.trim().toLowerCase();
   if (LAU_RECIPES.has(normalizedName)) return FALLBACK_MEAL_IMAGE;
 

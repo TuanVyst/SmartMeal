@@ -2935,5 +2935,1599 @@
       "Bữa sáng",
       "Nhanh"
     ]
+  },
+  {
+    "Recipe_name": "Rau lang xào tỏi",
+    "Description": "Món rau dân dã, xanh mướt, giòn ngọt thơm lừng mùi tỏi phi, cực kỳ đưa cơm.",
+    "Instruction": "Bước 1 (Sơ chế): Nhặt lấy phần ngọn và lá non của rau lang, tước xơ phần cuống, rửa sạch để ráo. Tỏi bóc vỏ, đập dập.\nBước 2 (Chần rau): Đun sôi nồi nước, cho rau lang vào chần sơ khoảng 1 phút rồi vớt ra rổ cho ráo (giúp rau giữ màu xanh).\nBước 3 (Xào rau): Cho dầu ăn vào chảo, phi thơm tỏi. Cho rau lang vào xào nhanh tay trên lửa lớn, nêm hạt nêm và xíu nước mắm cho vừa miệng, tắt bếp.",
+    "CookTime": 5,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Rau lang",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 4,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Nhanh",
+      "Bữa tối",
+      "Lành mạnh",
+      "Chay"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Cà pháo muối xổi",
+    "Description": "Món ăn kèm chua cay, giòn tan, kích thích vị giác đặc trưng của bữa cơm miền Bắc.",
+    "Instruction": "Bước 1 (Sơ chế): Cà pháo cắt cuống, thái lát mỏng ngâm ngay vào âu nước muối loãng có vắt chút chanh trong 15 phút để cà không bị thâm và bớt nhựa. Vớt ra rửa sạch, để thật ráo.\nBước 2 (Pha mắm): Giã nhuyễn tỏi, ớt. Pha hỗn hợp nước mắm, đường, nước cốt chanh sao cho có vị chua mặn ngọt hài hòa.\nBước 3 (Trộn cà): Cho cà pháo vào âu, đổ hỗn hợp nước mắm tỏi ớt vào trộn đều. Bọc màng bọc thực phẩm, để khoảng 1-2 tiếng là có thể ăn được.",
+    "CookTime": 0,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cà pháo trắng",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 3,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Chanh",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Ăn kèm",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Rau muống luộc dầm sấu",
+    "Description": "Bát nước luộc thanh mát, chua dịu vị sấu cùng đĩa rau muống xanh ngắt là hương vị mùa hè khó quên.",
+    "Instruction": "Bước 1 (Sơ chế): Rau muống nhặt phần non, rửa sạch qua nhiều nước. Sấu cạo vỏ, rửa sạch.\nBước 2 (Luộc rau): Đun sôi nồi nước, cho chút muối để rau xanh. Thả rau muống vào luộc lật đều, rau chín vớt ra đĩa cho tơi.\nBước 3 (Dầm sấu): Thả sấu vào phần nước luộc rau đun thêm 3-5 phút cho sấu mềm. Tắt bếp, múc sấu ra bát dầm nát, bỏ hạt rồi đổ lại nước sấu chua vào nồi nước luộc.",
+    "CookTime": 10,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Rau muống",
+        "Quantity": 350,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Sấu xanh",
+        "Quantity": 3,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Lành mạnh",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Dưa giá muối chua",
+    "Description": "Dưa giá giòn sần sật, chua ngọt dịu nhẹ, thường dùng kèm thịt kho hột vịt giúp chống ngán hiệu quả.",
+    "Instruction": "Bước 1 (Sơ chế): Giá đỗ rửa sạch để ráo. Hẹ rửa sạch cắt khúc. Cà rốt gọt vỏ, bào sợi nhỏ. Trộn đều cả ba.\nBước 2 (Làm nước muối): Pha nước ấm với muối, đường, chút giấm nếm có vị lợ lợ, chua ngọt nhẹ. Khuấy tan.\nBước 3 (Muối chua): Cho hỗn hợp giá vào hũ thủy tinh, đổ ngập nước muối đã pha. Đậy kín nắp để ở nhiệt độ phòng khoảng 1 ngày là chua giòn tới nái.",
+    "CookTime": 0,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Giá đỗ",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hẹ",
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Cà rốt",
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Giấm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Ăn kèm",
+      "Chay",
+      "Lành mạnh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh rau tập tàng nấu tôm",
+    "Description": "Món canh ngọt lịm kết hợp từ nhiều loại rau quê và tôm tươi, mang đậm chất mộc mạc miền Trung.",
+    "Instruction": "Bước 1 (Sơ chế): Rau nhặt sạch, rửa kỹ, thái nhỏ nếu lá to. Tôm bóc vỏ, bỏ chỉ lưng, băm thô. Hành tím băm nhuyễn.\nBước 2 (Xào tôm): Phi thơm hành tím với xíu dầu ăn, cho tôm vào xào săn lại.\nBước 3 (Nấu canh): Đổ nước lọc vừa đủ vào nồi tôm xào đun sôi. Thả rau tập tàng vào, đun sôi bùng lại, nêm nếm hạt nêm vừa ăn rồi tắt bếp ngay để rau không bị nát.",
+    "CookTime": 10,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Rau tập tàng",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tôm",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Bữa trưa",
+      "Lành mạnh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh hẹ đậu hũ non",
+    "Description": "Món canh giải nhiệt cực nhanh, thanh đạm, thơm mùi lá hẹ đặc trưng.",
+    "Instruction": "Bước 1 (Sơ chế): Hẹ rửa sạch, cắt khúc dài 3cm. Đậu hũ non thái khối vuông vừa ăn, làm nhẹ tay tránh nát.\nBước 2 (Đun nước dùng): Cho nước vào nồi đun sôi (nếu dùng thịt băm thì xào chín thịt trước rồi mới đổ nước). Nêm nếm gia vị, hạt nêm cho vừa miệng.\nBước 3 (Nấu canh): Thả đậu hũ non vào nồi đun sôi lăn tăn khoảng 2 phút. Cho hẹ vào, tắt bếp ngay, rắc thêm chút tiêu.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Đậu hủ",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hẹ",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Bữa tối",
+      "Nhanh",
+      "Chay"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Đậu bắp luộc chấm chao",
+    "Description": "Đậu bắp giòn ngọt, giữ nguyên độ nhớt bổ dưỡng chấm cùng chao béo ngậy đậm đà.",
+    "Instruction": "Bước 1 (Sơ chế): Đậu bắp rửa sạch, cắt bỏ phần cuống cứng (không cắt lẹm vào ruột để tránh ra nhiều nhớt khi luộc).\nBước 2 (Luộc đậu bắp): Đun sôi nồi nước với chút muối. Thả đậu bắp vào luộc 3-4 phút đến khi chín tới, vớt ra ngâm nước đá cho giòn và xanh.\nBước 3 (Pha chao): Tán nhuyễn viên chao cùng ít nước chao, thêm đường, vắt xíu chanh và cắt ớt lát vào khuấy đều cho vừa vị ngọt mặn.",
+    "CookTime": 5,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Đậu bắp",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Chao",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Chanh",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Nhanh",
+      "Chay"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Thịt luộc cuốn bánh tráng",
+    "Description": "Món ăn dân dã, thanh mát với thịt ba chỉ béo ngậy, bún tươi và các loại rau thơm ăn kèm.",
+    "Instruction": "Bước 1 (Sơ chế): Rửa sạch thịt. Rửa sạch rau sống, dưa leo thái lát mỏng dọc.\nBước 2 (Luộc thịt): Luộc thịt ngập nước cùng 1 củ hành khô đập dập và xíu muối. Thịt chín vớt ra ngâm nước lạnh cho trắng giòn, sau đó thái lát thật mỏng.\nBước 3 (Thưởng thức): Dọn thịt ra đĩa. Bày bánh tráng, bún, rau sống, dưa leo và chén mắm ra. Trải bánh tráng, xếp rau bún, thịt rồi cuốn chặt tay chấm mắm.",
+    "CookTime": 20,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Thịt heo",
+        "Quantity": 400,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Bánh tráng",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Bún",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Lá xà lách",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dưa leo",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Mắm nêm",
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Bữa trưa",
+      "Bữa tối",
+      "Salad / Trộn"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Su su xào tỏi",
+    "Description": "Su su xanh mướt, giòn sần sật quyện với hương tỏi phi thơm nức mũi.",
+    "Instruction": "Bước 1 (Sơ chế): Su su gọt vỏ (đeo găng tay để tránh nhựa), rửa sạch, bổ đôi bỏ hạt rồi thái sợi hoặc thái lát mỏng. Tỏi băm nhuyễn.\nBước 2 (Xào tỏi): Đun nóng chảo dầu, phi thơm tỏi băm đến khi hơi ngả vàng.\nBước 3 (Xào su su): Đổ su su vào xào nhanh trên lửa lớn. Nêm hạt nêm, đảo đều tay khoảng 3-4 phút cho su su chín tới, tắt bếp rắc tiêu.",
+    "CookTime": 5,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Su su",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 4,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Nhanh",
+      "Bữa tối",
+      "Chay"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh bí đao nấu sườn non",
+    "Description": "Bát canh thanh mát, sườn mềm ngọt xương, bí đao trong vắt giúp thanh nhiệt cơ thể.",
+    "Instruction": "Bước 1 (Sơ chế): Sườn non chặt miếng vừa ăn, rửa sạch chần qua nước sôi rồi xả lại. Bí đao gọt vỏ, bỏ ruột, thái miếng dày. Hành ngò xắt nhỏ.\nBước 2 (Ninh sườn): Cho sườn vào nồi nước nấu sôi, hớt bọt cho nước trong. Hạ lửa nhỏ ninh khoảng 15-20 phút cho sườn mềm, nêm chút muối.\nBước 3 (Nấu canh): Thả bí đao vào nồi sườn, đun đến khi miếng bí trong lại (chín tới). Nêm nếm gia vị vừa ăn, rắc hành ngò và tắt bếp.",
+    "CookTime": 25,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bí đao",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Sườn sụn",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ngò rí",
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Bữa trưa",
+      "Hầm / Ninh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Đậu phộng rang muối",
+    "Description": "Món nhắm, món ăn kèm kinh điển, hạt đậu giòn tan áo lớp muối mặn mặn bùi bùi.",
+    "Instruction": "Bước 1 (Rang đậu): Bắc chảo lên bếp, cho đậu phộng vào rang lửa nhỏ, đảo đều tay liên tục để đậu không bị cháy vỏ.\nBước 2 (Thêm dầu): Khi đậu bắt đầu lách tách và vỏ áo sậm màu, nhỏ vào 1 thìa cafe dầu ăn, đảo đều cho hạt đậu bóng và giòn rụm. Tắt bếp.\nBước 3 (Trộn muối): Chờ đậu nguội bớt (còn hơi ấm), cho muối bột canh vào xóc đều để muối bám quanh hạt đậu. Để nguội hoàn toàn rồi cất hũ kín.",
+    "CookTime": 10,
+    "PrepTime": 0,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Đậu phộng",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Ăn vặt",
+      "Bữa phụ",
+      "Chay"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Trứng chiên hành tây",
+    "Description": "Biến tấu đơn giản của trứng chiên giúp món ăn xốp hơn, thơm ngọt vị hành tây chín.",
+    "Instruction": "Bước 1 (Sơ chế): Hành tây bóc vỏ, thái hạt lựu nhỏ. Trứng đập ra bát, nêm chút nước mắm, tiêu, đánh tan nổi bọt.\nBước 2 (Xào hành): Cho chút dầu ăn vào chảo, xào qua hành tây cho mềm và ngọt nước. Trút hành tây vào bát trứng trộn đều.\nBước 3 (Chiên trứng): Đun nóng dầu ăn trong chảo, đổ bát trứng hành tây vào tráng đều. Chiên vàng một mặt rồi lật chiên chín mặt còn lại, lấy ra đĩa cắt miếng.",
+    "CookTime": 5,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Trứng gà",
+        "Quantity": 3,
+        "UOM": "piece",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hành tây",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Nhanh",
+      "Bữa sáng",
+      "Bữa tối",
+      "Chiên"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Cơm cháy kho quẹt",
+    "Description": "Miếng cơm cháy giòn rụm bẻ ra quệt đẫm nước mắm mỡ hành tôm khô mặn ngọt cay xé lưỡi.",
+    "Instruction": "Bước 1 (Ép cơm cháy): Dùng chảo chống dính, quết mỏng lớp dầu, dàn đều cơm nguội ép chặt, chiên lửa nhỏ đến khi vàng giòn 1 mặt thì lật mặt chiên tiếp.\nBước 2 (Làm kho quẹt): Thịt ba chỉ thái hạt lựu, thắng ra mỡ, vớt tóp mỡ ra riêng. Dùng mỡ heo phi hành, cho tôm khô (đã ngâm mềm) vào xào săn.\nBước 3 (Rim mắm): Pha mắm, đường, nước lọc đổ vào chảo tôm khô. Rim lửa nhỏ đến khi hỗn hợp kẹo lại, cho tóp mỡ, ớt tươi, tiêu vào đảo đều rồi tắt bếp.",
+    "CookTime": 15,
+    "PrepTime": 15,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Gạo",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tôm khô",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Kho / Rim",
+      "Ăn vặt",
+      "Bữa tối"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh măng chua cá hú",
+    "Description": "Vị chua thanh của măng kết hợp vị béo ngậy của cá hú làm nên món canh đưa cơm số 1 miền Tây.",
+    "Instruction": "Bước 1 (Sơ chế): Cá hú rửa sạch với nước muối/chanh khử tanh. Măng chua rửa vắt ráo. Cà chua bổ múi cau. Rau ngổ, ngò gai thái nhỏ.\nBước 2 (Chiên sơ cá): Phi thơm tỏi, cho cá hú vào áp chảo sơ 2 mặt cho thịt cá săn lại, bớt tanh. Đổ nước lọc vào đun sôi.\nBước 3 (Nấu canh): Xào qua măng và cà chua rồi trút vào nồi canh cá. Nêm nếm gia vị chua ngọt vừa miệng, cá chín thì rắc ngò gai, ngổ lên và tắt bếp.",
+    "CookTime": 20,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "medium",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cá basa",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Măng chua",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Cà chua",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Rau thơm",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Bữa trưa",
+      "Bữa tối"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Bầu luộc chấm kho quẹt",
+    "Description": "Miếng bầu non xanh ngọt luộc chín tới chấm cùng nồi kho quẹt đậm đà mặn ngọt.",
+    "Instruction": "Bước 1 (Sơ chế): Bầu non để nguyên vỏ hoặc gọt vỏ tùy ý, rửa sạch, cắt khoanh dày rồi bổ đôi hoặc bổ làm tư.\nBước 2 (Luộc bầu): Đun sôi lượng nước vừa đủ cùng một chút muối. Thả bầu vào luộc lửa lớn khoảng 5 phút đến khi bầu chín trong.\nBước 3 (Thưởng thức): Vớt bầu ra đĩa để ráo. Làm nóng lại niêu kho quẹt để chấm kèm. Nước luộc bầu làm canh rất ngọt mát.",
+    "CookTime": 10,
+    "PrepTime": 5,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bầu non",
+        "Quantity": 350,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 50,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tôm khô",
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Lành mạnh",
+      "Bữa tối",
+      "Luộc / Hấp"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh rau dền nấu thịt băm",
+    "Description": "Bát canh màu đỏ hồng bắt mắt, rau dền nhừ tơi, nước ngọt vị thịt băm dễ ăn cho cả nhà.",
+    "Instruction": "Bước 1 (Sơ chế): Rau dền nhặt khúc non, ngâm rửa kỹ với nước muối, để ráo. Hành tím băm nhỏ.\nBước 2 (Xào thịt): Phi thơm hành tím với dầu ăn, cho thịt băm vào xào tơi, nêm chút hạt nêm cho thịt ngấm vị.\nBước 3 (Nấu canh): Đổ nước đun sôi vào nồi thịt, hớt bọt. Cho rau dền vào nấu lửa lớn, nêm gia vị vừa ăn. Rau chín mềm nhừ thì tắt bếp.",
+    "CookTime": 10,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Rau dền đỏ",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Bữa trưa",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Dưa cải chua xào tóp mỡ",
+    "Description": "Dưa cải chua chua giòn giòn quyện với tóp mỡ béo ngậy nổ lách tách trong miệng.",
+    "Instruction": "Bước 1 (Sơ chế): Dưa chua rửa vắt bớt nước chua, thái khúc ngắn. Mỡ heo thái miếng rang thành tóp mỡ (nếu có tóp mỡ sẵn thì bỏ qua). Cà chua bổ múi.\nBước 2 (Xào cà chua): Dùng mỡ heo phi thơm hành khô, xào mềm cà chua để tạo màu đẹp.\nBước 3 (Xào dưa): Cho dưa chua vào xào kỹ cho thấm mỡ. Nêm xíu mắm, xíu đường cho cân bằng vị chua. Cuối cùng cho tóp mỡ vào đảo đều rồi tắt bếp.",
+    "CookTime": 10,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Dưa chua",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tóp mỡ",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Cà chua",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Xào",
+      "Bữa tối",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Mướp đắng xào trứng",
+    "Description": "Vị đắng dịu của mướp hòa quyện với vị béo thơm của trứng, món xào quen thuộc siêu nhanh.",
+    "Instruction": "Bước 1 (Sơ chế): Mướp đắng bổ đôi moi sạch ruột (cạo màng trắng để bớt đắng), thái lát thật mỏng. Trứng đập ra bát đánh tan với xíu hạt nêm.\nBước 2 (Xào mướp): Phi hành thơm, xào mướp đắng trên lửa lớn cho chín tái, nêm hạt nêm.\nBước 3 (Đổ trứng): Rưới đều bát trứng lên mướp đắng, đợi vài giây cho trứng hơi se lại rồi đảo tơi đều tay đến khi trứng bám vào mướp, tắt bếp rắc tiêu.",
+    "CookTime": 5,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Mướp đắng",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Trứng gà",
+        "Quantity": 2,
+        "UOM": "piece",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Xào",
+      "Nhanh",
+      "Lành mạnh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Bắp xào mỡ hành",
+    "Description": "Món ăn vặt tuổi thơ thơm lừng mùi bơ, béo ngậy mỡ hành tôm khô, hạt bắp dẻo ngọt.",
+    "Instruction": "Bước 1 (Sơ chế): Bắp luộc sơ cho mềm vớt ra để ráo. Tôm khô ngâm nở nhỏ. Hành lá thái nhỏ.\nBước 2 (Làm mỡ hành): Cho bơ và chút dầu ăn vào chảo, phi phần đầu hành trắng, xào tôm khô cho thơm.\nBước 3 (Xào bắp): Đổ bắp vào đảo đều, nêm chút nước mắm, xíu đường cho vừa miệng. Bắp chín áo đều bơ thì cho hành lá thái nhỏ vào, đảo nhanh tay rồi tắt bếp.",
+    "CookTime": 10,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bắp",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tôm khô",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Bơ thực vật",
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Ăn vặt",
+      "Xào",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Khoai lang luộc",
+    "Description": "Món ăn sáng hoặc ăn nhẹ đơn giản, giữ trọn vị ngọt tự nhiên, bùi bở của khoai lang.",
+    "Instruction": "Bước 1 (Sơ chế): Khoai lang rửa thật sạch bùn đất, cắt bỏ hai đầu núm, không cần gọt vỏ.\nBước 2 (Luộc khoai): Xếp khoai vào nồi, đổ nước xâm xấp mặt khoai, thêm xíu muối để khoai ngọt đậm hơn. Đậy kín vung.\nBước 3 (Kiểm tra độ chín): Luộc sôi, sau đó hạ nhỏ lửa đun 15-20 phút. Xiên đũa qua củ khoai thấy mềm xuyên thấu là khoai chín. Chắt hết nước, đun thêm 1 phút cho khô vỏ.",
+    "CookTime": 20,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Khoai lang",
+        "Quantity": 400,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Luộc / Hấp",
+      "Bữa sáng",
+      "Lành mạnh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Khoai mì hấp cốt dừa",
+    "Description": "Khoai mì bở tơi, béo ngậy cốt dừa, thơm lừng lá dứa, rắc thêm muối mè nhai bùi bùi.",
+    "Instruction": "Bước 1 (Sơ chế): Khoai mì lột vỏ, ngâm nước muối pha loãng 2-3 tiếng để thải độc, rửa lại sạch, cắt khúc.\nBước 2 (Hấp khoai): Xếp khoai mì và lá dứa vào nồi hấp, hấp khoảng 20 phút cho khoai chín nứt, bở tơi.\nBước 3 (Chan cốt dừa): Rưới từ từ nước cốt dừa pha chút đường, xíu muối lên khoai mì đang nóng, đậy nắp hấp thêm 3-5 phút cho cốt dừa ngấm. Lấy ra rắc muối mè.",
+    "CookTime": 25,
+    "PrepTime": 15,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Khoai mì",
+        "Quantity": 400,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Nước cốt dừa",
+        "Quantity": 150,
+        "UOM": "ml",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Lá dứa",
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đậu phộng",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Bữa phụ",
+      "Tráng miệng",
+      "Luộc / Hấp"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Cháo trắng hột vịt muối",
+    "Description": "Bát cháo nếp tẻ sánh mịn ăn cùng lòng đỏ hột vịt muối mặn béo mằn mặn, mộc mạc mà ấm bụng.",
+    "Instruction": "Bước 1 (Sơ chế): Gạo vo sạch, ngâm nước 30 phút cho nhanh nhừ. Hột vịt muối luộc chín, bóc vỏ bổ làm tư.\nBước 2 (Nấu cháo): Đổ nước và gạo vào nồi (tỉ lệ 1 gạo : 8 nước), thả cuộn lá dứa vào ninh lửa nhỏ đến khi hạt gạo nở bung, sánh mịn.\nBước 3 (Thưởng thức): Múc cháo nóng ra bát, rắc hành lá nếu thích. Ăn kèm từng chút hột vịt muối béo ngậy.",
+    "CookTime": 30,
+    "PrepTime": 5,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Gạo",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hột vịt muối",
+        "Quantity": 2,
+        "UOM": "piece",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Lá dứa",
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hành lá",
+        "Quantity": 10,
+        "UOM": "g",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Bữa sáng",
+      "Bữa tối",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Bún nước tương",
+    "Description": "Món bún trộn chay tiện lợi, thanh đạm, vị nước tương tỏi ớt mặn ngọt vừa miệng.",
+    "Instruction": "Bước 1 (Sơ chế): Đậu hũ chiên lại cho giòn, cắt sợi hoặc khối nhỏ. Dưa leo băm sợi. Rau sống rửa sạch cắt nhỏ.\nBước 2 (Pha nước tương): Băm nhuyễn tỏi ớt. Pha nước tương với đường, chút nước lọc, vắt thêm xíu chanh và cho tỏi ớt vào khuấy tan.\nBước 3 (Trộn bún): Cho bún ra tô, xếp rau, dưa leo, đậu hũ lên trên. Khi ăn rưới nước tương tỏi ớt vào trộn đều, rắc thêm đậu phộng rang (nếu có).",
+    "CookTime": 5,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Bún",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Đậu hủ",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Dưa leo",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Lá xà lách",
+        "Quantity": 80,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Rau thơm",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước tương",
+        "Quantity": 2,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Chay",
+      "Nhanh",
+      "Bữa sáng",
+      "Salad / Trộn"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Cà tím xào lá lốt",
+    "Description": "Miếng cà tím mềm nhừ ngấm vị ngọt của thịt, thơm nức mũi mùi đặc trưng của lá lốt.",
+    "Instruction": "Bước 1 (Sơ chế): Cà tím thái vát hoặc bổ cau, ngâm nước muối loãng cho khỏi thâm, vớt để ráo. Lá lốt thái sợi nhuyễn. Tỏi băm.\nBước 2 (Xào thịt): Phi tỏi thơm, cho thịt băm vào xào săn chín, nêm chút hạt nêm.\nBước 3 (Xào cà): Trút cà tím vào chảo thịt, đảo đều. Có thể thêm chút nước để cà chín mềm không bị cháy. Khi cà mềm nhừ vừa ăn, nêm nếm lại, rắc lá lốt vào đảo nhanh và tắt bếp.",
+    "CookTime": 15,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cà tím",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Lá lốt",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 3,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Xào",
+      "Bữa tối"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh cải xanh nấu gừng",
+    "Description": "Bát canh màu xanh trong vắt, hăng nhẹ vị cải và nồng ấm vị gừng tươi giúp giải cảm.",
+    "Instruction": "Bước 1 (Sơ chế): Cải bẹ xanh cắt gốc, rửa sạch bùn đất từng kẽ lá, thái khúc 3cm. Gừng cạo vỏ, thái chỉ hoặc đập dập.\nBước 2 (Nấu nước dùng): Đun sôi nồi nước, thả gừng đập dập vào đun 2 phút cho ra tinh dầu thơm.\nBước 3 (Nấu canh): Thả rau cải vào nồi đun sôi trên lửa lớn để rau giữ màu xanh. Nêm gia vị, rau chín vớt ra bát ngay để rau không bị nhũn nát.",
+    "CookTime": 5,
+    "PrepTime": 5,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Cải bẹ xanh",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Gừng",
+        "Quantity": 15,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Chay",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Giá hẹ xào đậu hũ",
+    "Description": "Đĩa đồ xào thanh đạm, giòn ngọt từ giá, thơm nồng vị hẹ và mềm béo của đậu hũ.",
+    "Instruction": "Bước 1 (Sơ chế): Giá đỗ rửa sạch vớt ráo. Hẹ rửa sạch cắt khúc. Đậu hũ thái con chì (thái sợi dài).\nBước 2 (Phi tỏi): Bắc chảo dầu lên bếp, phi thơm tỏi băm. (Nếu ăn chay kiêng ngũ vị tân có thể thay bằng hành paro).\nBước 3 (Xào nguyên liệu): Cho đậu hũ vào đảo sơ. Cho giá và hẹ vào đảo nhanh tay trên lửa thật lớn, nêm xíu nước tương và hạt nêm. Tắt bếp ngay khi rau hơi xẹp để giữ độ giòn.",
+    "CookTime": 5,
+    "PrepTime": 10,
+    "Servings": 2,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Giá đỗ",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hẹ",
+        "Quantity": 100,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đậu hủ",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Nước tương",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Xào",
+      "Chay",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Đậu cove xào thịt heo",
+    "Description": "Đậu cove giòn sần sật, xanh mướt kết hợp những lát thịt heo thăn xào mềm ngọt.",
+    "Instruction": "Bước 1 (Sơ chế): Đậu cove tước xơ 2 bên mép, rửa sạch, thái lát xéo mỏng. Thịt heo thái lát mỏng ướp tỏi, dầu hào, tiêu 10 phút.\nBước 2 (Xào thịt): Phi thơm hành, xào thịt heo trên lửa lớn cho săn lại và chín tới rồi trút ra bát.\nBước 3 (Xào đậu): Dùng lại chảo, thêm dầu ăn xào đậu cove. Khi đậu chuyển màu xanh trong (chín), trút thịt lại vào chảo đảo đều, nêm nếm lại rồi tắt bếp.",
+    "CookTime": 10,
+    "PrepTime": 10,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Đậu que",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Thịt heo",
+        "Quantity": 150,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu hào",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tiêu đen",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Xào",
+      "Bữa trưa",
+      "Bữa tối"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Gỏi dưa leo",
+    "Description": "Đĩa gỏi chống ngán tuyệt vời, dưa leo giòn tan thấm đẫm sốt chua ngọt, rắc đậu phộng bùi bùi.",
+    "Instruction": "Bước 1 (Sơ chế): Dưa leo rửa sạch, gọt sơ vỏ, chẻ đôi bỏ ruột, thái lát xéo mỏng. Bóp dưa với xíu muối 5 phút rồi xả nước, vắt ráo (giúp dưa siêu giòn).\nBước 2 (Pha nước trộn): Pha nước mắm tỏi ớt chua ngọt (mắm, đường, chanh tỉ lệ 1:1:1), quậy tan.\nBước 3 (Trộn gỏi): Cho dưa leo, rau thơm thái nhỏ vào thố. Đổ nước mắm chua ngọt trộn đều tay. Trình bày ra đĩa và rắc đậu phộng rang giã dập.",
+    "CookTime": 0,
+    "PrepTime": 15,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Dưa leo",
+        "Quantity": 300,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Rau thơm",
+        "Quantity": 20,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đậu phộng",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Chanh",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Đường",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Nước mắm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Tỏi",
+        "Quantity": 2,
+        "UOM": "clove",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Ớt tươi",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Salad / Trộn",
+      "Chay",
+      "Nhanh"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Củ cải trắng luộc chấm mắm quẹt",
+    "Description": "Củ cải luộc trong veo, ngọt nước, giải ngấy hoàn hảo khi kết hợp mắm quẹt cay nồng.",
+    "Instruction": "Bước 1 (Sơ chế): Củ cải trắng gọt vỏ, xát nhẹ muối rửa sạch để khử bớt mùi hăng. Thái khoanh tròn hoặc móng lợn dày vừa ăn.\nBước 2 (Luộc củ cải): Đun sôi nước, thả củ cải vào luộc lửa vừa khoảng 10-15 phút.\nBước 3 (Kiểm tra): Khi thấy củ cải chuyển sang màu hơi trong là đã chín mềm và rất ngọt. Vớt ra đĩa chấm cùng kho quẹt.",
+    "CookTime": 15,
+    "PrepTime": 5,
+    "Servings": 3,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Củ cải trắng",
+        "Quantity": 350,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Mắm nêm",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Muối",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Luộc / Hấp",
+      "Lành mạnh",
+      "Bữa tối"
+    ],
+    "ImageUrl": null
+  },
+  {
+    "Recipe_name": "Canh mướp nấu mồng tơi",
+    "Description": "Canh rau thanh mát \"chuẩn vị mẹ nấu\", mướp hương thơm nức mũi hòa với độ sánh mềm của mồng tơi.",
+    "Instruction": "Bước 1 (Sơ chế): Mướp gọt vỏ, rửa sạch, thái lát vát xéo. Mồng tơi nhặt lá rửa sạch. Tôm khô ngâm mềm giã hơi dập.\nBước 2 (Nấu nước dùng): Phi hành tím xào thơm tôm khô. Đổ nước đun sôi, hớt bọt để nước dùng trong và ngọt.\nBước 3 (Nấu canh): Thả mướp vào trước đun 2 phút, tiếp đó thả mồng tơi vào đảo đều đun sôi lại. Nêm nếm gia vị và tắt bếp để rau không bị vàng úa.",
+    "CookTime": 10,
+    "PrepTime": 10,
+    "Servings": 4,
+    "Difficulty": "easy",
+    "IsPublic": true,
+    "AccountUsername": "admin",
+    "Ingredients": [
+      {
+        "Name": "Mướp hương",
+        "Quantity": 200,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Rau mồng tơi",
+        "Quantity": 250,
+        "UOM": "g",
+        "IsPrimary": true
+      },
+      {
+        "Name": "Tôm khô",
+        "Quantity": 30,
+        "UOM": "g",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hành tím",
+        "Quantity": 1,
+        "UOM": "piece",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Dầu ăn",
+        "Quantity": 1,
+        "UOM": "tbsp",
+        "IsPrimary": false
+      },
+      {
+        "Name": "Hạt nêm",
+        "Quantity": 1,
+        "UOM": "tsp",
+        "IsPrimary": false
+      }
+    ],
+    "TagNames": [
+      "Canh & Súp",
+      "Chay",
+      "Lành mạnh"
+    ],
+    "ImageUrl": null
   }
 ]

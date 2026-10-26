@@ -57,7 +57,7 @@ export default function Register() {
       } else if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/home');
+        navigate('/');
       }
     } catch (err) {
       if (err.response?.data?.message) {
@@ -83,7 +83,7 @@ export default function Register() {
       if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/home');
+        navigate('/');
       }
     } catch (err) {
       if (err.response?.data?.message) {
@@ -99,7 +99,6 @@ export default function Register() {
   if (otpStep) {
     return (
         <div className="auth-card-modern">
-          <Link to="/" className="back-home">← Về trang chủ</Link>
           <h1>Xác thực Email</h1>
           <p className="auth-subtitle">Nhập mã đã gửi đến <strong>{pendingEmail}</strong></p>
           <form onSubmit={handleOtpSubmit}>
@@ -129,7 +128,6 @@ export default function Register() {
 
   return (
         <div className="auth-card-modern">
-          <Link to="/" className="back-home">← Về trang chủ</Link>
           <h1>Tạo tài khoản</h1>
         <p className="auth-subtitle">Tham gia SmartMeal và bắt đầu hành trình nấu ăn của bạn</p>
         <form onSubmit={handleSubmit}>

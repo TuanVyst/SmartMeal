@@ -9,6 +9,11 @@ export default function ProtectedRoute({ children }) {
 
   if (loading || profileLoading) return <div className="loading">Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
+  const isAdmin = (user?.role || '').toLowerCase() === 'admin';
+  if (isAdmin) {
+    return children;
+  }
+
   // profile + health-survey are always reachable (users can edit profile before completing survey)
   const SKIP_SURVEY_REDIRECT = ['/health-survey', '/profile', '/favorites'];
   if (

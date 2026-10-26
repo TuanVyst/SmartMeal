@@ -82,13 +82,28 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose, todayTotals 
         payload.recipeId = recipe.id;
       }
       
-      await addDiaryEntry(payload);
-
-      // Notify Sidebar Progress Ring to update immediately
       if (toDateKey(date) === getTodayDateKey()) {
-        notifyNutritionUpdated({ deltaCalories: Math.round(baseCalories * finalServings) });
+        notifyNutritionUpdated({
+          deltaCalories: Math.round(baseCalories * finalServings),
+          optimisticLog: {
+            log_id: `optimistic-${recipe.id || mealType}`,
+            recipe_id: !isMockRecipe ? recipe.id : undefined,
+            mealType,
+            quantity: finalServings,
+            logDate: date,
+            totalCalories: macros.calories,
+            totalProtein: macros.protein,
+            totalCarbs: macros.carbs,
+            totalFat: macros.fat,
+          },
+        });
       }
 
+      await addDiaryEntry(payload);
+
+      if (toDateKey(date) === getTodayDateKey()) {
+        notifyNutritionUpdated({ syncOnly: true });
+      }
       setToast({ type: 'success', text: 'Đã thêm vào nhật ký!' });
       setTimeout(() => {
         setToast(null);

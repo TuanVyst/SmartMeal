@@ -1,11 +1,18 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logo from '../assets/SmartMealLogo.png';
-
+import '../assets/styles/auth.css';
 export default function AuthLayout() {
+  const { user, loading } = useAuth();
+
+  if (!loading && user) {
+    return <Navigate to={user.role === 'Admin' ? '/admin' : '/'} replace />;
+  }
+
   return (
     <div className="auth-layout">
       <div className="auth-left-panel">
-        <Link to="/" className="branding-logo-link">
+        <Link to="/login" className="branding-logo-link">
           <img src={logo} alt="SmartMeal" className="branding-logo" />
         </Link>
         <div className="auth-branding">

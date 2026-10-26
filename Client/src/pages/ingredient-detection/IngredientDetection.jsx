@@ -1,91 +1,202 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { predictImage } from '../../services/api';
+import { getIngredients } from '../../services/foodService';
+import { useAuth } from '../../context/AuthContext';
+import {
+  INGREDIENT_NAMES_VN,
+  getVietnameseLabel,
+  matchDetectedToSystemIngredients,
+} from '../../utils/ingredientMapping';
 import './IngredientDetection.css';
 
 export default function IngredientDetection() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const accountId = user?.accountId || user?.account_id;
+
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const redirectTimerRef = useRef(null);
 
   const [image, setImage] = useState(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [detections, setDetections] = useState([]);
   const [analyzing, setAnalyzing] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [emptyDetection, setEmptyDetection] = useState(false);
+  const [systemIngredients, setSystemIngredients] = useState([]);
 
-  const ingredientNamesVN = {
-    'Mushroom': 'Nấm',
-    'Egg': 'Trứng',
-    'Sweet Potato -Suthuni-': 'Khoai lang',
-    'Taro Leaves -Karkalo-': 'Lá khoai môn',
-    'Beetroot': 'Củ dền',
-    'Potato': 'Khoai tây',
-    'Capsicum': 'Ớt chuông',
-    'Taro Root-Pidalu-': 'Củ khoai môn',
-    'Turnip': 'Củ cải trắng',
-    'Green Mint -Pudina-': 'Bạc hà',
-    'Pointed Gourd -Chuche Karela-': 'Khổ qua nhỏ',
-    'Stinging Nettle -Sisnu-': 'Cây tầm ma',
-    'Bitter Gourd': 'Khổ qua',
-    'Snake Gourd -Chichindo-': 'Bầu rắn',
-    'Fiddlehead Ferns -Niguro-': 'Rau dớn',
-    'Palungo -Nepali Spinach-': 'Rau bina',
-    'Cabbage': 'Bắp cải',
-    'Brinjal': 'Cà tím',
-    'Bottle Gourd -Lauka-': 'Bầu',
-    'Tomato': 'Cà chua',
-    'Onion': 'Hành tây',
-    'Radish': 'Củ cải',
-    'Sponge Gourd -Ghiraula-': 'Mướp',
-    'Red Lentils': 'Đậu lăng đỏ',
-    'Masyaura': 'Masyaura',
-    'Okra -Bhindi-': 'Đậu bắp',
-    'Chayote-iskus-': 'Su su',
-    'Garden Peas': 'Đậu Hà Lan',
-    'Cheese': 'Phô mai',
-    'Rayo ko Saag': 'Cải Rayo',
-    'Lapsi -Nepali Hog Plum-': 'Quả Lapsi',
-    'Artichoke': 'Atisô',
-    'Banana': 'Chuối',
-    'Cinnamon': 'Quế',
-    'Bread': 'Bánh mì',
-    'Jack Fruit': 'Mít',
-    'Beans': 'Đậu que',
-    'Asparagus -Kurilo-': 'Măng tây',
-    'Gundruk': 'Gundruk',
-    'Avocado': 'Bơ',
-    'Nutrela -Soya Chunks-': 'Đậu nành khô',
-    'Rice -Chamal-': 'Gạo',
-    'Corn': 'Bắp',
-    'Onion Leaves': 'Hành lá',
-    'Tree Tomato -Rukh Tamatar-': 'Cà chua thân gỗ',
-    'Carrot': 'Cà rốt',
-    'Farsi ko Munta': 'Ngọn bí',
-    'Coriander -Dhaniya-': 'Rau mùi',
-    'Lemon -Nimbu-': 'Chanh',
-    'Cassava -Ghar Tarul-': 'Khoai mì',
-    'Pork': 'Thịt heo',
-    'Cucumber': 'Dưa leo',
-    'Black Lentils': 'Đậu lăng đen',
-    'Ash Gourd -Kubhindo-': 'Bí đao'
+  useEffect(() => {
+    let active = true;
+    getIngredients()
+      .then((res) => {
+        if (active) {
+          setSystemIngredients(res.data?.data || []);
+        }
+      })
+      .catch((err) => {
+        console.error('Không thể tải danh sách nguyên liệu hệ thống:', err);
+      });
+
+    return () => {
+      active = false;
+      stopCamera();
+      clearTimeout(redirectTimerRef.current);
+    };
+  }, []);
+
+  const clearRedirectTimer = () => {
+    clearTimeout(redirectTimerRef.current);
+    redirectTimerRef.current = null;
+    setRedirecting(false);
+  };
+
+  const buildDetectionPayload = (rawDetections, sysIngredientsList) => {
+    const countsMap = rawDetections.reduce((acc, item) => {
+      const rawName = item.name || item.class_name || '';
+      if (!rawName) return acc;
+      acc[rawName] = (acc[rawName] || 0) + 1;
+      return acc;
+    }, {});
+
+    const items = Object.entries(countsMap).map(([rawName, count]) => ({
+      rawName,
+      vnName: getVietnameseLabel(rawName),
+      count,
+    }));
+
+    const matchedSystem = matchDetectedToSystemIngredients(items, sysIngredientsList);
+    const matchedIngredientIds = matchedSystem
+      .map((ing) => ing.ingredient_id || ing.Ingredient_id)
+      .filter(Boolean);
+
+    return {
+      items,
+      matchedIngredientIds,
+      matchedIngredientNames: matchedSystem.map((ing) => ing.name || ing.Name).filter(Boolean),
+      timestamp: Date.now(),
+    };
+  };
+
+  const goToExploreWithDetections = (rawDetections = detections, sysIngs = systemIngredients) => {
+    clearRedirectTimer();
+    const payload = buildDetectionPayload(rawDetections, sysIngs);
+
+    try {
+      sessionStorage.setItem('smartmeal_detected_ingredients', JSON.stringify(payload));
+      if (accountId && payload.matchedIngredientIds.length > 0) {
+        localStorage.setItem(`pantry_${accountId}`, JSON.stringify(payload.matchedIngredientIds));
+      }
+    } catch (e) {
+      console.error('Không thể lưu trạng thái nguyên liệu nhận diện:', e);
+    }
+
+    navigate('/?tab=discover&fromDetection=1', {
+      state: { detectedIngredients: payload },
+    });
+  };
+
+  const analyzeImage = async (targetImage = image) => {
+    if (!targetImage) return;
+
+    clearRedirectTimer();
+    setErrorMsg(null);
+    setEmptyDetection(false);
+
+    try {
+      setAnalyzing(true);
+
+      const formData = new FormData();
+      const response = await fetch(targetImage);
+      const blob = await response.blob();
+
+      formData.append('image', blob, 'ingredient.jpg');
+      const aiResponse = await predictImage(formData);
+
+      if (!aiResponse.ok) {
+        throw new Error(`AI server error: ${aiResponse.status}`);
+      }
+
+      const result = await aiResponse.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'AI nhận diện thất bại');
+      }
+
+      const detectedList = result.detections || [];
+      setDetections(detectedList);
+
+      if (detectedList.length === 0) {
+        setEmptyDetection(true);
+        return;
+      }
+
+      // Ensure system ingredients are available before navigating
+      let currentSysIngs = systemIngredients;
+      if (!currentSysIngs || currentSysIngs.length === 0) {
+        try {
+          const ingRes = await getIngredients();
+          currentSysIngs = ingRes.data?.data || [];
+          setSystemIngredients(currentSysIngs);
+        } catch (err) {
+          console.error('Lỗi tải nguyên liệu khi đồng bộ:', err);
+        }
+      }
+
+      const payload = buildDetectionPayload(detectedList, currentSysIngs);
+      try {
+        sessionStorage.setItem('smartmeal_detected_ingredients', JSON.stringify(payload));
+        if (accountId && payload.matchedIngredientIds.length > 0) {
+          localStorage.setItem(`pantry_${accountId}`, JSON.stringify(payload.matchedIngredientIds));
+        }
+      } catch (e) {
+        console.error('Không thể lưu trạng thái nguyên liệu nhận diện:', e);
+      }
+
+      setRedirecting(true);
+      redirectTimerRef.current = setTimeout(() => {
+        navigate('/?tab=discover&fromDetection=1', {
+          state: { detectedIngredients: payload },
+        });
+      }, 1200);
+    } catch (error) {
+      console.error('Không thể phân tích ảnh:', error);
+      setErrorMsg('Không thể kết nối tới AI server. Vui lòng thử lại.');
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
-    setImage(URL.createObjectURL(file));
+    clearRedirectTimer();
+    const objectUrl = URL.createObjectURL(file);
+    setImage(objectUrl);
+    setDetections([]);
+    setErrorMsg(null);
+    setEmptyDetection(false);
     setCameraOpen(false);
     stopCamera();
+
+    // Tự động nhận diện ngay sau khi chọn ảnh
+    analyzeImage(objectUrl);
   };
 
   const startCamera = async () => {
+    clearRedirectTimer();
+    setErrorMsg(null);
+    setEmptyDetection(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'environment'
+          facingMode: 'environment',
         },
-        audio: false
+        audio: false,
       });
 
       streamRef.current = stream;
@@ -98,7 +209,7 @@ export default function IngredientDetection() {
       }, 100);
     } catch (error) {
       console.error('Cannot access camera:', error);
-      alert('Không thể truy cập camera. Vui lòng kiểm tra quyền camera.');
+      setErrorMsg('Không thể truy cập camera. Vui lòng kiểm tra quyền camera hoặc tải ảnh từ thiết bị.');
     }
   };
 
@@ -113,68 +224,45 @@ export default function IngredientDetection() {
     if (!videoRef.current) return;
 
     const video = videoRef.current;
-
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
 
     const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    context.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    setImage(canvas.toDataURL('image/jpeg', 0.9));
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    setImage(dataUrl);
+    setDetections([]);
+    setErrorMsg(null);
+    setEmptyDetection(false);
 
     stopCamera();
     setCameraOpen(false);
+
+    // Tự động nhận diện ngay sau khi chụp xong
+    analyzeImage(dataUrl);
   };
 
   const retakePhoto = () => {
+    clearRedirectTimer();
     setImage(null);
+    setDetections([]);
+    setErrorMsg(null);
+    setEmptyDetection(false);
     startCamera();
   };
 
-  const analyzeImage = async () => {
-    if (!image) return;
-
-    try {
-      setAnalyzing(true);
-
-      const formData = new FormData();
-
-      const response = await fetch(image);
-      const blob = await response.blob();
-
-      formData.append('image', blob, 'ingredient.jpg');
-      const aiResponse = await predictImage(formData);
-
-      if (!aiResponse.ok) {
-        throw new Error(`AI server error: ${aiResponse.status}`);
-      }
-
-      const result = await aiResponse.json();
-
-      console.log('AI RESULT:', result);
-
-      if (!result.success) {
-        throw new Error(result.message || 'AI nhận diện thất bại');
-      }
-
-      setDetections(result.detections || []);
-
-    } catch (error) {
-      console.error('Không thể phân tích ảnh:', error);
-      alert('Không thể kết nối tới AI server.');
-    } finally {
-      setAnalyzing(false);
+  const resetSelection = () => {
+    clearRedirectTimer();
+    setImage(null);
+    setDetections([]);
+    setErrorMsg(null);
+    setEmptyDetection(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
-
   return (
     <div className="ingredient-detection-page">
 
@@ -294,43 +382,85 @@ export default function IngredientDetection() {
             <button
               className="secondary-btn"
               onClick={retakePhoto}
+              disabled={analyzing}
             >
-              Chụp lại
+              📷 Chụp lại
+            </button>
+
+            <button
+              className="secondary-btn"
+              onClick={resetSelection}
+              disabled={analyzing}
+            >
+              📁 Chọn ảnh khác
             </button>
 
             <button
               className="primary-btn"
-              onClick={analyzeImage}
+              onClick={() => analyzeImage(image)}
               disabled={analyzing}
             >
-              {analyzing ? '⏳ Đang phân tích...' : '🔍 Phân tích ảnh'}
+              {analyzing ? '⏳ Đang nhận diện nguyên liệu...' : '🔍 Nhận diện lại'}
             </button>
 
           </div>
-            {detections.length > 0 && (
-              <div className="detection-result">
-                <h2>Nguyên liệu được nhận diện</h2>
 
-                <div className="detection-list">
-                  {Object.entries(
-                    detections.reduce((counts, item) => {
-                      counts[item.name] = (counts[item.name] || 0) + 1;
-                      return counts;
-                    }, {})
-                  ).map(([name, count]) => (
-                    <div className="detection-item" key={name}>
-                      <span className="detection-name">
-                        {ingredientNamesVN[name] || name}
-                      </span>
+          {errorMsg && (
+            <div className="detection-feedback detection-error" role="alert">
+              <span>⚠️ {errorMsg}</span>
+            </div>
+          )}
 
-                      <span className="detection-count">
-                        × {count}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {emptyDetection && !analyzing && (
+            <div className="detection-feedback detection-warning" role="status">
+              <span>
+                Không nhận diện được nguyên liệu nào trong ảnh. Vui lòng chụp lại ở nơi đủ sáng hoặc chọn ảnh rõ nét hơn.
+              </span>
+            </div>
+          )}
+
+          {detections.length > 0 && (
+            <div className="detection-result">
+              <h2>Nguyên liệu được nhận diện</h2>
+
+              <div className="detection-list">
+                {Object.entries(
+                  detections.reduce((counts, item) => {
+                    const rawName = item.name || item.class_name || '';
+                    if (rawName) {
+                      counts[rawName] = (counts[rawName] || 0) + 1;
+                    }
+                    return counts;
+                  }, {})
+                ).map(([name, count]) => (
+                  <div className="detection-item" key={name}>
+                    <span className="detection-name">
+                      {INGREDIENT_NAMES_VN[name] || name}
+                    </span>
+
+                    <span className="detection-count">
+                      × {count}
+                    </span>
+                  </div>
+                ))}
               </div>
-            )}
+
+              <div className="detection-explore-cta">
+                {redirecting && (
+                  <p className="redirect-status-text">
+                    ✨ Đã nhận diện xong! Đang chuyển sang trang Khám phá để gợi ý món ăn...
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="explore-now-btn"
+                  onClick={() => goToExploreWithDetections(detections, systemIngredients)}
+                >
+                  🍽️ Khám phá món ăn gợi ý ngay
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

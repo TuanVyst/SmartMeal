@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
@@ -11,7 +11,6 @@ import Profile from '../pages/profile/Profile';
 import MealDetail from '../pages/MealDetail/MealDetail';
 import IngredientForm from '../pages/food/IngredientForm';
 import IngredientDetail from '../pages/food/IngredientDetail';
-import LandingPage from '../pages/landing/LandingPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/AdminUsers';
 import AdminIngredientTags from '../pages/admin/AdminIngredientTags';
@@ -39,10 +38,14 @@ import JournalPage from '../pages/JournalPage/JournalPage';
 import Favorites from '../pages/food/Favorites';
 import IngredientDetection from '../pages/ingredient-detection/IngredientDetection';
 
+function HomeRedirect() {
+  const location = useLocation();
+  return <Navigate to={{ pathname: '/', search: location.search }} replace />;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -59,15 +62,16 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {/* ── TRANG 1: Discover (Tổng quan + Khám phá + Kế hoạch) ── */}
-        <Route path="/home" element={<DiscoverPage />} />
+        {/* ── TRANG MẶC ĐỊNH: Discover (Tổng quan + Khám phá + Kế hoạch) ── */}
+        <Route path="/" element={<DiscoverPage />} />
+        <Route path="/home" element={<HomeRedirect />} />
 
         {/* Redirects từ routes cũ → đúng tab */}
-        <Route path="/dashboard" element={<Navigate to="/home?tab=overview" replace />} />
-        <Route path="/meal-suggestions" element={<Navigate to="/home?tab=discover" replace />} />
-        <Route path="/meal-suggestion" element={<Navigate to="/home?tab=plan" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/?tab=overview" replace />} />
+        <Route path="/meal-suggestions" element={<Navigate to="/?tab=discover" replace />} />
+        <Route path="/meal-suggestion" element={<Navigate to="/?tab=plan" replace />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/ingredient-detection" element={<IngredientDetection />}/>
+        <Route path="/ingredient-detection" element={<IngredientDetection />} />
 
         {/* ── TRANG 2: Journal (Nhật ký + Tra cứu nguyên liệu) ── */}
         <Route path="/journal" element={<JournalPage />} />

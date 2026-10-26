@@ -25,6 +25,13 @@ api.interceptors.response.use(
     }
     if (error.response) {
       const { status, data } = error.response;
+      if (status === 401 && !error.config?.url?.includes('/auth/login') && !error.config?.url?.includes('/auth/verify')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+          window.location.href = '/login';
+        }
+      }
       const message = data?.message || data?.title || `Server error (${status})`;
       return Promise.reject({ message, status, data, originalError: error });
     }
@@ -36,8 +43,32 @@ api.interceptors.response.use(
 );
 
 export const predictImage = async (formData) => {
-  const targetUrl = apiEndpoint ? `${apiEndpoint}/predict` : '/predict';
-  return fetch(targetUrl, {
+  const aiEnvUrl = import.meta.env.VITE_AI_URL || '';
+  const isLocalBackend =
+    apiEndpoint.includes('localhost:5267') ||
+    apiEndpoint.includes('127.0.0.1:5267');
+  const primaryUrl = aiEnvUrl
+    ? `${aiEnvUrl.replace(/\/$/, '')}/predict`
+    : isLocalBackend || !apiEndpoint
+      ? '/predict'
+      : `${apiEndpoint.replace(/\/$/, '')}/predict`;
+
+  try {
+    const res = await fetch(primaryUrl, {
+      method: 'POST',
+      body: formData,
+    });
+    if (res.ok || primaryUrl !== '/predict') {
+      return res;
+    }
+  } catch (err) {
+    if (primaryUrl !== '/predict') {
+      throw err;
+    }
+  }
+
+  // Fallback to direct local AI service on port 8000 if Vite proxy is unavailable
+  return fetch('http://localhost:8000/predict', {
     method: 'POST',
     body: formData,
   });

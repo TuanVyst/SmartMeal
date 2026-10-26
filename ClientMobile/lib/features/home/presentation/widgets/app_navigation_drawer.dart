@@ -5,6 +5,7 @@ import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
 import 'package:smart_meal/features/diary/presentation/providers/nutrition_provider.dart';
 import 'package:smart_meal/features/favorites/presentation/providers/favorite_provider.dart';
+import 'package:smart_meal/features/profile/presentation/widgets/feedback_dialog.dart';
 
 /// Drawer menu bên trái điều hướng ứng dụng theo format Web Sidebar
 class AppNavigationDrawer extends StatelessWidget {
@@ -177,73 +178,111 @@ class AppNavigationDrawer extends StatelessWidget {
             const SizedBox(height: 8),
             const Divider(height: 1, color: AppColors.divider),
             const SizedBox(height: 8),
-            const SizedBox(height: 12),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // 1. Khám phá (matches Web /home)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.explore_outlined,
+                      title: 'Khám phá',
+                      isSelected: currentNavIndex == 0,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        onNavSelect?.call(0);
+                      },
+                    ),
 
-            // 1. Khám phá (matches Web /home)
-            _buildMenuItem(
-              context,
-              icon: Icons.explore_outlined,
-              title: 'Khám phá',
-              isSelected: currentNavIndex == 0,
-              onTap: () {
-                Navigator.of(context).pop();
-                onNavSelect?.call(0);
-              },
-            ),
+                    // 2. Nhật ký dinh dưỡng (matches Web /journal)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.menu_book_outlined,
+                      title: 'Nhật ký',
+                      isSelected: currentNavIndex == 1,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        onNavSelect?.call(1);
+                      },
+                    ),
 
-            // 2. Nhật ký (matches Web /journal)
-            _buildMenuItem(
-              context,
-              icon: Icons.menu_book_outlined,
-              title: 'Nhật ký',
-              isSelected: currentNavIndex == 1,
-              onTap: () {
-                Navigator.of(context).pop();
-                onNavSelect?.call(1);
-              },
-            ),
+                    // 3. Kế hoạch bữa ăn (matches Web /meal-plan)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.calendar_month_outlined,
+                      title: 'Kế hoạch bữa ăn',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.push('/meal-plan');
+                      },
+                    ),
 
-            // 3. Bộ sưu tập (matches Web /favorites)
-            _buildMenuItem(
-              context,
-              icon: Icons.favorite_border,
-              title: 'Bộ sưu tập',
-              isSelected: currentNavIndex == 2,
-              onTap: () {
-                Navigator.of(context).pop();
-                onNavSelect?.call(2);
-              },
-            ),
+                    // 4. Tra cứu nguyên liệu (matches Web /ingredients)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.spa_outlined,
+                      title: 'Tra cứu nguyên liệu',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.push('/ingredients');
+                      },
+                    ),
 
-            // 4. Gói Pro (matches Web /subscription)
-            _buildMenuItem(
-              context,
-              icon: Icons.workspace_premium_outlined,
-              title: 'Gói Pro',
-              badge: isPremium ? 'PRO' : 'HOT',
-              badgeColor: isPremium ? Colors.green : Colors.amber,
-              isSelected: currentNavIndex == 3,
-              onTap: () {
-                Navigator.of(context).pop();
-                onNavSelect?.call(3);
-              },
-            ),
+                    // 6. Bộ sưu tập yêu thích (matches Web /favorites)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.favorite_border,
+                      title: 'Bộ sưu tập',
+                      isSelected: currentNavIndex == 2,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        onNavSelect?.call(2);
+                      },
+                    ),
 
-            // 5. Cài đặt (matches Web /profile)
-            _buildMenuItem(
-              context,
-              icon: Icons.settings_outlined,
-              title: 'Cài đặt',
-              isSelected: currentNavIndex == 4,
-              onTap: () {
-                Navigator.of(context).pop();
-                onNavSelect?.call(4);
-              },
+                    // 7. Gói Pro (matches Web /subscription)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.workspace_premium_outlined,
+                      title: 'Gói Pro',
+                      badge: isPremium ? 'PRO' : 'HOT',
+                      badgeColor: isPremium ? Colors.green : Colors.amber,
+                      isSelected: currentNavIndex == 3,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        onNavSelect?.call(3);
+                      },
+                    ),
+
+                    // 8. Cài đặt tài khoản (matches Web /profile)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.settings_outlined,
+                      title: 'Cài đặt',
+                      isSelected: currentNavIndex == 4,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        onNavSelect?.call(4);
+                      },
+                    ),
+
+                    // 9. Góp ý & Báo lỗi (Feedback)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.feedback_outlined,
+                      title: 'Góp ý & Báo lỗi',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        FeedbackDialog.show(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const Spacer(),
             const Divider(height: 1, color: AppColors.divider),
 
-            // 6. Đăng xuất
+            // 10. Đăng xuất
             _buildMenuItem(
               context,
               icon: Icons.logout,

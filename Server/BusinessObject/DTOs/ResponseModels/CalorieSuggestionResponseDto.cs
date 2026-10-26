@@ -14,6 +14,7 @@ namespace BusinessObject.Dtos.ResponseModels
         public int PrepTime { get; set; }
         public int Servings { get; set; }
         public string Difficulty { get; set; }
+        public string? ImageUrl { get; set; }
 
         public double TotalCalories { get; set; }
         public double CaloriesPerServing { get; set; }

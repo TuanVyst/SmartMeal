@@ -9,6 +9,7 @@ import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { toast } from 'react-hot-toast';
 import UpgradePaywallModal from '../../components/common/UpgradePaywallModal';
 import { useNutrientFocus, focusQueryParam, NUTRIENT_FOCUS_LABELS } from '../../utils/nutrientFocus';
+import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
 import './MealPlanSuggestion.css';
 
 const SLOT_LABELS = { breakfast: 'Bữa Sáng', lunch: 'Bữa Trưa', dinner: 'Bữa Tối' };
@@ -22,14 +23,46 @@ const SLOT_COLORS = {
   dinner:    { bg: '#f5f3ff', border: '#ddd6fe', badge: '#8b5cf6', text: '#5b21b6', soft: '#ede9fe' },
 };
 
+const getWeekMondayKey = (dateVal) => {
+  const d = dateVal instanceof Date ? new Date(dateVal) : new Date(String(dateVal).split('T')[0] + 'T12:00:00');
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diff);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+};
+
+const readCachedWeekPlan = (accountId, dateVal) => {
+  if (!accountId) return null;
+  try {
+    const weekKey = `smartmeal_weekplan_${accountId}_${getWeekMondayKey(dateVal)}`;
+    const raw = sessionStorage.getItem(weekKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedWeekPlan = (accountId, dateVal, plan) => {
+  if (!accountId || !plan) return;
+  try {
+    const weekKey = `smartmeal_weekplan_${accountId}_${getWeekMondayKey(dateVal)}`;
+    sessionStorage.setItem(weekKey, JSON.stringify(plan));
+  } catch {
+    // ignore storage errors
+  }
+};
+
 export default function MealPlanSuggestion() {
   const { user, isPremium, hasProAccess } = useAuth();
   const navigate = useNavigate();
   const accountId = user?.accountId || user?.account_id;
 
-  const [weekPlan, setWeekPlan] = useState(null);
   const [currentWeekDate, setCurrentWeekDate] = useState(() => new Date());
-  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [weekPlan, setWeekPlan] = useState(() => readCachedWeekPlan(accountId, new Date()));
+  const [loadingPlans, setLoadingPlans] = useState(() => !readCachedWeekPlan(accountId, new Date()));
   const [showPopup, setShowPopup] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
   const [mealToDelete, setMealToDelete] = useState(null);
@@ -42,15 +75,11 @@ export default function MealPlanSuggestion() {
   const [nutrientFocus, setNutrientFocus] = useNutrientFocus();
 
   // ── Safe date helpers (no UTC shift) ────────────────────────────────────
-  // Backend may serialize DateTime without Z → JS parses as LOCAL → toISOString shifts back 7h.
-  // Always extract YYYY-MM-DD by splitting the string directly, never via new Date().toISOString().
   const safeDate = (dateVal) => {
     if (!dateVal) return '';
     if (typeof dateVal === 'string') {
-      // "2026-08-08T00:00:00" or "2026-08-08T00:00:00Z" → "2026-08-08"
       return dateVal.split('T')[0];
     }
-    // JS Date object → use LOCAL date components to avoid UTC shift
     const d = dateVal instanceof Date ? dateVal : new Date(dateVal);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -58,7 +87,7 @@ export default function MealPlanSuggestion() {
     return `${y}-${m}-${day}`;
   };
 
-  const todayStr = safeDate(new Date()); // local YYYY-MM-DD for today
+  const todayStr = safeDate(new Date());
 
   const isTodayDate = (dateStr) => {
     if (!dateStr) return false;
@@ -70,31 +99,41 @@ export default function MealPlanSuggestion() {
     return safeDate(dateStr) < todayStr;
   };
 
-  const fetchWeekPlan = useCallback(async (dateToFetch, targetDateStr = null) => {
+  const applyPlanState = useCallback((plan, dateReference, targetDateStr = null) => {
+    if (!plan) return;
+    setWeekPlan(plan);
+    writeCachedWeekPlan(accountId, dateReference || new Date(), plan);
+    if (plan?.days?.length > 0) {
+      if (targetDateStr) {
+        const idx = plan.days.findIndex(d => d.dayDate && safeDate(d.dayDate) === targetDateStr);
+        setSelectedDayIdx(idx >= 0 ? idx : 0);
+      } else {
+        const todayIdx = plan.days.findIndex(d => isTodayDate(d.dayDate));
+        setSelectedDayIdx(todayIdx >= 0 ? todayIdx : 0);
+      }
+    }
+  }, [accountId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchWeekPlan = useCallback(async (dateToFetch, targetDateStr = null, silent = false) => {
     if (!accountId) return;
-    setLoadingPlans(true);
+    const cached = readCachedWeekPlan(accountId, dateToFetch || new Date());
+    if (cached && !silent) {
+      applyPlanState(cached, dateToFetch, targetDateStr);
+      setLoadingPlans(false);
+    } else if (!silent) {
+      setLoadingPlans(true);
+    }
     try {
-      // Use safeDate() to avoid UTC shift when dateToFetch is a JS Date object
       const dateStr = safeDate(dateToFetch || new Date());
       const res = await api.get(`/MealPlan/week?date=${dateStr}`);
       const plan = res.data.data;
-      setWeekPlan(plan);
-
-      if (plan?.days?.length > 0) {
-        if (targetDateStr) {
-          const idx = plan.days.findIndex(d => d.dayDate && safeDate(d.dayDate) === targetDateStr);
-          setSelectedDayIdx(idx >= 0 ? idx : 0);
-        } else {
-          const todayIdx = plan.days.findIndex(d => isTodayDate(d.dayDate));
-          setSelectedDayIdx(todayIdx >= 0 ? todayIdx : 0);
-        }
-      }
+      applyPlanState(plan, dateToFetch, targetDateStr);
     } catch (err) {
       console.error('Lỗi tải thực đơn tuần:', err);
     } finally {
       setLoadingPlans(false);
     }
-  }, [accountId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [accountId, applyPlanState]);
 
   useEffect(() => {
     fetchWeekPlan(new Date());
@@ -105,19 +144,18 @@ export default function MealPlanSuggestion() {
     if (msg) {
       setAlertMsg(msg);
       setTimeout(() => setAlertMsg(null), 3000);
-      // Navigate to the week/day that was generated
       if (msg.date) {
         const pickedDate = new Date(msg.date + 'T12:00:00');
         setCurrentWeekDate(pickedDate);
+        if (msg.planData) {
+          applyPlanState(msg.planData, pickedDate, msg.date);
+          return;
+        }
         fetchWeekPlan(pickedDate, msg.date);
         return;
       }
     }
-    // Re-fetch current week but keep the currently selected day
-    const keepDate = selectedDay?.dayDate ? safeDate(selectedDay.dayDate) : null;
-    fetchWeekPlan(currentWeekDate, keepDate);
   };
-
   const handlePrevWeek = () => {
     const prev = new Date(currentWeekDate);
     prev.setDate(prev.getDate() - 7);
@@ -148,6 +186,43 @@ export default function MealPlanSuggestion() {
   };
 
   const handleLogMeal = async (entry, date) => {
+    const tempLogId = `optimistic-${entry.entry_id || entry.recipe_id || 'meal'}`;
+    const logDateIso = typeof date === 'string' ? date : new Date().toISOString();
+
+    // 1. Optimistic UI update on meal card (0ms)
+    setWeekPlan((prevPlan) => {
+      if (!prevPlan) return prevPlan;
+      const updated = {
+        ...prevPlan,
+        days: prevPlan.days.map((day) => ({
+          ...day,
+          entries: day.entries.map((e) =>
+            e.entry_id === entry.entry_id ? { ...e, isLogged: true } : e
+          ),
+        })),
+      };
+      writeCachedWeekPlan(accountId, currentWeekDate, updated);
+      return updated;
+    });
+
+    // 2. Optimistic update on macro circles & sidebar ring (0ms)
+    notifyNutritionUpdated({
+      deltaCalories: entry.slotCalories || 0,
+      optimisticLog: {
+        log_id: tempLogId,
+        recipe_id: entry.recipe_id,
+        mealType: entry.mealSlot,
+        quantity: 1,
+        logDate: logDateIso,
+        totalCalories: entry.slotCalories || 0,
+        totalProtein: entry.slotProtein || 0,
+        totalCarbs: entry.slotCarbs || 0,
+        totalFat: entry.slotFat || 0,
+        totalFiber: entry.slotFiber || null,
+      },
+    });
+    toast.success('Đã lưu vào nhật ký ăn uống!');
+
     try {
       const payload = {
         recipeId: entry.recipe_id,
@@ -162,28 +237,26 @@ export default function MealPlanSuggestion() {
       };
 
       await api.post('/nutrition-diary', payload);
-      toast.success('Đã lưu vào nhật ký ăn uống!');
-
-      setWeekPlan((prevPlan) => {
-        if (!prevPlan) return prevPlan;
-        return {
-          ...prevPlan,
-          days: prevPlan.days.map((day) => {
-            return {
-              ...day,
-              entries: day.entries.map((e) => {
-                if (e.entry_id === entry.entry_id) {
-                  return { ...e, isLogged: true };
-                }
-                return e;
-              }),
-            };
-          }),
-        };
-      });
+      notifyNutritionUpdated({ syncOnly: true });
     } catch (error) {
       console.error('Error logging meal:', error);
       toast.error(error.response?.data?.message || 'Không thể lưu vào nhật ký.');
+      // Rollback on failure
+      setWeekPlan((prevPlan) => {
+        if (!prevPlan) return prevPlan;
+        const rolledBack = {
+          ...prevPlan,
+          days: prevPlan.days.map((day) => ({
+            ...day,
+            entries: day.entries.map((e) =>
+              e.entry_id === entry.entry_id ? { ...e, isLogged: false } : e
+            ),
+          })),
+        };
+        writeCachedWeekPlan(accountId, currentWeekDate, rolledBack);
+        return rolledBack;
+      });
+      notifyNutritionUpdated({ rollbackLogId: tempLogId, syncOnly: true });
     }
   };
 
@@ -229,13 +302,14 @@ export default function MealPlanSuggestion() {
     }
     try {
       setQuickGenerating(slotKey);
-      // Use safeDate() to avoid UTC timezone shift on backend date strings
       const dateParam = safeDate(date);
-      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}${focusQueryParam()}`);
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${slotKey}${focusQueryParam()}`);
       toast.success(`Đã tạo gợi ý cho ${SLOT_LABELS[slotKey]} thành công!`);
-      // Always re-fetch the CURRENT displayed week — never use the response body to set weekPlan
-      // because the response could be for a different week (timezone mismatch)
-      await fetchWeekPlan(currentWeekDate, dateParam);
+      if (res.data?.data) {
+        applyPlanState(res.data.data, currentWeekDate, dateParam);
+      } else {
+        await fetchWeekPlan(currentWeekDate, dateParam);
+      }
     } catch (err) {
       console.error('Error quick generate:', err);
       toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');
@@ -259,9 +333,13 @@ export default function MealPlanSuggestion() {
       setQuickGenerating('all');
       const dateParam = safeDate(date);
       const mealsParam = missingSlots.join(',');
-      await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}${focusQueryParam()}`);
+      const res = await api.post(`/MealPlan/suggest-for-date?date=${dateParam}&meals=${mealsParam}${focusQueryParam()}`);
       toast.success(`Đã tạo gợi ý ${missingSlots.length} bữa còn thiếu cho ngày này!`);
-      await fetchWeekPlan(currentWeekDate, dateParam);
+      if (res.data?.data) {
+        applyPlanState(res.data.data, currentWeekDate, dateParam);
+      } else {
+        await fetchWeekPlan(currentWeekDate, dateParam);
+      }
     } catch (err) {
       console.error('Error quick generate all:', err);
       toast.error(err.response?.data?.message || 'Không thể tạo gợi ý.');

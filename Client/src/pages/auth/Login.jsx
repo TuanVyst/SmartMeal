@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -16,6 +16,22 @@ export default function Login() {
   const { login, verifyOtp, googleLogin } = useAuth();
   const navigate = useNavigate();
 
+  const googleBtnContainerRef = useRef(null);
+  const [googleBtnWidth, setGoogleBtnWidth] = useState(380);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (googleBtnContainerRef.current) {
+        const measured = Math.floor(googleBtnContainerRef.current.offsetWidth);
+        if (measured > 0) {
+          setGoogleBtnWidth(Math.min(400, Math.max(200, measured)));
+        }
+      }
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
   // Load remembered credentials on mount
   useEffect(() => {
     try {
@@ -56,7 +72,7 @@ export default function Login() {
       } else if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/home');
+        navigate('/');
       }
     } catch (err) {
       if (err.code === 'ERR_NETWORK' || !err.response) {
@@ -85,7 +101,7 @@ export default function Login() {
       if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/home');
+        navigate('/');
       }
     } catch (err) {
       if (err.code === 'ERR_NETWORK' || !err.response) {
@@ -105,7 +121,7 @@ export default function Login() {
       if (result.role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/home');
+        navigate('/');
       }
     } catch (err) {
       if (err.code === 'ERR_NETWORK' || !err.response) {
@@ -121,7 +137,6 @@ export default function Login() {
   if (otpStep) {
     return (
       <div className="auth-card-modern">
-        <Link to="/" className="back-home">← Về trang chủ</Link>
         <h1>Xác thực OTP</h1>
         <p className="auth-subtitle">Nhập mã đã gửi đến <strong>{pendingEmail}</strong></p>
         <form onSubmit={handleOtpSubmit}>
@@ -151,7 +166,6 @@ export default function Login() {
 
   return (
     <div className="auth-card-modern">
-      <Link to="/" className="back-home">← Về trang chủ</Link>
       <h1>Chào mừng trở lại</h1>
       <p className="auth-subtitle">Đăng nhập để tiếp tục với SmartMeal</p>
       <form onSubmit={handleSubmit}>
@@ -215,14 +229,17 @@ export default function Login() {
       </form>
 
       <div className="divider">hoặc tiếp tục với</div>
-      <GoogleLogin
-        onSuccess={handleGoogleSuccess}
-        onError={() => setError('Đăng nhập Google thất bại')}
-        shape="pill"
-        text="signin_with"
-        theme="outline"
-        size="large"
-      />
+      <div className="google-login-wrapper" ref={googleBtnContainerRef}>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError('Đăng nhập Google thất bại')}
+          shape="rectangular"
+          text="signin_with"
+          theme="outline"
+          size="large"
+          width={googleBtnWidth}
+        />
+      </div>
       <p className="auth-footer-text">
         Chưa có tài khoản? <Link to="/register">Tạo ngay</Link>
       </p>

@@ -1,11 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useFavorite } from '../../context/FavoriteContext';
+import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
-import { getRecommendation } from '../../utils/recommendationEngine';
-import avocadoMascot from '../../assets/avocado_mascot.png';
 import { FiHome, FiClipboard, FiSettings, FiTrendingUp, FiHeart, FiShield, FiAward, FiMenu, FiX, FiChevronLeft, FiChevronRight, FiCamera } from 'react-icons/fi';
 import SidebarProgressAvatar from '../common/SidebarProgressAvatar';
 import { useTodayCalorieProgress } from '../../hooks/useTodayCalorieProgress';
@@ -44,12 +41,8 @@ function calculateCurrentStreak(logs) {
 
 export default function Sidebar() {
   const { user, isPremium, logout } = useAuth();
-  const { favorites } = useFavorite();
   const navigate = useNavigate();
   const [streakDays, setStreakDays] = useState(0);
-  const [tip, setTip] = useState(() => getRecommendation({}));
-  const [fading, setFading] = useState(false);
-  const pausedRef = useRef(false);
 
   // Desktop collapse state (persisted in localStorage)
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => {
@@ -91,25 +84,10 @@ export default function Sidebar() {
     navigate('/login');
   };
 
-  const nextTip = useCallback(() => {
-    setFading(true);
-    setTimeout(() => {
-      setTip(getRecommendation({}));
-      setFading(false);
-    }, 400);
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (!pausedRef.current) nextTip();
-    }, 12000);
-    return () => clearInterval(id);
-  }, [nextTip]);
-
   const accountId = user?.accountId || user?.account_id;
 
   const navItems = [
-    { to: '/home',                  icon: <FiHome size={20} />,      label: 'Khám phá',                    end: false },
+    { to: '/',                      icon: <FiHome size={20} />,      label: 'Khám phá',                    end: true },
     { to: '/journal',               icon: <FiClipboard size={20} />, label: 'Nhật ký',                     end: false },
     { to: '/favorites',             icon: <FiHeart size={20} />,     label: 'Bộ sưu tập',                  end: false },
     { to: '/subscription',          icon: <FiAward size={20} />,     label: 'Gói Pro' },
@@ -185,20 +163,10 @@ export default function Sidebar() {
 
           <div className="sidebar-stats-row">
             <div className="sidebar-stat-card stat-streak">
-              <div className="stat-icon"><FiTrendingUp size={20} /></div>
-              <div className="stat-value">{streakDays}</div>
-              <div className="stat-label">ngày liên tiếp</div>
+              <span className="stat-icon"><FiTrendingUp size={18} /></span>
+              <span className="stat-value">{streakDays}</span>
+              <span className="stat-label">ngày liên tiếp</span>
             </div>
-            <button
-              type="button"
-              className="sidebar-stat-card sidebar-stat-card-clickable stat-favorites"
-              onClick={() => navigate('/favorites')}
-              title="Mở bộ sưu tập"
-            >
-              <div className="stat-icon"><FiHeart size={20} /></div>
-              <div className="stat-value">{favorites.length}</div>
-              <div className="stat-label">bộ sưu tập</div>
-            </button>
           </div>
         </div>
 
@@ -247,22 +215,18 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* ── Mascot Widget (Desktop only) ── */}
-        <div
-          className={`sidebar-mascot-widget desktop-only${fading ? ' mascot--fading' : ''}`}
-          onMouseEnter={() => { pausedRef.current = true; }}
-          onMouseLeave={() => { pausedRef.current = false; }}
-        >
-          <div className="mascot-top">
-            <div className="mascot-image-wrap">
-              <img src={avocadoMascot} alt="SmartMeal Mascot" />
-            </div>
-            <div className="mascot-text">
-              <div className="mascot-title">{tip.label}</div>
-              <div className="mascot-message">{tip.text}</div>
-            </div>
+        {/* ── Medical Disclaimer (Desktop only, under settings) ── */}
+        <div className="sidebar-disclaimer desktop-only">
+          <div className="sidebar-disclaimer-header">
+            <span className="sidebar-disclaimer-icon" role="img" aria-label="cảnh báo">⚠️</span>
+            <span className="sidebar-disclaimer-title">Lưu ý y tế</span>
           </div>
+          <p className="sidebar-disclaimer-text">
+            SmartMeal cung cấp thông tin dinh dưỡng mang tính tham khảo, không thay thế chẩn đoán, điều trị hoặc tư vấn từ chuyên gia y tế.
+          </p>
         </div>
+
+
       </aside>
     </>
   );

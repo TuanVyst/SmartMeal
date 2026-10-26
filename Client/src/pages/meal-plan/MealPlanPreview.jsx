@@ -72,7 +72,7 @@ const MealPlanPreview = () => {
     try {
       await api.post(`/MealPlan/${plan.mealPlan_id}/confirm`);
       toast.success('Xác nhận thực đơn thành công!');
-      navigate('/home');
+      navigate('/');
     } catch (error) {
       toast.error('Lỗi khi xác nhận thực đơn.');
     } finally {
@@ -178,7 +178,7 @@ const MealPlanPreview = () => {
                 >
                   <div style={s.entryImage}>
                     <img 
-                      src={resolveRecipeImageUrl(entry.recipeName)} 
+                      src={resolveRecipeImageUrl(entry.recipeName, entry.recipeImage || entry.imageUrl)} 
                       alt={entry.recipeName}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop'; }}
@@ -223,7 +223,7 @@ const MealPlanPreview = () => {
                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}
                     onMouseOver={e => { e.currentTarget.style.borderColor = '#22C55E'; e.currentTarget.style.background = '#f0fdf4'; }}
                     onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = 'white'; }}>
-                    <img src={resolveRecipeImageUrl(recipe.recipe_name)} alt={recipe.recipe_name}
+                    <img src={resolveRecipeImageUrl(recipe.recipe_name, recipe.imageUrl || recipe.ImageUrl)} alt={recipe.recipe_name}
                       style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }}
                       onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1000&auto=format&fit=crop'; }} />
                     <div>

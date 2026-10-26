@@ -5,6 +5,8 @@ import {
   FiGrid, FiFileText, FiClock, FiUsers, FiAward, FiArrowLeft
 } from 'react-icons/fi';
 import ImageUpload from '../common/ImageUpload';
+import { resolveRecipeImageUrl, FALLBACK_MEAL_IMAGE } from '../../utils/recipeImages';
+import { getMultiplier } from '../../utils/unitConverter';
 import './RecipeEditorModal.css';
 
 const COMMON_UOMS = [
@@ -124,9 +126,13 @@ export default function RecipeEditorModal({
         return tag ? (tag.id || tag.rt_Id) : null;
       }).filter(Boolean);
 
+      const existingImg = initialRecipe.imageUrl || initialRecipe.ImageUrl || '';
+      const fallbackImg = resolveRecipeImageUrl(initialRecipe.recipe_name);
+      const initialImg = existingImg || (fallbackImg && fallbackImg !== FALLBACK_MEAL_IMAGE ? fallbackImg : '');
+
       setFormData({
         recipe_name: initialRecipe.recipe_name || '',
-        imageUrl: initialRecipe.imageUrl || '',
+        imageUrl: initialImg,
         description: initialRecipe.description || '',
         cookTime: initialRecipe.cookTime || 0,
         prepTime: initialRecipe.prepTime || 0,
@@ -333,8 +339,10 @@ export default function RecipeEditorModal({
     const nv = item.nutritionalValue;
     if (!nv || !nv.calories) return sum;
     const servingSize = nv.servingSize || 100;
+    const servingUnit = nv.servingUnit || 'g';
     const qty = parseFloat(item.quantity) || 0;
-    const cal = (nv.calories * qty) / servingSize;
+    const multiplier = getMultiplier(qty, item.uom, servingSize, servingUnit, item.name, nv.everydayWeight);
+    const cal = nv.calories * multiplier;
     return sum + (isNaN(cal) ? 0 : cal);
   }, 0);
 
@@ -365,6 +373,7 @@ export default function RecipeEditorModal({
     const baseRecipeData = {
       ...formData,
       recipe_name: formData.recipe_name.trim(),
+      imageUrl: formData.imageUrl || '',
       description: formData.description.trim(),
       instruction: instructionSerialized,
       cookTime: parseInt(formData.cookTime) || 0,
@@ -732,8 +741,10 @@ export default function RecipeEditorModal({
                   selectedIngredients.map((item, index) => {
                     const nv = item.nutritionalValue;
                     const servingSize = nv?.servingSize || 100;
+                    const servingUnit = nv?.servingUnit || 'g';
                     const qty = parseFloat(item.quantity) || 0;
-                    const itemCal = nv?.calories ? Math.round((nv.calories * qty) / servingSize) : null;
+                    const multiplier = nv?.calories ? getMultiplier(qty, item.uom, servingSize, servingUnit, item.name, nv?.everydayWeight) : 0;
+                    const itemCal = nv?.calories ? Math.round(nv.calories * multiplier) : null;
 
                     return (
                       <div

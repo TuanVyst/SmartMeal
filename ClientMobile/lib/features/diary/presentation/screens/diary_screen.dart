@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
+import 'package:smart_meal/features/recipes/presentation/screens/ingredients/ingredient_list_screen.dart';
+import '../../domain/nutrition_log_model.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
 import 'package:smart_meal/features/onboarding/presentation/providers/health_profile_provider.dart';
 import '../providers/nutrition_provider.dart';
@@ -158,16 +161,18 @@ class _DiaryScreenState extends State<DiaryScreen> {
             ),
             const SizedBox(height: 14),
 
-            // NẾU CHỌN TAB "TRA CỨU NGUYÊN LIỆU"
             if (_topTab == 1) ...[
-              _buildIngredientLookupSection(),
+              const SizedBox(
+                height: 600,
+                child: IngredientListScreen(),
+              ),
             ] else ...[
               // 2. BỘ CHỌN NGÀY (DD/MM/YYYY)
               _buildDateSelector(nutritionProvider),
               const SizedBox(height: 16),
 
               // 3. HỒ SƠ SỨC KHỎE
-              _buildHealthProfileCard(healthProvider),
+              _buildHealthProfileCard(healthProvider, nutritionProvider),
               const SizedBox(height: 16),
 
               // 4. PHÂN TÍCH NĂNG LƯỢNG
@@ -232,8 +237,17 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 6. SO SÁNH VỚI MỤC TIÊU HÔM NAY (Wireframe Page 1)
-              _buildGoalsComparisonCard(nutritionProvider),
+              if (_subTab == 0) ...[
+                // 6. SO SÁNH VỚI MỤC TIÊU HÔM NAY
+                _buildGoalsComparisonCard(nutritionProvider),
+                const SizedBox(height: 16),
+
+                // 7. BỮA ĂN GHI NHẬN HÔM NAY (Image 2)
+                _buildMealsOfDayCard(nutritionProvider),
+              ] else ...[
+                // 8. THỐNG KÊ VÀ PHÂN TÍCH
+                _buildStatsAndAnalysisCard(nutritionProvider),
+              ],
             ],
             const SizedBox(height: 24),
           ],
@@ -305,9 +319,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   // WIDGET HỒ SƠ SỨC KHỎE (4 CHỈ SỐ, LỊCH SỬ BMI, CHỈNH SỬA)
-  Widget _buildHealthProfileCard(HealthProfileProvider healthProvider) {
+  Widget _buildHealthProfileCard(HealthProfileProvider healthProvider, NutritionProvider nutritionProvider) {
     final profile = healthProvider.profile;
-    final height = profile?.height ?? 172.0;
+    final height = profile?.height ?? 170.0;
     final weight = profile?.weight ?? 68.0;
 
     double bmi = 23.0;
@@ -354,9 +368,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       side: const BorderSide(color: AppColors.border),
                     ),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Lịch sử BMI: Ổn định ở mức 23.0 (Bình thường)')),
-                      );
+                      context.push('/health-profile');
                     },
                     child: const Text('lịch sử BMI', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ),
@@ -368,9 +380,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       side: const BorderSide(color: AppColors.primary),
                     ),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Chuyển tới chỉnh sửa hồ sơ sức khoẻ')),
-                      );
+                      context.push('/health-profile');
                     },
                     child: const Text('chỉnh sửa', style: TextStyle(fontSize: 11, color: AppColors.primaryDark)),
                   ),
@@ -384,7 +394,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               _buildStatMetricBox('Chiều cao', '${height.round()} cm'),
               _buildStatMetricBox('Cân nặng', '${weight.round()} kg'),
               _buildStatMetricBox('BMI', bmi.toStringAsFixed(1)),
-              _buildStatMetricBox('TDEE', '2355 kcal'),
+              _buildStatMetricBox('Mục tiêu', nutritionProvider.dailyTargets.calories > 0 ? '${nutritionProvider.dailyTargets.calories.round()} kcal' : '2000 kcal'),
             ],
           ),
         ],
@@ -536,33 +546,17 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                 ),
               ),
-              Row(
-                children: [
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                      minimumSize: const Size(60, 28),
-                      side: const BorderSide(color: AppColors.border),
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Tính năng Thiết lập mục tiêu')),
-                      );
-                    },
-                    child: const Text('Thiết lập mục tiêu', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-                  ),
-                  const SizedBox(width: 4),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                      minimumSize: const Size(60, 28),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                    ),
-                    onPressed: _showAddLogSheet,
-                    child: const Text('Bữa ăn ghi nhận', style: TextStyle(fontSize: 10, color: Colors.white)),
-                  ),
-                ],
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  minimumSize: const Size(60, 28),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: _showAddLogSheet,
+                icon: const Icon(Icons.add, size: 14),
+                label: const Text('Ghi bữa ăn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -629,64 +623,488 @@ class _DiaryScreenState extends State<DiaryScreen> {
     );
   }
 
-  // WIDGET TRA CỨU NGUYÊN LIỆU (Khi chọn tab Tra cứu nguyên liệu)
-  Widget _buildIngredientLookupSection() {
-    final sampleIngredients = [
-      {'name': 'Ức gà phi lê', 'cal': '165 kcal / 100g', 'p': '31g', 'c': '0g', 'f': '3.6g'},
-      {'name': 'Gạo lứt đỏ', 'cal': '111 kcal / 100g', 'p': '2.6g', 'c': '23g', 'f': '0.9g'},
-      {'name': 'Cá hồi Na Uy', 'cal': '208 kcal / 100g', 'p': '20g', 'c': '0g', 'f': '13g'},
-      {'name': 'Trứng gà ta', 'cal': '155 kcal / 100g', 'p': '13g', 'c': '1.1g', 'f': '11g'},
-      {'name': 'Bông cải xanh', 'cal': '34 kcal / 100g', 'p': '2.8g', 'c': '7g', 'f': '0.4g'},
-      {'name': 'Khoai lang vàng', 'cal': '86 kcal / 100g', 'p': '1.6g', 'c': '20g', 'f': '0.1g'},
-    ];
+  // WIDGET BỮA ĂN NGÀY DD/MM/YYYY (Theo chuẩn Web Image 2)
+  Widget _buildMealsOfDayCard(NutritionProvider provider) {
+    final parsed = DateFormat('yyyy-MM-dd').parse(provider.selectedDate);
+    final displayDate = DateFormat('dd/MM/yyyy').format(parsed);
+    final logs = provider.selectedDateLogs;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Bữa ăn ngày $displayDate',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  minimumSize: const Size(60, 28),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: _showAddLogSheet,
+                icon: const Icon(Icons.add, size: 14),
+                label: const Text('Ghi bữa ăn', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          if (logs.isEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.restaurant_menu_outlined, size: 36, color: AppColors.textHint),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Không tìm thấy bữa ăn nào được ghi nhận cho ngày này.',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: _showAddLogSheet,
+                    icon: const Icon(Icons.add, size: 16, color: AppColors.primaryDark),
+                    label: const Text('Ghi nhận bữa ăn ngay', style: TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                ],
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: logs.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final log = logs[index];
+                final mealSlot = (log.mealType ?? 'breakfast').toLowerCase();
+
+                String slotLabel = 'Sáng';
+                Color slotBg = const Color(0xFFDCFCE7);
+                Color slotColor = const Color(0xFF15803D);
+
+                if (mealSlot.contains('lunch') || mealSlot.contains('trưa')) {
+                  slotLabel = 'Trưa';
+                  slotBg = const Color(0xFFFFEDD5);
+                  slotColor = const Color(0xFFC2410C);
+                } else if (mealSlot.contains('dinner') || mealSlot.contains('tối')) {
+                  slotLabel = 'Tối';
+                  slotBg = const Color(0xFFF3E8FF);
+                  slotColor = const Color(0xFF7C3AED);
+                } else if (mealSlot.contains('snack') || mealSlot.contains('phụ')) {
+                  slotLabel = 'Phụ';
+                  slotBg = const Color(0xFFFEF9C3);
+                  slotColor = const Color(0xFFA16207);
+                }
+
+                final resolvedRecipe = log.recipeId != null ? provider.recipesMap[log.recipeId] : null;
+                final dishName = (log.recipeName != null && log.recipeName!.trim().isNotEmpty)
+                    ? log.recipeName!
+                    : (resolvedRecipe?.recipeName ?? 'Món ăn dinh dưỡng');
+                final cals = (log.totalCalories ?? 0).round();
+                final protein = (log.totalProtein ?? 0).round();
+                final carbs = (log.totalCarbs ?? 0).round();
+                final fat = (log.totalFat ?? 0).round();
+
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: slotBg,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          slotLabel,
+                          style: TextStyle(color: slotColor, fontWeight: FontWeight.bold, fontSize: 11),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              dishName,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${log.quantity?.round() ?? 1} ${log.unit ?? "phần"} • $cals kcal',
+                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Đạm: ${protein}g  Carb: ${carbs}g  Béo: ${fat}g',
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
+                        tooltip: 'Xóa',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => _confirmDeleteLog(log),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteLog(NutritionLog log) {
+    final dishName = log.recipeName?.isNotEmpty == true ? log.recipeName! : 'bữa ăn này';
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Text('Xác nhận xóa', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: Text('Bạn có chắc chắn muốn xóa "$dishName" khỏi nhật ký không?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+                if (log.id != null) {
+                  try {
+                    await context.read<NutritionProvider>().deleteLog(log.id!);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Đã xóa món ăn khỏi nhật ký!'), backgroundColor: AppColors.success),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lỗi khi xóa: $e'), backgroundColor: AppColors.error),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // WIDGET THỐNG KÊ VÀ PHÂN TÍCH (Khi chọn subTab Thống kê và phân tích)
+  Widget _buildStatsAndAnalysisCard(NutritionProvider provider) {
+    final logs = provider.logs;
+    final targets = provider.dailyTargets;
+    final targetCal = targets.calories > 0 ? targets.calories : 2000.0;
+
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final weekDays = List.generate(7, (i) => monday.add(Duration(days: i)));
+
+    final dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    final weekCalMap = <String, double>{};
+
+    for (final l in logs) {
+      if (l.logDate != null) {
+        final key = DateFormat('yyyy-MM-dd').format(l.logDate!.toLocal());
+        weekCalMap[key] = (weekCalMap[key] ?? 0.0) + (l.totalCalories ?? 0.0);
+      }
+    }
+
+    double totalWeeklyCal = 0.0;
+    int daysWithData = 0;
+    for (final d in weekDays) {
+      final key = DateFormat('yyyy-MM-dd').format(d);
+      final cal = weekCalMap[key] ?? 0.0;
+      if (cal > 0) {
+        totalWeeklyCal += cal;
+        daysWithData++;
+      }
+    }
+
+    final avgDailyCal = daysWithData > 0 ? (totalWeeklyCal / daysWithData) : 0.0;
+
+    final todayTotals = provider.todayTotals;
+    final totalMacroGrams = todayTotals.protein + todayTotals.carbs + todayTotals.fat;
+    final pPct = totalMacroGrams > 0 ? (todayTotals.protein / totalMacroGrams * 100).round() : 25;
+    final cPct = totalMacroGrams > 0 ? (todayTotals.carbs / totalMacroGrams * 100).round() : 50;
+    final fPct = totalMacroGrams > 0 ? (todayTotals.fat / totalMacroGrams * 100).round() : 25;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _ingredientSearchCtrl,
-          decoration: InputDecoration(
-            hintText: 'Tra cứu calo và dưỡng chất nguyên liệu...',
-            prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.bar_chart, color: AppColors.primaryDark),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Xu hướng năng lượng tuần',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Mục tiêu: ${targetCal.round()} kcal',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              SizedBox(
+                height: 150,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: List.generate(7, (i) {
+                    final d = weekDays[i];
+                    final key = DateFormat('yyyy-MM-dd').format(d);
+                    final cal = weekCalMap[key] ?? 0.0;
+                    final ratio = targetCal > 0 ? (cal / targetCal).clamp(0.0, 1.2) : 0.0;
+                    final isToday = DateFormat('yyyy-MM-dd').format(now) == key;
+
+                    Color barColor = AppColors.primary;
+                    if (cal == 0) {
+                      barColor = Colors.grey.shade300;
+                    } else if (cal > targetCal * 1.1) {
+                      barColor = Colors.orange;
+                    }
+
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          cal > 0 ? cal.round().toString() : '',
+                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: barColor),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 24,
+                          height: (100 * (cal > 0 ? ratio : 0.05)).clamp(6.0, 100.0),
+                          decoration: BoxDecoration(
+                            color: barColor,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isToday ? AppColors.primary : Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            dayNames[i],
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                              color: isToday ? Colors.white : AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Nguyên liệu phổ biến',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 12),
-        ...sampleIngredients.map((ing) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
+
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(ing['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    const Text('Trung bình nạp / ngày', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                     const SizedBox(height: 4),
-                    Text(ing['cal']!, style: const TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.bold)),
+                    Text(
+                      '${avgDailyCal.round()} kcal',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      avgDailyCal > targetCal
+                          ? '+${(avgDailyCal - targetCal).round()} kcal vs mục tiêu'
+                          : '-${(targetCal - avgDailyCal).round()} kcal vs mục tiêu',
+                      style: TextStyle(fontSize: 10, color: avgDailyCal > targetCal ? Colors.orange : Colors.green),
+                    ),
                   ],
                 ),
-                Text(
-                  'P: ${ing['p']} • C: ${ing['c']} • F: ${ing['f']}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                ),
-              ],
+              ),
             ),
-          );
-        }),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Chuỗi ghi nhật ký', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.local_fire_department, color: Colors.orange, size: 20),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${provider.streakDays} ngày',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    const Text('Duy trì đều đặn mỗi ngày', style: TextStyle(fontSize: 10, color: AppColors.textHint)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Phân bổ đa lượng hôm nay (Macro Split)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  height: 10,
+                  child: Row(
+                    children: [
+                      Expanded(flex: pPct, child: Container(color: const Color(0xFF3B82F6))),
+                      Expanded(flex: cPct, child: Container(color: const Color(0xFF10B981))),
+                      Expanded(flex: fPct, child: Container(color: const Color(0xFFF97316))),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildMacroStatItem('Đạm (Protein)', '${todayTotals.protein.round()}g', '$pPct%', const Color(0xFF3B82F6)),
+                  _buildMacroStatItem('Tinh bột (Carb)', '${todayTotals.carbs.round()}g', '$cPct%', const Color(0xFF10B981)),
+                  _buildMacroStatItem('Chất béo (Fat)', '${todayTotals.fat.round()}g', '$fPct%', const Color(0xFFF97316)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMacroStatItem(String label, String grams, String pct, Color color) {
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+            const SizedBox(width: 4),
+            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text('$grams ($pct)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color)),
       ],
     );
   }

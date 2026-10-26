@@ -1,4 +1,6 @@
 import api from './api';
+import { invalidateRecipesCache } from './recipeService';
+import { invalidateIngredientsCache } from './foodService';
 
 export const adminService = {
   // Update dashboard stats to include all relevant data
@@ -88,16 +90,19 @@ export const adminService = {
 
   createIngredient: async (data) => {
     const res = await api.post('/Ingredient', data);
+    invalidateIngredientsCache();
     return res.data;
   },
 
   updateIngredient: async (id, data) => {
     const res = await api.put(`/Ingredient/${id}`, data);
+    invalidateIngredientsCache();
     return res.data;
   },
 
   deleteIngredient: async (id) => {
     const res = await api.delete(`/Ingredient/${id}`);
+    invalidateIngredientsCache();
     return res.data;
   },
 
@@ -151,16 +156,19 @@ export const adminService = {
 
   createRecipe: async (data) => {
     const res = await api.post('/Recipe', data);
+    invalidateRecipesCache();
     return res.data;
   },
 
   updateRecipe: async (id, data) => {
     const res = await api.put(`/Recipe/${id}`, data);
+    invalidateRecipesCache();
     return res.data;
   },
 
   deleteRecipe: async (id) => {
     const res = await api.delete(`/Recipe/${id}`);
+    invalidateRecipesCache();
     return res.data;
   },
 
@@ -234,6 +242,27 @@ export const adminService = {
 
   deletePlan: async (id) => {
     const res = await api.delete(`/Plan/${id}`);
+    return res.data;
+  },
+
+  // Admin Subscription operations (Grant / Revoke / List)
+  getAllSubscriptionsAdmin: async () => {
+    const res = await api.get('/Subscription/admin/all');
+    return res.data?.data || [];
+  },
+
+  getUserSubscriptions: async (accountId) => {
+    const res = await api.get(`/Subscription?accountId=${accountId}`);
+    return res.data?.data || [];
+  },
+
+  grantUserSubscription: async (payload) => {
+    const res = await api.post('/Subscription/admin/grant', payload);
+    return res.data;
+  },
+
+  revokeUserSubscription: async (accountId) => {
+    const res = await api.post(`/Subscription/admin/revoke/${accountId}`);
     return res.data;
   },
 

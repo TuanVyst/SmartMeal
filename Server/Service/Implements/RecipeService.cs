@@ -1,4 +1,5 @@
 
+using BusinessObject.Helpers;
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
@@ -63,21 +64,23 @@ namespace Service.Implements
         {
             try
             {
-                if (request.RecipeTagIds == null ||
-                    !request.RecipeTagIds.Any())
+                var distinctTagIds = request.RecipeTagIds?
+                    .Distinct()
+                    .ToList() ?? new List<Guid>();
+
+                if (!distinctTagIds.Any())
                 {
                     throw new ArgumentException(
                         "At least one recipe tag must be provided to create a recipe");
                 }
 
-                var tags = new List<RecipeTag>();
+                var allTags = await _recipeTagRepo.GetAllRecipeTags();
+                var tagMap = allTags.ToDictionary(t => t.Rt_Id);
+                var tags = new List<RecipeTag>(distinctTagIds.Count);
 
-                foreach (var tagId in request.RecipeTagIds)
+                foreach (var tagId in distinctTagIds)
                 {
-                    var existingTag =
-                        await _recipeTagRepo.GetRecipeTagById(tagId);
-
-                    if (existingTag == null)
+                    if (!tagMap.TryGetValue(tagId, out var existingTag))
                         throw new ArgumentException($"Invalid recipe tag: {tagId}");
 
                     tags.Add(existingTag);
@@ -92,9 +95,40 @@ namespace Service.Implements
                                ?? Guid.Empty;
                 }
 
+                var newRecipeId = Guid.NewGuid();
+
+                var newRecipeLabels = tags.Select(t => new RecipeLabel
+                {
+                    Id = Guid.NewGuid(),
+                    Recipe_Id = newRecipeId,
+                    Rt_Id = t.Rt_Id,
+                    IsDeleted = false
+                }).ToList();
+
+                var newRecipeIngredients = new List<RecipeIngredient>();
+                if (request.Ingredients != null && request.Ingredients.Any())
+                {
+                    foreach (var ingGroup in request.Ingredients
+                        .Where(i => i.Ingredient_id != Guid.Empty && i.Quantity > 0)
+                        .GroupBy(i => i.Ingredient_id))
+                    {
+                        var ing = ingGroup.Last();
+                        newRecipeIngredients.Add(new RecipeIngredient
+                        {
+                            RI_id = Guid.NewGuid(),
+                            Recipe_id = newRecipeId,
+                            Ingredient_id = ing.Ingredient_id,
+                            Quantity = ing.Quantity,
+                            UOM = string.IsNullOrWhiteSpace(ing.UOM) ? "g" : ing.UOM,
+                            IsPrimary = ing.IsPrimary,
+                            IsDeleted = false
+                        });
+                    }
+                }
+
                 var newItem = new Recipe
                 {
-                    Recipe_id = Guid.NewGuid(),
+                    Recipe_id = newRecipeId,
                     Account_id = authorId,
                     Recipe_name = request.Recipe_name,
                     Description = request.Description,
@@ -104,32 +138,37 @@ namespace Service.Implements
                     Servings = request.Servings,
                     Difficulty = request.Difficulty,
                     IsPublic = request.IsPublic,
+                    ImageUrl = request.ImageUrl,
                     CreatedAt = DateTime.UtcNow,
-                    IsDeleted = false
+                    IsDeleted = false,
+                    RecipeLabels = newRecipeLabels,
+                    RecipeIngredients = newRecipeIngredients
                 };
-
-                var newRecipeLabels = tags.Select(t => new RecipeLabel
-                {
-                    Id = Guid.NewGuid(),
-                    Recipe_Id = newItem.Recipe_id,
-                    Rt_Id = t.Rt_Id,
-                    IsDeleted = false
-                }).ToList();
 
                 await _recipeRepo.CreateRecipe(newItem);
 
-                foreach (var label in newRecipeLabels)
+                Recipe? createdRecipe;
+                if (newRecipeIngredients.Count > 0)
                 {
-                    await _recipeLabelRepo.CreateRecipeLabel(label);
+                    createdRecipe = await _recipeRepo.GetRecipeById(newItem.Recipe_id);
+                }
+                else
+                {
+                    foreach (var label in newRecipeLabels)
+                    {
+                        if (tagMap.TryGetValue(label.Rt_Id, out var tag))
+                        {
+                            label.RecipeTag = tag;
+                        }
+                    }
+                    createdRecipe = newItem;
                 }
 
-                var createdRecipe =
-                    await _recipeRepo.GetRecipeById(newItem.Recipe_id);
-
                 _logger.LogInformation(
-                    "Recipe '{Recipe_id}' created successfully with {TagCount} tags",
+                    "Recipe '{Recipe_id}' created successfully with {TagCount} tags and {IngredientCount} ingredients",
                     newItem.Recipe_id,
-                    tags.Count);
+                    tags.Count,
+                    newRecipeIngredients.Count);
 
                 return MapToDto(
                     createdRecipe ??
@@ -173,23 +212,22 @@ namespace Service.Implements
                 existingItem.Servings = request.Servings;
                 existingItem.Difficulty = request.Difficulty;
                 existingItem.IsPublic = request.IsPublic;
+                existingItem.ImageUrl = request.ImageUrl;
 
-                await _recipeRepo.UpdateRecipe(existingItem);
+                Dictionary<Guid, RecipeTag>? tagMap = null;
+                var newLabelsToCreate = new List<RecipeLabel>();
 
                 if (request.RecipeTagIds != null)
                 {
-                    var tags = new List<RecipeTag>();
+                    var distinctTagIds = request.RecipeTagIds.Distinct().ToList();
+                    var allTags = await _recipeTagRepo.GetAllRecipeTags();
+                    tagMap = allTags.ToDictionary(t => t.Rt_Id);
 
-                    foreach (var tagId in request.RecipeTagIds)
+                    foreach (var tagId in distinctTagIds)
                     {
-                        var existingTag =
-                            await _recipeTagRepo.GetRecipeTagById(tagId);
-
-                        if (existingTag == null)
+                        if (!tagMap.ContainsKey(tagId))
                             throw new ArgumentException(
                                 $"Invalid recipe tag: {tagId}");
-
-                        tags.Add(existingTag);
                     }
 
                     var currentLabels =
@@ -203,17 +241,19 @@ namespace Service.Implements
                         .Select(l => l.Rt_Id)
                         .ToHashSet();
 
-                    var tagIdsToAdd = request.RecipeTagIds
+                    var requestedTagIdSet = distinctTagIds.ToHashSet();
+
+                    var tagIdsToAdd = distinctTagIds
                         .Where(tid => !currentActiveTagIds.Contains(tid))
                         .ToList();
 
                     var labelsToRemove = currentActiveLabels
-                        .Where(l => !request.RecipeTagIds.Contains(l.Rt_Id))
+                        .Where(l => !requestedTagIdSet.Contains(l.Rt_Id))
                         .ToList();
 
                     foreach (var label in labelsToRemove)
                     {
-                        await _recipeLabelRepo.SoftDeleteRecipeLabel(label.Id);
+                        label.IsDeleted = true;
                     }
 
                     foreach (var tagId in tagIdsToAdd)
@@ -224,26 +264,124 @@ namespace Service.Implements
                         if (softDeletedLabel != null)
                         {
                             softDeletedLabel.IsDeleted = false;
-
-                            await _recipeLabelRepo.UpdateRecipeLabel(
-                                softDeletedLabel);
                         }
                         else
                         {
-                            var newLabel = new RecipeLabel
+                            newLabelsToCreate.Add(new RecipeLabel
                             {
                                 Id = Guid.NewGuid(),
                                 Recipe_Id = existingItem.Recipe_id,
                                 Rt_Id = tagId,
                                 IsDeleted = false
-                            };
-
-                            await _recipeLabelRepo.CreateRecipeLabel(newLabel);
+                            });
                         }
                     }
                 }
 
-                var updatedRecipe = await _recipeRepo.GetRecipeById(id);
+                var newIngredientsToCreate = new List<RecipeIngredient>();
+                if (request.Ingredients != null)
+                {
+                    var incomingIngredients = request.Ingredients
+                        .Where(i => i.Ingredient_id != Guid.Empty && i.Quantity > 0)
+                        .GroupBy(i => i.Ingredient_id)
+                        .Select(g => g.Last())
+                        .ToList();
+
+                    var incomingIngredientIdSet = incomingIngredients
+                        .Select(i => i.Ingredient_id)
+                        .ToHashSet();
+
+                    var currentIngredients =
+                        existingItem.RecipeIngredients ?? new List<RecipeIngredient>();
+
+                    foreach (var oldRi in currentIngredients.Where(
+                        ri => !ri.IsDeleted && !incomingIngredientIdSet.Contains(ri.Ingredient_id)))
+                    {
+                        oldRi.IsDeleted = true;
+                    }
+
+                    foreach (var ing in incomingIngredients)
+                    {
+                        var uom = string.IsNullOrWhiteSpace(ing.UOM) ? "g" : ing.UOM;
+                        var activeMatches = currentIngredients
+                            .Where(ri => !ri.IsDeleted && ri.Ingredient_id == ing.Ingredient_id)
+                            .ToList();
+
+                        if (activeMatches.Count > 0)
+                        {
+                            var targetRi = activeMatches[0];
+                            targetRi.Quantity = ing.Quantity;
+                            targetRi.UOM = uom;
+                            targetRi.IsPrimary = ing.IsPrimary;
+                            targetRi.IsDeleted = false;
+
+                            for (int idx = 1; idx < activeMatches.Count; idx++)
+                            {
+                                activeMatches[idx].IsDeleted = true;
+                            }
+                        }
+                        else
+                        {
+                            var softDeletedRi = currentIngredients.FirstOrDefault(
+                                ri => ri.IsDeleted && ri.Ingredient_id == ing.Ingredient_id);
+
+                            if (softDeletedRi != null)
+                            {
+                                softDeletedRi.Quantity = ing.Quantity;
+                                softDeletedRi.UOM = uom;
+                                softDeletedRi.IsPrimary = ing.IsPrimary;
+                                softDeletedRi.IsDeleted = false;
+                            }
+                            else
+                            {
+                                newIngredientsToCreate.Add(new RecipeIngredient
+                                {
+                                    RI_id = Guid.NewGuid(),
+                                    Recipe_id = existingItem.Recipe_id,
+                                    Ingredient_id = ing.Ingredient_id,
+                                    Quantity = ing.Quantity,
+                                    UOM = uom,
+                                    IsPrimary = ing.IsPrimary,
+                                    IsDeleted = false
+                                });
+                            }
+                        }
+                    }
+                }
+
+                await _recipeRepo.UpdateRecipe(existingItem);
+
+                if (newLabelsToCreate.Count > 0)
+                {
+                    await _recipeLabelRepo.CreateRecipeLabels(newLabelsToCreate);
+                    existingItem.RecipeLabels ??= new List<RecipeLabel>();
+                    foreach (var nl in newLabelsToCreate)
+                    {
+                        if (!existingItem.RecipeLabels.Any(l => l.Id == nl.Id))
+                            existingItem.RecipeLabels.Add(nl);
+                    }
+                }
+
+                Recipe? updatedRecipe;
+                if (newIngredientsToCreate.Count > 0)
+                {
+                    await _recipeIngredientRepo.CreateRecipeIngredients(newIngredientsToCreate);
+                    updatedRecipe = await _recipeRepo.GetRecipeById(id);
+                }
+                else
+                {
+                    if (tagMap != null && existingItem.RecipeLabels != null)
+                    {
+                        foreach (var label in existingItem.RecipeLabels.Where(l => !l.IsDeleted))
+                        {
+                            if (label.RecipeTag == null && tagMap.TryGetValue(label.Rt_Id, out var tag))
+                            {
+                                label.RecipeTag = tag;
+                            }
+                        }
+                    }
+                    updatedRecipe = existingItem;
+                }
 
                 _logger.LogInformation(
                     "Recipe '{Recipe_id}' updated successfully",
@@ -305,12 +443,17 @@ namespace Service.Implements
                             continue;
 
                         var servingSize = nv.ServingSize ?? 100.0;
-
                         if (servingSize <= 0)
                             servingSize = 100.0;
 
-                        var multiplier = ri.Quantity / servingSize;
-
+                        var multiplier = UnitConverter.GetMultiplier(
+                            ri.Quantity,
+                            ri.UOM,
+                            servingSize,
+                            nv.ServingUnit,
+                            ri.Ingredient?.Name,
+                            nv.EverydayWeight
+                        );
                         totalCal += nv.Calories * multiplier;
                         totalPro += (nv.Protein ?? 0) * multiplier;
                         totalCarb += (nv.Carbs ?? 0) * multiplier;
@@ -345,6 +488,7 @@ namespace Service.Implements
                         PrepTime = recipe.PrepTime,
                         Servings = recipe.Servings,
                         Difficulty = recipe.Difficulty,
+                        ImageUrl = recipe.ImageUrl,
                         TotalCalories = Math.Round(totalCal, 1),
                         CaloriesPerServing = Math.Round(calPerServing, 1),
                         TotalProtein = Math.Round(totalPro, 1),
@@ -471,6 +615,7 @@ namespace Service.Implements
                         CookTime = recipe.CookTime,
                         PrepTime = recipe.PrepTime,
                         Difficulty = recipe.Difficulty,
+                        ImageUrl = recipe.ImageUrl,
                         MatchPercentage = Math.Round(matchPercentage, 0),
                         MissingIngredients = missing,
                         AllIngredients = allIngDetails
@@ -493,18 +638,91 @@ namespace Service.Implements
             }
         }
 
+        private static readonly Dictionary<string, string[]> DetectedIngredientAliases =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Mushroom"] = new[] { "Nấm", "Nấm đông cô", "Mộc nhĩ" },
+                ["Egg"] = new[] { "Trứng gà", "Trứng", "Hột vịt muối" },
+                ["Trứng"] = new[] { "Trứng gà", "Trứng" },
+                ["Sweet Potato -Suthuni-"] = new[] { "Khoai lang" },
+                ["Taro Leaves -Karkalo-"] = new[] { "Lá khoai môn", "Rau lang" },
+                ["Beetroot"] = new[] { "Củ dền", "Rau dền đỏ" },
+                ["Potato"] = new[] { "Khoai tây" },
+                ["Capsicum"] = new[] { "Ớt chuông", "Ớt sừng", "Ớt tươi" },
+                ["Taro Root-Pidalu-"] = new[] { "Củ khoai môn", "Khoai môn" },
+                ["Turnip"] = new[] { "Củ cải trắng", "Củ cải" },
+                ["Green Mint -Pudina-"] = new[] { "Bạc hà", "Rau thơm" },
+                ["Pointed Gourd -Chuche Karela-"] = new[] { "Mướp đắng", "Khổ qua" },
+                ["Bitter Gourd"] = new[] { "Mướp đắng", "Khổ qua" },
+                ["Khổ qua"] = new[] { "Mướp đắng", "Khổ qua" },
+                ["Snake Gourd -Chichindo-"] = new[] { "Bầu non", "Bầu" },
+                ["Palungo -Nepali Spinach-"] = new[] { "Cải bó xôi", "Rau bina", "Rau mồng tơi" },
+                ["Rau bina"] = new[] { "Cải bó xôi", "Rau bina" },
+                ["Cabbage"] = new[] { "Bắp cải", "Bắp cải tím" },
+                ["Brinjal"] = new[] { "Cà tím", "Cà pháo trắng" },
+                ["Bottle Gourd -Lauka-"] = new[] { "Bầu non", "Bầu" },
+                ["Bầu"] = new[] { "Bầu non", "Bầu" },
+                ["Tomato"] = new[] { "Cà chua", "Tương cà" },
+                ["Tree Tomato -Rukh Tamatar-"] = new[] { "Cà chua" },
+                ["Onion"] = new[] { "Hành tây", "Hành tím" },
+                ["Radish"] = new[] { "Củ cải trắng", "Củ cải" },
+                ["Củ cải"] = new[] { "Củ cải trắng", "Củ cải" },
+                ["Sponge Gourd -Ghiraula-"] = new[] { "Mướp hương", "Mướp" },
+                ["Mướp"] = new[] { "Mướp hương", "Mướp" },
+                ["Red Lentils"] = new[] { "Đậu đỏ", "Đậu lăng đỏ" },
+                ["Okra -Bhindi-"] = new[] { "Đậu bắp" },
+                ["Chayote-iskus-"] = new[] { "Su su" },
+                ["Garden Peas"] = new[] { "Đậu xanh", "Đậu Hà Lan", "Đậu que" },
+                ["Cheese"] = new[] { "Phô mai" },
+                ["Rayo ko Saag"] = new[] { "Cải bẹ xanh" },
+                ["Lapsi -Nepali Hog Plum-"] = new[] { "Sấu xanh" },
+                ["Artichoke"] = new[] { "Bông atisô", "Atisô" },
+                ["Atisô"] = new[] { "Bông atisô", "Atisô" },
+                ["Banana"] = new[] { "Chuối", "Bắp chuối" },
+                ["Cinnamon"] = new[] { "Quế", "Ngũ vị hương" },
+                ["Bread"] = new[] { "Bánh mì", "Bánh mì sandwich" },
+                ["Jack Fruit"] = new[] { "Mít" },
+                ["Beans"] = new[] { "Đậu que", "Đậu xanh", "Đậu đỏ" },
+                ["Asparagus -Kurilo-"] = new[] { "Măng tây" },
+                ["Gundruk"] = new[] { "Dưa chua" },
+                ["Avocado"] = new[] { "Bơ" },
+                ["Nutrela -Soya Chunks-"] = new[] { "Đậu hủ", "Đậu nành khô" },
+                ["Rice -Chamal-"] = new[] { "Gạo", "Gạo nếp" },
+                ["Corn"] = new[] { "Bắp" },
+                ["Onion Leaves"] = new[] { "Hành lá", "Hẹ" },
+                ["Carrot"] = new[] { "Cà rốt" },
+                ["Farsi ko Munta"] = new[] { "Bí đỏ", "Ngọn bí" },
+                ["Coriander -Dhaniya-"] = new[] { "Rau mùi", "Ngò rí" },
+                ["Lemon -Nimbu-"] = new[] { "Chanh" },
+                ["Cassava -Ghar Tarul-"] = new[] { "Khoai mì" },
+                ["Pork"] = new[] { "Thịt heo", "Sườn sụn", "Da heo" },
+                ["Cucumber"] = new[] { "Dưa leo" },
+                ["Ash Gourd -Kubhindo-"] = new[] { "Bí đao" },
+            };
+
         public async Task<List<RecipeSuggestionByDetectedIngredientsDto>>
             SuggestRecipesByDetectedIngredients(
                 List<DetectedIngredientDto> detectedIngredients)
         {
             try
             {
-                var detectedNames = (detectedIngredients ??
-                                     new List<DetectedIngredientDto>())
-                    .Where(x => x != null &&
-                                !string.IsNullOrWhiteSpace(x.Name))
-                    .Select(x => x.Name.Trim())
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var detectedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in detectedIngredients ?? new List<DetectedIngredientDto>())
+                {
+                    if (item == null || string.IsNullOrWhiteSpace(item.Name))
+                        continue;
+
+                    var trimmed = item.Name.Trim();
+                    detectedNames.Add(trimmed);
+
+                    if (DetectedIngredientAliases.TryGetValue(trimmed, out var aliases))
+                    {
+                        foreach (var alias in aliases)
+                        {
+                            detectedNames.Add(alias);
+                        }
+                    }
+                }
 
                 if (detectedNames.Count == 0)
                 {
@@ -555,10 +773,8 @@ namespace Service.Implements
                             missing.Add(ingredientName);
                         }
                     }
+
                     if (matched.Count == 0)
-                        continue;
-                    // Only suggest recipes missing at most two ingredients.
-                    if (missing.Count > 2)
                         continue;
 
                     double matchPercentage =
@@ -576,8 +792,9 @@ namespace Service.Implements
                 }
 
                 return suggestions
-                    .OrderBy(s => s.MissingCount)
+                    .OrderByDescending(s => s.MatchedIngredients.Count)
                     .ThenByDescending(s => s.MatchPercentage)
+                    .ThenBy(s => s.MissingCount)
                     .ToList();
             }
             catch (Exception ex)
@@ -607,6 +824,7 @@ namespace Service.Implements
                 Servings = entity.Servings,
                 Difficulty = entity.Difficulty,
                 IsPublic = entity.IsPublic,
+                ImageUrl = entity.ImageUrl,
                 CreatedAt = entity.CreatedAt,
                 IsDeleted = entity.IsDeleted,
 
@@ -623,12 +841,13 @@ namespace Service.Implements
                     .Where(ri => !ri.IsDeleted)
                     .Select(ri => new RecipeIngredientResponseDto
                     {
+                        Id = ri.RI_id,
+                        Recipe_id = ri.Recipe_id,
                         Ingredient_id = ri.Ingredient_id,
                         Name = ri.Ingredient?.Name ?? "",
                         Quantity = ri.Quantity,
                         Uom = ri.UOM ?? "",
                         IsPrimary = ri.IsPrimary,
-
                         NutritionalValue =
                             ri.Ingredient?.Nutritional_value == null
                                 ? null

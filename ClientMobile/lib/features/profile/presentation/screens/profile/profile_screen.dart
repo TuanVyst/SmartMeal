@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/core/theme/app_typography.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
@@ -68,10 +69,10 @@ class ProfileScreen extends StatelessWidget {
           _buildMenuSection([
             _MenuItem(Icons.person_outline, 'Thông tin cá nhân', () {}),
             _MenuItem(Icons.health_and_safety_outlined, 'Hồ sơ sức khỏe', () {
-              Navigator.of(context).pushNamed('/health-survey');
+              context.push('/health-profile');
             }),
             _MenuItem(Icons.workspace_premium, auth.isPremium ? 'Gói Pro' : 'Nâng cấp Pro', () {
-              Navigator.of(context).pushNamed('/subscription');
+              context.push('/subscription');
             }),
           ]),
           const SizedBox(height: 14),

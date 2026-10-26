@@ -1,0 +1,271 @@
+/* ── Admin Recipes Toolbar & Filter Styles ── */
+
+.admin-recipe-toolbar-wrapper {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-recipe-toolbar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-recipe-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px 16px;
+  background: #f8fafc;
+  border-top: 1px dashed #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.admin-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.admin-filter-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.admin-filter-select {
+  height: 38px;
+  padding: 0 32px 0 12px;
+  font-size: 13.5px;
+  color: #1e293b;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.admin-filter-select:hover {
+  border-color: #94a3b8;
+}
+
+.admin-filter-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.admin-filter-select.has-value {
+  border-color: #10b981;
+  background-color: #f0fdf4;
+  color: #065f46;
+  font-weight: 500;
+}
+
+.admin-btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.admin-btn-reset:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.admin-filter-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.admin-filter-stats-badge {
+  background: #e2e8f0;
+  color: #334155;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+/* ── Sortable Column Headers ── */
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sortable-th:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.sort-header-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sort-icon-active {
+  color: #059669;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.sort-icon-idle {
+  color: #cbd5e1;
+  display: inline-flex;
+  vertical-align: middle;
+  transition: color 0.15s ease;
+}
+
+.sortable-th:hover .sort-icon-idle {
+  color: #94a3b8;
+}
+
+/* ── Pagination Bar ── */
+.admin-pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-pagination-info {
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+.admin-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+.pagination-btn.active {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.page-size-selector {
+  height: 34px;
+  padding: 0 28px 0 10px;
+  font-size: 13px;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+}
+
+/* ── Clear Search Button ── */
+.admin-search-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+.admin-search-clear-btn:hover {
+  color: #475569;
+  background-color: #f1f5f9;
+}
+
+/* ── Responsive adjustments ── */
+@media (max-width: 768px) {
+  .admin-recipe-toolbar-top,
+  .admin-recipe-filters-bar,
+  .admin-pagination-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-filter-item {
+    width: 100%;
+  }
+
+  .admin-filter-select {
+    width: 100%;
+  }
+
+  .admin-btn-reset,
+  .admin-filter-stats {
+    margin-left: 0;
+    justify-content: center;
+  }
+}

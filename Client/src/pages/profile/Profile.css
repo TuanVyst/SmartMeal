@@ -333,3 +333,56 @@
   font-weight: 500;
 }
 
+/* ── Policy & Legal Section ── */
+.policy-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.policy-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+
+.policy-icon {
+  color: #94a3b8;
+}
+
+.policy-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 10px;
+  color: #15803d;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.policy-link-btn:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);
+  transform: translateY(-1px);
+}
+
+.policy-external-icon {
+  margin-left: 2px;
+  opacity: 0.7;
+}
+

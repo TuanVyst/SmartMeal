@@ -20,10 +20,18 @@ namespace Repository.Implements
         public async Task<List<Allergy>> GetAllAllergies()
         {
             return await _ctx.Allergies
+                .AsNoTracking()
                 .Where(i => i.IsDeleted == false)
                 .ToListAsync();
         }
 
+        public async Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId)
+        {
+            return await _ctx.Allergies
+                .AsNoTracking()
+                .Where(i => i.IsDeleted == false && i.Account_id == accountId)
+                .ToListAsync();
+        }
         public async Task<Allergy?> GetAllergyById(Guid id)
             => await _ctx.Allergies
                 .Where(i => !i.IsDeleted)

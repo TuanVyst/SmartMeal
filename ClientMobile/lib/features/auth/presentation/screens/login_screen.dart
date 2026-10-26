@@ -8,6 +8,7 @@ import '../../../../core/ui/smart_text_field.dart';
 import '../../../../core/ui/smart_dialog.dart';
 import '../providers/auth_provider.dart';
 import 'package:smart_meal/features/onboarding/presentation/providers/health_profile_provider.dart';
+import '../widgets/forgot_password_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final healthProvider = context.read<HealthProfileProvider>();
         await healthProvider.loadProfile();
         if (!mounted) return;
-        if (healthProvider.surveyCompleted) {
+        if (healthProvider.surveyCompleted || authProvider.user?.isAdmin == true) {
           context.go('/main');
         } else {
           context.go('/onboarding');
@@ -82,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final healthProvider = context.read<HealthProfileProvider>();
       await healthProvider.loadProfile();
       if (!mounted) return;
-      if (healthProvider.surveyCompleted) {
+      if (healthProvider.surveyCompleted || authProvider.user?.isAdmin == true) {
         context.go('/main');
       } else {
         context.go('/onboarding');
@@ -101,56 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleForgotPassword() {
-    final emailController = TextEditingController(
-      text: _usernameController.text.contains('@') ? _usernameController.text : '',
-    );
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusLg),
-        title: Text('Quên mật khẩu', style: Theme.of(context).textTheme.displaySmall),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nhập địa chỉ email đăng ký tài khoản của bạn để nhận hướng dẫn khôi phục mật khẩu:',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SmartTextField(
-              controller: emailController,
-              label: 'Email',
-              prefixIcon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-            ),
-          ],
-        ),
-        actions: [
-          SmartButton(
-            text: 'Hủy',
-            variant: SmartButtonVariant.text,
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            fullWidth: false,
-          ),
-          SmartButton(
-            text: 'Gửi yêu cầu',
-            onPressed: () {
-              final email = emailController.text.trim();
-              Navigator.of(dialogContext).pop();
-              if (email.isNotEmpty) {
-                SmartDialog.showAlert(
-                  context: context,
-                  title: 'Yêu cầu đã gửi',
-                  message: 'Nếu email $email đã đăng ký tài khoản SmartMeal, hướng dẫn đặt lại mật khẩu sẽ được gửi đến hộp thư của bạn.',
-                );
-              }
-            },
-            fullWidth: false,
-          ),
-        ],
-      ),
-    );
+    final email = _usernameController.text.contains('@') ? _usernameController.text.trim() : '';
+    ForgotPasswordDialog.show(context, initialEmail: email);
   }
 
   @override

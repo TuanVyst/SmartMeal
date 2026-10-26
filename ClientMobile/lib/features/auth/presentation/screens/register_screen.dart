@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final healthProvider = context.read<HealthProfileProvider>();
         await healthProvider.loadProfile();
         if (!mounted) return;
-        if (healthProvider.surveyCompleted) {
+        if (healthProvider.surveyCompleted || authProvider.user?.isAdmin == true) {
           context.go('/main');
         } else {
           context.go('/onboarding');
@@ -106,7 +106,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final healthProvider = context.read<HealthProfileProvider>();
       await healthProvider.loadProfile();
       if (!mounted) return;
-      if (healthProvider.surveyCompleted) {
+      if (healthProvider.surveyCompleted || authProvider.user?.isAdmin == true) {
         context.go('/main');
       } else {
         context.go('/onboarding');

@@ -15,5 +15,7 @@ namespace Service.Interfaces
         Task<SubscriptionResponseDto> UpdateSubscription(Guid id, SubscriptionRequest subscription);
         Task<SubscriptionResponseDto> SoftDeleteSubscription(Guid id);
         Task<bool> HasFeatureAsync(Guid accountId, string featureKey);
+        Task<SubscriptionResponseDto> GrantSubscriptionByAdminAsync(AdminGrantSubscriptionRequest request);
+        Task<bool> RevokeActiveSubscriptionByAdminAsync(Guid accountId);
     }
 }

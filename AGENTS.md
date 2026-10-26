@@ -86,3 +86,15 @@ SmartMeal provides dedicated skills in `.skills/`. Agents should invoke and refe
   - Updating ONNX models, YOLO image preprocessing (Pillow/NumPy), or post-processing (NMS/bounding boxes).
   - Optimizing Docker packaging, container memory consumption, or health check routes.
 - **Key Focus**: Stateless microservice execution, ONNX Runtime session pooling, vectorized NMS coordinate rescaling, and minimal image containerization.
+
+### 4.4 `.skills/supabase/SKILL.md`
+- **When to Invoke**:
+  - Interacting with Supabase services (Database, Auth, Edge Functions, Storage, Branching).
+  - Managing Supabase MCP configurations, project settings, and migrations.
+- **Key Focus**: Supabase CLI / Management API, Edge Function authoring, auth workflows, and project resources.
+
+### 4.5 `.skills/supabase-postgres-best-practices/SKILL.md`
+- **When to Invoke**:
+  - Designing or modifying PostgreSQL schemas, tables, indexes, RLS policies, and queries.
+  - Troubleshooting slow queries, transaction deadlocks, connection pooling, or vacuuming.
+- **Key Focus**: PostgreSQL performance, query optimization, indexing strategies, RLS security patterns, and connection management.

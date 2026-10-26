@@ -5,11 +5,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useFavorite } from '../../context/FavoriteContext';
 import { HealthProfileContext } from '../../context/HealthProfileContext';
 import { nutritionLogService } from '../../services/nutritionLogService';
-import { recipeService } from '../../services/recipeService';
+import { recipeService, getCachedRecipesSync } from '../../services/recipeService';
 import heroSaladImg    from '../../assets/hero_salad_bowl.png';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
-import { getIngredients } from '../../services/foodService';
+import { getIngredients, getCachedIngredientsSync } from '../../services/foodService';
 import { FiZap, FiActivity, FiBarChart2, FiDroplet, FiHeart, FiLock } from 'react-icons/fi';
 import HealthTipCard from '../../components/common/HealthTipCard';
 import CalorieGoalReminder from '../../components/common/CalorieGoalReminder';
@@ -21,7 +21,7 @@ const SPEED = 0.05;
 function mapRecipeToSuggestion(recipe, index) {
   const id = recipe.recipe_id || recipe.Recipe_id || recipe.id || `recipe-${index}`;
   const name = recipe.recipe_name || recipe.Recipe_name || recipe.title || 'Món ăn';
-  const imageUrl = resolveRecipeImageUrl(name);
+  const imageUrl = resolveRecipeImageUrl(name, recipe.imageUrl || recipe.ImageUrl);
   const servings = recipe.servings || recipe.Servings || 1;
   const recipeIngredients = recipe.recipeIngredients || recipe.RecipeIngredients || [];
 
@@ -65,17 +65,10 @@ function AnimatedBar({ pct, className }) {
 
 /* ── Circular progress for nutrients ── */
 function NutrientCircle({ label, value, unit, pct, color, active, limit, onClick }) {
-  const [animatedPct, setAnimatedPct] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setAnimatedPct(pct), 300);
-    return () => clearTimeout(t);
-  }, [pct]);
-
   const radius = 30;
   const circumference = 2 * Math.PI * radius;
-  const displayPct = Math.min(Math.max(animatedPct, 0), 100);
+  const displayPct = Math.min(Math.max(pct || 0, 0), 100);
   const strokeDash = `${(displayPct / 100) * circumference} ${circumference}`;
-
   return (
     <button
       type="button"
@@ -165,9 +158,12 @@ export default function Dashboard() {
   const [, setSearchParams] = useSearchParams();
   const [isMounted, setIsMounted] = useState(false);
   const [nutritionLogs, setNutritionLogs] = useState([]);
-  const [ingredients, setIngredients] = useState([]);
-  const [recipes, setRecipes] = useState([]);
-  const [mealSuggestions, setMealSuggestions] = useState([]);
+  const [ingredients, setIngredients] = useState(() => getCachedIngredientsSync() || []);
+  const [recipes, setRecipes] = useState(() => getCachedRecipesSync() || []);
+  const [mealSuggestions, setMealSuggestions] = useState(() => {
+    const cached = getCachedRecipesSync();
+    return cached ? cached.slice(0, 8).map(mapRecipeToSuggestion) : [];
+  });
   const [nutrientFocus, setNutrientFocus] = useNutrientFocus();
 
   const accountId = user?.accountId || user?.account_id;
@@ -187,15 +183,18 @@ export default function Dashboard() {
     fetchTodayLogs();
 
     let debounceTimer;
-    const debouncedFetch = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
+    const handleUpdate = (event) => {
+      const detail = event?.detail;
+      if (detail?.optimisticLog) {
+        setNutritionLogs((prev) => [detail.optimisticLog, ...prev]);
+      }
+      if (detail?.rollbackLogId) {
+        setNutritionLogs((prev) => prev.filter((l) => l.log_id !== detail.rollbackLogId));
+      }
+      clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         fetchTodayLogs();
-      }, 1500);
-    };
-
-    const handleUpdate = () => {
-      debouncedFetch();
+      }, detail?.optimisticLog ? 400 : 50);
     };
 
     const handleFocus = () => fetchTodayLogs();
@@ -213,7 +212,7 @@ export default function Dashboard() {
       window.removeEventListener('smartmeal:nutrition-updated', handleUpdate);
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibility);
-      if (debounceTimer) clearTimeout(debounceTimer);
+      clearTimeout(debounceTimer);
     };
   }, [accountId]);
 

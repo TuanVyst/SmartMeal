@@ -41,4 +41,37 @@ class AuthRemoteDataSource {
     });
     return response.data as Map<String, dynamic>;
   }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await _api.post(ApiConstants.forgotPassword, data: {'email': email});
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    final response = await _api.post(ApiConstants.resetPassword, data: {
+      'email': email,
+      'otp': otp,
+      'newPassword': newPassword,
+      'confirmNewPassword': confirmNewPassword,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    final response = await _api.put(ApiConstants.changePassword, data: {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword,
+      'confirmNewPassword': confirmNewPassword,
+    });
+    return response.data as Map<String, dynamic>;
+  }
 }

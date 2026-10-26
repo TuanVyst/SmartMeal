@@ -41,24 +41,28 @@ class HealthProfile {
 
   factory HealthProfile.fromJson(Map<String, dynamic> json) {
     return HealthProfile(
-      accountId: json['account_id']?.toString() ?? json['accountId']?.toString(),
-      height: (json['height'] as num?)?.toDouble(),
-      weight: (json['weight'] as num?)?.toDouble(),
-      targetWeight: (json['targetWeight'] as num?)?.toDouble(),
-      targetDays: (json['targetDays'] as num?)?.toInt(),
-      goal: json['goal'] as String?,
-      gender: json['gender'] as String?,
-      dateOfBirth: json['dateOfBirth'] != null ? DateTime.tryParse(json['dateOfBirth'].toString()) : null,
-      activityLevel: json['activityLevel'] as String?,
-      bmiLevel: json['bmiLevel'] as String?,
-      conditions: (json['conditions'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      allergies: (json['allergies'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      cookingTimeMinutes: (json['cookingTimeMinutes'] as num?)?.toInt(),
-      budgetLevel: json['budgetLevel'] as String?,
-      mealsPerDay: (json['mealsPerDay'] as num?)?.toInt(),
-      dietType: json['dietType'] as String?,
-      planCycleDays: (json['planCycleDays'] as num?)?.toInt(),
-      dailyTargets: json['dailyTargets'] != null ? DailyTargets.fromJson(json['dailyTargets'] as Map<String, dynamic>) : null,
+      accountId: json['account_id']?.toString() ?? json['accountId']?.toString() ?? json['Account_id']?.toString(),
+      height: (json['height'] ?? json['Height'] as num?)?.toDouble(),
+      weight: (json['weight'] ?? json['Weight'] as num?)?.toDouble(),
+      targetWeight: (json['targetWeight'] ?? json['TargetWeight'] as num?)?.toDouble(),
+      targetDays: (json['targetDays'] ?? json['TargetDays'] as num?)?.toInt(),
+      goal: (json['goal'] ?? json['Goal']) as String?,
+      gender: (json['gender'] ?? json['Gender']) as String?,
+      dateOfBirth: (json['dateOfBirth'] ?? json['DateOfBirth']) != null
+          ? DateTime.tryParse((json['dateOfBirth'] ?? json['DateOfBirth']).toString())
+          : null,
+      activityLevel: (json['activityLevel'] ?? json['ActivityLevel']) as String?,
+      bmiLevel: (json['bmiLevel'] ?? json['BmiLevel']) as String?,
+      conditions: (json['conditions'] ?? json['Conditions'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      allergies: (json['allergies'] ?? json['Allergies'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      cookingTimeMinutes: (json['cookingTimeMinutes'] ?? json['CookingTimeMinutes'] as num?)?.toInt(),
+      budgetLevel: (json['budgetLevel'] ?? json['BudgetLevel']) as String?,
+      mealsPerDay: (json['mealsPerDay'] ?? json['MealsPerDay'] as num?)?.toInt(),
+      dietType: (json['dietType'] ?? json['DietType']) as String?,
+      planCycleDays: (json['planCycleDays'] ?? json['PlanCycleDays'] as num?)?.toInt(),
+      dailyTargets: (json['dailyTargets'] ?? json['DailyTargets']) != null
+          ? DailyTargets.fromJson((json['dailyTargets'] ?? json['DailyTargets']) as Map<String, dynamic>)
+          : null,
     );
   }
 

@@ -91,7 +91,40 @@ export function HealthProfileProvider({ children }) {
       return;
     }
     const currentAccId = user.accountId || user.account_id;
-    setLoading(true);
+    const isAdmin = (user.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      setHealthProfile(null);
+      setSurveyCompleted(true);
+      computeDerivedState(null);
+      setProfileLoadedForUser(currentAccId);
+      setLoading(false);
+      return;
+    }
+
+    // Hydrate immediately from localStorage (Stale-While-Revalidate) so ProtectedRoute never blocks initial render
+    let hydratedFromStorage = false;
+    try {
+      const storedProfileStr = localStorage.getItem('userHealthProfile');
+      const completed = localStorage.getItem('healthSurveyCompleted') === 'true';
+      if (storedProfileStr && completed) {
+        const parsedProfile = JSON.parse(storedProfileStr);
+        const storedAccId = parsedProfile?.account_id || parsedProfile?.accountId;
+        if (parsedProfile && (!storedAccId || !currentAccId || storedAccId === currentAccId)) {
+          setHealthProfile(parsedProfile);
+          setSurveyCompleted(true);
+          computeDerivedState(parsedProfile);
+          setProfileLoadedForUser(currentAccId);
+          setLoading(false);
+          hydratedFromStorage = true;
+        }
+      }
+    } catch {
+      // ignore invalid JSON in localStorage
+    }
+
+    if (!hydratedFromStorage) {
+      setLoading(true);
+    }
 
     const fetchProfile = async () => {
       try {
@@ -161,6 +194,11 @@ export function HealthProfileProvider({ children }) {
   }, [user, computeDerivedState]);
 
   const completeSurvey = useCallback(async (profileData) => {
+    const isAdmin = (user?.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      return { success: false, message: 'Tài khoản quản trị viên không sử dụng khảo sát sức khỏe.' };
+    }
+
     const result = profileData
       ? await healthSurveyService.submitHealthSurvey(profileData)
       : { success: true };
@@ -179,6 +217,11 @@ export function HealthProfileProvider({ children }) {
   }, [computeDerivedState, user]);
 
   const updateProfile = useCallback(async (data) => {
+    const isAdmin = (user?.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      return { success: false, message: 'Tài khoản quản trị viên không sử dụng khảo sát sức khỏe.' };
+    }
+
     const result = await healthSurveyService.updateHealthProfile(data);
     if (result.success && result.profile) {
       setHealthProfile(result.profile);

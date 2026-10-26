@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
 import 'package:smart_meal/core/theme/app_typography.dart';
 import 'package:smart_meal/features/auth/presentation/providers/auth_provider.dart';
@@ -334,7 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             isFavorite: favoriteProvider.isFavorite(recipe.recipeId),
             tag: tags[index % tags.length],
             onTap: () {
-              Navigator.of(context).pushNamed('/recipe-detail', arguments: recipe.recipeId);
+              context.push('/recipe-detail/${recipe.recipeId}');
             },
             onFavoriteTap: () {
               // Toggle favorite

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Dashboard from '../dashboard/Dashboard';
 import MealSuggestion from '../MealSuggestion/MealSuggestion';
@@ -15,14 +16,19 @@ const SECTIONS = [
 export default function DiscoverPage() {
   const { isPremium, hasProAccess } = useAuth();
   const canUsePro = isPremium || hasProAccess;
-  const [activeSection, setActiveSection] = useState('overview');
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [activeSection, setActiveSection] = useState(() => {
+    const tab = searchParams.get('tab');
+    if (tab && SECTIONS.some((s) => s.id === tab)) return tab;
+    if (searchParams.get('fromDetection') === '1' || location.state?.detectedIngredients) return 'discover';
+    return 'overview';
+  });
   const [isPlanCollapsed, setIsPlanCollapsed] = useState(false);
   const [isDiscoverCollapsed, setIsDiscoverCollapsed] = useState(false);
   const [isNutritionOpen, setIsNutritionOpen] = useState(false);
   const observerRef = useRef(null);
   const navRef = useRef(null);
-
-  // Measure discover-anchor-nav height dynamically and set CSS variable
   useEffect(() => {
     const el = navRef.current;
     if (!el) return;
@@ -48,16 +54,45 @@ export default function DiscoverPage() {
   const scrollToSection = useCallback((id) => {
     const el = document.getElementById(`discover-section-${id}`);
     if (el) {
-      // Nếu nhảy tới Kế hoạch tuần mà đang ẩn thì mở ra
+      // Nếu nhảy tới Kế hoạch tuần hoặc Khám phá mà đang ẩn thì mở ra
       if (id === 'plan' && isPlanCollapsed) {
         setIsPlanCollapsed(false);
       }
+      if (id === 'discover' && isDiscoverCollapsed) {
+        setIsDiscoverCollapsed(false);
+      }
+      setActiveSection(id);
       // Dùng timeout nhỏ để đảm bảo render xong state collapse nếu có
       setTimeout(() => {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
+      }, 80);
     }
-  }, [isPlanCollapsed]);
+  }, [isPlanCollapsed, isDiscoverCollapsed]);
+
+  // Tự động cuộn tới đúng section khi điều hướng qua ?tab=discover / ?fromDetection=1
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const fromDetection = searchParams.get('fromDetection') === '1' || Boolean(location.state?.detectedIngredients);
+    const targetSection = fromDetection
+      ? 'discover'
+      : (tab && SECTIONS.some((s) => s.id === tab) ? tab : null);
+
+    if (targetSection) {
+      if (targetSection === 'discover') {
+        setIsDiscoverCollapsed(false);
+      } else if (targetSection === 'plan') {
+        setIsPlanCollapsed(false);
+      }
+      setActiveSection(targetSection);
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`discover-section-${targetSection}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, location.state]);
 
   // IntersectionObserver: highlight anchor khi section vào viewport
   useEffect(() => {

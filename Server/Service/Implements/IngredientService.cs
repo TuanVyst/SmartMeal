@@ -51,43 +51,40 @@ namespace Service.Implements
                 if (ingredient.AveragePrice < 0)
                     throw new ArgumentException("AveragePrice cannot be negative", nameof(ingredient.AveragePrice));
 
-                // Support single tag (IngredientTagId) or multiple tags (IngredientTagIds)
-                var tagIds = new List<Guid>();
-                if (ingredient.IngredientTagIds != null && ingredient.IngredientTagIds.Any())
-                {
-                    tagIds.AddRange(ingredient.IngredientTagIds);
-                }
+                var distinctTagIds = ingredient.IngredientTagIds?
+                    .Distinct()
+                    .ToList() ?? new List<Guid>();
 
-                if (!tagIds.Any())
+                if (!distinctTagIds.Any())
                     throw new ArgumentException("At least one ingredient tag id is required");
 
-                // Validate tags exist
-                var existingTags = new List<BusinessObject.Entities.IngredientTag>();
-                foreach (var tid in tagIds.Distinct())
+                // Validate tags exist in a single query
+                var allTags = await _ingredientTagRepo.GetAllIngredientTags();
+                var tagMap = allTags.ToDictionary(t => t.It_id);
+                var existingTags = new List<IngredientTag>(distinctTagIds.Count);
+                foreach (var tid in distinctTagIds)
                 {
-                    var t = await _ingredientTagRepo.GetIngredientTagById(tid);
-                    if (t == null) throw new ArgumentException($"Invalid ingredient tag id: {tid}");
+                    if (!tagMap.TryGetValue(tid, out var t))
+                        throw new ArgumentException($"Invalid ingredient tag id: {tid}");
                     existingTags.Add(t);
                 }
 
-                var newIngredient = new Ingredient
+                var newIngredientId = Guid.NewGuid();
+                var createdLabels = existingTags.Select(tag => new IngredientLabel
                 {
-                    Ingredient_id = Guid.NewGuid(),
-                    Name = ingredient.Name,
-                    AveragePrice = ingredient.AveragePrice,
-                    ImageUrl = ingredient.ImageUrl,
+                    Id = Guid.NewGuid(),
+                    Ingredient_id = newIngredientId,
+                    It_id = tag.It_id,
                     IsDeleted = false
-                };
+                }).ToList();
 
-                var result = await _ingredientRepo.CreateIngredient(newIngredient);
-
-                // Create NutritionalValue
+                NutritionalValue? nv = null;
                 if (ingredient.NutritionalValue != null)
                 {
-                    var nv = new NutritionalValue
+                    nv = new NutritionalValue
                     {
                         Nv_id = Guid.NewGuid(),
-                        Ingredient_id = newIngredient.Ingredient_id,
+                        Ingredient_id = newIngredientId,
                         Calories = ingredient.NutritionalValue.Calories,
                         Protein = ingredient.NutritionalValue.Protein,
                         Carbs = ingredient.NutritionalValue.Carbohydrates,
@@ -102,26 +99,32 @@ namespace Service.Implements
                         EverydayWeight = ingredient.NutritionalValue.EverydayWeight,
                         IsDeleted = false
                     };
-                    await _nutritionalValueRepo.CreateNutritionalValue(nv);
                 }
 
-                // Create one IngredientLabel per provided tag
-                var createdLabels = new List<IngredientLabel>();
-                foreach (var tag in existingTags)
+                var newIngredient = new Ingredient
                 {
-                    var label = new IngredientLabel
+                    Ingredient_id = newIngredientId,
+                    Name = ingredient.Name,
+                    AveragePrice = ingredient.AveragePrice,
+                    ImageUrl = ingredient.ImageUrl,
+                    IsDeleted = false,
+                    Nutritional_value = nv,
+                    IngredientLabels = createdLabels
+                };
+
+                var result = await _ingredientRepo.CreateIngredient(newIngredient)
+                    ?? throw new InvalidOperationException("Failed to add ingredient to database");
+
+                foreach (var label in createdLabels)
+                {
+                    if (tagMap.TryGetValue(label.It_id, out var tag))
                     {
-                        Id = Guid.NewGuid(),
-                        Ingredient_id = newIngredient.Ingredient_id,
-                        It_id = tag.It_id,
-                        IsDeleted = false
-                    };
-                    var created = await _ingredientLabelRepo.CreateIngredientLabel(label);
-                    createdLabels.Add(created);
+                        label.Ingredient_tag = tag;
+                    }
                 }
 
                 _logger.LogInformation("Ingredient '{Ingredient_id}' ({Name}) with {LabelCount} labels created successfully", newIngredient.Ingredient_id, newIngredient.Name, createdLabels.Count);
-                return MapToDto(result ?? throw new InvalidOperationException("Failed to add ingredient to database"));
+                return MapToDto(result);
             }
             catch (Exception ex)
             {
@@ -149,15 +152,14 @@ namespace Service.Implements
                 existingIngredient.AveragePrice = ingredient.AveragePrice;
                 existingIngredient.ImageUrl = ingredient.ImageUrl;
 
-                await _ingredientRepo.UpdateIngredient(existingIngredient);
-
-                // Update NutritionalValue
+                // Update existing NutritionalValue in memory before single SaveChangesAsync
+                NutritionalValue? newNvToCreate = null;
                 if (ingredient.NutritionalValue != null)
                 {
                     var nv = existingIngredient.Nutritional_value;
                     if (nv == null)
                     {
-                        nv = new NutritionalValue
+                        newNvToCreate = new NutritionalValue
                         {
                             Nv_id = Guid.NewGuid(),
                             Ingredient_id = existingIngredient.Ingredient_id,
@@ -175,7 +177,6 @@ namespace Service.Implements
                             EverydayWeight = ingredient.NutritionalValue.EverydayWeight,
                             IsDeleted = false
                         };
-                        await _nutritionalValueRepo.CreateNutritionalValue(nv);
                     }
                     else
                     {
@@ -191,31 +192,35 @@ namespace Service.Implements
                         nv.ServingUnit = ingredient.NutritionalValue.ServingUnit ?? nv.ServingUnit;
                         nv.EverydayUnit = ingredient.NutritionalValue.EverydayUnit ?? nv.EverydayUnit;
                         nv.EverydayWeight = ingredient.NutritionalValue.EverydayWeight ?? nv.EverydayWeight;
-                        await _nutritionalValueRepo.UpdateNutritionalValue(nv);
                     }
                 }
 
+                Dictionary<Guid, IngredientTag>? tagMap = null;
+                var newLabelsToCreate = new List<IngredientLabel>();
+
                 if (ingredient.IngredientTagIds != null)
                 {
-                    var tags = new List<IngredientTag>();
-                    foreach (var tagId in ingredient.IngredientTagIds)
+                    var distinctTagIds = ingredient.IngredientTagIds.Distinct().ToList();
+                    var allTags = await _ingredientTagRepo.GetAllIngredientTags();
+                    tagMap = allTags.ToDictionary(t => t.It_id);
+
+                    foreach (var tagId in distinctTagIds)
                     {
-                        var existingTag = await _ingredientTagRepo.GetIngredientTagById(tagId);
-                        if (existingTag == null)
+                        if (!tagMap.ContainsKey(tagId))
                             throw new ArgumentException($"Invalid ingredient tag: {tagId}");
-                        tags.Add(existingTag);
                     }
 
                     var currentLabels = existingIngredient.IngredientLabels ?? new List<IngredientLabel>();
                     var currentActiveLabels = currentLabels.Where(l => !l.IsDeleted).ToList();
                     var currentActiveTagIds = currentActiveLabels.Select(l => l.It_id).ToHashSet();
+                    var requestedTagIdSet = distinctTagIds.ToHashSet();
 
-                    var tagIdsToAdd = ingredient.IngredientTagIds.Where(tid => !currentActiveTagIds.Contains(tid)).ToList();
-                    var labelsToRemove = currentActiveLabels.Where(l => !ingredient.IngredientTagIds.Contains(l.It_id)).ToList();
+                    var tagIdsToAdd = distinctTagIds.Where(tid => !currentActiveTagIds.Contains(tid)).ToList();
+                    var labelsToRemove = currentActiveLabels.Where(l => !requestedTagIdSet.Contains(l.It_id)).ToList();
 
                     foreach (var label in labelsToRemove)
                     {
-                        await _ingredientLabelRepo.SoftDeleteIngredientLabel(label.Id);
+                        label.IsDeleted = true;
                     }
 
                     foreach (var tagId in tagIdsToAdd)
@@ -224,25 +229,54 @@ namespace Service.Implements
                         if (softDeletedLabel != null)
                         {
                             softDeletedLabel.IsDeleted = false;
-                            await _ingredientLabelRepo.UpdateIngredientLabel(softDeletedLabel);
                         }
                         else
                         {
-                            var newLabel = new IngredientLabel
+                            newLabelsToCreate.Add(new IngredientLabel
                             {
                                 Id = Guid.NewGuid(),
                                 Ingredient_id = existingIngredient.Ingredient_id,
                                 It_id = tagId,
                                 IsDeleted = false
-                            };
-                            await _ingredientLabelRepo.CreateIngredientLabel(newLabel);
+                            });
                         }
                     }
                 }
 
-                var updatedIngredient = await _ingredientRepo.GetIngredientById(id);
+                await _ingredientRepo.UpdateIngredient(existingIngredient);
+
+                if (newNvToCreate != null)
+                {
+                    await _nutritionalValueRepo.CreateNutritionalValue(newNvToCreate);
+                    existingIngredient.Nutritional_value = newNvToCreate;
+                }
+
+                if (newLabelsToCreate.Count > 0)
+                {
+                    existingIngredient.IngredientLabels ??= new List<IngredientLabel>();
+                    foreach (var newLabel in newLabelsToCreate)
+                    {
+                        await _ingredientLabelRepo.CreateIngredientLabel(newLabel);
+                        if (!existingIngredient.IngredientLabels.Any(l => l.Id == newLabel.Id))
+                        {
+                            existingIngredient.IngredientLabels.Add(newLabel);
+                        }
+                    }
+                }
+
+                if (tagMap != null && existingIngredient.IngredientLabels != null)
+                {
+                    foreach (var label in existingIngredient.IngredientLabels.Where(l => !l.IsDeleted))
+                    {
+                        if (label.Ingredient_tag == null && tagMap.TryGetValue(label.It_id, out var tag))
+                        {
+                            label.Ingredient_tag = tag;
+                        }
+                    }
+                }
+
                 _logger.LogInformation("Ingredient '{Ingredient_id}' updated successfully", id);
-                return MapToDto(updatedIngredient);
+                return MapToDto(existingIngredient);
             }
             catch (Exception ex)
             {

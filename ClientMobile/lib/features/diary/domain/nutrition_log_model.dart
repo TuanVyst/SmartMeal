@@ -15,6 +15,8 @@ class NutritionLog {
   final double? totalSugar;
   final double? totalSalt;
   final double? totalCholesterol;
+  final String? recipeName;
+  final String? unit;
 
   NutritionLog({
     this.id,
@@ -32,6 +34,8 @@ class NutritionLog {
     this.totalSugar,
     this.totalSalt,
     this.totalCholesterol,
+    this.recipeName,
+    this.unit = 'phần',
   });
 
   factory NutritionLog.fromJson(Map<String, dynamic> json) {
@@ -62,6 +66,32 @@ class NutritionLog {
       totalSugar: _toDouble(json['totalSugar'] ?? json['total_sugar'] ?? json['TotalSugar']),
       totalSalt: _toDouble(json['totalSalt'] ?? json['total_salt'] ?? json['TotalSalt'] ?? json['totalSodium'] ?? json['total_sodium'] ?? json['TotalSodium']),
       totalCholesterol: _toDouble(json['totalCholesterol'] ?? json['total_cholesterol'] ?? json['TotalCholesterol']),
+      recipeName: (json['recipeName'] ??
+              json['recipe_name'] ??
+              json['Recipe_name'] ??
+              json['name'] ??
+              json['Name'] ??
+              json['title'] ??
+              json['Title'] ??
+              (json['recipe'] is Map
+                  ? (json['recipe']['recipe_name'] ??
+                      json['recipe']['Recipe_name'] ??
+                      json['recipe']['recipeName'] ??
+                      json['recipe']['RecipeName'] ??
+                      json['recipe']['title'] ??
+                      json['recipe']['Title'] ??
+                      json['recipe']['name'] ??
+                      json['recipe']['Name'])
+                  : null) ??
+              (json['ingredient'] is Map
+                  ? (json['ingredient']['name'] ??
+                      json['ingredient']['Name'] ??
+                      json['ingredient']['ingredient_name'] ??
+                      json['ingredient']['ingredientName'] ??
+                      json['ingredient']['IngredientName'])
+                  : null))
+          ?.toString(),
+      unit: (json['unit'] ?? json['Unit'] ?? 'phần').toString(),
     );
   }
 

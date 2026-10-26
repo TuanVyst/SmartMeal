@@ -72,7 +72,7 @@ export default function RecipeForm() {
           }
         }
       }
-      navigate('/home?tab=discover');
+      navigate('/?tab=discover');
     } catch (err) {
       alert(err.response?.data?.message || err.message || 'Lỗi khi lưu công thức');
     } finally {

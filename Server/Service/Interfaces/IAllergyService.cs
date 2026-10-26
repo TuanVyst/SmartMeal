@@ -9,6 +9,7 @@ namespace Service.Interfaces
     public interface IAllergyService
     {
         Task<List<AllergyResponseDto>> GetAllAllergies();
+        Task<List<AllergyResponseDto>> GetAllergiesByAccountId(Guid accountId);
         Task<AllergyResponseDto?> GetAllergyById(Guid id);
         Task<AllergyResponseDto> CreateAllergy(AllergyRequest allergy);
         Task<AllergyResponseDto> UpdateAllergy(Guid id, AllergyRequest allergy);

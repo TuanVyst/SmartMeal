@@ -40,6 +40,8 @@ namespace BusinessObject.Entities
 
         public bool IsPublic { get; set; } = true;
 
+        public string? ImageUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
                 public bool IsDeleted { get; set; } = false;

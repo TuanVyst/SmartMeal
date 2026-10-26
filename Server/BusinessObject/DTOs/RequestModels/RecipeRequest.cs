@@ -14,6 +14,16 @@ namespace BusinessObject.Dtos.RequestModels
         public int Servings { get; set; }
         public string Difficulty { get; set; }
         public bool IsPublic { get; set; }
+        public string? ImageUrl { get; set; }
         public List<Guid> RecipeTagIds { get; set; } = new List<Guid>();
+        public List<RecipeIngredientItemRequest>? Ingredients { get; set; }
+    }
+
+    public class RecipeIngredientItemRequest
+    {
+        public Guid Ingredient_id { get; set; }
+        public int Quantity { get; set; }
+        public string UOM { get; set; } = "g";
+        public bool IsPrimary { get; set; }
     }
 }

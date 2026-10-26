@@ -43,8 +43,8 @@ namespace Service.Implements
             {
                 throw new Exception($"Cloudinary upload error: {uploadResult.Error.Message}");
             }
-
-            return uploadResult.SecureUrl.ToString();
+            var secureUrl = uploadResult.SecureUrl.ToString();
+            return secureUrl.Replace("/upload/", "/upload/f_auto,q_auto,w_800/");
         }
 
         public async Task<bool> DeleteImageAsync(string publicId)
