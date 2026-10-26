@@ -112,7 +112,6 @@ export default function Sidebar() {
     { to: '/home',                  icon: <FiHome size={20} />,      label: 'Khám phá',                    end: false },
     { to: '/journal',               icon: <FiClipboard size={20} />, label: 'Nhật ký',                     end: false },
     { to: '/favorites',             icon: <FiHeart size={20} />,     label: 'Bộ sưu tập',                  end: false },
-    { to: '/ingredient-detection',  icon: <FiCamera size={20} />,    label: 'Nhận diện nguyên liệu',       desktopOnly: true },
     { to: '/subscription',          icon: <FiAward size={20} />,     label: 'Gói Pro' },
     { to: '/profile',               icon: <FiSettings size={20} />,  label: 'Cài đặt'                      },
   ];
