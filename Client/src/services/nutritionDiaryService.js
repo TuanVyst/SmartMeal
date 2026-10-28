@@ -3,8 +3,17 @@ import { addOptimisticNutritionLog, removeOptimisticNutritionLog } from './nutri
 
 export async function addDiaryEntry(entry) {
   const { data } = await api.post('/nutrition-diary', entry);
-  if (data?.entry?.account_id) {
-    addOptimisticNutritionLog(data.entry.account_id, data.entry);
+  const entryData = data?.entry;
+  const accountId = entryData?.account_id || entryData?.accountId;
+  if (accountId && entryData) {
+    const entryToCache = {
+      ...entryData,
+      recipe: entryData.recipe || (entryData.recipe_id && entry?.recipeName ? {
+        recipe_id: entryData.recipe_id,
+        recipe_name: entry.recipeName,
+      } : undefined),
+    };
+    addOptimisticNutritionLog(accountId, entryToCache);
   }
   return data;
 }

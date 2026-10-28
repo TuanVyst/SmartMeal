@@ -343,15 +343,15 @@ export default function Nutrition() {
     }
   };
 
-  const fetchUserLogsAndGoals = async (silent = false) => {
+  const fetchUserLogsAndGoals = async (silent = false, forceRefresh = true) => {
     if (!accountId) return [];
     try {
       if (!silent) setLoading(true);
-      const logsRes = await nutritionLogService.getAll(accountId);
+      const logsRes = await nutritionLogService.getAll(accountId, forceRefresh);
       const logs = logsRes.data?.data || [];
       setNutritionLogs(logs);
 
-      const goalsRes = await nutritionGoalService.getAll(accountId);
+      const goalsRes = await nutritionGoalService.getAll(accountId, forceRefresh);
       const userGoals = goalsRes.data?.data || [];
       if (userGoals.length > 0) {
         const latestGoal = userGoals[0];
@@ -1032,8 +1032,10 @@ export default function Nutrition() {
                     </div>
                   ) : (
                     logsToday.map(log => {
-                      const name = log.recipe?.recipe_name || log.ingredient?.name || 'Món ăn tùy chỉnh';
-                      const recipeId = log.recipe_id || log.recipe?.recipe_id;
+                      const matchedRecipe = log.recipe || (log.recipe_id ? recipes.find(r => r.recipe_id === log.recipe_id) : null);
+                      const matchedIngredient = log.ingredient || (log.ingredient_id ? ingredients.find(i => i.ingredient_id === log.ingredient_id) : null);
+                      const name = matchedRecipe?.recipe_name || matchedRecipe?.name || matchedIngredient?.name || log.customName || 'Món ăn tùy chỉnh';
+                      const recipeId = log.recipe_id || matchedRecipe?.recipe_id;
                       return (
                         <div
                           key={log.log_id}
