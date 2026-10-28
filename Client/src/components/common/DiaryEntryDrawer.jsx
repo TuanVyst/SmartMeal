@@ -81,35 +81,44 @@ export default function DiaryEntryDrawer({ recipe, isOpen, onClose, todayTotals 
       if (!isMockRecipe) {
         payload.recipeId = recipe.id;
       }
-      
-      if (toDateKey(date) === getTodayDateKey()) {
-        notifyNutritionUpdated({
-          deltaCalories: Math.round(baseCalories * finalServings),
-          optimisticLog: {
-            log_id: `optimistic-${recipe.id || mealType}`,
-            recipe_id: !isMockRecipe ? recipe.id : undefined,
-            mealType,
-            quantity: finalServings,
-            logDate: date,
-            totalCalories: macros.calories,
-            totalProtein: macros.protein,
-            totalCarbs: macros.carbs,
-            totalFat: macros.fat,
-          },
-        });
-      }
+      const optimisticId = `optimistic-${Date.now()}-${recipe?.id || mealType}`;
+      const optimisticLog = {
+        log_id: optimisticId,
+        recipe_id: !isMockRecipe ? recipe?.id : undefined,
+        recipe: recipe ? {
+          recipe_id: recipe.id,
+          recipe_name: recipeName,
+          image_url: recipe.image_url || recipe.imageUrl,
+        } : undefined,
+        mealType,
+        quantity: finalServings,
+        unit: 'khẩu phần',
+        logDate: new Date(date).toISOString(),
+        totalCalories: macros.calories,
+        totalProtein: macros.protein,
+        totalCarbs: macros.carbs,
+        totalFat: macros.fat,
+      };
 
-      await addDiaryEntry(payload);
+      notifyNutritionUpdated({
+        deltaCalories: toDateKey(date) === getTodayDateKey() ? Math.round(baseCalories * finalServings) : 0,
+        optimisticLog,
+      });
 
-      if (toDateKey(date) === getTodayDateKey()) {
-        notifyNutritionUpdated({ syncOnly: true });
-      }
+      const res = await addDiaryEntry(payload);
+      const savedEntry = res?.entry;
+
+      notifyNutritionUpdated({
+        syncOnly: true,
+        newEntry: savedEntry || optimisticLog,
+        optimisticId,
+      });
+
       setToast({ type: 'success', text: 'Đã thêm vào nhật ký!' });
       setTimeout(() => {
         setToast(null);
         onClose?.();
-      }, 1200);
-    } catch (err) {
+      }, 350);
       const backendMsg = err.response?.data?.message || err.response?.data?.title || 'Thêm thất bại, vui lòng thử lại';
       setToast({ type: 'error', text: backendMsg });
       setTimeout(() => setToast(null), 3000);

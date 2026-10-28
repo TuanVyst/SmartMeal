@@ -124,10 +124,7 @@ namespace Service.Implements
 
             if (entity.Ingredient_id.HasValue)
             {
-                var allIngredients = await _ingredientRepo.GetAllIngredients();
-                var ingredient = allIngredients.FirstOrDefault(i => i.Ingredient_id == entity.Ingredient_id.Value)
-                    ?? await _ingredientRepo.GetIngredientById(entity.Ingredient_id.Value);
-
+                var ingredient = await _ingredientRepo.GetIngredientById(entity.Ingredient_id.Value);
                 if (ingredient?.Nutritional_value != null)
                 {
                     var multiplier = UnitConverter.GetMultiplier(
@@ -155,9 +152,7 @@ namespace Service.Implements
             }
             else if (entity.Recipe_id.HasValue)
             {
-                var allRecipes = await _recipeRepo.GetAllRecipes();
-                var recipe = allRecipes.FirstOrDefault(r => r.Recipe_id == entity.Recipe_id.Value)
-                    ?? await _recipeRepo.GetRecipeById(entity.Recipe_id.Value);
+                var recipe = await _recipeRepo.GetRecipeById(entity.Recipe_id.Value);
 
                 var recipeIngredients = recipe?.RecipeIngredients?.Where(ri => !ri.IsDeleted).ToList()
                     ?? await _recipeIngredientRepo.GetRecipeIngredientsByRecipeId(entity.Recipe_id.Value);
