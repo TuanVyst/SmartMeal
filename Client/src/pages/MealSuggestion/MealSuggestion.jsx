@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { FiSearch, FiCamera } from 'react-icons/fi';
 import { getIngredients, getCachedIngredientsSync } from '../../services/foodService';
@@ -15,6 +15,11 @@ import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { nutritionLogService } from '../../services/nutritionLogService';
 import { getTodayDateKey, toDateKey } from '../../utils/dateTime';
 import { matchDetectedToSystemIngredients } from '../../utils/ingredientMapping';
+import {
+  parseIngredientSearchQuery,
+  matchesIngredientSearch,
+  rankAndFilterIngredients,
+} from '../../utils/ingredientSearch';
 import './MealSuggestion.css';
 import {
   MdBlock, MdCheckCircle, MdOutlineKitchen, MdWarning, MdLocalFireDepartment,
@@ -69,6 +74,8 @@ export default function MealSuggestion() {
   const [warningPopupData, setWarningPopupData] = useState(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
+  const [isIngredientDropdownOpen, setIsIngredientDropdownOpen] = useState(false);
+  const ingredientSearchWrapperRef = useRef(null);
   const [pantryMode, setPantryMode] = useState('explore'); // 'explore' | 'cook'
   const [selectedCookingMethod, setSelectedCookingMethod] = useState(null);
   const [detectedBanner, setDetectedBanner] = useState(null);
@@ -196,6 +203,28 @@ export default function MealSuggestion() {
       localStorage.setItem(`pantry_${accountId}`, JSON.stringify(pantryItems));
     }
   }, [pantryItems, accountId]);
+  useEffect(() => {
+    if (!isIngredientDropdownOpen) return;
+    const handleMouseDown = (e) => {
+      if (
+        ingredientSearchWrapperRef.current &&
+        !ingredientSearchWrapperRef.current.contains(e.target)
+      ) {
+        setIsIngredientDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsIngredientDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isIngredientDropdownOpen]);
 
   // Nhận danh sách nguyên liệu từ trang Nhận diện nguyên liệu (/ingredient-detection)
   useEffect(() => {
@@ -353,36 +382,29 @@ export default function MealSuggestion() {
   };
 
   const filteredGroupedIngredients = useMemo(() => {
-    const normalizedQuery = ingredientSearchQuery
-      .normalize('NFC')
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (!normalizedQuery) return groupedIngredients;
-
-    const escaped = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    let searchRegex = null;
-    try {
-      searchRegex = new RegExp(`(?<!\\p{L})${escaped}`, 'iu');
-    } catch {
-      searchRegex = null;
-    }
-    const lowerQuery = normalizedQuery.toLowerCase();
+    const parsedQuery = parseIngredientSearchQuery(ingredientSearchQuery);
+    if (!parsedQuery) return groupedIngredients;
 
     const result = {};
     Object.keys(groupedIngredients).forEach(category => {
-      const matches = groupedIngredients[category].filter(ing => {
-        const normalizedName = (ing.name || '').normalize('NFC');
-        if (!normalizedName) return false;
-        return searchRegex
-          ? searchRegex.test(normalizedName)
-          : normalizedName.toLowerCase().includes(lowerQuery);
-      });
+      const matches = groupedIngredients[category].filter(ing =>
+        matchesIngredientSearch(ing.name, parsedQuery)
+      );
       if (matches.length > 0) {
         result[category] = matches;
       }
     });
     return result;
   }, [groupedIngredients, ingredientSearchQuery]);
+
+  const rankedDropdownIngredients = useMemo(() => {
+    if (!ingredientSearchQuery) return [];
+    const parsedQuery = parseIngredientSearchQuery(ingredientSearchQuery);
+    if (!parsedQuery) {
+      return Object.values(filteredGroupedIngredients).flat();
+    }
+    return rankAndFilterIngredients(ingredients, ingredientSearchQuery);
+  }, [ingredients, filteredGroupedIngredients, ingredientSearchQuery]);
 
   const getRecipeHealthInfo = (recipe) => {
     if (!lockedIngredients.length) return null;
@@ -730,14 +752,20 @@ export default function MealSuggestion() {
             <div className="sidebar-tabs-nav">
               <button
                 className={`sidebar-tab-btn ${leftTab === 'pantry' ? 'active' : ''}`}
-                onClick={() => setLeftTab('pantry')}
+                onClick={() => {
+                  setLeftTab('pantry');
+                  setIsIngredientDropdownOpen(false);
+                }}
               >
                 <MdOutlineKitchen className="tab-icon" />
                 Tủ lạnh
               </button>
               <button
                 className={`sidebar-tab-btn ${leftTab === 'allergy' ? 'active' : ''}`}
-                onClick={() => setLeftTab('allergy')}
+                onClick={() => {
+                  setLeftTab('allergy');
+                  setIsIngredientDropdownOpen(false);
+                }}
               >
                 <MdBlock className="tab-icon" />
                 Dị ứng
@@ -769,7 +797,7 @@ export default function MealSuggestion() {
             </div>
           )}
 
-        <div className="ingredient-search-wrapper">
+        <div className="ingredient-search-wrapper" ref={ingredientSearchWrapperRef}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <div className="ingredient-search-bar" style={{ flex: 1 }}>
               <FiSearch size={16} />
@@ -777,12 +805,25 @@ export default function MealSuggestion() {
                 type="text"
                 placeholder={leftTab === 'pantry' ? 'Tìm nguyên liệu trong tủ lạnh...' : 'Tìm nguyên liệu dị ứng...'}
                 value={ingredientSearchQuery}
-                onChange={(e) => setIngredientSearchQuery(e.target.value)}
+                onFocus={() => setIsIngredientDropdownOpen(true)}
+                onChange={(e) => {
+                  setIngredientSearchQuery(e.target.value);
+                  setIsIngredientDropdownOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsIngredientDropdownOpen(false);
+                  }
+                }}
               />
               {ingredientSearchQuery && (
                 <button
+                  type="button"
                   className="ingredient-search-clear"
-                  onClick={() => setIngredientSearchQuery('')}
+                  onClick={() => {
+                    setIngredientSearchQuery('');
+                    setIsIngredientDropdownOpen(false);
+                  }}
                 >
                   &times;
                 </button>
@@ -807,16 +848,18 @@ export default function MealSuggestion() {
             )}
           </div>
           
-          {ingredientSearchQuery && Object.keys(filteredGroupedIngredients).length > 0 && (
+          {isIngredientDropdownOpen && ingredientSearchQuery && rankedDropdownIngredients.length > 0 && (
             <div className="ingredient-search-dropdown">
-              {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => {
+              {rankedDropdownIngredients.map(ing => {
                 const ingIdStr = String(ing.ingredient_id);
-                const isSelectedPantry = leftTab === 'pantry' && pantryIdSet.has(ingIdStr);
                 const isAllergic = allergyIdSet.has(ingIdStr);
+                const isSelectedPantry = leftTab === 'pantry' && pantryIdSet.has(ingIdStr);
+                const isSelectedAllergy = leftTab === 'allergy' && isAllergic;
                 return (
                   <button 
                     key={ing.ingredient_id} 
-                    className={`dropdown-item ${isSelectedPantry ? 'already-selected' : ''}`}
+                    type="button"
+                    className={`dropdown-item ${isSelectedPantry ? 'already-selected' : ''} ${isSelectedAllergy ? 'already-selected-allergy' : ''}`}
                     onClick={() => {
                       if (leftTab === 'pantry') {
                         if (!isAllergic) {
@@ -825,17 +868,25 @@ export default function MealSuggestion() {
                             handleTogglePantry(ing.ingredient_id);
                           }
                           setIngredientSearchQuery('');
+                          setIsIngredientDropdownOpen(false);
                         }
                       } else {
-                        handleToggleAllergy(ing.ingredient_id);
+                        // Only ADD — never remove via dropdown (use the pill to toggle)
+                        if (!isAllergic) {
+                          handleToggleAllergy(ing.ingredient_id);
+                        }
                         setIngredientSearchQuery('');
+                        setIsIngredientDropdownOpen(false);
                       }
                     }}
                     disabled={leftTab === 'pantry' && isAllergic}
                   >
-                    {ing.name}
+                    <span>{ing.name}</span>
                     {isSelectedPantry && (
                       <span className="already-selected-label"> ✓ Đã chọn</span>
+                    )}
+                    {isSelectedAllergy && (
+                      <span className="already-selected-allergy-label"> ✓ Đã chọn</span>
                     )}
                     {leftTab === 'pantry' && isAllergic && (
                       <span className="disabled-pill-text">(Dị ứng)</span>

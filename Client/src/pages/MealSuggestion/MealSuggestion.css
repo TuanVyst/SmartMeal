@@ -780,11 +780,27 @@
 }
 .dropdown-item.already-selected:hover {
   background: #dcfce7;
+  color: #16a34a;
 }
 .already-selected-label {
   font-size: 0.75rem;
   font-weight: 600;
   color: #16a34a;
+  margin-left: 6px;
+}
+.dropdown-item.already-selected-allergy {
+  color: #b91c1c;
+  background: #fef2f2;
+  cursor: default;
+}
+.dropdown-item.already-selected-allergy:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.already-selected-allergy-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
   margin-left: 6px;
 }
 
