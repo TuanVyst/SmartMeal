@@ -296,15 +296,17 @@ const CONDITION_SCORERS = {
  * @returns {{ blocked: boolean, matchedAllergies: string[] }}
  */
 export function checkAllergyBlock(ingredientNames = [], userAllergies = []) {
-  if (!userAllergies || userAllergies.length === 0) return { blocked: false, matchedAllergies: [] };
+  if (!userAllergies || userAllergies.length === 0 || !ingredientNames || ingredientNames.length === 0) {
+    return { blocked: false, matchedAllergies: [] };
+  }
 
+  const normalizedIngredients = ingredientNames.map(ing => normalize(ing));
   const matched = [];
   userAllergies.forEach(allergy => {
     const normalizedAllergy = normalize(allergy);
-    const hasMatch = ingredientNames.some(ing => {
-      const n = normalize(ing);
-      return n.includes(normalizedAllergy) || normalizedAllergy.includes(n);
-    });
+    const hasMatch = normalizedIngredients.some(n =>
+      n.includes(normalizedAllergy) || normalizedAllergy.includes(n)
+    );
     if (hasMatch) matched.push(allergy);
   });
 

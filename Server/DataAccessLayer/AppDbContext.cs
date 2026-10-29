@@ -65,6 +65,9 @@ namespace DataAccessLayer
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
+            modelBuilder.Entity<BusinessObject.Entities.Allergy>()
+                .HasIndex(a => new { a.Account_id, a.IsDeleted });
+
             modelBuilder.Entity<BusinessObject.Entities.UserSessionLog>()
                 .HasIndex(s => s.SessionToken);
 

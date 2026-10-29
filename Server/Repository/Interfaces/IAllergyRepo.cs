@@ -6,11 +6,12 @@ namespace Repository.Interfaces
 {
     public interface IAllergyRepo
     {
-        Task<List<Allergy>> GetAllAllergies();
-        Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId);
-        Task<Allergy?> GetAllergyById(Guid id);
-        Task<Allergy> CreateAllergy(Allergy allergy);
-        Task<Allergy> UpdateAllergy(Allergy allergy);
-        Task<Allergy> SoftDeleteAllergy(Guid id);
+        Task<List<Allergy>> GetAllAllergies(CancellationToken cancellationToken = default);
+        Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId, CancellationToken cancellationToken = default);
+        Task<Allergy?> GetAllergyById(Guid id, CancellationToken cancellationToken = default);
+        Task<Allergy?> GetAllergyByAccountAndIngredient(Guid accountId, Guid ingredientId, CancellationToken cancellationToken = default);
+        Task<Allergy> CreateAllergy(Allergy allergy, CancellationToken cancellationToken = default);
+        Task<Allergy> UpdateAllergy(Allergy allergy, CancellationToken cancellationToken = default);
+        Task<Allergy> SoftDeleteAllergy(Guid id, CancellationToken cancellationToken = default);
     }
 }

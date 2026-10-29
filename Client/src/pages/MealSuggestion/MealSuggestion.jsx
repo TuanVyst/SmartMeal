@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { FiSearch, FiCamera } from 'react-icons/fi';
 import { getIngredients, getCachedIngredientsSync } from '../../services/foodService';
 import { recipeService, getCachedRecipesSync } from '../../services/recipeService';
-import { allergyService } from '../../services/allergyService';
+import { allergyService, getCachedAllergiesSync } from '../../services/allergyService';
 import { useAuth } from '../../context/AuthContext';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import RecipeHealthScore from '../../components/common/RecipeHealthScore';
@@ -22,6 +22,7 @@ import {
 import { FiFilter, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight, FiRefreshCw } from 'react-icons/fi';
 import AdvancedRecipeFilter from '../../components/RecipeFilter/AdvancedRecipeFilter';
 import CalorieSuggester from './CalorieSuggester';
+const regexCache = new Map();
 
 export default function MealSuggestion() {
   const { user } = useAuth();
@@ -38,7 +39,7 @@ export default function MealSuggestion() {
   } = useHealthProfile();
 
   const [ingredients, setIngredients] = useState(() => getCachedIngredientsSync() || []);
-  const [allergies, setAllergies] = useState([]);
+  const [allergies, setAllergies] = useState(() => getCachedAllergiesSync(accountId) || []);
   const [recipes, setRecipes] = useState(() => getCachedRecipesSync() || []);
   const [loadingRecipes, setLoadingRecipes] = useState(() => !getCachedRecipesSync());
   const [leftTab, setLeftTab] = useState('pantry');
@@ -46,6 +47,22 @@ export default function MealSuggestion() {
     const saved = localStorage.getItem(`pantry_${accountId}`);
     return saved ? JSON.parse(saved) : [];
   });
+  const allergyIdSet = useMemo(() => {
+    const set = new Set();
+    for (const a of allergies) {
+      const id = a.ingredient_id || a.Ingredient_id;
+      if (id !== undefined && id !== null) set.add(String(id));
+    }
+    return set;
+  }, [allergies]);
+
+  const pantryIdSet = useMemo(() => {
+    const set = new Set();
+    for (const id of pantryItems) {
+      if (id !== undefined && id !== null) set.add(String(id));
+    }
+    return set;
+  }, [pantryItems]);
   const [showAllergicRecipes, setShowAllergicRecipes] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
   const [drawerRecipe, setDrawerRecipe] = useState(null);
@@ -152,9 +169,11 @@ export default function MealSuggestion() {
   };
 
   const fetchUserAllergies = async () => {
+    if (!accountId) return;
     try {
       const res = await allergyService.getAll(accountId);
-      setAllergies(res.data.data || []);
+      const items = res.data?.data || [];
+      setAllergies(items);
     } catch (err) {
       console.error('Không thể tải danh sách dị ứng:', err);
     }
@@ -200,7 +219,7 @@ export default function MealSuggestion() {
     const matchedSys = matchDetectedToSystemIngredients(payload.items, ingredients);
     const validMatchedIds = matchedSys
       .map((ing) => ing.ingredient_id || ing.Ingredient_id)
-      .filter((id) => id && !allergies.some((a) => a.ingredient_id == id));
+      .filter((id) => id && !allergyIdSet.has(String(id)));
 
     setLeftTab('pantry');
     setPantryMode('explore');
@@ -241,23 +260,47 @@ export default function MealSuggestion() {
 
   const handleToggleAllergy = async (ingId) => {
     if (!accountId) return;
-    const existingAllergy = allergies.find(a => a.ingredient_id === ingId);
-    try {
-      if (existingAllergy) {
-        await allergyService.delete(existingAllergy.allergy_id);
-        triggerAlert('Đã xóa khỏi danh sách dị ứng.', 'success');
-      } else {
-        await allergyService.create({
+    const existingAllergy = allergies.find(a => (a.ingredient_id || a.Ingredient_id) === ingId);
+    const previousAllergies = [...allergies];
+    const previousPantry = [...pantryItems];
+
+    if (existingAllergy) {
+      // Optimistic delete
+      setAllergies(prev => prev.filter(a => (a.ingredient_id || a.Ingredient_id) !== ingId));
+      triggerAlert('Đã xóa khỏi danh sách dị ứng.', 'success');
+      try {
+        await allergyService.delete(existingAllergy.allergy_id || existingAllergy.Allergy_id, accountId, ingId);
+      } catch (err) {
+        console.error(err);
+        setAllergies(previousAllergies);
+        triggerAlert('Cập nhật dị ứng thất bại.', 'error');
+      }
+    } else {
+      // Optimistic add
+      const tempItem = {
+        allergy_id: 'temp-' + Date.now(),
+        account_id: accountId,
+        ingredient_id: ingId,
+        isDeleted: false
+      };
+      setAllergies(prev => [...prev, tempItem]);
+      setPantryItems(prev => prev.filter(id => id !== ingId));
+      triggerAlert('Đã thêm vào danh sách dị ứng.', 'success');
+      try {
+        const res = await allergyService.create({
           account_id: accountId,
           ingredient_id: ingId
         });
-        triggerAlert('Đã thêm vào danh sách dị ứng.', 'success');
-        setPantryItems(prev => prev.filter(id => id !== ingId));
+        const created = res.data?.data;
+        if (created) {
+          setAllergies(prev => prev.map(a => (a.ingredient_id || a.Ingredient_id) === ingId ? created : a));
+        }
+      } catch (err) {
+        console.error(err);
+        setAllergies(previousAllergies);
+        setPantryItems(previousPantry);
+        triggerAlert('Cập nhật dị ứng thất bại.', 'error');
       }
-      await fetchUserAllergies();
-    } catch (err) {
-      console.error(err);
-      triggerAlert('Cập nhật dị ứng thất bại.', 'error');
     }
   };
 
@@ -277,9 +320,7 @@ export default function MealSuggestion() {
       .trim();
   };
 
-  const getGroupedIngredients = () => {
-    // Simple grouping by label category - no dedup needed
-    // matchSystemIngredient uses exact-match-first so "Phở" won't match recipes using "Bánh phở"
+  const groupedIngredients = useMemo(() => {
     const groups = {};
     ingredients.forEach(ing => {
       const labels = ing.ingredientLabels || [];
@@ -290,19 +331,25 @@ export default function MealSuggestion() {
       groups[tagName].push(ing);
     });
     return groups;
-  };
-
-  const groupedIngredients = getGroupedIngredients();
+  }, [ingredients]);
 
   const safeTestWord = (text, searchWord) => {
     if (!text || !searchWord) return false;
-    try {
-      const escaped = searchWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu');
-      return regex.test(text);
-    } catch {
-      return text.toLowerCase().includes(searchWord.toLowerCase());
+    let reg = regexCache.get(searchWord);
+    if (reg === undefined) {
+      try {
+        const escaped = searchWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        reg = new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu');
+      } catch {
+        reg = null;
+      }
+      regexCache.set(searchWord, reg);
     }
+    if (reg) {
+      reg.lastIndex = 0;
+      return reg.test(text);
+    }
+    return text.toLowerCase().includes(searchWord.toLowerCase());
   };
 
   const filteredGroupedIngredients = useMemo(() => {
@@ -332,20 +379,43 @@ export default function MealSuggestion() {
     return { locked, reduced };
   };
 
-  const matchSystemIngredient = (recipeIngName, allSysIngredients) => {
+  const sysIngredientsIndex = useMemo(() => {
+    const exactMap = new Map();
+    const list = [];
+    for (const ing of ingredients) {
+      const name = ing.name || ing.Name || '';
+      const norm = normalizeText(name);
+      exactMap.set(norm, ing);
+      list.push({ ing, norm, len: name.length });
+    }
+    list.sort((a, b) => b.len - a.len);
+    return { exactMap, list };
+  }, [ingredients]);
+
+  const recipeIngMatchCache = useMemo(() => new Map(), [ingredients]);
+
+  const matchSystemIngredient = useCallback((recipeIngName) => {
+    if (!recipeIngName) return null;
+    if (recipeIngMatchCache.has(recipeIngName)) {
+      return recipeIngMatchCache.get(recipeIngName);
+    }
     const rName = normalizeText(recipeIngName);
     // 1. Exact match first (highest priority)
-    const exactMatch = allSysIngredients.find(sysIng => normalizeText(sysIng.name) === rName);
-    if (exactMatch) return exactMatch;
+    const exactMatch = sysIngredientsIndex.exactMap.get(rName);
+    if (exactMatch) {
+      recipeIngMatchCache.set(recipeIngName, exactMatch);
+      return exactMatch;
+    }
     // 2. Substring/word-boundary match: dbName is whole word inside rName
-    const subMatches = allSysIngredients.filter(sysIng => {
-      const dbName = normalizeText(sysIng.name);
-      return safeTestWord(rName, dbName) || safeTestWord(dbName, rName);
-    });
-    if (subMatches.length === 0) return null;
-    // Pick longest name match to prefer specific (e.g. "Banh pho" over "Pho")
-    return subMatches.sort((a, b) => b.name.length - a.name.length)[0];
-  };
+    for (const item of sysIngredientsIndex.list) {
+      if (safeTestWord(rName, item.norm) || safeTestWord(item.norm, rName)) {
+        recipeIngMatchCache.set(recipeIngName, item.ing);
+        return item.ing;
+      }
+    }
+    recipeIngMatchCache.set(recipeIngName, null);
+    return null;
+  }, [sysIngredientsIndex, recipeIngMatchCache]);
 
   const mappedRecipes = useMemo(() => recipes.map(rec => {
     // --- Normalize fields from both getAll and suggestFromPantry response formats ---
@@ -415,12 +485,11 @@ export default function MealSuggestion() {
         totalSodium += nutrition.sodium;
         totalCholesterol += nutrition.cholesterol;
 
-        const sysIng = matchSystemIngredient(ingName, ingredients);
-        // Use loose comparison to handle string/number type mismatch from localStorage vs API
-        const possessed = sysIng ? pantryItems.some(id => id == sysIng.ingredient_id) : false;
+        const sysIng = matchSystemIngredient(ingName);
+        const possessed = sysIng ? pantryIdSet.has(String(sysIng.ingredient_id || sysIng.Ingredient_id)) : false;
         const isPrimary = ri.isPrimary !== undefined ? ri.isPrimary : (ri.IsPrimary !== undefined ? ri.IsPrimary : false);
 
-        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, isPrimary, nutrition };
+        return { name: ingName, amount: `${quantityVal} ${uom}`.trim(), possessed, isPrimary, nutrition, sysIng };
       });
 
       allIngredients = mappedIngredients;
@@ -437,12 +506,12 @@ export default function MealSuggestion() {
     const calculatedCalories = Math.round(totalCalories / servings);
 
     // --- Allergy check (always client-side) ---
-    // Use == (loose equality) to handle potential string/number type mismatch from API
-    const allergicIngredients = requiredIngredients.filter(reqIng => {
-      const sysIng = matchSystemIngredient(reqIng, ingredients);
-      // eslint-disable-next-line eqeqeq
-      return sysIng && allergies.some(a => a.ingredient_id == sysIng.ingredient_id);
-    });
+    const allergicIngredients = allIngredients
+      .filter(item => {
+        const sys = item.sysIng || matchSystemIngredient(item.name);
+        return sys && allergyIdSet.has(String(sys.ingredient_id || sys.Ingredient_id));
+      })
+      .map(item => item.name);
     const hasAllergyConflict = allergicIngredients.length > 0;
 
     // --- Health Score ---
@@ -490,7 +559,7 @@ export default function MealSuggestion() {
       healthDetails,
       cookingMethod: detectCookingMethod(rec, normalizeText(recipeName))
     };
-  }), [recipes, lockedIngredients, reducedIngredients, pantryItems, pantryMode, getHealthScoreDetails, ingredients, allergies]);
+  }), [recipes, lockedIngredients, reducedIngredients, pantryIdSet, pantryMode, getHealthScoreDetails, matchSystemIngredient, allergyIdSet]);
 
   const baseFilteredRecipes = useMemo(() => {
     return mappedRecipes
@@ -517,7 +586,7 @@ export default function MealSuggestion() {
         }
         return true;
       });
-  }, [mappedRecipes, showAllergicRecipes, pantryItems, pantryMode]);
+  }, [mappedRecipes, showAllergicRecipes, pantryIdSet, pantryMode]);
 
   // Calculate available cooking methods based on baseFilteredRecipes
   const availableCookingMethods = useMemo(() => {
@@ -723,35 +792,40 @@ export default function MealSuggestion() {
           
           {ingredientSearchQuery && Object.keys(filteredGroupedIngredients).length > 0 && (
             <div className="ingredient-search-dropdown">
-              {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => (
-                <button 
-                  key={ing.ingredient_id} 
-                  className={`dropdown-item ${leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) ? 'already-selected' : ''}`}
-                  onClick={() => {
-                    if (leftTab === 'pantry') {
-                      if (!allergies.some(a => a.ingredient_id === ing.ingredient_id)) {
-                        // Only ADD — never remove via dropdown (use the pill to toggle)
-                        if (!pantryItems.includes(ing.ingredient_id)) {
-                          handleTogglePantry(ing.ingredient_id);
+              {Object.values(filteredGroupedIngredients).flat().slice(0, 10).map(ing => {
+                const ingIdStr = String(ing.ingredient_id);
+                const isSelectedPantry = leftTab === 'pantry' && pantryIdSet.has(ingIdStr);
+                const isAllergic = allergyIdSet.has(ingIdStr);
+                return (
+                  <button 
+                    key={ing.ingredient_id} 
+                    className={`dropdown-item ${isSelectedPantry ? 'already-selected' : ''}`}
+                    onClick={() => {
+                      if (leftTab === 'pantry') {
+                        if (!isAllergic) {
+                          // Only ADD — never remove via dropdown (use the pill to toggle)
+                          if (!pantryIdSet.has(ingIdStr)) {
+                            handleTogglePantry(ing.ingredient_id);
+                          }
+                          setIngredientSearchQuery('');
                         }
+                      } else {
+                        handleToggleAllergy(ing.ingredient_id);
                         setIngredientSearchQuery('');
                       }
-                    } else {
-                      handleToggleAllergy(ing.ingredient_id);
-                      setIngredientSearchQuery('');
-                    }
-                  }}
-                  disabled={leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id)}
-                >
-                  {ing.name}
-                  {leftTab === 'pantry' && pantryItems.includes(ing.ingredient_id) &&
-                    <span className="already-selected-label"> ✓ Đã chọn</span>
-                  }
-                  {leftTab === 'pantry' && allergies.some(a => a.ingredient_id === ing.ingredient_id) && 
-                    <span className="disabled-pill-text">(Dị ứng)</span>
-                  }
-                </button>
-              ))}
+                    }}
+                    disabled={leftTab === 'pantry' && isAllergic}
+                  >
+                    {ing.name}
+                    {isSelectedPantry && (
+                      <span className="already-selected-label"> ✓ Đã chọn</span>
+                    )}
+                    {leftTab === 'pantry' && isAllergic && (
+                      <span className="disabled-pill-text">(Dị ứng)</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -791,8 +865,9 @@ export default function MealSuggestion() {
               <h4 className="category-header">{categoryName}</h4>
               <div className="ingredients-pills-list">
                 {filteredGroupedIngredients[categoryName].map(ing => {
-                  const isPantry = pantryItems.includes(ing.ingredient_id);
-                  const isAllergy = allergies.some(a => a.ingredient_id === ing.ingredient_id);
+                  const ingIdStr = String(ing.ingredient_id);
+                  const isPantry = pantryIdSet.has(ingIdStr);
+                  const isAllergy = allergyIdSet.has(ingIdStr);
                   return (
                     <button
                       key={ing.ingredient_id}
@@ -819,7 +894,7 @@ export default function MealSuggestion() {
               <h4 className="category-header">{categoryName}</h4>
               <div className="ingredients-pills-list">
                 {filteredGroupedIngredients[categoryName].map(ing => {
-                  const isAllergy = allergies.some(a => a.ingredient_id === ing.ingredient_id);
+                  const isAllergy = allergyIdSet.has(String(ing.ingredient_id));
                   return (
                     <button
                       key={ing.ingredient_id}

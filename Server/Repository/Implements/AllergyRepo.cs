@@ -17,48 +17,54 @@ namespace Repository.Implements
             _ctx = context;
         }
 
-        public async Task<List<Allergy>> GetAllAllergies()
+        public async Task<List<Allergy>> GetAllAllergies(CancellationToken cancellationToken = default)
         {
             return await _ctx.Allergies
                 .AsNoTracking()
                 .Where(i => i.IsDeleted == false)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId)
+        public async Task<List<Allergy>> GetAllergiesByAccountId(Guid accountId, CancellationToken cancellationToken = default)
         {
             return await _ctx.Allergies
                 .AsNoTracking()
                 .Where(i => i.IsDeleted == false && i.Account_id == accountId)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
-        public async Task<Allergy?> GetAllergyById(Guid id)
+
+        public async Task<Allergy?> GetAllergyById(Guid id, CancellationToken cancellationToken = default)
             => await _ctx.Allergies
                 .Where(i => !i.IsDeleted)
-                .FirstOrDefaultAsync(i => i.Allergy_id == id);
+                .FirstOrDefaultAsync(i => i.Allergy_id == id, cancellationToken);
 
-        public async Task<Allergy> CreateAllergy(Allergy allergy)
+        public async Task<Allergy?> GetAllergyByAccountAndIngredient(Guid accountId, Guid ingredientId, CancellationToken cancellationToken = default)
+            => await _ctx.Allergies
+                .FirstOrDefaultAsync(i => i.Account_id == accountId && i.Ingredient_id == ingredientId, cancellationToken);
+
+        public async Task<Allergy> CreateAllergy(Allergy allergy, CancellationToken cancellationToken = default)
         {
             _ctx.Allergies.Add(allergy);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
             return allergy;
         }
 
-        public async Task<Allergy> UpdateAllergy(Allergy allergy)
+        public async Task<Allergy> UpdateAllergy(Allergy allergy, CancellationToken cancellationToken = default)
         {
             _ctx.Allergies.Update(allergy);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
             return allergy;
         }
 
-        public async Task<Allergy> SoftDeleteAllergy(Guid id)
+        public async Task<Allergy> SoftDeleteAllergy(Guid id, CancellationToken cancellationToken = default)
         {
-            var allergy = _ctx.Allergies.Where(i => i.IsDeleted == false).FirstOrDefault(i => i.Allergy_id == id);
+            var allergy = await _ctx.Allergies
+                .FirstOrDefaultAsync(i => i.Allergy_id == id && i.IsDeleted == false, cancellationToken);
             if (allergy == null)
-                throw new Exception("Allergy not found");
+                throw new KeyNotFoundException("Allergy not found");
             allergy.IsDeleted = true;
             _ctx.Allergies.Update(allergy);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
             return allergy;
         }
     }
