@@ -353,13 +353,30 @@ export default function MealSuggestion() {
   };
 
   const filteredGroupedIngredients = useMemo(() => {
-    if (!ingredientSearchQuery.trim()) return groupedIngredients;
+    const normalizedQuery = ingredientSearchQuery
+      .normalize('NFC')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!normalizedQuery) return groupedIngredients;
+
+    const escaped = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let searchRegex = null;
+    try {
+      searchRegex = new RegExp(`(?<!\\p{L})${escaped}`, 'iu');
+    } catch {
+      searchRegex = null;
+    }
+    const lowerQuery = normalizedQuery.toLowerCase();
 
     const result = {};
     Object.keys(groupedIngredients).forEach(category => {
-      const matches = groupedIngredients[category].filter(ing =>
-        safeTestWord(ing.name, ingredientSearchQuery)
-      );
+      const matches = groupedIngredients[category].filter(ing => {
+        const normalizedName = (ing.name || '').normalize('NFC');
+        if (!normalizedName) return false;
+        return searchRegex
+          ? searchRegex.test(normalizedName)
+          : normalizedName.toLowerCase().includes(lowerQuery);
+      });
       if (matches.length > 0) {
         result[category] = matches;
       }
