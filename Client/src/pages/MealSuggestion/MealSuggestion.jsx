@@ -847,15 +847,6 @@ export default function MealSuggestion() {
           <div className="explore-header-row1">
             <h2 className="explore-page-title">Khám phá món ăn</h2>
             <div className="explore-header-actions">
-              <button
-                type="button"
-                className="explore-camera-btn"
-                onClick={() => navigate('/ingredient-detection')}
-                title="Chụp hoặc tải ảnh để nhận diện nguyên liệu"
-              >
-                <FiCamera size={16} />
-                <span>Nhận diện nguyên liệu</span>
-              </button>
               <button 
                 type="button"
                 className="explore-filter-btn"
