@@ -88,6 +88,42 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* ── Mobile: compact header card (≤ 20vh, no bg image/text) ── */
+@media (max-width: 640px) {
+  .nutrition-header-card {
+    background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+    padding: 0.55rem 1rem;
+    border-radius: 14px;
+    margin-bottom: 0.75rem;
+    min-height: unset;
+    max-height: 20vh;
+    justify-content: flex-end;
+    gap: 0;
+  }
+
+  .nutrition-header-card::before {
+    display: none;
+  }
+
+  .nutrition-header-card-text {
+    display: none;
+  }
+
+  .nutrition-header-card h1,
+  .nutrition-header-card .subtitle {
+    display: none;
+  }
+
+  .date-picker-wrapper {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
+    padding: 0.4rem 0.75rem;
+  }
+
+  .header-date-input {
+    font-size: 0.88rem;
+  }
+}
 .date-picker-wrapper {
   display: flex;
   align-items: center;
@@ -1031,4 +1067,104 @@
 .nutrition-modal-close:hover {
   color: #0f172a;
   background: #f1f5f9;
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE & RESPONSIVE: Horizontal Bar Chart & Container
+   ══════════════════════════════════════════════════════ */
+.mobile-bar-chart-container {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.mobile-bar-chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mobile-chart-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.m-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.m-legend-line-goal {
+  width: 16px;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    #f59e0b 0px, #f59e0b 4px,
+    transparent 4px, transparent 7px
+  );
+  display: inline-block;
+}
+
+.m-legend-box {
+  width: 12px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.m-legend-box.normal {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.m-legend-box.over {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+/* Mobile viewport adjustments */
+@media (max-width: 640px) {
+  .nutrition-container {
+    padding: 0.75rem;
+  }
+
+  /* Hide Desktop vertical SVG chart, show mobile horizontal chart */
+  .svg-chart {
+    display: none !important;
+  }
+
+  .mobile-bar-chart-container {
+    display: block !important;
+  }
+
+  .chart-wrapper {
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  /* Reorder: Logs card above Goals card on mobile */
+  .goal-comparison-layout {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+  }
+}
+
+/* Desktop viewport: Hide mobile horizontal chart, show desktop vertical chart */
+@media (min-width: 641px) {
+  .mobile-bar-chart-container {
+    display: none !important;
+  }
+
+  .svg-chart {
+    display: block;
+  }
 }

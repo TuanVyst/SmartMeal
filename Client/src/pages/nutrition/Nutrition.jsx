@@ -713,7 +713,7 @@ export default function Nutrition() {
       )}
 
       <div className="nutrition-header-card">
-        <div>
+        <div className="nutrition-header-card-text">
           <h1>Theo dõi Dinh dưỡng & Bữa ăn</h1>
           <p className="subtitle">Ghi nhận lượng thức ăn nạp vào và so sánh với mục tiêu sức khỏe của bạn</p>
         </div>
@@ -1265,7 +1265,325 @@ export default function Nutrition() {
                       );
                     })}
                   </svg>
-                </div>
+
+                {/* Mobile: Full Horizontal Bar Chart with X/Y Axes & Milestones */}
+                <div className="mobile-bar-chart-container">
+                  {(() => {
+                    // Chart coordinates & geometry
+                    const CHART_W = 390;
+                    const L_PAD = 70;      // Space for Y-axis labels ("Thứ 2", "26/10")
+                    const R_PAD = 24;      // Space on the right margin
+                    const T_PAD = 26;      // Space on top for Goal Badge
+                    const B_PAD = 38;      // Space on bottom for X-axis ticks & labels
+                    const BAR_AREA_W = CHART_W - L_PAD - R_PAD; // 296px
+
+                    const NUM_DAYS = 7;
+                    const ROW_H = 34;      // Height per day row
+                    const BAR_H = 18;      // Thickness of each bar
+                    const chartBottom = T_PAD + NUM_DAYS * ROW_H; // 26 + 238 = 264
+                    const CHART_H = chartBottom + B_PAD;          // 264 + 38 = 302
+
+                    // X-axis: 0 to 2500 kcal scale, with requested milestones
+                    const X_MAX = 2500;
+                    const X_TICKS = [
+                      { val: 0, label: '0' },
+                      { val: 1000, label: '1000-' },
+                      { val: 1500, label: '1500' },
+                      { val: 2000, label: '2000' },
+                      { val: 2500, label: '2500+' }
+                    ];
+
+                    const xScale = (kcal) => L_PAD + (Math.min(Math.max(kcal, 0), X_MAX) / X_MAX) * BAR_AREA_W;
+                    const yCenter = (i) => T_PAD + i * ROW_H + ROW_H / 2;
+                    const yBarTop = (i) => yCenter(i) - BAR_H / 2;
+
+                    const goalX = xScale(activeGoal.calories);
+                    const todayKey = getTodayDateKey();
+
+                    return (
+                      <>
+                        <svg
+                          viewBox={`0 0 ${CHART_W} ${CHART_H}`}
+                          className="mobile-bar-chart-svg"
+                          aria-label="Biểu đồ năng lượng tuần dạng thanh ngang"
+                        >
+                          <defs>
+                            <linearGradient id="grad-normal-mobile" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#22c55e" />
+                              <stop offset="100%" stopColor="#16a34a" />
+                            </linearGradient>
+                            <linearGradient id="grad-over-mobile" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#ef4444" />
+                              <stop offset="100%" stopColor="#dc2626" />
+                            </linearGradient>
+                          </defs>
+
+                          {/* 1. X-axis Grid Lines (Vertical lines from bottom to top) */}
+                          {X_TICKS.map((tick) => {
+                            const x = xScale(tick.val);
+                            if (tick.val === 0) return null;
+                            return (
+                              <line
+                                key={`grid-x-${tick.val}`}
+                                x1={x}
+                                y1={T_PAD}
+                                x2={x}
+                                y2={chartBottom}
+                                stroke="#e2e8f0"
+                                strokeWidth="1"
+                                strokeDasharray="4 3"
+                              />
+                            );
+                          })}
+
+                          {/* 2. Today highlight background behind the row */}
+                          {dailyCaloriesData.map((d, i) => {
+                            const isToday = d.date === todayKey;
+                            if (!isToday) return null;
+                            return (
+                              <rect
+                                key="today-row-bg"
+                                x={2}
+                                y={T_PAD + i * ROW_H + 2}
+                                width={CHART_W - 4}
+                                height={ROW_H - 4}
+                                rx="6"
+                                fill="#f0fdf4"
+                                stroke="#86efac"
+                                strokeWidth="1"
+                              />
+                            );
+                          })}
+
+                          {/* 3. Bar tracks & Bar fills & Values */}
+                          {dailyCaloriesData.map((d, i) => {
+                            const isToday = d.date === todayKey;
+                            const isEmpty = !d.calories || d.calories <= 0;
+                            const isOver = !isEmpty && d.calories >= activeGoal.calories;
+                            const barW = isEmpty ? 0 : Math.max((Math.min(d.calories, X_MAX) / X_MAX) * BAR_AREA_W, 4);
+                            const by = yBarTop(i);
+                            const cy = yCenter(i);
+
+                            return (
+                              <g key={`bar-group-${d.date}`}>
+                                {/* Y-axis tick mark */}
+                                <line
+                                  x1={L_PAD - 4}
+                                  y1={cy}
+                                  x2={L_PAD}
+                                  y2={cy}
+                                  stroke="#94a3b8"
+                                  strokeWidth="1.5"
+                                />
+
+                                {/* Y-axis Day Label: Weekday */}
+                                <text
+                                  x={L_PAD - 8}
+                                  y={cy - 2}
+                                  textAnchor="end"
+                                  fontSize="11"
+                                  fontWeight={isToday ? '700' : '600'}
+                                  fontFamily="Inter, sans-serif"
+                                  fill={isToday ? '#15803d' : '#334155'}
+                                >
+                                  {d.displayWeekday}
+                                </text>
+
+                                {/* Y-axis Day Label: Date (dd/mm) */}
+                                <text
+                                  x={L_PAD - 8}
+                                  y={cy + 10}
+                                  textAnchor="end"
+                                  fontSize="9"
+                                  fontFamily="Inter, sans-serif"
+                                  fill={isToday ? '#22c55e' : '#94a3b8'}
+                                >
+                                  {d.displayDayMonth}
+                                </text>
+
+                                {/* Bar Background Track */}
+                                <rect
+                                  x={L_PAD}
+                                  y={by}
+                                  width={BAR_AREA_W}
+                                  height={BAR_H}
+                                  rx="4"
+                                  fill="#f8fafc"
+                                  stroke="#f1f5f9"
+                                  strokeWidth="1"
+                                />
+
+                                {/* Bar Fill */}
+                                {barW > 0 && (
+                                  <rect
+                                    x={L_PAD}
+                                    y={by}
+                                    width={barW}
+                                    height={BAR_H}
+                                    rx="4"
+                                    fill={isOver ? 'url(#grad-over-mobile)' : 'url(#grad-normal-mobile)'}
+                                  />
+                                )}
+
+                                {/* Calorie text value */}
+                                {!isEmpty ? (
+                                  barW >= 70 ? (
+                                    <text
+                                      x={L_PAD + barW - 6}
+                                      y={cy + 4}
+                                      textAnchor="end"
+                                      fontSize="9.5"
+                                      fontWeight="700"
+                                      fontFamily="Inter, sans-serif"
+                                      fill="#ffffff"
+                                    >
+                                      {Math.round(d.calories)} kcal
+                                    </text>
+                                  ) : (
+                                    <text
+                                      x={L_PAD + barW + 6}
+                                      y={cy + 4}
+                                      textAnchor="start"
+                                      fontSize="9.5"
+                                      fontWeight="700"
+                                      fontFamily="Inter, sans-serif"
+                                      fill={isOver ? '#dc2626' : '#15803d'}
+                                    >
+                                      {Math.round(d.calories)}
+                                    </text>
+                                  )
+                                ) : (
+                                  <text
+                                    x={L_PAD + 8}
+                                    y={cy + 3.5}
+                                    textAnchor="start"
+                                    fontSize="9.5"
+                                    fontFamily="Inter, sans-serif"
+                                    fill="#cbd5e1"
+                                  >
+                                    0
+                                  </text>
+                                )}
+                              </g>
+                            );
+                          })}
+
+                          {/* 4. Target Dashed Line (Đường Mục tiêu) */}
+                          <line
+                            x1={goalX}
+                            y1={T_PAD}
+                            x2={goalX}
+                            y2={chartBottom}
+                            stroke="#f59e0b"
+                            strokeWidth="2"
+                            strokeDasharray="5 3"
+                            opacity="0.95"
+                          />
+
+                          {/* Target Pill Badge on top */}
+                          <rect
+                            x={Math.max(L_PAD + 2, Math.min(goalX - 30, CHART_W - R_PAD - 60))}
+                            y={T_PAD - 18}
+                            width="60"
+                            height="15"
+                            rx="4"
+                            fill="#fef3c7"
+                            stroke="#f59e0b"
+                            strokeWidth="1"
+                          />
+                          <text
+                            x={Math.max(L_PAD + 32, Math.min(goalX, CHART_W - R_PAD - 30))}
+                            y={T_PAD - 7}
+                            textAnchor="middle"
+                            fontSize="8.5"
+                            fontWeight="700"
+                            fontFamily="Inter, sans-serif"
+                            fill="#b45309"
+                          >
+                            Mục tiêu
+                          </text>
+
+                          {/* 5. Trục Y (Vertical Axis Line) */}
+                          <line
+                            x1={L_PAD}
+                            y1={T_PAD}
+                            x2={L_PAD}
+                            y2={chartBottom}
+                            stroke="#64748b"
+                            strokeWidth="1.5"
+                          />
+
+                          {/* 6. Trục X (Horizontal Axis Line) */}
+                          <line
+                            x1={L_PAD}
+                            y1={chartBottom}
+                            x2={L_PAD + BAR_AREA_W}
+                            y2={chartBottom}
+                            stroke="#64748b"
+                            strokeWidth="1.5"
+                          />
+
+                          {/* 7. Trục X Ticks & Labels (0, 1000-, 1500, 2000, 2500+) */}
+                          {X_TICKS.map((tick) => {
+                            const x = xScale(tick.val);
+                            return (
+                              <g key={`xtick-label-${tick.val}`}>
+                                <line
+                                  x1={x}
+                                  y1={chartBottom}
+                                  x2={x}
+                                  y2={chartBottom + 5}
+                                  stroke="#64748b"
+                                  strokeWidth="1.5"
+                                />
+                                <text
+                                  x={x}
+                                  y={chartBottom + 16}
+                                  textAnchor="middle"
+                                  fontSize="9.5"
+                                  fontWeight="600"
+                                  fontFamily="Inter, sans-serif"
+                                  fill="#475569"
+                                >
+                                  {tick.label}
+                                </text>
+                              </g>
+                            );
+                          })}
+
+                          {/* Unit label at bottom right */}
+                          <text
+                            x={CHART_W - 4}
+                            y={chartBottom + 16}
+                            textAnchor="end"
+                            fontSize="8.5"
+                            fontFamily="Inter, sans-serif"
+                            fill="#94a3b8"
+                            fontStyle="italic"
+                          >
+                            kcal
+                          </text>
+                        </svg>
+
+                        {/* Legend beneath the mobile chart */}
+                        <div className="mobile-chart-legend">
+                          <div className="m-legend-item">
+                            <span className="m-legend-line-goal" />
+                            <span>Mục tiêu ({activeGoal.calories} kcal)</span>
+                          </div>
+                          <div className="m-legend-item">
+                            <span className="m-legend-box normal" />
+                            <span>Đạt chuẩn</span>
+                          </div>
+                          <div className="m-legend-item">
+                            <span className="m-legend-box over" />
+                            <span>Vượt</span>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div></div>
               </div>
 
               {/* Average Calories per Meal */}
