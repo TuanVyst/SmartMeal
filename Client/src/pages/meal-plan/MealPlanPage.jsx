@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { addDiaryEntry } from '../../services/nutritionDiaryService';
 import { toast } from 'react-hot-toast';
 import Header from '../../components/layout/Header';
 import { resolveRecipeImageUrl } from '../../utils/recipeImages';
@@ -73,8 +74,29 @@ const MealPlanPage = () => {
   }, [navigate]);
 
   const handleLogMeal = async (entry, date) => {
-    const tempLogId = `optimistic-${entry.entry_id || entry.recipe_id || 'meal'}`;
+    const tempLogId = `optimistic-${entry.entry_id || entry.recipe_id || 'meal'}-${Date.now()}`;
     const logDateIso = typeof date === 'string' ? date : new Date().toISOString();
+
+    const optimisticRecipe = {
+      recipe_id: entry.recipe_id,
+      recipe_name: entry.recipeName,
+      image_url: entry.recipeImage || entry._resolvedImg,
+    };
+
+    const optimisticLogObj = {
+      log_id: tempLogId,
+      recipe_id: entry.recipe_id,
+      recipe: optimisticRecipe,
+      mealType: entry.mealSlot,
+      quantity: 1,
+      unit: 'khẩu phần',
+      logDate: logDateIso,
+      totalCalories: entry.slotCalories || 0,
+      totalProtein: entry.slotProtein || 0,
+      totalCarbs: entry.slotCarbs || 0,
+      totalFat: entry.slotFat || 0,
+      totalFiber: entry.slotFiber || null,
+    };
 
     setPlan((prevPlan) => {
       if (!prevPlan) return prevPlan;
@@ -91,18 +113,7 @@ const MealPlanPage = () => {
 
     notifyNutritionUpdated({
       deltaCalories: entry.slotCalories || 0,
-      optimisticLog: {
-        log_id: tempLogId,
-        recipe_id: entry.recipe_id,
-        mealType: entry.mealSlot,
-        quantity: 1,
-        logDate: logDateIso,
-        totalCalories: entry.slotCalories || 0,
-        totalProtein: entry.slotProtein || 0,
-        totalCarbs: entry.slotCarbs || 0,
-        totalFat: entry.slotFat || 0,
-        totalFiber: entry.slotFiber || null,
-      },
+      optimisticLog: optimisticLogObj,
     });
     toast.success('Đã lưu vào nhật ký ăn uống!');
 
@@ -119,8 +130,12 @@ const MealPlanPage = () => {
         date: date,
       };
 
-      await api.post('/nutrition-diary', payload);
-      notifyNutritionUpdated({ syncOnly: true });
+      const res = await addDiaryEntry(payload);
+      notifyNutritionUpdated({
+        syncOnly: true,
+        newEntry: res?.entry || optimisticLogObj,
+        optimisticId: tempLogId,
+      });
     } catch (error) {
       console.error('Error logging meal:', error);
       toast.error(error.response?.data?.message || 'Không thể lưu vào nhật ký.');

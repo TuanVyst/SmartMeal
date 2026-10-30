@@ -1,95 +1,88 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Nutrition from '../nutrition/Nutrition';
 import IngredientList from '../food/IngredientList';
 import './JournalPage.css';
 
-const SECTIONS = [
+const TABS = [
   { id: 'diary',  label: 'Nhật ký ăn uống',   icon: '📓' },
   { id: 'lookup', label: 'Tra cứu nguyên liệu', icon: '🥦' },
 ];
 
 export default function JournalPage() {
-  const [activeSection, setActiveSection] = useState('diary');
-  const observerRef = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab = tabParam === 'lookup' ? 'lookup' : 'diary';
 
-  const scrollToSection = useCallback((id) => {
-    const el = document.getElementById(`journal-section-${id}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, []);
+  // Lazy-mount lookup tab only when first visited
+  const [visitedLookup, setVisitedLookup] = useState(activeTab === 'lookup');
 
   useEffect(() => {
-    const options = {
-      root: document.querySelector('.main-page-content'),
-      rootMargin: '-50px 0px -55% 0px',
-      threshold: 0,
-    };
+    if (activeTab === 'lookup') {
+      setVisitedLookup(true);
+    }
+  }, [activeTab]);
 
-    observerRef.current = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.id.replace('journal-section-', '');
-          setActiveSection(sectionId);
-        }
-      });
-    }, options);
+  useEffect(() => {
+    const mainEl = document.querySelector('.main-page-content');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+    }
+  }, [activeTab]);
 
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(`journal-section-${id}`);
-      if (el) observerRef.current.observe(el);
-    });
-
-    return () => observerRef.current?.disconnect();
-  }, []);
-
+  const handleTabChange = (tabId) => {
+    if (tabId === 'lookup') {
+      setSearchParams({ tab: 'lookup' });
+    } else {
+      setSearchParams({});
+    }
+    const mainEl = document.querySelector('.main-page-content');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+    }
+  };
   return (
     <div className="journal-page">
 
-      {/* ── Sticky Anchor Nav ── */}
+      {/* ── Tabs Navigation ── */}
       <nav className="journal-anchor-nav" aria-label="Điều hướng nhật ký">
-        {SECTIONS.map((s) => (
+        {TABS.map((t) => (
           <button
-            key={s.id}
-            className={`journal-anchor-btn${activeSection === s.id ? ' active' : ''}`}
-            onClick={() => scrollToSection(s.id)}
-            aria-label={s.label}
+            key={t.id}
+            type="button"
+            className={`journal-anchor-btn${activeTab === t.id ? ' active' : ''}`}
+            onClick={() => handleTabChange(t.id)}
+            aria-label={t.label}
           >
-            <span>{s.icon}</span>
-            <span>{s.label}</span>
+            <span>{t.icon}</span>
+            <span>{t.label}</span>
           </button>
         ))}
       </nav>
 
       {/* ══════════════════════════════════════════
-          SECTION 1: Nhật ký ăn uống (Nutrition)
+          TAB 1: Nhật ký ăn uống (Nutrition)
          ══════════════════════════════════════════ */}
-      <section
+      <div
         id="journal-section-diary"
-        className="journal-section"
+        className="journal-tab-panel"
+        style={{ display: activeTab === 'diary' ? 'block' : 'none' }}
       >
         <Nutrition />
-      </section>
-
-      {/* ── Divider → Tra cứu ── */}
-      <div className="journal-section-divider">
-        <div className="journal-divider-icon">🥦</div>
-        <div className="journal-divider-text">
-          <h2>Tra cứu nguyên liệu</h2>
-          <p>Xem chi tiết dinh dưỡng của từng nguyên liệu, tính theo khẩu phần</p>
-        </div>
       </div>
 
       {/* ══════════════════════════════════════════
-          SECTION 2: Tra cứu nguyên liệu (IngredientList)
+          TAB 2: Tra cứu nguyên liệu (IngredientList)
          ══════════════════════════════════════════ */}
-      <section
-        id="journal-section-lookup"
-        className="journal-section"
-      >
-        <IngredientList />
-      </section>
-
+      {visitedLookup && (
+        <div
+          id="journal-section-lookup"
+          className="journal-tab-panel"
+          style={{ display: activeTab === 'lookup' ? 'block' : 'none' }}
+        >
+          <IngredientList />
+        </div>
+      )}
     </div>
   );
 }

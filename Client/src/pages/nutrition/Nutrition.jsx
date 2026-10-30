@@ -3,13 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { useDialog } from '../../context/DialogContext';
-import { getIngredients } from '../../services/foodService';
-import { recipeService } from '../../services/recipeService';
-import { nutritionLogService } from '../../services/nutritionLogService';
-import { nutritionGoalService } from '../../services/nutritionGoalService';
+import { getIngredients, getCachedIngredientsSync } from '../../services/foodService';
+import { recipeService, getCachedRecipesSync } from '../../services/recipeService';
+import { 
+  nutritionLogService, 
+  getCachedNutritionLogsSync, 
+  addOptimisticNutritionLog, 
+  removeOptimisticNutritionLog 
+} from '../../services/nutritionLogService';
+import { nutritionGoalService, getCachedNutritionGoalsSync } from '../../services/nutritionGoalService';
 import HealthProfileEditor from '../../components/HealthProfileEditor';
 import { formatDateVi, getTodayDateKey, toDateKey } from '../../utils/dateTime';
-import { notifyNutritionUpdated } from '../../utils/nutritionEvents';
+import { notifyNutritionUpdated, NUTRITION_UPDATED_EVENT } from '../../utils/nutritionEvents';
 import { getMultiplier } from '../../utils/unitConverter';
 import './Nutrition.css';
 import { 
@@ -202,12 +207,18 @@ export default function Nutrition() {
     return Array.from(weeks).sort().reverse();
   };
 
-  // Data from backend
-  const [ingredients, setIngredients] = useState([]);
-  const [recipes, setRecipes] = useState([]);
-  const [nutritionLogs, setNutritionLogs] = useState([]);
-  const [currentGoal, setCurrentGoal] = useState(null);
-
+  // Data from backend & cache
+  const [isAddMealModalOpen, setIsAddMealModalOpen] = useState(false);
+  const [ingredients, setIngredients] = useState(() => getCachedIngredientsSync() || []);
+  const [recipes, setRecipes] = useState(() => getCachedRecipesSync() || []);
+  const [nutritionLogs, setNutritionLogs] = useState(() => {
+    return accountId ? (getCachedNutritionLogsSync(accountId) || []) : [];
+  });
+  const [currentGoal, setCurrentGoal] = useState(() => {
+    if (!accountId) return null;
+    const cachedGoals = getCachedNutritionGoalsSync(accountId);
+    return cachedGoals?.[0] || null;
+  });
   // Form states
   const [logType, setLogType] = useState('ingredient'); // ingredient | recipe | custom
   const [selectedItem, setSelectedItem] = useState('');
@@ -250,32 +261,98 @@ export default function Nutrition() {
   }, []);
 
   useEffect(() => {
-    if (accountId) {
-      fetchUserLogsAndGoals();
+    if (!accountId) {
+      setNutritionLogs([]);
+      setCurrentGoal(null);
+      return;
     }
+
+    const cachedLogs = getCachedNutritionLogsSync(accountId);
+    if (cachedLogs && cachedLogs.length > 0) {
+      setNutritionLogs(cachedLogs);
+    }
+
+    const cachedGoals = getCachedNutritionGoalsSync(accountId);
+    if (cachedGoals && cachedGoals.length > 0) {
+      const latest = cachedGoals[0];
+      setCurrentGoal(latest);
+      setGoalForm({
+        targetCalories: latest.targetCalories || 2000,
+        targetProtein: latest.targetProtein || 75,
+        targetCarbs: latest.targetCarbs || 250,
+        targetFat: latest.targetFat || 65,
+        targetFiber: latest.targetFiber || 25,
+        targetSugar: latest.targetSugar ?? 50,
+        targetSalt: latest.targetSalt ?? 5,
+        targetCholesterol: latest.targetCholesterol ?? 300
+      });
+    }
+
+    // If we have cached logs, fetch silently in the background
+    fetchUserLogsAndGoals(Boolean(cachedLogs && cachedLogs.length > 0));
+  }, [accountId]);
+
+  // Listen for real-time nutrition updates across the app (e.g. from DiaryEntryDrawer)
+  useEffect(() => {
+    const handleNutritionUpdated = (e) => {
+      const { optimisticLog, newEntry, removedLogId, optimisticId } = e.detail || {};
+
+      if (removedLogId) {
+        setNutritionLogs(prev => prev.filter(l => (l.id || l.log_id || l.nutrition_log_id) !== removedLogId));
+        return;
+      }
+
+      if (optimisticLog) {
+        setNutritionLogs(prev => {
+          const exists = prev.some(l => (l.id || l.log_id) === optimisticLog.log_id);
+          if (exists) return prev;
+          return [optimisticLog, ...prev];
+        });
+      }
+
+      if (newEntry) {
+        setNutritionLogs(prev => {
+          const newId = newEntry.id || newEntry.log_id;
+          const filtered = prev.filter(l => {
+            const currentId = l.id || l.log_id;
+            if (optimisticId && currentId === optimisticId) return false;
+            return currentId !== newId;
+          });
+          return [newEntry, ...filtered];
+        });
+      }
+
+      if (accountId) {
+        fetchUserLogsAndGoals(true);
+      }
+    };
+
+    window.addEventListener(NUTRITION_UPDATED_EVENT, handleNutritionUpdated);
+    return () => window.removeEventListener(NUTRITION_UPDATED_EVENT, handleNutritionUpdated);
   }, [accountId]);
 
   const fetchBaseData = async () => {
     try {
       const ingRes = await getIngredients();
-      setIngredients(ingRes.data.data || []);
+      setIngredients(ingRes.data?.data || []);
 
       const recRes = await recipeService.getAll();
-      setRecipes(recRes.data.data || []);
+      setRecipes(recRes.data?.data || []);
     } catch (err) {
       console.error('Lỗi khi tải nguyên liệu/công thức:', err);
     }
   };
 
-  const fetchUserLogsAndGoals = async () => {
+  const fetchUserLogsAndGoals = async (silent = false, forceRefresh = true) => {
+    if (!accountId) return [];
     try {
-      setLoading(true);
-      const logsRes = await nutritionLogService.getAll(accountId);
-      const logs = logsRes.data.data || [];
+      if (!silent) setLoading(true);
+      const logsRes = await nutritionLogService.getAll(accountId, forceRefresh);
+      const logs = logsRes.data?.data || [];
       setNutritionLogs(logs);
 
-      const goalsRes = await nutritionGoalService.getAll(accountId);
-      const userGoals = goalsRes.data.data || [];
+      const goalsRes = await nutritionGoalService.getAll(accountId, forceRefresh);
+      const userGoals = goalsRes.data?.data || [];
       if (userGoals.length > 0) {
         const latestGoal = userGoals[0];
         setCurrentGoal(latestGoal);
@@ -298,10 +375,9 @@ export default function Nutrition() {
       console.error('Lỗi khi tải dữ liệu người dùng:', err);
       return [];
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
-
   // Adjust default quantity when switching log type
   useEffect(() => {
     if (logType === 'recipe') {
@@ -391,7 +467,7 @@ export default function Nutrition() {
   }, [logType, selectedItem, quantity]);
 
   const handleAddLog = async (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
     if (!accountId) return;
 
     if (logType !== 'custom' && !selectedItem) {
@@ -405,14 +481,17 @@ export default function Nutrition() {
     }
 
     try {
-      setLoading(true);
+      const selectedRecipe = logType === 'recipe' ? recipes.find(r => r.recipe_id === selectedItem) : null;
+      const selectedIng = logType === 'ingredient' ? ingredients.find(i => i.ingredient_id === selectedItem) : null;
+
+      const optimisticId = `optimistic-${Date.now()}`;
       const payload = {
         account_id: accountId,
         logDate: new Date(selectedDate).toISOString(),
         mealType,
         recipe_id: logType === 'recipe' ? selectedItem : null,
         ingredient_id: logType === 'ingredient' ? selectedItem : null,
-        quantity: parseFloat(quantity),
+        quantity: parseFloat(quantity) || 1,
         unit,
         totalCalories: (logType === 'recipe' || logType === 'custom' || manualMacros.calories > 0) ? parseFloat(manualMacros.calories) : null,
         totalProtein: (logType === 'recipe' || logType === 'custom' || manualMacros.protein > 0) ? parseFloat(manualMacros.protein) : null,
@@ -424,16 +503,37 @@ export default function Nutrition() {
         totalCholesterol: (logType === 'recipe' || logType === 'custom' || manualMacros.cholesterol > 0) ? parseFloat(manualMacros.cholesterol) : null
       };
 
-      await nutritionLogService.create(payload);
+      const optimisticLog = {
+        log_id: optimisticId,
+        account_id: accountId,
+        logDate: payload.logDate,
+        mealType,
+        quantity: payload.quantity,
+        unit: payload.unit,
+        totalCalories: payload.totalCalories || 0,
+        totalProtein: payload.totalProtein || 0,
+        totalCarbs: payload.totalCarbs || 0,
+        totalFat: payload.totalFat || 0,
+        totalFiber: payload.totalFiber || 0,
+        totalSugar: payload.totalSugar || 0,
+        totalSalt: payload.totalSalt || 0,
+        totalCholesterol: payload.totalCholesterol || 0,
+        recipe: selectedRecipe,
+        ingredient: selectedIng,
+      };
+
+      // Instant optimistic UI update (0ms delay!)
+      setNutritionLogs(prev => [optimisticLog, ...prev]);
+      addOptimisticNutritionLog(accountId, optimisticLog);
+      setIsAddMealModalOpen(false);
+
+      const logDateKey = toDateKey(payload.logDate);
+      if (logDateKey === getTodayDateKey()) {
+        notifyNutritionUpdated({ deltaCalories: optimisticLog.totalCalories, optimisticLog });
+      }
+
       triggerAlert('Ghi nhận bữa ăn thành công!', 'success');
 
-      // Immediate delta update for Sidebar Progress Ring + hook will auto-refetch
-      const logDateKey = toDateKey(new Date(selectedDate).toISOString());
-      if (logDateKey === getTodayDateKey()) {
-        const addedCalories = parseFloat(manualMacros.calories) || parseFloat(payload.totalCalories) || 0;
-        notifyNutritionUpdated({ deltaCalories: addedCalories });
-      }
-      
       // Reset form
       setSelectedItem('');
       setQuantity(logType === 'recipe' ? 1 : 100);
@@ -441,14 +541,17 @@ export default function Nutrition() {
         calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0, cholesterol: 0, customName: ''
       });
 
-      // Reload Nutrition page data (hook auto-refetches separately for sidebar sync)
-      await fetchUserLogsAndGoals();
-      setActiveTab('history');
+      const res = await nutritionLogService.create(payload);
+      const created = res?.data?.data;
+      if (created) {
+        setNutritionLogs(prev => prev.map(l => l.log_id === optimisticId ? created : l));
+        addOptimisticNutritionLog(accountId, created);
+      }
+      await fetchUserLogsAndGoals(true);
     } catch (err) {
       console.error(err);
       triggerAlert('Ghi nhận bữa ăn thất bại, vui lòng thử lại.', 'error');
-    } finally {
-      setLoading(false);
+      await fetchUserLogsAndGoals(true);
     }
   };
 
@@ -456,27 +559,28 @@ export default function Nutrition() {
     const ok = await dialog.confirm({ title: 'Xóa bản ghi?', message: 'Bạn có chắc chắn muốn xóa bản ghi nhật ký này?', confirmLabel: 'Xóa', danger: true });
     if (!ok) return;
     try {
-      setLoading(true);
       const logToDelete = nutritionLogs.find(
         (log) => (log.id || log.log_id || log.nutrition_log_id) === id
       );
       const removedCalories = logToDelete?.totalCalories || 0;
       const logDateKey = toDateKey(logToDelete?.logDate);
 
-      await nutritionLogService.delete(id);
+      // Instant optimistic deletion from state and cache (0ms delay!)
+      setNutritionLogs(prev => prev.filter(log => (log.id || log.log_id || log.nutrition_log_id) !== id));
+      removeOptimisticNutritionLog(accountId, id);
+
       triggerAlert('Đã xóa bản ghi nhật ký.', 'success');
 
-      // Immediate delta update for Sidebar Progress Ring + hook will auto-refetch
       if (logDateKey === getTodayDateKey() && removedCalories > 0) {
-        notifyNutritionUpdated({ deltaCalories: -removedCalories });
+        notifyNutritionUpdated({ deltaCalories: -removedCalories, removedLogId: id });
       }
 
-      await fetchUserLogsAndGoals();
+      await nutritionLogService.delete(id, accountId);
+      await fetchUserLogsAndGoals(true);
     } catch (err) {
       console.error(err);
       triggerAlert('Không thể xóa bản ghi.', 'error');
-    } finally {
-      setLoading(false);
+      await fetchUserLogsAndGoals(true);
     }
   };
 
@@ -868,7 +972,16 @@ export default function Nutrition() {
                     {/* Day Summary */}
                     <div className="day-summary-summary">
                       {totalsToday.calories === 0 ? (
-                        <p>Hôm nay bạn chưa ghi nhận bữa ăn nào. Hãy chuyển qua tab <strong>Ghi nhận bữa ăn</strong> nhé!</p>
+                        <div className="empty-calories-prompt">
+                          <p>Hôm nay bạn chưa ghi nhận bữa ăn nào. Hãy thêm món ăn vào nhật ký để theo dõi dinh dưỡng nhé!</p>
+                          <button
+                            type="button"
+                            className="btn-add-meal-prompt"
+                            onClick={() => setIsAddMealModalOpen(true)}
+                          >
+                            <MdAddCircleOutline size={17} /> Ghi nhận bữa ăn ngay
+                          </button>
+                        </div>
                       ) : totalsToday.calories < activeGoal.calories ? (
                         <p className="summary-text deficit">
                           Hôm nay bạn còn <strong>thiếu {Math.round(activeGoal.calories - totalsToday.calories)} kcal</strong> nữa để đạt mục tiêu dinh dưỡng hàng ngày.
@@ -885,15 +998,22 @@ export default function Nutrition() {
 
               {/* Logs history list */}
               <div className="logs-list-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px', flexWrap: 'wrap' }}>
                   <h3 style={{ margin: 0 }}>Bữa ăn ngày {formatDateVi(selectedDate)}</h3>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      className="btn-add-meal-header"
+                      onClick={() => setIsAddMealModalOpen(true)}
+                      title="Ghi nhận món ăn vào ngày này"
+                    >
+                      <MdAddCircleOutline size={16} /> Thêm món
+                    </button>
                     <button onClick={() => {
                       const d = new Date(selectedDate);
                       d.setDate(d.getDate() - 1);
                       setSelectedDate(toDateKey(d));
                     }} style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#475569', fontSize: '18px' }} title="Ngày trước">‹</button>
-                    
                     <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} max={getTodayDateKey()} style={{ padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', outline: 'none', color: '#334155' }} />
 
                     <button onClick={() => {
@@ -912,8 +1032,10 @@ export default function Nutrition() {
                     </div>
                   ) : (
                     logsToday.map(log => {
-                      const name = log.recipe?.recipe_name || log.ingredient?.name || 'Món ăn tùy chỉnh';
-                      const recipeId = log.recipe_id || log.recipe?.recipe_id;
+                      const matchedRecipe = log.recipe || (log.recipe_id ? recipes.find(r => r.recipe_id === log.recipe_id) : null);
+                      const matchedIngredient = log.ingredient || (log.ingredient_id ? ingredients.find(i => i.ingredient_id === log.ingredient_id) : null);
+                      const name = matchedRecipe?.recipe_name || matchedRecipe?.name || matchedIngredient?.name || log.customName || 'Món ăn tùy chỉnh';
+                      const recipeId = log.recipe_id || matchedRecipe?.recipe_id;
                       return (
                         <div
                           key={log.log_id}
@@ -1227,6 +1349,185 @@ export default function Nutrition() {
         )}
 
       </div>
+
+      {/* Quick Add Meal Modal */}
+      {isAddMealModalOpen && (
+        <div className="nutrition-modal-overlay" onClick={() => setIsAddMealModalOpen(false)}>
+          <div className="nutrition-modal-card" onClick={e => e.stopPropagation()}>
+            <div className="nutrition-modal-header">
+              <h2>Ghi nhận bữa ăn ngày {formatDateVi(selectedDate)}</h2>
+              <button 
+                type="button" 
+                className="nutrition-modal-close" 
+                onClick={() => setIsAddMealModalOpen(false)}
+                aria-label="Đóng"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddLog}>
+              {/* Type selector */}
+              <div className="log-type-selector">
+                <button
+                  type="button"
+                  className={`type-btn ${logType === 'recipe' ? 'active' : ''}`}
+                  onClick={() => setLogType('recipe')}
+                >
+                  Công thức món ăn
+                </button>
+                <button
+                  type="button"
+                  className={`type-btn ${logType === 'ingredient' ? 'active' : ''}`}
+                  onClick={() => setLogType('ingredient')}
+                >
+                  Nguyên liệu
+                </button>
+                <button
+                  type="button"
+                  className={`type-btn ${logType === 'custom' ? 'active' : ''}`}
+                  onClick={() => setLogType('custom')}
+                >
+                  Tùy chỉnh
+                </button>
+              </div>
+
+              {/* Meal type */}
+              <div className="form-group">
+                <label>Thời điểm bữa ăn</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {[
+                    { id: 'breakfast', label: 'Sáng' },
+                    { id: 'lunch', label: 'Trưa' },
+                    { id: 'dinner', label: 'Tối' },
+                    { id: 'snack', label: 'Phụ' }
+                  ].map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className={`type-btn ${mealType === m.id ? 'active' : ''}`}
+                      onClick={() => setMealType(m.id)}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Item selection */}
+              {logType === 'recipe' && (
+                <div className="form-group">
+                  <label>Chọn món ăn</label>
+                  <select
+                    className="form-input"
+                    value={selectedItem}
+                    onChange={e => setSelectedItem(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Chọn món ăn --</option>
+                    {recipes.map(r => (
+                      <option key={r.recipe_id} value={r.recipe_id}>
+                        {r.recipe_name} ({r.servings || 1} khẩu phần)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {logType === 'ingredient' && (
+                <div className="form-group">
+                  <label>Chọn nguyên liệu</label>
+                  <select
+                    className="form-input"
+                    value={selectedItem}
+                    onChange={e => setSelectedItem(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Chọn nguyên liệu --</option>
+                    {ingredients.map(ing => (
+                      <option key={ing.ingredient_id} value={ing.ingredient_id}>
+                        {ing.name} ({ing.nutritional_value?.calories || 0} kcal / {ing.nutritional_value?.servingSize || 100}{ing.nutritional_value?.servingUnit || 'g'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {logType === 'custom' && (
+                <div className="form-group">
+                  <label>Tên món ăn / đồ uống</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="VD: Cơm tấm sườn bì chả"
+                    value={manualMacros.customName}
+                    onChange={e => setManualMacros(prev => ({ ...prev, customName: e.target.value }))}
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Quantity */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Số lượng ({unit})</label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0.1"
+                    className="form-input"
+                    value={quantity}
+                    onChange={e => setQuantity(e.target.value)}
+                    required
+                  />
+                </div>
+                {logType === 'custom' && (
+                  <div className="form-group">
+                    <label>Ước tính Calories (kcal)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={manualMacros.calories || ''}
+                      onChange={e => setManualMacros(prev => ({ ...prev, calories: parseFloat(e.target.value) || 0 }))}
+                      placeholder="VD: 550"
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Macro preview */}
+              <div className="preview-calories-gauge">
+                <span className="gauge-value">{Math.round(manualMacros.calories || 0)}</span>
+                <span className="gauge-label">kcal</span>
+              </div>
+
+              <div className="preview-grid" style={{ marginBottom: 20 }}>
+                <div className="preview-item">
+                  <span className="macro-dot protein-dot"></span>
+                  <span className="macro-name">Đạm: {Math.round(manualMacros.protein || 0)}g</span>
+                </div>
+                <div className="preview-item">
+                  <span className="macro-dot carbs-dot"></span>
+                  <span className="macro-name">Carb: {Math.round(manualMacros.carbs || 0)}g</span>
+                </div>
+                <div className="preview-item">
+                  <span className="macro-dot fat-dot"></span>
+                  <span className="macro-name">Béo: {Math.round(manualMacros.fat || 0)}g</span>
+                </div>
+                <div className="preview-item">
+                  <span className="macro-dot fiber-dot"></span>
+                  <span className="macro-name">Chất xơ: {Math.round(manualMacros.fiber || 0)}g</span>
+                </div>
+              </div>
+
+              <button type="submit" className="btn-submit" disabled={loading}>
+                {loading ? 'Đang lưu...' : 'Thêm vào nhật ký'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

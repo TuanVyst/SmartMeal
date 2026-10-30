@@ -22,27 +22,43 @@ namespace Service.Implements
             _logger = logger;
         }
 
-        public async Task<List<AllergyResponseDto>> GetAllAllergies()
+        public async Task<List<AllergyResponseDto>> GetAllAllergies(CancellationToken cancellationToken = default)
         {
-            var items = await _allergyRepo.GetAllAllergies();
+            var items = await _allergyRepo.GetAllAllergies(cancellationToken);
             return items.Select(MapToDto).ToList();
         }
 
-        public async Task<List<AllergyResponseDto>> GetAllergiesByAccountId(Guid accountId)
+        public async Task<List<AllergyResponseDto>> GetAllergiesByAccountId(Guid accountId, CancellationToken cancellationToken = default)
         {
-            var items = await _allergyRepo.GetAllergiesByAccountId(accountId);
+            var items = await _allergyRepo.GetAllergiesByAccountId(accountId, cancellationToken);
             return items.Select(MapToDto).ToList();
         }
-        public async Task<AllergyResponseDto?> GetAllergyById(Guid id)
+
+        public async Task<AllergyResponseDto?> GetAllergyById(Guid id, CancellationToken cancellationToken = default)
         {
-            var item = await _allergyRepo.GetAllergyById(id);
+            var item = await _allergyRepo.GetAllergyById(id, cancellationToken);
             return item == null ? null : MapToDto(item);
         }
 
-        public async Task<AllergyResponseDto> CreateAllergy(AllergyRequest request)
+        public async Task<AllergyResponseDto> CreateAllergy(AllergyRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
+                // Check if allergy record already exists for this account and ingredient
+                var existingItem = await _allergyRepo.GetAllergyByAccountAndIngredient(request.Account_id, request.Ingredient_id, cancellationToken);
+                if (existingItem != null)
+                {
+                    if (existingItem.IsDeleted)
+                    {
+                        existingItem.IsDeleted = false;
+                        var updated = await _allergyRepo.UpdateAllergy(existingItem, cancellationToken);
+                        _logger.LogInformation("Allergy '{Allergy_id}' restored successfully", updated.Allergy_id);
+                        return MapToDto(updated);
+                    }
+                    // Already active, return existing to avoid duplicate entries
+                    return MapToDto(existingItem);
+                }
+
                 var newItem = new Allergy
                 {
                     Allergy_id = Guid.NewGuid(),
@@ -51,7 +67,7 @@ namespace Service.Implements
                     IsDeleted = false
                 };
 
-                var result = await _allergyRepo.CreateAllergy(newItem);
+                var result = await _allergyRepo.CreateAllergy(newItem, cancellationToken);
                 _logger.LogInformation("Allergy '{Allergy_id}' created successfully", newItem.Allergy_id);
                 return MapToDto(result);
             }
@@ -62,18 +78,18 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AllergyResponseDto> UpdateAllergy(Guid id, AllergyRequest request)
+        public async Task<AllergyResponseDto> UpdateAllergy(Guid id, AllergyRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var existingItem = await _allergyRepo.GetAllergyById(id);
+                var existingItem = await _allergyRepo.GetAllergyById(id, cancellationToken);
                 if (existingItem == null)
                     throw new KeyNotFoundException($"Allergy with id {id} not found");
 
                 existingItem.Ingredient_id = request.Ingredient_id;
                 existingItem.Account_id = request.Account_id;
 
-                var result = await _allergyRepo.UpdateAllergy(existingItem);
+                var result = await _allergyRepo.UpdateAllergy(existingItem, cancellationToken);
                 _logger.LogInformation("Allergy '{Allergy_id}' updated successfully", existingItem.Allergy_id);
                 return MapToDto(result);
             }
@@ -84,9 +100,9 @@ namespace Service.Implements
             }
         }
 
-        public async Task<AllergyResponseDto> SoftDeleteAllergy(Guid id)
+        public async Task<AllergyResponseDto> SoftDeleteAllergy(Guid id, CancellationToken cancellationToken = default)
         {
-            var result = await _allergyRepo.SoftDeleteAllergy(id);
+            var result = await _allergyRepo.SoftDeleteAllergy(id, cancellationToken);
             return MapToDto(result);
         }
         

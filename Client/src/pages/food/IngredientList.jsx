@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useDialog } from '../../context/DialogContext';
 import { resolveIngredientImageUrl } from '../../utils/ingredientImages';
 import { getMultiplier, getEstimateWeightForPiece } from '../../utils/unitConverter';
+import { parseIngredientSearchQuery, rankAndFilterIngredients } from '../../utils/ingredientSearch';
 import { FiSearch, FiPlus, FiEdit, FiTrash2, FiX, FiInfo } from 'react-icons/fi';
 import './IngredientList.css';
 
@@ -193,11 +194,14 @@ export default function IngredientList() {
   };
 
   // Filter logic
-  const filteredIngredients = ingredients.filter((i) => {
-    const matchesSearch = i.name.toLowerCase().includes(search.toLowerCase());
-    const matchesTag = selectedTag === 'All' || 
-      (i.ingredientLabels && i.ingredientLabels.some(l => l.labelName === selectedTag));
-    return matchesSearch && matchesTag;
+  const parsedSearch = parseIngredientSearchQuery(search);
+  const filteredIngredients = (
+    parsedSearch ? rankAndFilterIngredients(ingredients, search) : ingredients
+  ).filter((i) => {
+    return (
+      selectedTag === 'All' ||
+      (i.ingredientLabels && i.ingredientLabels.some((l) => l.labelName === selectedTag))
+    );
   });
 
   if (loading) {

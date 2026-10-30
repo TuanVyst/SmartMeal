@@ -7,6 +7,7 @@ import {
 import ImageUpload from '../common/ImageUpload';
 import { resolveRecipeImageUrl, FALLBACK_MEAL_IMAGE } from '../../utils/recipeImages';
 import { getMultiplier } from '../../utils/unitConverter';
+import { matchesIngredientSearch, rankAndFilterIngredients } from '../../utils/ingredientSearch';
 import './RecipeEditorModal.css';
 
 const COMMON_UOMS = [
@@ -313,12 +314,12 @@ export default function RecipeEditorModal({
 
   // Filter available ingredients for search autocomplete
   const filteredSearchIngredients = searchQuery.trim()
-    ? availableIngredients.filter(ing => {
-        const name = (ing.name || ing.Name || '').toLowerCase();
-        const tags = (ing.ingredientLabels || []).map(l => (l.labelName || l.LabelName || '').toLowerCase()).join(' ');
-        const q = searchQuery.toLowerCase();
-        return name.includes(q) || tags.includes(q);
-      }).slice(0, 10)
+    ? rankAndFilterIngredients(availableIngredients, searchQuery, {
+        getSecondaryTexts: (ing) =>
+          (ing.ingredientLabels || [])
+            .map((l) => l.labelName || l.LabelName)
+            .filter(Boolean),
+      })
     : [];
 
   // Library modal tags & list
@@ -327,8 +328,9 @@ export default function RecipeEditorModal({
   ));
 
   const filteredLibraryIngredients = availableIngredients.filter(ing => {
-    const matchesSearch = !librarySearch.trim() ||
-      (ing.name || ing.Name || '').toLowerCase().includes(librarySearch.toLowerCase());
+    const matchesSearch =
+      !librarySearch.trim() ||
+      matchesIngredientSearch(ing.name || ing.Name || '', librarySearch);
     const matchesTag = librarySelectedTag === 'all' ||
       (ing.ingredientLabels || []).some(l => (l.labelName || l.LabelName) === librarySelectedTag);
     return matchesSearch && matchesTag;

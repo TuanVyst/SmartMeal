@@ -3,6 +3,7 @@ import { FiPlus, FiEdit, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
 import { useDialog } from '../../context/DialogContext';
 import { resolveIngredientImageUrl } from '../../utils/ingredientImages';
+import { parseIngredientSearchQuery, rankAndFilterIngredients } from '../../utils/ingredientSearch';
 import ImageUpload from '../../components/common/ImageUpload';
 
 export default function AdminIngredients() {
@@ -184,9 +185,9 @@ export default function AdminIngredients() {
     setEditingIngredient(null);
   };
 
-  const filteredIngredients = ingredients
-    .filter((ing) => (ing.name || '').toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const filteredIngredients = parseIngredientSearchQuery(search)
+    ? rankAndFilterIngredients(ingredients, search)
+    : [...ingredients].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
 
   if (loading) return <div className="admin-loading">Đang tải nguyên liệu...</div>;
 

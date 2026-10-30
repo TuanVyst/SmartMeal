@@ -127,9 +127,9 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Allergy_id");
 
-                    b.HasIndex("Account_id");
-
                     b.HasIndex("Ingredient_id");
+
+                    b.HasIndex("Account_id", "IsDeleted");
 
                     b.ToTable("Allergies");
                 });

@@ -22,13 +22,13 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] Guid? accountId = null)
+        public async Task<IActionResult> GetAll([FromQuery] Guid? accountId = null, CancellationToken cancellationToken = default)
         {
             try
             {
                 var items = accountId.HasValue
-                    ? await _allergyService.GetAllergiesByAccountId(accountId.Value)
-                    : await _allergyService.GetAllAllergies();
+                    ? await _allergyService.GetAllergiesByAccountId(accountId.Value, cancellationToken)
+                    : await _allergyService.GetAllAllergies(cancellationToken);
                 return Ok(new { success = true, data = items });
             }
             catch (Exception ex)
@@ -39,11 +39,11 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
-                var item = await _allergyService.GetAllergyById(id);
+                var item = await _allergyService.GetAllergyById(id, cancellationToken);
                 if (item == null)
                     return NotFound(new { success = false, message = "Allergy not found" });
 
@@ -57,14 +57,14 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AllergyRequest request)
+        public async Task<IActionResult> Create([FromBody] AllergyRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var item = await _allergyService.CreateAllergy(request);
+                var item = await _allergyService.CreateAllergy(request, cancellationToken);
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
@@ -75,14 +75,14 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] AllergyRequest request)
+        public async Task<IActionResult> Update(Guid id, [FromBody] AllergyRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(new { success = false, message = "Invalid model", errors = ModelState });
 
-                var item = await _allergyService.UpdateAllergy(id, request);
+                var item = await _allergyService.UpdateAllergy(id, request, cancellationToken);
                 return Ok(new { success = true, data = item });
             }
             catch (Exception ex)
@@ -93,11 +93,11 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
-                var item = await _allergyService.SoftDeleteAllergy(id);
+                var item = await _allergyService.SoftDeleteAllergy(id, cancellationToken);
                 return Ok(new { success = true, message = "Allergy deleted successfully", data = item });
             }
             catch (Exception ex)

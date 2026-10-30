@@ -97,11 +97,12 @@
   font-weight: 500;
 }
 
-/* ── Sections ── */
-.journal-section {
+/* ── Sections & Tab Panels ── */
+.journal-section,
+.journal-tab-panel {
   scroll-margin-top: 50px;
+  min-height: calc(100vh - 120px);
 }
-
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .journal-anchor-nav {
