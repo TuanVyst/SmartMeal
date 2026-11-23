@@ -128,6 +128,7 @@ namespace Service.Implements
             _cache.Set($"RegisterData_{request.Email}", request, cacheOptions);
 
             await _emailService.RequestOtpAsync(request.Email);
+            MarkOtpResent($"OTP_RESEND_REGISTER_{request.Email.Trim().ToLowerInvariant()}");
 
             return new AuthResponseDto
             {
@@ -173,6 +174,67 @@ namespace Service.Implements
             _cache.Remove($"RegisterData_{request.Email}");
 
             return GenerateAuthResponse(account);
+        }
+
+        private const int OtpResendCooldownSeconds = 60;
+
+        private void MarkOtpResent(string cooldownKey)
+        {
+            _cache.Set(cooldownKey, DateTime.UtcNow, TimeSpan.FromSeconds(OtpResendCooldownSeconds));
+        }
+
+        private void EnsureOtpResendAllowed(string cooldownKey)
+        {
+            if (_cache.TryGetValue<DateTime>(cooldownKey, out var lastSentAt))
+            {
+                var remainingSeconds = OtpResendCooldownSeconds - (DateTime.UtcNow - lastSentAt).TotalSeconds;
+                if (remainingSeconds > 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Vui lòng đợi {Math.Ceiling(remainingSeconds)} giây trước khi gửi lại mã OTP.");
+                }
+            }
+        }
+
+        public async Task ResendRegisterOtpAsync(string email)
+        {
+            var normalizedEmail = email?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedEmail))
+            {
+                throw new InvalidOperationException("Email không hợp lệ.");
+            }
+
+            if (!_cache.TryGetValue($"RegisterData_{normalizedEmail}", out RegisterRequest _))
+            {
+                throw new InvalidOperationException("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.");
+            }
+
+            var cooldownKey = $"OTP_RESEND_REGISTER_{normalizedEmail.ToLowerInvariant()}";
+            EnsureOtpResendAllowed(cooldownKey);
+            MarkOtpResent(cooldownKey);
+
+            await _emailService.RequestOtpAsync(normalizedEmail);
+        }
+
+        public async Task ResendLoginOtpAsync(string email)
+        {
+            var normalizedEmail = email?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedEmail))
+            {
+                throw new InvalidOperationException("Email không hợp lệ.");
+            }
+
+            var account = await _accountRepo.GetAccountByEmail(normalizedEmail);
+            if (account == null || !account.IsActive)
+            {
+                throw new InvalidOperationException("Không tìm thấy tài khoản đang hoạt động với email này.");
+            }
+
+            var cooldownKey = $"OTP_RESEND_LOGIN_{normalizedEmail.ToLowerInvariant()}";
+            EnsureOtpResendAllowed(cooldownKey);
+            MarkOtpResent(cooldownKey);
+
+            await _emailService.RequestOtpAsync(normalizedEmail);
         }
 
         public async Task<AuthResponseDto> GoogleLogin(GoogleLoginRequest request)

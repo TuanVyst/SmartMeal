@@ -185,6 +185,42 @@ namespace PresentationLayer.Controllers
                 return StatusCode(500, new { message = "Internal server error: " + ex.Message });
             }
         }
+        [HttpPost("resend-register-otp")]
+        public async Task<IActionResult> ResendRegisterOtp([FromBody] ResendOtpRequest request)
+        {
+            try
+            {
+                await _service.ResendRegisterOtpAsync(request.Email);
+                return Ok(new { success = true, message = "Đã gửi lại mã OTP." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+
+        [HttpPost("resend-login-otp")]
+        public async Task<IActionResult> ResendLoginOtp([FromBody] ResendOtpRequest request)
+        {
+            try
+            {
+                await _service.ResendLoginOtpAsync(request.Email);
+                return Ok(new { success = true, message = "Đã gửi lại mã OTP." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error: " + ex.Message });
+            }
+        }
+
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
         {

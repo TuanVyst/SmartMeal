@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { useResendCountdown } from '../../hooks/useResendCountdown';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -19,7 +20,10 @@ export default function Register() {
   const [otpStep, setOtpStep] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
-  const { register, verifyRegisterOtp } = useAuth();
+  const { register, verifyRegisterOtp, resendRegisterOtp } = useAuth();
+  const { remaining, start: startResendCooldown, canResend } = useResendCountdown(60);
+  const [resending, setResending] = useState(false);
+  const [resendNotice, setResendNotice] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -54,6 +58,7 @@ export default function Register() {
       if (result.requiresOtp) {
         setPendingEmail(result.email);
         setOtpStep(true);
+        startResendCooldown();
       } else if (result.role === 'Admin') {
         navigate('/admin');
       } else {
@@ -96,6 +101,28 @@ export default function Register() {
     }
   };
 
+  const handleResendOtp = async () => {
+    if (!canResend || resending) return;
+    setError('');
+    setResendNotice('');
+    setResending(true);
+    try {
+      await resendRegisterOtp(pendingEmail);
+      startResendCooldown();
+      setResendNotice('Đã gửi lại mã OTP. Vui lòng kiểm tra email.');
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Không thể kết nối máy chủ. Hãy đảm bảo backend đang chạy.');
+      } else {
+        setError('Gửi lại mã OTP thất bại. Vui lòng thử lại.');
+      }
+    } finally {
+      setResending(false);
+    }
+  };
+
   if (otpStep) {
     return (
         <div className="auth-card-modern">
@@ -115,7 +142,22 @@ export default function Register() {
               />
             </div>
             {error && <p className="auth-error">{error}</p>}
+            {resendNotice && <p className="auth-success" role="status">{resendNotice}</p>}
             <button type="submit" className="btn-submit">Xác thực & Tạo tài khoản</button>
+            <div className="otp-resend-row">
+              <button
+                type="button"
+                className="btn-link"
+                onClick={handleResendOtp}
+                disabled={!canResend || resending}
+              >
+                {resending
+                  ? 'Đang gửi...'
+                  : canResend
+                    ? 'Gửi lại mã OTP'
+                    : `Gửi lại mã sau ${remaining}s`}
+              </button>
+            </div>
           </form>
           <p className="auth-footer-text">
             <button className="btn-link" onClick={() => { setOtpStep(false); setOtpCode(''); setError(''); }}>

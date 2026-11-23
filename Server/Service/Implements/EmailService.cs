@@ -1,58 +1,72 @@
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using Microsoft.Extensions.Logging;
+using MimeKit;
 using Service.Interfaces;
 
 namespace Service.Implements
 {
     public class EmailService : IEmailService
     {
+        private const int DefaultSmtpPort = 587;
+        private static readonly TimeSpan SmtpTimeout = TimeSpan.FromSeconds(20);
+
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _config;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IMemoryCache cache, IConfiguration config)
+        public EmailService(IMemoryCache cache, IConfiguration config, ILogger<EmailService> logger)
         {
             _cache = cache;
             _config = config;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            var apiKey = _config["Email:SendGridApiKey"] ?? Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
+            var host = _config["Email:Host"] ?? Environment.GetEnvironmentVariable("EMAIL_HOST") ?? "smtp.gmail.com";
+            var port = int.TryParse(_config["Email:Port"] ?? Environment.GetEnvironmentVariable("EMAIL_PORT"), out var parsedPort)
+                ? parsedPort
+                : DefaultSmtpPort;
             var emailUser = _config["Email:EmailUser"] ?? Environment.GetEnvironmentVariable("EMAIL_USER");
+            var emailPass = _config["Email:EmailPass"] ?? Environment.GetEnvironmentVariable("EMAIL_PASS");
 
-            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(emailUser))
+            if (string.IsNullOrWhiteSpace(emailUser) || string.IsNullOrWhiteSpace(emailPass))
             {
-                Console.WriteLine("\n⚠️ WARNING: SENDGRID_API_KEY or EMAIL_USER is missing.");
+                _logger.LogWarning("SMTP credentials are missing (Email:EmailUser / Email:EmailPass); email to {ToEmail} was not sent.", toEmail);
                 return;
             }
 
-            var client = new SendGridClient(apiKey);
-            var from = new EmailAddress(emailUser, "Smart Meal");
-            var to = new EmailAddress(toEmail);
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Smart Meal", emailUser));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+            message.Body = new TextPart("html") { Text = body };
 
-            // Tạo email message
-            var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
+            using var client = new SmtpClient { Timeout = (int)SmtpTimeout.TotalMilliseconds };
 
             try
             {
-                // Giao tiếp qua HTTP/REST API (cổng 443) - Không bao giờ bị chặn
-                var response = await client.SendEmailAsync(msg);
+                // 465 = implicit TLS, 587 = STARTTLS, 25 = opportunistic STARTTLS.
+                var secureOptions = port switch
+                {
+                    465 => SecureSocketOptions.SslOnConnect,
+                    587 => SecureSocketOptions.StartTls,
+                    _ => SecureSocketOptions.StartTlsWhenAvailable
+                };
 
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"[EMAIL SUCCESS] Sent via SendGrid API to {toEmail}");
-                }
-                else
-                {
-                    var errorBody = await response.Body.ReadAsStringAsync();
-                    Console.WriteLine($"[EMAIL API ERROR] Status: {response.StatusCode}. Details: {errorBody}");
-                }
+                await client.ConnectAsync(host, port, secureOptions);
+                await client.AuthenticateAsync(emailUser, emailPass);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                _logger.LogInformation("Email sent via SMTP {Host}:{Port} to {ToEmail}", host, port, toEmail);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[EMAIL FATAL ERROR] Thất bại khi gọi API: {ex.Message}");
+                _logger.LogError(ex, "Failed to send email via SMTP {Host}:{Port} to {ToEmail}", host, port, toEmail);
             }
         }
 
@@ -61,7 +75,7 @@ namespace Service.Implements
             var otpCode = new Random().Next(100000, 999999).ToString();
 
             var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
-            var otp = _cache.Set($"OTP_{email}", otpCode, cacheOptions);
+            _cache.Set($"OTP_{email}", otpCode, cacheOptions);
 
             var subject = "Mã xác thực đăng nhập SmartMeal";
 
@@ -73,22 +87,21 @@ namespace Service.Implements
                     <p><i>Mã này sẽ hết hạn trong 5 phút. Vui lòng không chia sẻ cho người khác.</i></p>
                 </div>";
 
-            Console.WriteLine("Pushing email to background task via SendGrid API...");
+            _logger.LogInformation("Queueing OTP email via SMTP for {Email}", email);
 
             _ = Task.Run(async () =>
             {
                 try
                 {
                     await SendEmailAsync(email, subject, htmlBody);
-                    Console.WriteLine($"Background API request completed for {email}.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Background email task failed: {ex.Message}");
+                    _logger.LogError(ex, "Background OTP email task failed for {Email}", email);
                 }
             });
 
-            return otp;
+            return otpCode;
         }
     }
 }

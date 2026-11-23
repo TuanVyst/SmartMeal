@@ -15,6 +15,8 @@ namespace Service.Interfaces
         Task<AuthResponseDto> VerifyOtp(VerifyOtpRequest request);
         Task<AuthResponseDto> VerifyRegisterOtp(VerifyOtpRequest request);
         Task<AuthResponseDto> Register(RegisterRequest request);
+        Task ResendRegisterOtpAsync(string email);
+        Task ResendLoginOtpAsync(string email);
         Task<AuthResponseDto> GoogleLogin(GoogleLoginRequest request);
         Task<Account> UpdateAvatarUrl(Guid accountId, string avatarUrl);
         Task<bool> ForgotPassword(ForgotPasswordRequest request);

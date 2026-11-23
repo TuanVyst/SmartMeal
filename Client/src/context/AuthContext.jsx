@@ -184,6 +184,16 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const resendRegisterOtp = async (email) => {
+    const { data } = await authService.resendRegisterOtp(email);
+    return data;
+  };
+
+  const resendLoginOtp = async (email) => {
+    const { data } = await authService.resendLoginOtp(email);
+    return data;
+  };
+
   const googleLogin = async (idToken) => {
     const { data } = await authService.googleLogin(idToken);
     localStorage.setItem('token', data.token);
@@ -216,7 +226,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, googleLogin, logout, updateAvatar, subscription, isPremium, hasProAccess, checkPremiumStatus, checkPendingPaymentStatus }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, register, verifyRegisterOtp, resendRegisterOtp, resendLoginOtp, googleLogin, logout, updateAvatar, subscription, isPremium, hasProAccess, checkPremiumStatus, checkPendingPaymentStatus }}>
       {children}
     </AuthContext.Provider>
   );
