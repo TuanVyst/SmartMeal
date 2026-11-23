@@ -46,6 +46,9 @@ spec:
           port: 443
     - ports:
         - protocol: TCP
+          port: 80
+    - ports:
+        - protocol: TCP
           port: 587
 ---
 apiVersion: networking.k8s.io/v1
