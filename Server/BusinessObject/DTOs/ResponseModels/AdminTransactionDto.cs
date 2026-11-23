@@ -71,6 +71,23 @@ namespace BusinessObject.Dtos.ResponseModels
         public int AdminGrantCount { get; set; }
         public double AdminGrantValue { get; set; }
         public double AvgOrderValue { get; set; }
+
+        /// <summary>Distinct accounts that have at least one row matching the current filter.</summary>
+        public int DistinctSubscribers { get; set; }
+
+        /// <summary>System-wide snapshot of accounts with an active subscription (not filter-dependent).</summary>
+        public int ActiveSubscribers { get; set; }
+
+        /// <summary>Paid, non-admin transactions grouped by plan (same predicate as TotalRevenue).</summary>
+        public List<PlanRevenueDto> PlanBreakdown { get; set; } = new List<PlanRevenueDto>();
+    }
+
+    public class PlanRevenueDto
+    {
+        public Guid PlanId { get; set; }
+        public string? PlanName { get; set; }
+        public int Count { get; set; }
+        public double Revenue { get; set; }
     }
 
     public class AdminTransactionListResponse

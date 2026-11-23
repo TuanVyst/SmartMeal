@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
   formatDuration,
+  formatPlanTier,
   maskAccountNumber,
 } from './transactionFormat';
 
@@ -334,7 +335,7 @@ export default function TransactionDetailDrawer({ subId, onClose }) {
                   <DetailItem label="Tên gói" value={detail.planName} />
                   <DetailItem label="Giá niêm yết" value={formatCurrency(detail.planPrice)} />
                   <DetailItem label="Thời lượng" value={formatDuration(detail.planDurationDays)} />
-                  <DetailItem label="Phân hạng" value={detail.planTier} />
+                  <DetailItem label="Loại gói" value={formatPlanTier(detail.planTier)} />
                   <DetailItem label="Bắt đầu" value={formatDate(detail.startDate)} />
                   <DetailItem label="Kết thúc" value={formatDate(detail.endDate)} />
                   <DetailItem label="Cấp tay">

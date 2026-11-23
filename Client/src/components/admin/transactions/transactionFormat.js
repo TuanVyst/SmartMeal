@@ -85,6 +85,21 @@ export function formatDuration(days) {
   return `${num} ngày`;
 }
 
+const PLAN_TIER_LABELS = {
+  0: 'Miễn phí',
+  1: 'Tuần',
+  2: 'Tháng',
+  3: 'Năm',
+};
+
+/** Maps Plan.Tier (0 Free, 1 Weekly, 2 Monthly, 3 Yearly) to a display label. */
+export function formatPlanTier(tier, fallback = EMPTY) {
+  if (tier === null || tier === undefined || tier === '') return fallback;
+  const num = Number(tier);
+  if (!Number.isFinite(num)) return fallback;
+  return PLAN_TIER_LABELS[num] ?? `Khác (${num})`;
+}
+
 export function maskAccountNumber(value, visibleDigits = 4) {
   if (value === null || value === undefined) return EMPTY;
   const text = String(value).trim();

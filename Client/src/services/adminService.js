@@ -318,23 +318,6 @@ export const adminService = {
     return { blob: res.data, filename };
   },
 
-  getSubscriptionOverview: async (params = {}) => {
-    const res = await api.get('/Statistic/subscription-overview', { params });
-    return res.data?.data ?? null;
-  },
-
-  // Statistics
-  getSubscriptionStatistics: async (startDate, endDate) => {
-    let url = '/Statistic/subscriptions';
-    const params = [];
-    if (startDate) params.push(`startDate=${startDate}`);
-    if (endDate) params.push(`endDate=${endDate}`);
-    if (params.length > 0) url += `?${params.join('&')}`;
-
-    const res = await api.get(url);
-    return res.data.data;
-  },
-
   getWeeklyEngagementStats: async (date) => {
     let url = '/Statistic/weekly-engagement';
     if (date) url += `?date=${encodeURIComponent(date)}`;

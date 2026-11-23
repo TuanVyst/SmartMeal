@@ -48,14 +48,14 @@ const SOURCE_OPTIONS = [
 
 const SKELETON_WIDTHS = ['70%', '55%', '80%', '65%', '50%', '60%', '45%', '55%', '50%', '45%', '60%', '55%'];
 
-function createInitialFilters(from, to) {
+function createInitialFilters() {
   return {
     search: '',
     status: '',
     source: '',
     planId: '',
-    fromDate: from === null || from === undefined ? TRANSACTION_DEFAULT_FROM : from,
-    toDate: to === null || to === undefined ? todayInputValue() : to,
+    fromDate: TRANSACTION_DEFAULT_FROM,
+    toDate: todayInputValue(),
     page: 1,
     pageSize: 20,
     sortBy: 'createdAt',
@@ -119,14 +119,9 @@ function getPlanName(plan) {
   return plan?.name ?? plan?.planName ?? plan?.plan_name ?? 'Gói không tên';
 }
 
-export default function AdminTransactionsPanel({
-  defaultFrom,
-  defaultTo,
-  showHeader = true,
-  compact = false,
-}) {
+export default function AdminTransactionsPanel() {
   const dialog = useDialog();
-  const [filters, setFilters] = useState(() => createInitialFilters(defaultFrom, defaultTo));
+  const [filters, setFilters] = useState(() => createInitialFilters());
   const [searchInput, setSearchInput] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -192,7 +187,7 @@ export default function AdminTransactionsPanel({
 
   const handleReset = () => {
     setSearchInput('');
-    setFilters(createInitialFilters(defaultFrom, defaultTo));
+    setFilters(createInitialFilters());
   };
 
   const handleClearDates = () => {
@@ -256,18 +251,16 @@ export default function AdminTransactionsPanel({
   const hasAdminGrant = summary.adminGrantCount !== undefined && summary.adminGrantCount !== null;
 
   return (
-    <div className={`txn-panel ${compact ? 'txn-panel-compact' : ''}`.trim()}>
-      <div className={`txn-panel-header ${showHeader ? '' : 'txn-panel-header-actions-only'}`.trim()}>
-        {showHeader && (
-          <div className="txn-panel-heading">
+    <div className="txn-panel">
+      <div className="txn-panel-header">
+        <div className="txn-panel-heading">
             <h2>
               <FiCreditCard aria-hidden="true" /> Giao dịch &amp; thanh toán
             </h2>
             <p>
-              Đối chiếu PayOS, theo dõi bằng chứng thanh toán và xuất báo cáo doanh thu.
+              Đối chiếu PayOS, theo dõi bằng chứng thanh toán, doanh thu theo gói và xuất báo cáo.
             </p>
-          </div>
-        )}
+        </div>
         <div className="txn-panel-actions">
           <button
             type="button"
@@ -289,9 +282,8 @@ export default function AdminTransactionsPanel({
         </div>
       </div>
 
-      {!compact && (
-        <div className="txn-summary-grid">
-          <SummaryCard
+      <div className="txn-summary-grid">
+        <SummaryCard
             label="Tổng giao dịch"
             value={(summary.totalTransactions ?? 0).toLocaleString('vi-VN')}
             tone="blue"
@@ -321,6 +313,12 @@ export default function AdminTransactionsPanel({
             value={formatCurrency(summary.avgOrderValue ?? 0)}
             tone="slate"
           />
+          <SummaryCard
+            label="Người đăng ký"
+            value={(summary.distinctSubscribers ?? 0).toLocaleString('vi-VN')}
+            sub="tài khoản có giao dịch"
+            tone="blue"
+          />
           {hasAdminGrant && (
             <SummaryCard
               label="Cấp tay"
@@ -329,8 +327,7 @@ export default function AdminTransactionsPanel({
               tone="violet"
             />
           )}
-        </div>
-      )}
+      </div>
 
       <div className="txn-filter-card">
         <div className="txn-filters">
@@ -690,6 +687,44 @@ export default function AdminTransactionsPanel({
           </div>
         </div>
       </div>
+
+      {!loading && !error && data && Array.isArray(summary.planBreakdown) && summary.planBreakdown.length > 0 && (
+        <div className="txn-plan-breakdown">
+          <div className="txn-plan-breakdown-head">
+            <div>
+              <h3>Doanh thu theo gói</h3>
+              <p>Chỉ tính giao dịch đã thanh toán, không gồm gói admin cấp.</p>
+            </div>
+            <span className="txn-muted txn-small">{summary.planBreakdown.length} gói</span>
+          </div>
+          <div className="txn-table-scroll">
+            <table className="admin-table txn-table">
+              <thead>
+                <tr>
+                  <th scope="col">Gói</th>
+                  <th scope="col">Số giao dịch</th>
+                  <th scope="col">Doanh thu</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.planBreakdown.map((plan) => (
+                  <tr key={plan.planId || plan.planName}>
+                    <td>
+                      <span className="txn-cell-main">{plan.planName || 'Gói không tên'}</span>
+                    </td>
+                    <td>
+                      <span className="txn-cell-main">{(plan.count ?? 0).toLocaleString('vi-VN')}</span>
+                    </td>
+                    <td>
+                      <span className="txn-amount">{formatCurrency(plan.revenue ?? 0)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {detailSubId !== null && (
         <TransactionDetailDrawer
