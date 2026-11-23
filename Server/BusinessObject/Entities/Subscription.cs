@@ -25,7 +25,7 @@ namespace BusinessObject.Entities
         public DateTime? EndDate { get; set; }
 
         /// <summary>
-        /// active | expired | cancelled
+        /// active | expired | cancelled | pending | superseded
         /// </summary>
         [Required]
         [MaxLength(20)]
@@ -38,8 +38,70 @@ namespace BusinessObject.Entities
 
         public bool IsDeleted { get; set; } = false;
 
+        // ---- Transaction / payment evidence ----
+
+        /// <summary>
+        /// Row creation timestamp (UTC). Distinct from StartDate (service period start).
+        /// </summary>
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Actual payment confirmation time reported by the payment provider (UTC).
+        /// </summary>
+        public DateTime? PaidAt { get; set; }
+
+        /// <summary>
+        /// "PayOS" | "AdminGrant"
+        /// </summary>
+        [MaxLength(20)]
+        public string? PaymentProvider { get; set; }
+
+        /// <summary>
+        /// PayOS payment link id (e.g. 4f1a...).
+        /// </summary>
+        [MaxLength(100)]
+        public string? PaymentLinkId { get; set; }
+
+        /// <summary>
+        /// Bank transaction reference (PayOS transaction reference).
+        /// </summary>
+        [MaxLength(100)]
+        public string? BankReference { get; set; }
+
+        /// <summary>
+        /// Transfer content / description shown on the bank statement.
+        /// </summary>
+        [MaxLength(255)]
+        public string? PaymentDescription { get; set; }
+
+        /// <summary>
+        /// Raw provider status: PENDING | PAID | CANCELLED | EXPIRED | UNDERPAID | PROCESSING | FAILED
+        /// </summary>
+        [MaxLength(30)]
+        public string? ProviderStatus { get; set; }
+
+        /// <summary>
+        /// Raw PayOS payload (JSON) kept as reconciliation evidence.
+        /// </summary>
+        [Column(TypeName = "text")]
+        public string? RawEvidence { get; set; }
+
+        /// <summary>
+        /// "webhook" | "poll" | "backfill" | "admin"
+        /// </summary>
+        [MaxLength(20)]
+        public string? EvidenceSource { get; set; }
+
+        public DateTime? EvidenceSyncedAt { get; set; }
+
+        /// <summary>
+        /// Admin account that granted this subscription (null for regular purchases).
+        /// </summary>
+        public Guid? GrantedByAccountId { get; set; }
+
         // Navigation properties
         public virtual Account Account { get; set; }
         public virtual Plan Plan { get; set; }
+        public virtual Account? GrantedByAccount { get; set; }
     }
 }

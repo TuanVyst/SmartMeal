@@ -266,6 +266,63 @@ export const adminService = {
     return res.data;
   },
 
+  // Admin Transaction operations (list / detail / PayOS reconciliation)
+  getAdminTransactions: async (params = {}) => {
+    const res = await api.get('/Subscription/admin/transactions', { params });
+    return res.data?.data ?? {
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 20,
+      totalPages: 0,
+      summary: {},
+    };
+  },
+
+  getAdminTransactionDetail: async (subId) => {
+    const res = await api.get(`/Subscription/admin/transactions/${subId}`);
+    return res.data?.data ?? null;
+  },
+
+  verifyPayOsTransaction: async (subId) => {
+    const res = await api.get(`/Subscription/admin/transactions/${subId}/verify-payos`);
+    return res.data?.data ?? null;
+  },
+
+  syncPayOsTransactions: async (payload = {}) => {
+    const res = await api.post('/Subscription/admin/transactions/sync-payos', payload);
+    return res.data?.data ?? null;
+  },
+
+  exportAdminTransactions: async (params = {}) => {
+    const res = await api.get('/Subscription/admin/transactions/export', {
+      params,
+      responseType: 'blob',
+    });
+
+    let filename = '';
+    const disposition = res.headers?.['content-disposition'] || res.headers?.['Content-Disposition'] || '';
+    const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf8Match?.[1]) {
+      try {
+        filename = decodeURIComponent(utf8Match[1].trim());
+      } catch {
+        filename = utf8Match[1].trim();
+      }
+    }
+    if (!filename) {
+      const asciiMatch = disposition.match(/filename="?([^";]+)"?/i);
+      if (asciiMatch?.[1]) filename = asciiMatch[1].trim();
+    }
+
+    return { blob: res.data, filename };
+  },
+
+  getSubscriptionOverview: async (params = {}) => {
+    const res = await api.get('/Statistic/subscription-overview', { params });
+    return res.data?.data ?? null;
+  },
+
   // Statistics
   getSubscriptionStatistics: async (startDate, endDate) => {
     let url = '/Statistic/subscriptions';

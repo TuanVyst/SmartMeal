@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Service.Interfaces;
 using BusinessObject.Dtos.RequestModels;
 using System;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -15,11 +18,16 @@ namespace PresentationLayer.Controllers
     public class SubscriptionController : ControllerBase
     {
         private readonly ISubscriptionService _subscriptionService;
+        private readonly IPaymentService _paymentService;
         private readonly ILogger<SubscriptionController> _logger;
 
-        public SubscriptionController(ISubscriptionService subscriptionService, ILogger<SubscriptionController> logger)
+        public SubscriptionController(
+            ISubscriptionService subscriptionService,
+            IPaymentService paymentService,
+            ILogger<SubscriptionController> logger)
         {
             _subscriptionService = subscriptionService;
+            _paymentService = paymentService;
             _logger = logger;
         }
 
@@ -29,6 +37,13 @@ namespace PresentationLayer.Controllers
             if (claim == null)
                 throw new UnauthorizedAccessException("Account ID not found in token");
             return Guid.Parse(claim.Value);
+        }
+
+        private Guid? TryGetAccountId()
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim == null) return null;
+            return Guid.TryParse(claim.Value, out var id) ? id : null;
         }
 
         [HttpGet]
@@ -171,6 +186,121 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        // ------------------------------------------------------------------
+        // Admin transaction dashboard
+        // ------------------------------------------------------------------
+
+        [HttpGet("admin/transactions")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAdminTransactions([FromQuery] AdminTransactionFilter filter)
+        {
+            try
+            {
+                var data = await _subscriptionService.GetAdminTransactionsAsync(filter ?? new AdminTransactionFilter());
+                return Ok(new { success = true, data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting admin transactions");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("admin/transactions/export")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ExportAdminTransactions([FromQuery] AdminTransactionFilter filter)
+        {
+            try
+            {
+                var csv = await _subscriptionService.BuildAdminTransactionsCsvAsync(filter ?? new AdminTransactionFilter());
+
+                var preamble = Encoding.UTF8.GetPreamble(); // EF BB BF
+                var body = Encoding.UTF8.GetBytes(csv);
+                var bytes = new byte[preamble.Length + body.Length];
+                Buffer.BlockCopy(preamble, 0, bytes, 0, preamble.Length);
+                Buffer.BlockCopy(body, 0, bytes, preamble.Length, body.Length);
+
+                var fileName = $"smartmeal-transactions-{DateTime.UtcNow.AddHours(7):yyyyMMdd-HHmm}.csv";
+                return File(bytes, "text/csv; charset=utf-8", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting admin transactions");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("admin/transactions/{id:guid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAdminTransactionDetail(Guid id)
+        {
+            try
+            {
+                var data = await _subscriptionService.GetAdminTransactionDetailAsync(id);
+                if (data == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy giao dịch." });
+
+                return Ok(new { success = true, data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting admin transaction detail for {Id}", id);
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("admin/transactions/{id:guid}/verify-payos")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> VerifyPayOsTransaction(Guid id)
+        {
+            try
+            {
+                var detail = await _subscriptionService.GetAdminTransactionDetailAsync(id);
+                if (detail == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy giao dịch." });
+
+                if (detail.IsAdminGrant)
+                    return BadRequest(new { success = false, message = "Giao dịch do admin cấp, không có link PayOS để đối soát." });
+
+                if (string.IsNullOrWhiteSpace(detail.OrderCode) || !long.TryParse(detail.OrderCode, out var orderCode))
+                    return BadRequest(new { success = false, message = "Giao dịch không có mã đơn PayOS hợp lệ." });
+
+                try
+                {
+                    var verification = await _paymentService.VerifyPaymentLinkAsync(orderCode);
+                    return Ok(new { success = true, data = verification });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "PayOS verification failed for order {OrderCode}", orderCode);
+                    return StatusCode(502, new { success = false, message = ex.Message });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying PayOS transaction for {Id}", id);
+                return StatusCode(502, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("admin/transactions/sync-payos")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SyncPayOsEvidence(
+            [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] PayOsSyncRequest? request)
+        {
+            try
+            {
+                request ??= new PayOsSyncRequest();
+                var result = await _paymentService.SyncPayOsEvidenceAsync(request);
+                return Ok(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error syncing PayOS evidence");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost("admin/grant")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GrantByAdmin([FromBody] AdminGrantSubscriptionRequest request)
@@ -181,6 +311,9 @@ namespace PresentationLayer.Controllers
                 {
                     return BadRequest(new { success = false, message = "Thiếu thông tin người dùng hoặc gói cước." });
                 }
+
+                // Audit trail: remember which admin performed the grant.
+                request.GrantedByAccountId ??= TryGetAccountId();
 
                 var item = await _subscriptionService.GrantSubscriptionByAdminAsync(request);
                 return Ok(new

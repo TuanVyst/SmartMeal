@@ -36,6 +36,21 @@ namespace PresentationLayer.Controllers
             }
         }
 
+        [HttpGet("subscription-overview")]
+        public async Task<IActionResult> GetSubscriptionOverview([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            try
+            {
+                var data = await _statisticService.GetSubscriptionOverviewAsync(fromDate, toDate);
+                return Ok(new { success = true, data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting subscription overview");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("weekly-engagement")]
         public async Task<IActionResult> GetWeeklyEngagementStatistics([FromQuery] string? date = null)
         {

@@ -1133,11 +1133,43 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("Account_id")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BankReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("EvidenceSource")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("EvidenceSyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("GrantedByAccountId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentDescription")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("PaymentLinkId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PaymentProvider")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("PaymentRef")
                         .IsRequired()
@@ -1150,6 +1182,13 @@ namespace DataAccessLayer.Migrations
                     b.Property<double>("PricePaid")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ProviderStatus")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("RawEvidence")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -1160,9 +1199,15 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Sub_id");
 
-                    b.HasIndex("Account_id");
+                    b.HasIndex("GrantedByAccountId");
+
+                    b.HasIndex("PaymentRef");
 
                     b.HasIndex("Plan_id");
+
+                    b.HasIndex("Account_id", "Status");
+
+                    b.HasIndex("Status", "CreatedAt");
 
                     b.ToTable("Subscription");
                 });
@@ -1632,6 +1677,11 @@ namespace DataAccessLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BusinessObject.Entities.Account", "GrantedByAccount")
+                        .WithMany()
+                        .HasForeignKey("GrantedByAccountId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("BusinessObject.Entities.Plan", "Plan")
                         .WithMany("Subscriptions")
                         .HasForeignKey("Plan_id")
@@ -1639,6 +1689,8 @@ namespace DataAccessLayer.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
+
+                    b.Navigation("GrantedByAccount");
 
                     b.Navigation("Plan");
                 });

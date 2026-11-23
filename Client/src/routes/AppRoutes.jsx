@@ -17,9 +17,9 @@ import AdminIngredientTags from '../pages/admin/AdminIngredientTags';
 import AdminIngredients from '../pages/admin/AdminIngredients';
 import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
 import AdminRecipes from '../pages/admin/AdminRecipes';
-import AdminCategories from '../pages/admin/AdminCategories';
 import AdminPlans from '../pages/admin/AdminPlans';
 import AdminStatistics from '../pages/admin/AdminStatistics';
+import AdminTransactions from '../pages/admin/AdminTransactions';
 import AdminFeedbacks from '../pages/admin/AdminFeedbacks';
 import SurveyPage from '../pages/survey/SurveyPage';
 import RecipeForm from '../pages/food/RecipeForm';
@@ -141,6 +141,7 @@ export default function AppRoutes() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="transactions" element={<AdminTransactions />} />
         <Route path="ingredient-tags" element={<AdminIngredientTags />} />
         <Route path="ingredients" element={<AdminIngredients />} />
         <Route path="recipe-tags" element={<AdminRecipeTags />} />

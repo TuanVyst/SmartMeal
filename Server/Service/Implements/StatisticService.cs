@@ -1,7 +1,10 @@
+using BusinessObject.Dtos.ResponseModels;
+using BusinessObject.Helpers;
 using DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Service.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,8 +22,9 @@ namespace Service.Implements
         public async Task<object> GetSubscriptionStatisticsAsync(DateTime? startDate, DateTime? endDate)
         {
             var query = _ctx.Subscriptions
+                .AsNoTracking()
                 .Include(s => s.Plan)
-                .Where(s => !s.IsDeleted && s.Status == "PAID" || s.Status == "active");
+                .Where(s => !s.IsDeleted && (s.Status == "active" || s.Status == "expired" || s.Status == "superseded"));
 
             if (startDate.HasValue)
                 query = query.Where(s => s.StartDate >= startDate.Value);
@@ -30,17 +34,26 @@ namespace Service.Implements
 
             var subscriptions = await query.ToListAsync();
 
-            var totalSubscribers = subscriptions.Count;
-            var totalRevenue = subscriptions.Sum(s => s.PricePaid);
+            var paidSubscriptions = subscriptions
+                .Where(s => !PaymentEvidenceHelper.IsAdminGrant(s) && s.PricePaid > 0)
+                .ToList();
+
+            var totalSubscribers = subscriptions
+                .Select(s => s.Account_id)
+                .Distinct()
+                .Count();
+
+            var totalRevenue = paidSubscriptions.Sum(s => s.PricePaid);
 
             var planStats = subscriptions
-                .GroupBy(s => new { s.Plan_id, s.Plan.Name })
+                .GroupBy(s => new { s.Plan_id, PlanName = s.Plan != null ? s.Plan.Name : null })
                 .Select(g => new
                 {
                     PlanId = g.Key.Plan_id,
-                    PlanName = g.Key.Name,
+                    PlanName = g.Key.PlanName,
                     SubscriberCount = g.Count(),
-                    Revenue = g.Sum(s => s.PricePaid)
+                    Revenue = g.Where(s => !PaymentEvidenceHelper.IsAdminGrant(s) && s.PricePaid > 0)
+                               .Sum(s => s.PricePaid)
                 })
                 .ToList();
 
@@ -49,6 +62,94 @@ namespace Service.Implements
                 TotalSubscribers = totalSubscribers,
                 TotalRevenue = totalRevenue,
                 PlanStatistics = planStats
+            };
+        }
+
+        public async Task<SubscriptionOverviewDto> GetSubscriptionOverviewAsync(DateTime? fromDate, DateTime? toDate)
+        {
+            var fromVn = fromDate?.Date ?? DateTime.UtcNow.AddHours(7).Date.AddDays(-29);
+            var toVn = toDate?.Date ?? DateTime.UtcNow.AddHours(7).Date;
+            if (toVn < fromVn)
+            {
+                (fromVn, toVn) = (toVn, fromVn);
+            }
+
+            var fromUtc = PaymentEvidenceHelper.ToVnStartUtc(fromVn);
+            var toUtcExclusive = PaymentEvidenceHelper.ToVnEndUtcExclusive(toVn);
+            var now = DateTime.UtcNow;
+
+            var subscriptions = await _ctx.Subscriptions
+                .AsNoTracking()
+                .Include(s => s.Plan)
+                .Where(s => !s.IsDeleted && s.CreatedAt >= fromUtc && s.CreatedAt < toUtcExclusive)
+                .ToListAsync();
+
+            var successful = subscriptions
+                .Where(s => (s.Status == "active" || s.Status == "expired" || s.Status == "superseded") && s.PricePaid > 0)
+                .ToList();
+
+            var paidSuccessful = successful
+                .Where(s => !PaymentEvidenceHelper.IsAdminGrant(s))
+                .ToList();
+
+            var adminGrants = subscriptions
+                .Where(PaymentEvidenceHelper.IsAdminGrant)
+                .ToList();
+
+            var revenue = paidSuccessful.Sum(s => s.PricePaid);
+            var avgOrderValue = paidSuccessful.Count > 0 ? Math.Round(revenue / paidSuccessful.Count, 2) : 0;
+
+            var activeSubscribers = await _ctx.Subscriptions
+                .AsNoTracking()
+                .Where(s => !s.IsDeleted && s.Status == "active" && (s.EndDate == null || s.EndDate > now))
+                .Select(s => s.Account_id)
+                .Distinct()
+                .CountAsync();
+
+            // ---- daily revenue (Vietnam calendar days) ----
+            var revenueByVnDate = paidSuccessful
+                .GroupBy(s => (s.PaidAt ?? s.CreatedAt).AddHours(7).Date)
+                .ToDictionary(g => g.Key, g => new { Revenue = g.Sum(s => s.PricePaid), Count = g.Count() });
+
+            var dailyRevenue = new List<DailyRevenueDto>();
+            for (var day = fromVn.Date; day <= toVn.Date; day = day.AddDays(1))
+            {
+                revenueByVnDate.TryGetValue(day, out var bucket);
+                dailyRevenue.Add(new DailyRevenueDto
+                {
+                    Date = day.ToString("yyyy-MM-dd"),
+                    Revenue = bucket?.Revenue ?? 0,
+                    Count = bucket?.Count ?? 0
+                });
+            }
+
+            var planBreakdown = paidSuccessful
+                .GroupBy(s => new { s.Plan_id, PlanName = s.Plan != null ? s.Plan.Name : null })
+                .Select(g => new PlanRevenueDto
+                {
+                    PlanId = g.Key.Plan_id,
+                    PlanName = g.Key.PlanName,
+                    Count = g.Count(),
+                    Revenue = g.Sum(s => s.PricePaid)
+                })
+                .OrderByDescending(p => p.Revenue)
+                .ToList();
+
+            return new SubscriptionOverviewDto
+            {
+                FromDate = fromVn,
+                ToDate = toVn,
+                Revenue = revenue,
+                SuccessfulCount = paidSuccessful.Count,
+                PendingCount = subscriptions.Count(s => s.Status == "pending"),
+                CancelledCount = subscriptions.Count(s => s.Status == "cancelled"),
+                ExpiredCount = subscriptions.Count(s => s.Status == "expired"),
+                ActiveSubscribers = activeSubscribers,
+                AdminGrantCount = adminGrants.Count,
+                AdminGrantValue = adminGrants.Sum(s => s.PricePaid),
+                AvgOrderValue = avgOrderValue,
+                DailyRevenue = dailyRevenue,
+                PlanBreakdown = planBreakdown
             };
         }
 

@@ -13,5 +13,11 @@ namespace BusinessObject.Dtos.ResponseModels
         public string PaymentRef { get; set; }
         public double PricePaid { get; set; }
         public bool IsDeleted { get; set; }
+
+        // ---- Transaction metadata (non-breaking additions) ----
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? PaidAt { get; set; }
+        public string? PaymentProvider { get; set; }
+        public string? ProviderStatus { get; set; }
     }
 }
