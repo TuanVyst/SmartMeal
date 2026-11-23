@@ -91,6 +91,30 @@ namespace DataAccessLayer
                 .WithMany()
                 .HasForeignKey(f => f.RepliedBy)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // ----- Subscription -----
+            // Explicit relationships: Subscription has two Account navigations (owner + admin grantor),
+            // so the owner relationship must be configured explicitly to avoid ambiguity.
+            modelBuilder.Entity<BusinessObject.Entities.Subscription>()
+                .HasOne(s => s.Account)
+                .WithMany(a => a.Subscriptions)
+                .HasForeignKey(s => s.Account_id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BusinessObject.Entities.Subscription>()
+                .HasOne(s => s.GrantedByAccount)
+                .WithMany()
+                .HasForeignKey(s => s.GrantedByAccountId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<BusinessObject.Entities.Subscription>()
+                .HasIndex(s => s.PaymentRef);
+
+            modelBuilder.Entity<BusinessObject.Entities.Subscription>()
+                .HasIndex(s => new { s.Status, s.CreatedAt });
+
+            modelBuilder.Entity<BusinessObject.Entities.Subscription>()
+                .HasIndex(s => new { s.Account_id, s.Status });
         }
     }
 }

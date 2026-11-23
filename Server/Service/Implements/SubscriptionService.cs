@@ -1,13 +1,17 @@
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
+using BusinessObject.Helpers;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Service.Implements
@@ -60,6 +64,10 @@ namespace Service.Implements
             if (plan.Duration > 0)
                 endDate = startDate.AddDays(plan.Duration);
 
+            var paymentProvider = string.IsNullOrWhiteSpace(request.PaymentProvider)
+                ? "PayOS"
+                : request.PaymentProvider.Trim();
+
             var newItem = new Subscription
             {
                 Sub_id = Guid.NewGuid(),
@@ -70,7 +78,13 @@ namespace Service.Implements
                 Status = request.Status,
                 PaymentRef = request.PaymentRef,
                 PricePaid = request.PricePaid > 0 ? request.PricePaid : plan.Price,
-                IsDeleted = false
+                IsDeleted = false,
+                CreatedAt = DateTime.UtcNow,
+                PaidAt = null,
+                PaymentProvider = paymentProvider,
+                ProviderStatus = "PENDING",
+                PaymentLinkId = request.PaymentLinkId,
+                PaymentDescription = request.PaymentDescription
             };
 
             var result = await _subscriptionRepo.CreateSubscription(newItem);
@@ -99,6 +113,16 @@ namespace Service.Implements
             existingItem.Status = request.Status;
             existingItem.PaymentRef = request.PaymentRef;
             if (request.PricePaid > 0) existingItem.PricePaid = request.PricePaid;
+
+            // Preserve/complete payment metadata without wiping reconciliation evidence.
+            if (!string.IsNullOrWhiteSpace(request.PaymentProvider))
+                existingItem.PaymentProvider = request.PaymentProvider.Trim();
+            if (!string.IsNullOrWhiteSpace(request.PaymentLinkId))
+                existingItem.PaymentLinkId = request.PaymentLinkId;
+            if (!string.IsNullOrWhiteSpace(request.PaymentDescription))
+                existingItem.PaymentDescription = request.PaymentDescription;
+            if (existingItem.CreatedAt == default)
+                existingItem.CreatedAt = DateTime.UtcNow;
 
             var result = await _subscriptionRepo.UpdateSubscription(existingItem);
             _logger.LogInformation("Subscription '{Sub_id}' updated successfully", existingItem.Sub_id);
@@ -210,7 +234,14 @@ namespace Service.Implements
                     ? $"ADMIN_GRANT_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
                     : request.PaymentRef.Trim(),
                 PricePaid = request.PricePaid ?? plan.Price,
-                IsDeleted = false
+                IsDeleted = false,
+                CreatedAt = now,
+                PaidAt = null,
+                PaymentProvider = "AdminGrant",
+                ProviderStatus = null,
+                EvidenceSource = "admin",
+                EvidenceSyncedAt = now,
+                GrantedByAccountId = request.GrantedByAccountId
             };
 
             var created = await _subscriptionRepo.CreateSubscription(newSub);
@@ -236,12 +267,192 @@ namespace Service.Implements
             {
                 sub.Status = "cancelled";
                 sub.EndDate = now;
+                sub.ProviderStatus ??= "CANCELLED";
                 await _subscriptionRepo.UpdateSubscription(sub);
             }
 
             _logger.LogInformation("Admin revoked {Count} active subscription(s) for account {AccountId}", activeSubs.Count, accountId);
             return true;
         }
+
+        // ------------------------------------------------------------------
+        // Admin transaction dashboard
+        // ------------------------------------------------------------------
+
+        public async Task<AdminTransactionListResponse> GetAdminTransactionsAsync(AdminTransactionFilter filter, CancellationToken ct = default)
+        {
+            filter ??= new AdminTransactionFilter();
+
+            var page = filter.Page < 1 ? 1 : filter.Page;
+            var pageSize = filter.PageSize < 1 ? 20 : filter.PageSize;
+            if (pageSize > 200) pageSize = 200;
+            filter.Page = page;
+            filter.PageSize = pageSize;
+
+            var (items, total) = await _subscriptionRepo.GetPagedSubscriptionsWithDetailsAsync(filter);
+            var summary = await _subscriptionRepo.GetTransactionSummaryAsync(filter);
+
+            return new AdminTransactionListResponse
+            {
+                Items = items.Select(MapToAdminTransactionDto).ToList(),
+                Total = total,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = total <= 0 ? 0 : (int)Math.Ceiling(total / (double)pageSize),
+                Summary = summary
+            };
+        }
+
+        public async Task<AdminTransactionDetailDto?> GetAdminTransactionDetailAsync(Guid id)
+        {
+            var entity = await _subscriptionRepo.GetSubscriptionWithDetailsAsync(id);
+            if (entity == null) return null;
+
+            var baseDto = MapToAdminTransactionDto(entity);
+            return new AdminTransactionDetailDto
+            {
+                SubId = baseDto.SubId,
+                OrderCode = baseDto.OrderCode,
+                PaymentLinkId = baseDto.PaymentLinkId,
+                BankReference = baseDto.BankReference,
+                Source = baseDto.Source,
+                Status = baseDto.Status,
+                ProviderStatus = baseDto.ProviderStatus,
+                PricePaid = baseDto.PricePaid,
+                PlanPrice = baseDto.PlanPrice,
+                PlanName = baseDto.PlanName,
+                PlanDurationDays = baseDto.PlanDurationDays,
+                PlanTier = baseDto.PlanTier,
+                AccountId = baseDto.AccountId,
+                AccountName = baseDto.AccountName,
+                AccountUsername = baseDto.AccountUsername,
+                AccountEmail = baseDto.AccountEmail,
+                AccountPhone = baseDto.AccountPhone,
+                AccountCreatedAt = baseDto.AccountCreatedAt,
+                CreatedAt = baseDto.CreatedAt,
+                PaidAt = baseDto.PaidAt,
+                StartDate = baseDto.StartDate,
+                EndDate = baseDto.EndDate,
+                PaymentDescription = baseDto.PaymentDescription,
+                EvidenceLevel = baseDto.EvidenceLevel,
+                EvidenceSyncedAt = baseDto.EvidenceSyncedAt,
+                EvidenceSource = baseDto.EvidenceSource,
+                IsAdminGrant = baseDto.IsAdminGrant,
+                GrantedByAccountId = baseDto.GrantedByAccountId,
+                GrantedByName = baseDto.GrantedByName,
+                RawEvidence = entity.RawEvidence,
+                IsDeleted = entity.IsDeleted,
+                AccountIsActive = entity.Account?.IsActive ?? false
+            };
+        }
+
+        private const string CsvHeader =
+            "Mã đơn,Mã link PayOS,Mã GD ngân hàng,Nguồn,Trạng thái,Tên người mua,Username,Email,SĐT,Tên gói,Giá gói,Thời hạn (ngày),Số tiền đã trả,Ngày tạo,Ngày thanh toán,Ngày bắt đầu,Ngày kết thúc,Nội dung chuyển khoản,Mức bằng chứng,Admin cấp";
+
+        public async Task<string> BuildAdminTransactionsCsvAsync(AdminTransactionFilter filter)
+        {
+            var items = await _subscriptionRepo.GetAllSubscriptionsWithDetailsAsync(filter);
+            var sb = new StringBuilder();
+            sb.Append(CsvHeader).Append("\r\n");
+
+            foreach (var entity in items)
+            {
+                var dto = MapToAdminTransactionDto(entity);
+
+                var fields = new[]
+                {
+                    dto.OrderCode,
+                    dto.PaymentLinkId,
+                    dto.BankReference,
+                    dto.Source,
+                    dto.Status,
+                    dto.AccountName,
+                    dto.AccountUsername,
+                    dto.AccountEmail,
+                    dto.AccountPhone,
+                    dto.PlanName,
+                    FormatNumber(dto.PlanPrice),
+                    dto.PlanDurationDays.ToString(CultureInfo.InvariantCulture),
+                    FormatNumber(dto.PricePaid),
+                    FormatVnDate(dto.CreatedAt),
+                    FormatVnDate(dto.PaidAt),
+                    FormatVnDate(dto.StartDate),
+                    FormatVnDate(dto.EndDate),
+                    dto.PaymentDescription,
+                    dto.EvidenceLevel,
+                    dto.GrantedByName
+                };
+
+                sb.Append(string.Join(",", fields.Select(EscapeCsv))).Append("\r\n");
+            }
+
+            return sb.ToString();
+        }
+
+        private static string FormatNumber(double value)
+            => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+        /// <summary>Dates are exported in Vietnam local time (UTC+7), minute precision.</summary>
+        private static string FormatVnDate(DateTime? value)
+            => value.HasValue
+                ? value.Value.AddHours(7).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)
+                : string.Empty;
+
+        private static string EscapeCsv(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+
+            // Prevent spreadsheet formula injection from user-controlled fields
+            // (account name, transfer description, ...).
+            if (value[0] is '=' or '+' or '-' or '@' or '\t' or '\r')
+                value = "'" + value;
+
+            var needsQuotes = value.IndexOfAny(new[] { ',', '"', '\r', '\n' }) >= 0;
+            if (!needsQuotes) return value;
+
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
+        }
+
+        private AdminTransactionDto MapToAdminTransactionDto(Subscription entity)
+        {
+            var isAdminGrant = PaymentEvidenceHelper.IsAdminGrant(entity);
+
+            return new AdminTransactionDto
+            {
+                SubId = entity.Sub_id,
+                OrderCode = entity.PaymentRef,
+                PaymentLinkId = entity.PaymentLinkId,
+                BankReference = entity.BankReference,
+                Source = isAdminGrant ? "AdminGrant" : "PayOS",
+                Status = entity.Status,
+                ProviderStatus = entity.ProviderStatus,
+                PricePaid = entity.PricePaid,
+                PlanPrice = entity.Plan?.Price ?? 0,
+                PlanName = entity.Plan?.Name,
+                PlanDurationDays = entity.Plan?.Duration ?? 0,
+                PlanTier = entity.Plan?.Tier ?? 0,
+                AccountId = entity.Account_id,
+                AccountName = entity.Account?.Name,
+                AccountUsername = entity.Account?.Username,
+                AccountEmail = entity.Account?.Email,
+                AccountPhone = entity.Account?.Phone,
+                AccountCreatedAt = entity.Account?.CreatedAt,
+                CreatedAt = entity.CreatedAt,
+                PaidAt = entity.PaidAt,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
+                PaymentDescription = entity.PaymentDescription,
+                EvidenceLevel = PaymentEvidenceHelper.ComputeEvidenceLevel(entity),
+                EvidenceSyncedAt = entity.EvidenceSyncedAt,
+                EvidenceSource = entity.EvidenceSource,
+                IsAdminGrant = isAdminGrant,
+                GrantedByAccountId = entity.GrantedByAccountId,
+                GrantedByName = entity.GrantedByAccount?.Name
+                    ?? entity.GrantedByAccount?.Username
+                    ?? entity.GrantedByAccount?.Email
+            };
+        }
+
         private SubscriptionResponseDto MapToDto(Subscription entity)
         {
             if (entity == null) return null;
@@ -255,7 +466,11 @@ namespace Service.Implements
                 Status = entity.Status,
                 PaymentRef = entity.PaymentRef,
                 PricePaid = entity.PricePaid,
-                IsDeleted = entity.IsDeleted
+                IsDeleted = entity.IsDeleted,
+                CreatedAt = entity.CreatedAt,
+                PaidAt = entity.PaidAt,
+                PaymentProvider = entity.PaymentProvider,
+                ProviderStatus = entity.ProviderStatus
             };
         }
     }

@@ -53,7 +53,10 @@ namespace PresentationLayer.Controllers
                     Plan_id = request.Plan_id,
                     StartDate = now,
                     Status = "pending",
-                    PaymentRef = paymentResponse.OrderCode.ToString()
+                    PaymentRef = paymentResponse.OrderCode.ToString(),
+                    PaymentProvider = "PayOS",
+                    PaymentLinkId = paymentResponse.PaymentLinkId,
+                    PaymentDescription = paymentResponse.TransferContent
                 };
 
                 var subscription = await _subscriptionService.CreateSubscription(subscriptionRequest);
