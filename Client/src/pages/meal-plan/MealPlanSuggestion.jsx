@@ -35,12 +35,75 @@ const getWeekMondayKey = (dateVal) => {
   return `${y}-${m}-${dd}`;
 };
 
+const toPlanDateKey = (value) => {
+  if (!value) return '';
+  if (typeof value === 'string') return value.split('T')[0];
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const addDaysToKey = (key, amount) => {
+  const [y, m, d] = key.split('-').map(Number);
+  const dt = new Date(y, m - 1, d, 12, 0, 0);
+  dt.setDate(dt.getDate() + amount);
+  return toPlanDateKey(dt);
+};
+
+const mergePlanDayEntries = (existing, incoming) => {
+  const existingEntries = Array.isArray(existing.entries) ? existing.entries : [];
+  const existingSlots = new Set(
+    existingEntries.map((e) => (e.mealSlot || e.meal_slot || '').toLowerCase())
+  );
+  const extraEntries = (Array.isArray(incoming.entries) ? incoming.entries : []).filter(
+    (e) => !existingSlots.has((e.mealSlot || e.meal_slot || '').toLowerCase())
+  );
+  if (extraEntries.length === 0) return existing;
+  return {
+    ...existing,
+    entries: [...existingEntries, ...extraEntries],
+    totalCalories:
+      (existing.totalCalories || 0) + extraEntries.reduce((sum, e) => sum + (e.slotCalories || 0), 0),
+  };
+};
+
+// A plan can contain days from multiple ranges (legacy range responses or a stale
+// sessionStorage cache). The week view must show exactly one tab per date in the
+// displayed week, otherwise the same day renders twice.
+const normalizeWeekPlan = (plan, dateReference) => {
+  if (!plan || !Array.isArray(plan.days) || plan.days.length === 0) return plan;
+
+  const weekStart = getWeekMondayKey(dateReference || new Date());
+  const weekEnd = addDaysToKey(weekStart, 6);
+  const byDate = new Map();
+
+  for (const day of plan.days) {
+    const key = toPlanDateKey(day?.dayDate);
+    if (!key || key < weekStart || key > weekEnd) continue;
+    const existing = byDate.get(key);
+    byDate.set(key, existing ? mergePlanDayEntries(existing, day) : day);
+  }
+
+  if (byDate.size === 0) return { ...plan, days: [] };
+
+  const days = [...byDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, day]) => day);
+
+  return { ...plan, days };
+};
+
 const readCachedWeekPlan = (accountId, dateVal) => {
   if (!accountId) return null;
   try {
     const weekKey = `smartmeal_weekplan_${accountId}_${getWeekMondayKey(dateVal)}`;
     const raw = sessionStorage.getItem(weekKey);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const normalized = normalizeWeekPlan(JSON.parse(raw), dateVal);
+    return normalized?.days?.length > 0 ? normalized : null;
   } catch {
     return null;
   }
@@ -76,17 +139,7 @@ export default function MealPlanSuggestion() {
   const [nutrientFocus, setNutrientFocus] = useNutrientFocus();
 
   // ── Safe date helpers (no UTC shift) ────────────────────────────────────
-  const safeDate = (dateVal) => {
-    if (!dateVal) return '';
-    if (typeof dateVal === 'string') {
-      return dateVal.split('T')[0];
-    }
-    const d = dateVal instanceof Date ? dateVal : new Date(dateVal);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
+  const safeDate = (dateVal) => toPlanDateKey(dateVal);
 
   const todayStr = safeDate(new Date());
 
@@ -102,14 +155,15 @@ export default function MealPlanSuggestion() {
 
   const applyPlanState = useCallback((plan, dateReference, targetDateStr = null) => {
     if (!plan) return;
-    setWeekPlan(plan);
-    writeCachedWeekPlan(accountId, dateReference || new Date(), plan);
-    if (plan?.days?.length > 0) {
+    const normalizedPlan = normalizeWeekPlan(plan, dateReference || new Date());
+    setWeekPlan(normalizedPlan);
+    writeCachedWeekPlan(accountId, dateReference || new Date(), normalizedPlan);
+    if (normalizedPlan?.days?.length > 0) {
       if (targetDateStr) {
-        const idx = plan.days.findIndex(d => d.dayDate && safeDate(d.dayDate) === targetDateStr);
+        const idx = normalizedPlan.days.findIndex(d => d.dayDate && safeDate(d.dayDate) === targetDateStr);
         setSelectedDayIdx(idx >= 0 ? idx : 0);
       } else {
-        const todayIdx = plan.days.findIndex(d => isTodayDate(d.dayDate));
+        const todayIdx = normalizedPlan.days.findIndex(d => isTodayDate(d.dayDate));
         setSelectedDayIdx(todayIdx >= 0 ? todayIdx : 0);
       }
     }
