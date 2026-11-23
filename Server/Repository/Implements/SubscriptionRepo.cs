@@ -320,6 +320,36 @@ namespace Repository.Implements
             // TotalTransactions == every row matching the filter (deleted only when requested).
             var totalTransactions = await query.CountAsync();
 
+            var distinctSubscribers = await query
+                .Select(s => s.Account_id)
+                .Distinct()
+                .CountAsync();
+
+            // Snapshot metric: active accounts system-wide, independent of the transaction filter.
+            var activeSubscribers = await _ctx.Subscriptions
+                .AsNoTracking()
+                .Where(s => !s.IsDeleted &&
+                            s.Status == "active" &&
+                            (s.EndDate == null || s.EndDate > DateTime.UtcNow))
+                .Select(s => s.Account_id)
+                .Distinct()
+                .CountAsync();
+
+            var planBreakdown = await (
+                    from s in successQuery
+                    join p in _ctx.Plans.AsNoTracking() on s.Plan_id equals p.Plan_id into plans
+                    from p in plans.DefaultIfEmpty()
+                    group s by new { s.Plan_id, PlanName = p.Name } into g
+                    select new PlanRevenueDto
+                    {
+                        PlanId = g.Key.Plan_id,
+                        PlanName = g.Key.PlanName,
+                        Count = g.Count(),
+                        Revenue = g.Sum(x => x.PricePaid)
+                    })
+                .OrderByDescending(p => p.Revenue)
+                .ToListAsync();
+
             return new AdminTransactionSummaryDto
             {
                 TotalTransactions = totalTransactions,
@@ -330,7 +360,10 @@ namespace Repository.Implements
                 TotalRevenue = totalRevenue,
                 AdminGrantCount = adminGrantCount,
                 AdminGrantValue = adminGrantValue,
-                AvgOrderValue = successfulCount > 0 ? Math.Round(totalRevenue / successfulCount, 2) : 0
+                AvgOrderValue = successfulCount > 0 ? Math.Round(totalRevenue / successfulCount, 2) : 0,
+                DistinctSubscribers = distinctSubscribers,
+                ActiveSubscribers = activeSubscribers,
+                PlanBreakdown = planBreakdown
             };
         }
     }

@@ -14,10 +14,6 @@
   margin-bottom: 28px;
 }
 
-.txn-panel-compact {
-  margin-bottom: 4px;
-}
-
 .txn-panel-header {
   display: flex;
   justify-content: space-between;
@@ -25,10 +21,6 @@
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 16px;
-}
-
-.txn-panel-header-actions-only {
-  justify-content: flex-end;
 }
 
 .txn-panel-heading h2 {
@@ -1415,6 +1407,36 @@ select.txn-input {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ── Plan revenue breakdown ────────────────────────────────── */
+.txn-plan-breakdown {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.txn-plan-breakdown-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.txn-plan-breakdown-head h3 {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.txn-plan-breakdown-head p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
 }
 
 /* ── Dashboard revenue section ─────────────────────────────── */

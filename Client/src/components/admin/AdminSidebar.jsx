@@ -23,7 +23,6 @@ export default function AdminSidebar() {
     { to: '/admin/recipe-tags', icon: <FiAward />, label: 'Thẻ công thức' },
     { to: '/admin/recipes', icon: <FiHeart />, label: 'Món ăn & Công thức' },
     { to: '/admin/plans', icon: <FiAward />, label: 'Gói dịch vụ' },
-    { to: '/admin/statistics', icon: <FiGrid />, label: 'Thống kê' },
     { to: '/admin/feedbacks', icon: <FiMessageSquare />, label: 'Phản hồi người dùng' },
   ];
 

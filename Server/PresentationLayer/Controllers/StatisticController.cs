@@ -21,36 +21,6 @@ namespace PresentationLayer.Controllers
             _logger = logger;
         }
 
-        [HttpGet("subscriptions")]
-        public async Task<IActionResult> GetSubscriptionStatistics([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
-        {
-            try
-            {
-                var data = await _statisticService.GetSubscriptionStatisticsAsync(startDate, endDate);
-                return Ok(new { success = true, data });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting subscription statistics");
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet("subscription-overview")]
-        public async Task<IActionResult> GetSubscriptionOverview([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
-        {
-            try
-            {
-                var data = await _statisticService.GetSubscriptionOverviewAsync(fromDate, toDate);
-                return Ok(new { success = true, data });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting subscription overview");
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-        }
-
         [HttpGet("weekly-engagement")]
         public async Task<IActionResult> GetWeeklyEngagementStatistics([FromQuery] string? date = null)
         {

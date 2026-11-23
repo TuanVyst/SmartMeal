@@ -430,7 +430,7 @@ namespace Service.Implements
                 PlanPrice = entity.Plan?.Price ?? 0,
                 PlanName = entity.Plan?.Name,
                 PlanDurationDays = entity.Plan?.Duration ?? 0,
-                PlanTier = entity.Plan?.Tier ?? 0,
+                PlanTier = PlanTierHelper.GetEffectiveTier(entity.Plan),
                 AccountId = entity.Account_id,
                 AccountName = entity.Account?.Name,
                 AccountUsername = entity.Account?.Username,

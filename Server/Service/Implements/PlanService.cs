@@ -1,6 +1,7 @@
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Dtos.ResponseModels;
 using BusinessObject.Entities;
+using BusinessObject.Helpers;
 using Repository.Interfaces;
 using Service.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -44,7 +45,7 @@ namespace Service.Implements
                     Name = request.Name,
                     Price = request.Price,
                     Duration = request.Duration,
-                    Tier = request.Tier > 0 ? request.Tier : (request.Price == 0 ? 0 : (request.Duration >= 365 ? 3 : (request.Duration >= 30 ? 2 : 1))),
+                    Tier = request.Tier > 0 ? request.Tier : PlanTierHelper.DeriveTier(request.Price, request.Duration),
                     Description = request.Description,
                     Features = request.Features,
                     IsDeleted = false
@@ -96,9 +97,7 @@ namespace Service.Implements
         private PlanResponseDto MapToDto(Plan entity)
         {
             if (entity == null) return null;
-            int effectiveTier = entity.Tier > 0 
-                ? entity.Tier 
-                : (entity.Price == 0 ? 0 : (entity.Duration >= 365 ? 3 : (entity.Duration >= 30 ? 2 : 1)));
+            int effectiveTier = PlanTierHelper.GetEffectiveTier(entity);
 
             return new PlanResponseDto
             {

@@ -18,7 +18,6 @@ import AdminIngredients from '../pages/admin/AdminIngredients';
 import AdminRecipeTags from '../pages/admin/AdminRecipeTags';
 import AdminRecipes from '../pages/admin/AdminRecipes';
 import AdminPlans from '../pages/admin/AdminPlans';
-import AdminStatistics from '../pages/admin/AdminStatistics';
 import AdminTransactions from '../pages/admin/AdminTransactions';
 import AdminFeedbacks from '../pages/admin/AdminFeedbacks';
 import SurveyPage from '../pages/survey/SurveyPage';
@@ -148,7 +147,6 @@ export default function AppRoutes() {
         <Route path="recipes" element={<AdminRecipes />} />
         <Route path="categories" element={<Navigate to="/admin/recipes" replace />} />
         <Route path="plans" element={<AdminPlans />} />
-        <Route path="statistics" element={<AdminStatistics />} />
         <Route path="feedbacks" element={<AdminFeedbacks />} />
       </Route>
 

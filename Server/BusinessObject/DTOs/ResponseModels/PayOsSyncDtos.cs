@@ -74,37 +74,5 @@ namespace BusinessObject.Dtos.ResponseModels
         public DateTime FetchedAt { get; set; } = DateTime.UtcNow;
     }
 
-    public class DailyRevenueDto
-    {
-        /// <summary>Vietnam calendar date (yyyy-MM-dd).</summary>
-        public string Date { get; set; } = string.Empty;
 
-        public double Revenue { get; set; }
-        public int Count { get; set; }
-    }
-
-    public class PlanRevenueDto
-    {
-        public Guid PlanId { get; set; }
-        public string? PlanName { get; set; }
-        public int Count { get; set; }
-        public double Revenue { get; set; }
-    }
-
-    public class SubscriptionOverviewDto
-    {
-        public DateTime FromDate { get; set; }
-        public DateTime ToDate { get; set; }
-        public double Revenue { get; set; }
-        public int SuccessfulCount { get; set; }
-        public int PendingCount { get; set; }
-        public int CancelledCount { get; set; }
-        public int ExpiredCount { get; set; }
-        public int ActiveSubscribers { get; set; }
-        public int AdminGrantCount { get; set; }
-        public double AdminGrantValue { get; set; }
-        public double AvgOrderValue { get; set; }
-        public List<DailyRevenueDto> DailyRevenue { get; set; } = new List<DailyRevenueDto>();
-        public List<PlanRevenueDto> PlanBreakdown { get; set; } = new List<PlanRevenueDto>();
-    }
 }

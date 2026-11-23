@@ -22,7 +22,6 @@ import {
   FiAlertTriangle,
 } from 'react-icons/fi';
 import { adminService } from '../../services/adminService';
-import AdminTransactionsPanel from '../../components/admin/transactions/AdminTransactionsPanel';
 import {
   formatCurrency,
   formatDate,
@@ -43,31 +42,34 @@ export default function AdminDashboard() {
     fromDate: TRANSACTION_DEFAULT_FROM,
     toDate: todayInputValue(),
   }));
-  const [overview, setOverview] = useState(null);
-  const [overviewLoading, setOverviewLoading] = useState(true);
-  const [overviewError, setOverviewError] = useState('');
+  const [txSummary, setTxSummary] = useState(null);
+  const [txSummaryLoading, setTxSummaryLoading] = useState(true);
+  const [txSummaryError, setTxSummaryError] = useState('');
 
-  const loadOverview = useCallback(async () => {
+  const loadTxSummary = useCallback(async () => {
     try {
-      const result = await adminService.getSubscriptionOverview({
+      setTxSummaryError('');
+      const result = await adminService.getAdminTransactions({
         fromDate: txRange.fromDate,
         toDate: txRange.toDate,
+        page: 1,
+        pageSize: 1,
       });
-      setOverview(result || null);
+      setTxSummary(result?.summary ?? null);
     } catch (err) {
-      setOverview(null);
-      setOverviewError(err?.message || 'Không thể tải số liệu doanh thu.');
+      setTxSummary(null);
+      setTxSummaryError(err?.message || 'Không thể tải số liệu doanh thu.');
     } finally {
-      setOverviewLoading(false);
+      setTxSummaryLoading(false);
     }
   }, [txRange]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      loadOverview();
+      loadTxSummary();
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [loadOverview]);
+  }, [loadTxSummary]);
 
   useEffect(() => {
     Promise.allSettled([
@@ -603,7 +605,7 @@ export default function AdminDashboard() {
               <FiCreditCard size={20} color="#059669" /> DOANH THU &amp; GIAO DỊCH
             </h2>
             <p className="admin-page-description">
-              Từ {formatDate(txRange.fromDate)} đến hôm nay (giờ Việt Nam)
+              Từ {formatDate(txRange.fromDate)} đến hôm nay (giờ Việt Nam) · tổng hợp từ trang Giao dịch
             </p>
           </div>
           <Link to="/admin/transactions" className="txn-dashboard-link">
@@ -612,10 +614,10 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        {overviewLoading && (
+        {txSummaryLoading && (
           <div className="txn-kpi-grid" aria-busy="true">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div className="txn-kpi-card" key={`overview-skeleton-${index}`} aria-hidden="true">
+              <div className="txn-kpi-card" key={`tx-summary-skeleton-${index}`} aria-hidden="true">
                 <span className="txn-kpi-icon slate" />
                 <div className="txn-kpi-info" style={{ width: '100%' }}>
                   <span className="txn-skeleton" style={{ width: '55%' }} />
@@ -626,20 +628,20 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {!overviewLoading && overviewError && (
+        {!txSummaryLoading && txSummaryError && (
           <div className="txn-inline-error" role="alert">
             <FiAlertTriangle aria-hidden="true" />
             <div>
               <strong>Không thể tải số liệu doanh thu</strong>
-              <p>{overviewError}</p>
+              <p>{txSummaryError}</p>
             </div>
             <button
               type="button"
               className="txn-btn txn-btn-ghost txn-btn-sm"
               onClick={() => {
-                setOverviewError('');
-                setOverviewLoading(true);
-                loadOverview();
+                setTxSummaryError('');
+                setTxSummaryLoading(true);
+                loadTxSummary();
               }}
             >
               Thử lại
@@ -647,14 +649,14 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {!overviewLoading && !overviewError && (
+        {!txSummaryLoading && !txSummaryError && (
           <div className="txn-kpi-grid">
             <div className="txn-kpi-card">
               <div className="txn-kpi-icon emerald"><FiCreditCard aria-hidden="true" /></div>
               <div className="txn-kpi-info">
                 <span className="txn-kpi-label">Doanh thu</span>
-                <strong className="txn-kpi-value">{formatCurrency(overview?.revenue ?? 0)}</strong>
-                <span className="txn-kpi-sub">{overview?.successfulCount ?? 0} giao dịch thành công</span>
+                <strong className="txn-kpi-value">{formatCurrency(txSummary?.totalRevenue ?? 0)}</strong>
+                <span className="txn-kpi-sub">{txSummary?.successfulCount ?? 0} giao dịch thành công</span>
               </div>
             </div>
             <div className="txn-kpi-card">
@@ -662,7 +664,7 @@ export default function AdminDashboard() {
               <div className="txn-kpi-info">
                 <span className="txn-kpi-label">Thành công</span>
                 <strong className="txn-kpi-value">
-                  {(overview?.successfulCount ?? 0).toLocaleString('vi-VN')}
+                  {(txSummary?.successfulCount ?? 0).toLocaleString('vi-VN')}
                 </strong>
                 <span className="txn-kpi-sub">giao dịch đã thanh toán</span>
               </div>
@@ -672,7 +674,7 @@ export default function AdminDashboard() {
               <div className="txn-kpi-info">
                 <span className="txn-kpi-label">Đang chờ</span>
                 <strong className="txn-kpi-value">
-                  {(overview?.pendingCount ?? 0).toLocaleString('vi-VN')}
+                  {(txSummary?.pendingCount ?? 0).toLocaleString('vi-VN')}
                 </strong>
                 <span className="txn-kpi-sub">cần đối chiếu PayOS</span>
               </div>
@@ -682,7 +684,7 @@ export default function AdminDashboard() {
               <div className="txn-kpi-info">
                 <span className="txn-kpi-label">Đang hoạt động</span>
                 <strong className="txn-kpi-value">
-                  {(overview?.activeSubscribers ?? 0).toLocaleString('vi-VN')}
+                  {(txSummary?.activeSubscribers ?? 0).toLocaleString('vi-VN')}
                 </strong>
                 <span className="txn-kpi-sub">người đăng ký còn hiệu lực</span>
               </div>
@@ -691,7 +693,7 @@ export default function AdminDashboard() {
               <div className="txn-kpi-icon slate"><FiTrendingUp aria-hidden="true" /></div>
               <div className="txn-kpi-info">
                 <span className="txn-kpi-label">Giá trị TB/đơn</span>
-                <strong className="txn-kpi-value">{formatCurrency(overview?.avgOrderValue ?? 0)}</strong>
+                <strong className="txn-kpi-value">{formatCurrency(txSummary?.avgOrderValue ?? 0)}</strong>
                 <span className="txn-kpi-sub">doanh thu trung bình mỗi đơn</span>
               </div>
             </div>
@@ -700,20 +702,14 @@ export default function AdminDashboard() {
               <div className="txn-kpi-info">
                 <span className="txn-kpi-label">Cấp tay</span>
                 <strong className="txn-kpi-value">
-                  {(overview?.adminGrantCount ?? 0).toLocaleString('vi-VN')}
+                  {(txSummary?.adminGrantCount ?? 0).toLocaleString('vi-VN')}
                 </strong>
-                <span className="txn-kpi-sub">{formatCurrency(overview?.adminGrantValue ?? 0)}</span>
+                <span className="txn-kpi-sub">{formatCurrency(txSummary?.adminGrantValue ?? 0)}</span>
               </div>
             </div>
           </div>
         )}
 
-        <AdminTransactionsPanel
-          showHeader={false}
-          compact
-          defaultFrom={txRange.fromDate}
-          defaultTo={txRange.toDate}
-        />
       </div>
 
       {/* ══════════════════════════════════════════════════════
