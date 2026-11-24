@@ -160,6 +160,23 @@ namespace PresentationLayer.Controllers
                     return BadRequest(new { success = false, message = "Tài khoản quản trị viên không sử dụng khảo sát sức khỏe." });
                 }
 
+                if (!request.Age.HasValue)
+                {
+                    return BadRequest(new { success = false, message = "Vui lòng nhập tuổi" });
+                }
+
+                var validationError = HealthProfileValidator.ValidateAll(
+                    request.Height,
+                    request.Weight,
+                    request.Age,
+                    request.TargetWeight,
+                    request.Goal,
+                    request.TargetDays ?? 84);
+                if (validationError != null)
+                {
+                    return BadRequest(new { success = false, message = validationError });
+                }
+
                 var profileRequest = new HealthProfileRequest
                 {
                     Account_id = accountId,
@@ -408,6 +425,23 @@ namespace PresentationLayer.Controllers
 
                 if (existing == null)
                     return NotFound(new { success = false, message = "Chưa có hồ sơ sức khoẻ" });
+
+                if (!request.Age.HasValue && !existing.DateOfBirth.HasValue)
+                {
+                    return BadRequest(new { success = false, message = "Vui lòng nhập tuổi" });
+                }
+
+                var validationError = HealthProfileValidator.ValidateAll(
+                    request.Height ?? existing.Height,
+                    request.Weight ?? existing.Weight,
+                    request.Age ?? HealthProfileValidator.GetAge(existing.DateOfBirth),
+                    request.TargetWeight,
+                    request.Goal ?? existing.Goal,
+                    request.TargetDays);
+                if (validationError != null)
+                {
+                    return BadRequest(new { success = false, message = validationError });
+                }
 
                 var profileRequest = new HealthProfileRequest
                 {
