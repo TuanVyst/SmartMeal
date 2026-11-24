@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_meal/core/theme/app_colors.dart';
+import 'package:smart_meal/core/validators/health_validators.dart';
 import 'package:smart_meal/core/ui/smart_button.dart';
 import 'package:smart_meal/core/ui/smart_card.dart';
 import 'package:smart_meal/core/ui/smart_loading.dart';
@@ -299,31 +300,45 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    final h = double.tryParse(_heightCtrl.text);
-    final w = double.tryParse(_weightCtrl.text);
-    final tw = double.tryParse(_targetWeightCtrl.text);
-    final days = int.tryParse(_targetDaysCtrl.text) ?? 84;
-    final age = int.tryParse(_ageCtrl.text) ?? 25;
-
-    if (h == null || h <= 0 || w == null || w <= 0) {
+    final metricError = HealthValidation.validateBasicMetrics(
+      age: _ageCtrl.text,
+      height: _heightCtrl.text,
+      weight: _weightCtrl.text,
+    );
+    if (metricError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập chiều cao và cân nặng hợp lệ'),
-          backgroundColor: AppColors.error,
-        ),
+        SnackBar(content: Text(metricError), backgroundColor: AppColors.error),
       );
       return;
     }
 
-    if ((_goal == 'lose' || _goal == 'gain') && (tw == null || tw <= 0)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập cân nặng mục tiêu hợp lệ'),
-          backgroundColor: AppColors.error,
-        ),
+    if (_goal == 'lose' || _goal == 'gain') {
+      final targetError = HealthValidation.validateTargetWeight(
+        targetWeight: _targetWeightCtrl.text,
+        weight: _weightCtrl.text,
+        goal: _goal,
       );
-      return;
+      if (targetError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(targetError), backgroundColor: AppColors.error),
+        );
+        return;
+      }
+
+      final daysError = HealthValidation.validateTargetDays(_targetDaysCtrl.text);
+      if (daysError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(daysError), backgroundColor: AppColors.error),
+        );
+        return;
+      }
     }
+
+    final h = double.parse(_heightCtrl.text.trim().replaceAll(',', '.'));
+    final w = double.parse(_weightCtrl.text.trim().replaceAll(',', '.'));
+    final tw = double.tryParse(_targetWeightCtrl.text.trim().replaceAll(',', '.'));
+    final days = int.parse(_targetDaysCtrl.text.trim());
+    final age = int.parse(_ageCtrl.text.trim());
 
     setState(() => _saving = true);
     try {
@@ -1606,6 +1621,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                 child: TextField(
                   controller: _heightCtrl,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [HealthDecimalInputFormatter()],
                   decoration: const InputDecoration(
                     labelText: 'Chiều cao (cm)',
                     border: OutlineInputBorder(),
@@ -1619,6 +1635,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                 child: TextField(
                   controller: _weightCtrl,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [HealthDecimalInputFormatter()],
                   decoration: const InputDecoration(
                     labelText: 'Cân nặng (kg)',
                     border: OutlineInputBorder(),
@@ -1638,6 +1655,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                 child: TextField(
                   controller: _ageCtrl,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [HealthIntegerInputFormatter()],
                   decoration: const InputDecoration(
                     labelText: 'Tuổi',
                     border: OutlineInputBorder(),
@@ -1690,6 +1708,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                   child: TextField(
                     controller: _targetWeightCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [HealthDecimalInputFormatter()],
                     decoration: InputDecoration(
                       labelText: 'Cân nặng đích (kg)',
                       border: const OutlineInputBorder(),
@@ -1704,6 +1723,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                   child: TextField(
                     controller: _targetDaysCtrl,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [HealthIntegerInputFormatter()],
                     decoration: const InputDecoration(
                       labelText: 'Thời gian (ngày)',
                       border: OutlineInputBorder(),

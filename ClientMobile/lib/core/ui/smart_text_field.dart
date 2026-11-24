@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SmartTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -11,6 +12,7 @@ class SmartTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final int? maxLines;
   final ValueChanged<String>? onChanged;
+  final List<TextInputFormatter>? inputFormatters;
 
   const SmartTextField({
     super.key,
@@ -24,6 +26,7 @@ class SmartTextField extends StatelessWidget {
     this.suffixIcon,
     this.maxLines = 1,
     this.onChanged,
+    this.inputFormatters,
   });
 
   @override
@@ -35,6 +38,7 @@ class SmartTextField extends StatelessWidget {
       validator: validator,
       maxLines: maxLines,
       onChanged: onChanged,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
