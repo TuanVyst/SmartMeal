@@ -489,6 +489,14 @@ export function getDailyCalorieBudget(profile) {
   };
 }
 
+/**
+ * Chỉ cần xác nhận an toàn khi có cảnh báo hoặc mục tiêu làm thay đổi calo.
+ * Dùng chung để UI không hiển thị "màn xác nhận rỗng" (dead-end).
+ */
+export function needsSafetyConfirmation(assessment) {
+  return Boolean(assessment && (assessment.goalTooAggressive || assessment.deficit !== 0));
+}
+
 // ─── Daily Nutrition Targets ───────────────────────────────────────────────
 /**
  * Tính toàn bộ mục tiêu dinh dưỡng cho một ngày.

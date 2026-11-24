@@ -1,6 +1,13 @@
 import { useReducer, useMemo, useState } from 'react';
 import { calculateBMI } from '../../utils/bmiCalculator';
-import { getDailyCalorieBudget, getLockedIngredientsForProfile } from '../../utils/healthRules';
+import { getDailyCalorieBudget, getLockedIngredientsForProfile, needsSafetyConfirmation } from '../../utils/healthRules';
+import {
+  HEALTH_LIMITS,
+  isForbiddenNumberKey,
+  getBasicMetricErrors,
+  getTargetWeightError,
+  validateBasicMetrics,
+} from '../../utils/healthConstraints';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { useNavigate } from 'react-router-dom';
 import { FiTrendingDown, FiActivity, FiMinimize2, FiArrowLeft } from 'react-icons/fi';
@@ -67,7 +74,8 @@ const bmiColors = {
   obese: { bg: '#fef2f2', text: '#dc2626', label: 'Béo phì' },
 };
 
-function InputField({ label, value, onChange, type = 'text', placeholder, suffix, min = "1" }) {
+function InputField({ label, value, onChange, type = 'text', placeholder, suffix, min = "1", max, step, error }) {
+  const baseBorder = error ? '#ef4444' : '#e2e8f0';
   return (
     <div style={{ flex: 1 }}>
       <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>{label}</label>
@@ -75,21 +83,21 @@ function InputField({ label, value, onChange, type = 'text', placeholder, suffix
         <input
           type={type}
           min={type === 'number' ? min : undefined}
+          max={type === 'number' ? max : undefined}
+          step={type === 'number' ? step : undefined}
           value={value}
-          onChange={e => {
-            let val = e.target.value;
-            if (type === 'number' && Number(val) < 0) {
-              val = '1';
-            }
-            onChange(val);
+          onChange={e => onChange(e.target.value)}
+          onKeyDown={e => {
+            if (type === 'number' && isForbiddenNumberKey(e.key)) e.preventDefault();
           }}
           placeholder={placeholder}
+          aria-invalid={Boolean(error)}
           style={{
-            width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: 8,
+            width: '100%', padding: '10px 14px', border: `1px solid ${baseBorder}`, borderRadius: 8,
             fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
           }}
-          onFocus={e => e.target.style.borderColor = '#22C55E'}
-          onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+          onFocus={e => e.target.style.borderColor = error ? '#ef4444' : '#22C55E'}
+          onBlur={e => e.target.style.borderColor = baseBorder}
         />
         {suffix && (
           <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#94a3b8' }}>
@@ -97,6 +105,9 @@ function InputField({ label, value, onChange, type = 'text', placeholder, suffix
           </span>
         )}
       </div>
+      {error && (
+        <p style={{ color: '#dc2626', fontSize: 12, margin: '4px 0 0' }}>{error}</p>
+      )}
     </div>
   );
 }
@@ -107,6 +118,17 @@ export default function OnboardingSurvey({ onComplete }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { step, formData, error, submitting } = state;
   const [showSafetyCheck, setShowSafetyCheck] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const updateField = (field, value) => {
+    dispatch({ type: 'SET_FIELD', field, value });
+    setFieldErrors(prev => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  };
+
+  const selectGoal = (goal) => {
+    updateField('goal', goal);
+    setFieldErrors(prev => (prev.targetWeight ? { ...prev, targetWeight: undefined } : prev));
+  };
 
   const bmiResult = useMemo(() => {
     if (formData.height && formData.weight && Number(formData.height) > 0 && Number(formData.weight) > 0) {
@@ -119,27 +141,50 @@ export default function OnboardingSurvey({ onComplete }) {
     const w = Number(formData.weight);
     const tw = Number(formData.targetWeight);
     if ((formData.goal === 'lose' || formData.goal === 'gain') && w > 0 && tw > 0) {
-      return Math.max(14, Math.ceil(Math.abs(tw - w) / 0.5) * 7);
+      const computedDays = Math.ceil(Math.abs(tw - w) / 0.5) * 7;
+      return Math.min(HEALTH_LIMITS.targetDays.max, Math.max(HEALTH_LIMITS.targetDays.min, computedDays));
     }
     return 84;
   }, [formData.weight, formData.targetWeight, formData.goal]);
 
   const effectiveTargetDays = autoTargetDays;
 
+  const safetyProfile = useMemo(() => ({
+    ...formData,
+    weight: Number(formData.weight),
+    targetWeight: Number(formData.targetWeight),
+    bmiLevel: bmiResult?.level,
+    targetDays: Number(effectiveTargetDays),
+  }), [formData, bmiResult, effectiveTargetDays]);
+
+  const safetyAssessment = useMemo(
+    () => getDailyCalorieBudget(safetyProfile),
+    [safetyProfile]
+  );
+
   const validateStep = () => {
     switch (step) {
-      case 1:
+      case 1: {
         if (!formData.height || !formData.weight || !formData.age || !formData.gender) return 'Vui lòng điền đầy đủ thông tin';
+        const metricErrors = getBasicMetricErrors(formData);
+        if (Object.keys(metricErrors).length > 0) {
+          setFieldErrors(metricErrors);
+          return Object.values(metricErrors)[0];
+        }
         return '';
-      case 2:
+      }
+      case 2: {
         if (!formData.goal) return 'Vui lòng chọn mục tiêu';
-        if (formData.goal === 'lose' && (!formData.targetWeight || Number(formData.targetWeight) <= 0)) {
-          return 'Vui lòng nhập cân nặng mục tiêu hợp lệ';
+        const targetError = getTargetWeightError(formData);
+        if (targetError) {
+          setFieldErrors({ targetWeight: targetError });
+          return targetError;
         }
         if (formData.goal === 'lose' && bmiResult?.level === 'underweight') {
           return 'Chỉ số BMI của bạn đang ở mức thiếu cân. Vui lòng không chọn giảm cân để đảm bảo sức khỏe.';
         }
         return '';
+      }
       case 3:
         if (!formData.activityLevel) return 'Vui lòng chọn mức độ vận động';
         return '';
@@ -152,11 +197,12 @@ export default function OnboardingSurvey({ onComplete }) {
     const err = validateStep();
     if (err) { dispatch({ type: 'SET_ERROR', value: err }); return; }
 
-    if (step === 3 && (formData.goal === 'lose' || formData.goal === 'gain')) {
+    if (step === 3 && (formData.goal === 'lose' || formData.goal === 'gain') && needsSafetyConfirmation(safetyAssessment)) {
       setShowSafetyCheck(true);
       return;
     }
 
+    setFieldErrors({});
     dispatch({ type: 'NEXT' });
   };
 
@@ -171,6 +217,11 @@ export default function OnboardingSurvey({ onComplete }) {
   };
 
   const handleSubmit = async () => {
+    const finalError = validateBasicMetrics(formData) || getTargetWeightError(formData);
+    if (finalError) {
+      dispatch({ type: 'SET_ERROR', value: finalError });
+      return;
+    }
     dispatch({ type: 'SET_SUBMITTING', value: true });
     dispatch({ type: 'SET_ERROR', value: '' });
     try {
@@ -205,11 +256,14 @@ export default function OnboardingSurvey({ onComplete }) {
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8, textAlign: 'center' }}>Thông tin cơ bản</h3>
             <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 24 }}>Cơ sở để cá nhân hóa hành trình của bạn</p>
             <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-              <InputField label="Chiều cao" value={formData.height} onChange={v => dispatch({ type: 'SET_FIELD', field: 'height', value: v })} type="number" placeholder="170" suffix="cm" />
-              <InputField label="Cân nặng hiện tại" value={formData.weight} onChange={v => dispatch({ type: 'SET_FIELD', field: 'weight', value: v })} type="number" placeholder="65" suffix="kg" />
+              <InputField label="Chiều cao" value={formData.height} onChange={v => updateField('height', v)} type="number" placeholder="170" suffix="cm"
+                min={HEALTH_LIMITS.height.min} max={HEALTH_LIMITS.height.max} step={HEALTH_LIMITS.height.step} error={fieldErrors.height} />
+              <InputField label="Cân nặng hiện tại" value={formData.weight} onChange={v => updateField('weight', v)} type="number" placeholder="65" suffix="kg"
+                min={HEALTH_LIMITS.weight.min} max={HEALTH_LIMITS.weight.max} step={HEALTH_LIMITS.weight.step} error={fieldErrors.weight} />
             </div>
             <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-              <InputField label="Tuổi" value={formData.age} onChange={v => dispatch({ type: 'SET_FIELD', field: 'age', value: v })} type="number" placeholder="25" suffix="tuổi" />
+              <InputField label="Tuổi" value={formData.age} onChange={v => updateField('age', v)} type="number" placeholder="25" suffix="tuổi"
+                min={HEALTH_LIMITS.age.min} max={HEALTH_LIMITS.age.max} step={1} error={fieldErrors.age} />
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>Giới tính</label>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -237,7 +291,7 @@ export default function OnboardingSurvey({ onComplete }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12, marginBottom: 20 }}>
               {goalCards.map(card => (
                 <button
-                  key={card.value} type="button" onClick={() => dispatch({ type: 'SET_FIELD', field: 'goal', value: card.value })}
+                  key={card.value} type="button" onClick={() => selectGoal(card.value)}
                   style={{
                     padding: 16, borderRadius: 12, border: `2px solid ${formData.goal === card.value ? '#22C55E' : '#e2e8f0'}`,
                     background: formData.goal === card.value ? '#f0fdf4' : 'white', cursor: 'pointer',
@@ -259,8 +313,10 @@ export default function OnboardingSurvey({ onComplete }) {
                 <InputField 
                   label="Cân nặng mục tiêu" 
                   value={formData.targetWeight} 
-                  onChange={v => dispatch({ type: 'SET_FIELD', field: 'targetWeight', value: v })} 
-                  type="number" placeholder={formData.goal === 'lose' ? 'Ví dụ: 60' : 'Ví dụ: 80'} suffix="kg" 
+                  onChange={v => updateField('targetWeight', v)}
+                  type="number" placeholder={formData.goal === 'lose' ? 'Ví dụ: 60' : 'Ví dụ: 80'} suffix="kg"
+                  min={HEALTH_LIMITS.targetWeight.min} max={HEALTH_LIMITS.targetWeight.max}
+                  step={HEALTH_LIMITS.targetWeight.step} error={fieldErrors.targetWeight}
                 />
               </div>
             )}
@@ -291,13 +347,7 @@ export default function OnboardingSurvey({ onComplete }) {
             </div>
             {showSafetyCheck && (
               <SafetyValidation 
-                  profile={{ 
-                    ...formData, 
-                    weight: Number(formData.weight), 
-                    targetWeight: Number(formData.targetWeight), 
-                    bmiLevel: bmiResult?.level,
-                    targetDays: Number(effectiveTargetDays)
-                  }} 
+                  profile={safetyProfile}
                 onAccept={handleSafetyAccept}
                 onContinue={handleSafetyContinue}
               />
