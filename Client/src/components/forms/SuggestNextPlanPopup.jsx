@@ -232,12 +232,11 @@ export default function SuggestNextPlanPopup({ onClose }) {
           type: 'success',
           text:
             numDays > 1
-              ? `Đã tạo gợi ý thành công cho ${numDays} ngày (${formatShortDate(startDate)} – ${formatShortDate(endDate)})!`
+              ? `Đã tạo gợi ý thành công cho ${numDays} ngày (${formatShortDate(startDate)} – ${formatShortDate(endDate)})! Dùng mũi tên ‹ › để xem các tuần tiếp theo.`
               : 'Đã tạo gợi ý thành công!',
           date: startDate,
           endDate: endDate,
           numDays: numDays,
-          planData: res.data.data,
         });
       }
     } catch (err) {

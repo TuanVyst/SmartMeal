@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -133,6 +133,7 @@ export default function MealPlanSuggestion() {
 
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [quickGenerating, setQuickGenerating] = useState(null);
+  const fetchSeqRef = useRef(0);
 
   // Pro features (access resolved centrally in AuthContext)
   const [showPaywall, setShowPaywall] = useState(false);
@@ -171,6 +172,7 @@ export default function MealPlanSuggestion() {
 
   const fetchWeekPlan = useCallback(async (dateToFetch, targetDateStr = null, silent = false) => {
     if (!accountId) return;
+    const reqId = ++fetchSeqRef.current;
     const cached = readCachedWeekPlan(accountId, dateToFetch || new Date());
     if (cached && !silent) {
       applyPlanState(cached, dateToFetch, targetDateStr);
@@ -181,12 +183,15 @@ export default function MealPlanSuggestion() {
     try {
       const dateStr = safeDate(dateToFetch || new Date());
       const res = await api.get(`/MealPlan/week?date=${dateStr}`);
+      if (reqId !== fetchSeqRef.current) return;
       const plan = res.data.data;
       applyPlanState(plan, dateToFetch, targetDateStr);
     } catch (err) {
       console.error('Lỗi tải thực đơn tuần:', err);
     } finally {
-      setLoadingPlans(false);
+      if (reqId === fetchSeqRef.current) {
+        setLoadingPlans(false);
+      }
     }
   }, [accountId, applyPlanState]);
 
@@ -198,13 +203,28 @@ export default function MealPlanSuggestion() {
     setShowPopup(false);
     if (msg) {
       setAlertMsg(msg);
-      setTimeout(() => setAlertMsg(null), 3000);
+      setTimeout(() => setAlertMsg(null), msg.numDays > 7 ? 6000 : 3000);
       if (msg.date) {
         const pickedDate = new Date(msg.date + 'T12:00:00');
         setCurrentWeekDate(pickedDate);
-        if (msg.planData) {
-          applyPlanState(msg.planData, pickedDate, msg.date);
-          return;
+
+        // Always refetch from the API so the week view shows exactly 7 days
+        // for the starting week.  Using msg.planData directly is unreliable
+        // because SuggestForDateRangeAsync returns all plan days (potentially
+        // spanning multiple weeks), which would cause the tab row to overflow.
+        // Clearing the stale cache first guarantees a fresh server response.
+        if (accountId) {
+          // Invalidate cache for every week covered by the new plan so the
+          // next/prev-week navigation buttons also pick up fresh data.
+          if (msg.numDays && msg.numDays > 0) {
+            const totalWeeks = Math.ceil(msg.numDays / 7) + 1;
+            for (let w = 0; w < totalWeeks; w++) {
+              const weekRefDate = new Date(pickedDate);
+              weekRefDate.setDate(weekRefDate.getDate() + w * 7);
+              const weekKey = `smartmeal_weekplan_${accountId}_${getWeekMondayKey(weekRefDate)}`;
+              try { sessionStorage.removeItem(weekKey); } catch { /* ignore */ }
+            }
+          }
         }
         fetchWeekPlan(pickedDate, msg.date);
         return;
@@ -548,11 +568,20 @@ export default function MealPlanSuggestion() {
                 const isActive = i === selectedDayIdx;
                 const isToday = isTodayDate(day.dayDate);
                 const dateShort = formatDateShort(day.dayDate);
-                const weekdayShort = ['T2','T3','T4','T5','T6','T7','CN'][i] || `T${i+2}`;
+                // Derive the weekday label from the actual date, not the array index,
+                // so it stays correct when the plan spans more than 7 days (e.g. 2 weeks).
+                const weekdayFromDate = (() => {
+                  const datePart = toPlanDateKey(day.dayDate);
+                  if (!datePart) return ['T2','T3','T4','T5','T6','T7','CN'][i] || `T${i+2}`;
+                  const [y, m, d] = datePart.split('-').map(Number);
+                  const jsDay = new Date(y, m - 1, d, 12, 0, 0).getDay(); // 0=Sun,1=Mon,...
+                  return ['CN','T2','T3','T4','T5','T6','T7'][jsDay];
+                })();
+                const weekdayShort = weekdayFromDate;
 
                 return (
                   <button
-                    key={day.day_id || i}
+                    key={toPlanDateKey(day.dayDate) || i}
                     className={`mps-day-tab ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}`}
                     onClick={() => setSelectedDayIdx(i)}
                   >
@@ -568,7 +597,17 @@ export default function MealPlanSuggestion() {
             {selectedDay && (
               <div className="mps-day-summary">
                 <div className="mps-day-summary-title">
-                  {WEEKDAY_LABELS[selectedDayIdx]} · {new Date(selectedDay.dayDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  {(() => {
+                    // Derive weekday label from the actual date, not the index,
+                    // so it stays correct when the plan spans more than one week.
+                    const dp = toPlanDateKey(selectedDay.dayDate);
+                    if (dp) {
+                      const [sy, sm, sd] = dp.split('-').map(Number);
+                      const jsDay = new Date(sy, sm - 1, sd, 12, 0, 0).getDay();
+                      return WEEKDAY_LABELS[jsDay === 0 ? 6 : jsDay - 1];
+                    }
+                    return WEEKDAY_LABELS[selectedDayIdx % 7];
+                  })()} · {new Date(selectedDay.dayDate + (selectedDay.dayDate?.includes('T') ? '' : 'T12:00:00')).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                   <div className="mps-day-summary-stats">
