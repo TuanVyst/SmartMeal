@@ -162,6 +162,10 @@ builder.Services.AddScoped<Service.Interfaces.IBmiLogService, Service.Implements
 builder.Services.AddScoped<Repository.Interfaces.IPlanRepo, Repository.Implements.PlanRepo>();
 builder.Services.AddScoped<Service.Interfaces.IPlanService, Service.Implements.PlanService>();
 
+// Promotion
+builder.Services.AddScoped<Repository.Interfaces.IPromotionRepo, Repository.Implements.PromotionRepo>();
+builder.Services.AddScoped<Service.Interfaces.IPromotionService, Service.Implements.PromotionService>();
+
 // Subscription
 builder.Services.AddScoped<Repository.Interfaces.ISubscriptionRepo, Repository.Implements.SubscriptionRepo>();
 builder.Services.AddScoped<Service.Interfaces.ISubscriptionService, Service.Implements.SubscriptionService>();

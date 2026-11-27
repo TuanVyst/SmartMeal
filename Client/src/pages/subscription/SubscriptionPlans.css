@@ -170,6 +170,48 @@
   margin-left: 4px;
 }
 
+/* ---- Promotion / sale ---- */
+
+.plan-sale-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
+}
+
+.plan-price-original {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: line-through;
+  margin-right: 10px;
+}
+
+.plan-price--sale {
+  color: #dc2626;
+}
+
+.plan-sale-period {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border: 1px dashed #fcd34d;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 /* Features list */
 .plan-card-body {
   border-top: 1px solid #f1f5f9;
@@ -476,6 +518,17 @@
   font-size: 1.5rem;
   font-weight: 800;
   color: #22c55e;
+}
+
+.checkout-sale-note {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: #b45309;
+}
+
+.checkout-price-original {
+  color: #94a3b8;
+  text-decoration: line-through;
 }
 
 .payment-method-selector {

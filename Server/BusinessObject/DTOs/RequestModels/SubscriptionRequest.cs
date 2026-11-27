@@ -12,6 +12,11 @@ namespace BusinessObject.Dtos.RequestModels
         public string PaymentRef { get; set; }
         public double PricePaid { get; set; }
 
+        // ---- Promotion snapshot (supplied by the payment flow) ----
+        public double OriginalPrice { get; set; }
+        public double DiscountPercent { get; set; }
+        public Guid? PromotionId { get; set; }
+
         // ---- Payment evidence (optional, supplied by the payment flow) ----
         /// <summary>"PayOS" | "AdminGrant". Defaults to "PayOS".</summary>
         public string? PaymentProvider { get; set; }

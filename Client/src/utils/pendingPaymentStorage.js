@@ -13,6 +13,7 @@ export const pendingPaymentStorage = {
         orderCode: data.orderCode,
         qrImage: data.qrImage || '',
         transferContent: data.transferContent || '',
+        amount: data.amount ?? null,
         createdAt,
         expiresAt,
       };

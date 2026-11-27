@@ -656,13 +656,60 @@ Get all available subscription plans.
         "name": "string",
         "description": "string",
         "price": 99000,
+        "effectivePrice": 79200,
         "durationDays": 30,
-        "features": "string|json"
+        "features": "string|json",
+        "salePercent": 20,
+        "promotionId": "guid|null",
+        "promotionName": "string|null",
+        "saleStartAt": "2026-11-27T00:00:00Z|null",
+        "saleEndAt": "2026-12-04T00:00:00Z|null",
+        "isOnSale": true
       }
     ]
   }
   ```
+- **Notes**: `price` is the list price and must never be used for charging.
+  `effectivePrice` is the server-computed amount to charge; it equals `price`
+  when no promotion is active. Sale timestamps are UTC.
 - **Errors**: 400, 500
+
+---
+
+## Promotions (Admin)
+
+At most one promotion may be active for a given plan at any moment; overlapping
+windows are rejected with HTTP 400.
+
+### GET /api/Promotion
+List promotions (including their plans and derived `status`:
+`scheduled` | `active` | `expired` | `disabled`).
+
+- **Auth required**: Yes (Admin)
+
+### POST /api/Promotion
+Create a percentage promotion.
+
+- **Auth required**: Yes (Admin)
+- **Request body**:
+  ```json
+  {
+    "name": "Sale cuối năm",
+    "discountPercent": 20,
+    "startAt": "2026-11-27T00:00:00Z",
+    "endAt": "2026-12-04T00:00:00Z",
+    "planIds": ["guid", "guid"]
+  }
+  ```
+
+### PUT /api/Promotion/{id}
+Update name/percentage/window/plans (same body as create).
+
+### POST /api/Promotion/{id}/end
+End immediately: sets `endAt = now` (or disables a not-yet-started promotion).
+
+### DELETE /api/Promotion/{id}
+Soft-delete. Existing subscriptions keep their price snapshot.
 
 ---
 
@@ -705,10 +752,19 @@ Create a PayOS payment link for purchasing a subscription plan.
     "success": true,
     "data": {
       "checkoutUrl": "https://pay.payos.vn/...",
-      "orderCode": 123456789
+      "orderCode": 123456789,
+      "amount": 39200,
+      "originalAmount": 49000,
+      "discountPercent": 20,
+      "promotionId": "guid|null",
+      "qrCode": "...",
+      "paymentLinkId": "...",
+      "transferContent": "..."
     }
   }
   ```
+- **Notes**: `amount` is computed server-side from the active promotion. Clients
+  must display `amount` (not the plan list price) once the link is created.
 - **Errors**: 400, 401, 403, 500
 - **Mobile notes**: Open `checkoutUrl` using `url_launcher`. Store `orderCode` to poll payment status.
 

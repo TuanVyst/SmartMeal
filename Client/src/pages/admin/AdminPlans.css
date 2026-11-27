@@ -1,0 +1,227 @@
+/* Admin plans page: promotions + sale pricing */
+
+.admin-section {
+  margin-bottom: 32px;
+}
+
+.admin-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 12px;
+}
+
+.promo-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.promo-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.promo-cell-sub {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.plan-price-cell {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.plan-price-original {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.plan-price-sale {
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.promo-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.promo-status--active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.promo-status--scheduled {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.promo-status--expired {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.promo-status--disabled {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.action-btn.end {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.action-btn.end:hover {
+  background: #ffedd5;
+}
+
+/* ---- Promotion modal ---- */
+
+.promo-modal {
+  max-width: calc(100vw - 32px);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.promo-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.promo-form-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.promo-form-grid label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.promo-modal input[type='text'],
+.promo-modal input[type='number'],
+.promo-modal input[type='datetime-local'] {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.promo-plans-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.promo-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.promo-link-btn:hover {
+  text-decoration: underline;
+}
+
+.promo-plan-list {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  margin-bottom: 18px;
+}
+
+.promo-plan-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 2px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.promo-plan-name {
+  flex: 1;
+}
+
+.promo-plan-price {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.promo-preview {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.promo-preview-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.promo-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.promo-preview th,
+.promo-preview td {
+  text-align: left;
+  padding: 5px 4px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.promo-preview th {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.promo-preview-sale {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .promo-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -78,6 +78,9 @@ namespace Service.Implements
                 Status = request.Status,
                 PaymentRef = request.PaymentRef,
                 PricePaid = request.PricePaid > 0 ? request.PricePaid : plan.Price,
+                OriginalPrice = request.OriginalPrice > 0 ? request.OriginalPrice : plan.Price,
+                DiscountPercent = request.DiscountPercent > 0 ? request.DiscountPercent : 0,
+                PromotionId = request.PromotionId,
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow,
                 PaidAt = null,
@@ -113,6 +116,9 @@ namespace Service.Implements
             existingItem.Status = request.Status;
             existingItem.PaymentRef = request.PaymentRef;
             if (request.PricePaid > 0) existingItem.PricePaid = request.PricePaid;
+            if (request.OriginalPrice > 0) existingItem.OriginalPrice = request.OriginalPrice;
+            if (request.DiscountPercent > 0) existingItem.DiscountPercent = request.DiscountPercent;
+            if (request.PromotionId.HasValue) existingItem.PromotionId = request.PromotionId;
 
             // Preserve/complete payment metadata without wiping reconciliation evidence.
             if (!string.IsNullOrWhiteSpace(request.PaymentProvider))
@@ -234,6 +240,8 @@ namespace Service.Implements
                     ? $"ADMIN_GRANT_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
                     : request.PaymentRef.Trim(),
                 PricePaid = request.PricePaid ?? plan.Price,
+                OriginalPrice = plan.Price,
+                DiscountPercent = 0,
                 IsDeleted = false,
                 CreatedAt = now,
                 PaidAt = null,
@@ -320,6 +328,8 @@ namespace Service.Implements
                 ProviderStatus = baseDto.ProviderStatus,
                 PricePaid = baseDto.PricePaid,
                 PlanPrice = baseDto.PlanPrice,
+                OriginalPrice = baseDto.OriginalPrice,
+                DiscountPercent = baseDto.DiscountPercent,
                 PlanName = baseDto.PlanName,
                 PlanDurationDays = baseDto.PlanDurationDays,
                 PlanTier = baseDto.PlanTier,
@@ -427,7 +437,9 @@ namespace Service.Implements
                 Status = entity.Status,
                 ProviderStatus = entity.ProviderStatus,
                 PricePaid = entity.PricePaid,
-                PlanPrice = entity.Plan?.Price ?? 0,
+                PlanPrice = entity.OriginalPrice > 0 ? entity.OriginalPrice : (entity.Plan?.Price ?? 0),
+                OriginalPrice = entity.OriginalPrice > 0 ? entity.OriginalPrice : (entity.Plan?.Price ?? 0),
+                DiscountPercent = entity.DiscountPercent,
                 PlanName = entity.Plan?.Name,
                 PlanDurationDays = entity.Plan?.Duration ?? 0,
                 PlanTier = PlanTierHelper.GetEffectiveTier(entity.Plan),
@@ -466,6 +478,9 @@ namespace Service.Implements
                 Status = entity.Status,
                 PaymentRef = entity.PaymentRef,
                 PricePaid = entity.PricePaid,
+                OriginalPrice = entity.OriginalPrice,
+                DiscountPercent = entity.DiscountPercent,
+                PromotionId = entity.PromotionId,
                 IsDeleted = entity.IsDeleted,
                 CreatedAt = entity.CreatedAt,
                 PaidAt = entity.PaidAt,

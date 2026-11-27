@@ -954,6 +954,60 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Plan");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.Promotion", b =>
+                {
+                    b.Property<Guid>("Promo_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("DiscountPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<DateTime>("EndAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("StartAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Promo_id");
+
+                    b.HasIndex("StartAt", "EndAt");
+
+                    b.ToTable("Promotion");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.PromotionPlan", b =>
+                {
+                    b.Property<Guid>("Promo_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Plan_id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Promo_id", "Plan_id");
+
+                    b.HasIndex("Plan_id");
+
+                    b.ToTable("Promotion_plan");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.Recipe", b =>
                 {
                     b.Property<Guid>("Recipe_id")
@@ -1140,6 +1194,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<double>("DiscountPercent")
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -1155,6 +1212,9 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<double>("OriginalPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("timestamp with time zone");
@@ -1182,6 +1242,9 @@ namespace DataAccessLayer.Migrations
                     b.Property<double>("PricePaid")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid?>("PromotionId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ProviderStatus")
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
@@ -1204,6 +1267,8 @@ namespace DataAccessLayer.Migrations
                     b.HasIndex("PaymentRef");
 
                     b.HasIndex("Plan_id");
+
+                    b.HasIndex("PromotionId");
 
                     b.HasIndex("Account_id", "Status");
 
@@ -1597,6 +1662,25 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Ingredient");
                 });
 
+            modelBuilder.Entity("BusinessObject.Entities.PromotionPlan", b =>
+                {
+                    b.HasOne("BusinessObject.Entities.Plan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("Plan_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BusinessObject.Entities.Promotion", "Promotion")
+                        .WithMany("PromotionPlans")
+                        .HasForeignKey("Promo_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("BusinessObject.Entities.Recipe", b =>
                 {
                     b.HasOne("BusinessObject.Entities.Account", "Account")
@@ -1688,11 +1772,18 @@ namespace DataAccessLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BusinessObject.Entities.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Account");
 
                     b.Navigation("GrantedByAccount");
 
                     b.Navigation("Plan");
+
+                    b.Navigation("Promotion");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.UserCondition", b =>
@@ -1820,6 +1911,11 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("BusinessObject.Entities.Plan", b =>
                 {
                     b.Navigation("Subscriptions");
+                });
+
+            modelBuilder.Entity("BusinessObject.Entities.Promotion", b =>
+                {
+                    b.Navigation("PromotionPlans");
                 });
 
             modelBuilder.Entity("BusinessObject.Entities.Recipe", b =>

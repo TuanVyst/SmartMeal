@@ -42,6 +42,8 @@ namespace DataAccessLayer
         public DbSet<BmiLog> BmiLogs { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<PromotionPlan> PromotionPlans { get; set; }
         
         // Meal Planning Engine
         public DbSet<MealPlan> MealPlans { get; set; }
@@ -115,6 +117,34 @@ namespace DataAccessLayer
 
             modelBuilder.Entity<BusinessObject.Entities.Subscription>()
                 .HasIndex(s => new { s.Account_id, s.Status });
+
+            modelBuilder.Entity<BusinessObject.Entities.Subscription>()
+                .HasOne(s => s.Promotion)
+                .WithMany()
+                .HasForeignKey(s => s.PromotionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // ----- Promotions -----
+            modelBuilder.Entity<BusinessObject.Entities.Promotion>()
+                .HasIndex(p => new { p.StartAt, p.EndAt });
+
+            modelBuilder.Entity<BusinessObject.Entities.PromotionPlan>()
+                .HasKey(pp => new { pp.Promo_id, pp.Plan_id });
+
+            modelBuilder.Entity<BusinessObject.Entities.PromotionPlan>()
+                .HasOne(pp => pp.Promotion)
+                .WithMany(p => p.PromotionPlans)
+                .HasForeignKey(pp => pp.Promo_id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BusinessObject.Entities.PromotionPlan>()
+                .HasOne(pp => pp.Plan)
+                .WithMany()
+                .HasForeignKey(pp => pp.Plan_id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BusinessObject.Entities.PromotionPlan>()
+                .HasIndex(pp => pp.Plan_id);
         }
     }
 }

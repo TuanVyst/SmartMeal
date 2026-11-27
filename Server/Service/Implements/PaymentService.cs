@@ -23,6 +23,7 @@ namespace Service.Implements
     {
         private readonly ISubscriptionRepo _subscriptionRepo;
         private readonly IPlanRepo _planRepo;
+        private readonly IPromotionRepo _promotionRepo;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentService> _logger;
 
@@ -43,11 +44,13 @@ namespace Service.Implements
         public PaymentService(
             ISubscriptionRepo subscriptionRepo,
             IPlanRepo planRepo,
+            IPromotionRepo promotionRepo,
             IConfiguration configuration,
             ILogger<PaymentService> logger)
         {
             _subscriptionRepo = subscriptionRepo;
             _planRepo = planRepo;
+            _promotionRepo = promotionRepo;
             _configuration = configuration;
             _logger = logger;
         }
@@ -64,7 +67,15 @@ namespace Service.Implements
             var payOS = CreatePayOsClient();
 
             var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var amount = (int)plan.Price;
+
+            // Price is resolved server-side so the advertised sale price and the charged
+            // amount can never diverge.
+            var nowUtc = DateTime.UtcNow;
+            var promotions = await _promotionRepo.GetActiveByPlanIdsAsync(new List<Guid> { planId }, nowUtc);
+            var promotion = promotions.GetValueOrDefault(planId);
+            var effectivePrice = PlanPricingHelper.ResolveEffectivePrice(plan.Price, promotion, nowUtc);
+            var amount = (int)Math.Round(effectivePrice, MidpointRounding.AwayFromZero);
+            var appliedPromotion = amount < plan.Price ? promotion : null;
             var description = orderCode.ToString();
 
             // Prefer configuration key PayOS:ReturnUrl (or environment key PayOS__ReturnUrl),
@@ -94,6 +105,9 @@ namespace Service.Implements
                     CheckoutUrl = response.CheckoutUrl,
                     OrderCode = orderCode,
                     Amount = amount,
+                    OriginalAmount = (int)Math.Round(plan.Price, MidpointRounding.AwayFromZero),
+                    DiscountPercent = appliedPromotion?.DiscountPercent ?? 0,
+                    PromotionId = appliedPromotion?.Promo_id,
                     QrCode = response.QrCode,
                     PaymentLinkId = response.PaymentLinkId,
                     TransferContent = ExtractPurposeOfTransaction(response.QrCode)

@@ -606,7 +606,10 @@ export default function AdminTransactionsPanel() {
                       {formatCurrency(item.pricePaid)}
                     </span>
                     {item.planPrice !== undefined && Number(item.planPrice) !== Number(item.pricePaid) && (
-                      <span className="txn-cell-sub">Giá gói: {formatCurrency(item.planPrice)}</span>
+                      <span className="txn-cell-sub">
+                        Giá gốc: {formatCurrency(item.planPrice)}
+                        {Number(item.discountPercent) > 0 ? ` (-${item.discountPercent}%)` : ''}
+                      </span>
                     )}
                   </td>
                   <td>

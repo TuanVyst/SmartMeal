@@ -334,6 +334,9 @@ export default function TransactionDetailDrawer({ subId, onClose }) {
                 <div className="txn-detail-grid">
                   <DetailItem label="Tên gói" value={detail.planName} />
                   <DetailItem label="Giá niêm yết" value={formatCurrency(detail.planPrice)} />
+                  {Number(detail.discountPercent) > 0 && (
+                    <DetailItem label="Khuyến mãi" value={`-${detail.discountPercent}%`} />
+                  )}
                   <DetailItem label="Thời lượng" value={formatDuration(detail.planDurationDays)} />
                   <DetailItem label="Loại gói" value={formatPlanTier(detail.planTier)} />
                   <DetailItem label="Bắt đầu" value={formatDate(detail.startDate)} />

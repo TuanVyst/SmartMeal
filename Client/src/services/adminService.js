@@ -245,6 +245,32 @@ export const adminService = {
     return res.data;
   },
 
+  // Promotion operations
+  getPromotions: async () => {
+    const res = await api.get('/Promotion');
+    return res.data.data || [];
+  },
+
+  createPromotion: async (data) => {
+    const res = await api.post('/Promotion', data);
+    return res.data;
+  },
+
+  updatePromotion: async (id, data) => {
+    const res = await api.put(`/Promotion/${id}`, data);
+    return res.data;
+  },
+
+  endPromotion: async (id) => {
+    const res = await api.post(`/Promotion/${id}/end`);
+    return res.data;
+  },
+
+  deletePromotion: async (id) => {
+    const res = await api.delete(`/Promotion/${id}`);
+    return res.data;
+  },
+
   // Admin Subscription operations (Grant / Revoke / List)
   getAllSubscriptionsAdmin: async () => {
     const res = await api.get('/Subscription/admin/all');

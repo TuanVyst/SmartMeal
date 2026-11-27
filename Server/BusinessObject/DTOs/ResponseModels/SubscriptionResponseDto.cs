@@ -12,6 +12,9 @@ namespace BusinessObject.Dtos.ResponseModels
         public string Status { get; set; }
         public string PaymentRef { get; set; }
         public double PricePaid { get; set; }
+        public double OriginalPrice { get; set; }
+        public double DiscountPercent { get; set; }
+        public Guid? PromotionId { get; set; }
         public bool IsDeleted { get; set; }
 
         // ---- Transaction metadata (non-breaking additions) ----

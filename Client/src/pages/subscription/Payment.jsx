@@ -5,7 +5,11 @@ import { subscriptionService } from '../../services/subscriptionService';
 import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import { IoChevronBackOutline } from 'react-icons/io5';
 import { QRCodeSVG } from 'qrcode.react';
+import toast from 'react-hot-toast';
 import './SubscriptionPlans.css';
+
+const formatVnd = (value) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(value) || 0);
 
 export default function Payment() {
   const location = useLocation();
@@ -14,6 +18,7 @@ export default function Payment() {
   const accountId = user?.accountId || user?.account_id;
 
   const [currentPlan, setCurrentPlan] = useState(() => location.state?.plan || null);
+  const [paidAmount, setPaidAmount] = useState(null);
   const [step, setStep] = useState('idle');
   const [qrImage, setQrImage] = useState('');
   const [orderCode, setOrderCode] = useState(null);
@@ -22,6 +27,11 @@ export default function Payment() {
   const [errorMsg, setErrorMsg] = useState('');
   const [copied, setCopied] = useState(null);
   const pollingRef = useRef(null);
+
+  // Once PayOS has created the link, its amount is authoritative (the promotion may
+  // have expired between page load and checkout).
+  const effectivePrice = currentPlan?.effectivePrice ?? currentPlan?.price ?? 0;
+  const displayAmount = paidAmount ?? effectivePrice;
 
   const startPolling = useCallback((accId, currentOrderCode) => {
     if (pollingRef.current) clearInterval(pollingRef.current);
@@ -52,6 +62,7 @@ export default function Payment() {
       setOrderCode(savedPayment.orderCode);
       setQrImage(savedPayment.qrImage);
       setTransferContent(savedPayment.transferContent);
+      setPaidAmount(savedPayment.amount ?? null);
       setStep('pending');
 
       const remainingSec = Math.max(0, Math.floor((savedPayment.expiresAt - Date.now()) / 1000));
@@ -124,12 +135,18 @@ export default function Payment() {
         setStep('pending');
         setTimeLeft(900);
 
+        if (resp.amount != null && Number(resp.amount) !== Number(effectivePrice)) {
+          toast.error('Khuyến mãi đã kết thúc — số tiền đã cập nhật theo giá hiện tại.');
+        }
+        setPaidAmount(resp.amount ?? null);
+
         pendingPaymentStorage.savePendingPayment({
           accountId,
           plan: currentPlan,
           orderCode: newOrderCode,
           qrImage: newQrImage,
           transferContent: newTransferContent,
+          amount: resp.amount,
         });
 
         startPolling(accountId, newOrderCode);
@@ -208,9 +225,18 @@ export default function Payment() {
             <div>
               <h3>Gói Pro: <strong>{currentPlan.name}</strong></h3>
               <p>{currentPlan.description}</p>
+              {currentPlan.isOnSale && (
+                <p className="checkout-sale-note">
+                  Đã áp dụng khuyến mãi <strong>-{currentPlan.salePercent}%</strong> · giá gốc{' '}
+                  <span className="checkout-price-original">{formatVnd(currentPlan.price)}</span>
+                  {currentPlan.saleEndAt
+                    ? ` · đến ${new Date(currentPlan.saleEndAt).toLocaleString('vi-VN')}`
+                    : ''}
+                </p>
+              )}
             </div>
             <div className="checkout-price">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPlan.price)}
+              {formatVnd(displayAmount)}
             </div>
           </div>
 
@@ -293,7 +319,7 @@ export default function Payment() {
                 <span className="item-label">Số tiền:</span>
                 <div className="item-value-row">
                   <span className="item-value font-bold">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPlan.price)}
+                    {formatVnd(displayAmount)}
                   </span>
                 </div>
               </div>
@@ -336,7 +362,7 @@ export default function Payment() {
                   <span className="item-label">Số tiền</span>
                   <div className="item-value-row">
                     <span className="item-value font-bold">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPlan.price)}
+                      {formatVnd(displayAmount)}
                     </span>
                   </div>
                 </div>

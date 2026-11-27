@@ -36,6 +36,18 @@ namespace BusinessObject.Entities
         [Column(TypeName = "decimal(18,2)")]
         public double PricePaid { get; set; } = 0;
 
+        // ---- Promotion snapshot (price at the time of purchase) ----
+
+        /// <summary>Plan list price before any promotion. 0 for legacy rows (fall back to Plan.Price).</summary>
+        [Column(TypeName = "decimal(18,2)")]
+        public double OriginalPrice { get; set; } = 0;
+
+        /// <summary>Applied discount percentage (0 when no promotion).</summary>
+        [Column(TypeName = "decimal(5,2)")]
+        public double DiscountPercent { get; set; } = 0;
+
+        public Guid? PromotionId { get; set; }
+
         public bool IsDeleted { get; set; } = false;
 
         // ---- Transaction / payment evidence ----
@@ -102,6 +114,7 @@ namespace BusinessObject.Entities
         // Navigation properties
         public virtual Account Account { get; set; }
         public virtual Plan Plan { get; set; }
+        public virtual Promotion? Promotion { get; set; }
         public virtual Account? GrantedByAccount { get; set; }
     }
 }

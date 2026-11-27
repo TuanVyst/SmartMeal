@@ -7,6 +7,14 @@ class SubscriptionPlan {
   final int? durationDays;
   final List<String> features;
 
+  /// Server-computed price actually charged (equals [price] when no promotion).
+  final double? effectivePrice;
+  final double? salePercent;
+  final DateTime? saleStartAt;
+  final DateTime? saleEndAt;
+  final bool isOnSale;
+  final String? promotionName;
+
   SubscriptionPlan({
     this.planId,
     this.name,
@@ -14,7 +22,15 @@ class SubscriptionPlan {
     this.price,
     this.durationDays,
     this.features = const [],
+    this.effectivePrice,
+    this.salePercent,
+    this.saleStartAt,
+    this.saleEndAt,
+    this.isOnSale = false,
+    this.promotionName,
   });
+
+  double get chargeablePrice => effectivePrice ?? price ?? 0;
 
   factory SubscriptionPlan.fromJson(Map<String, dynamic> json) {
     List<String> parsedFeatures = [];
@@ -40,6 +56,12 @@ class SubscriptionPlan {
               json['duration_days'] ??
               json['DurationDays']) as int?,
       features: parsedFeatures,
+      effectivePrice: _toDouble(json['effectivePrice'] ?? json['EffectivePrice'] ?? json['effective_price']),
+      salePercent: _toDouble(json['salePercent'] ?? json['SalePercent'] ?? json['sale_percent']),
+      saleStartAt: _parseIsoDate(json['saleStartAt'] ?? json['SaleStartAt'] ?? json['sale_start_at']),
+      saleEndAt: _parseIsoDate(json['saleEndAt'] ?? json['SaleEndAt'] ?? json['sale_end_at']),
+      isOnSale: (json['isOnSale'] ?? json['IsOnSale'] ?? json['is_on_sale']) == true,
+      promotionName: (json['promotionName'] ?? json['PromotionName']) as String?,
     );
   }
 
@@ -102,4 +124,10 @@ class Subscription {
     if (value is String) return DateTime.tryParse(value);
     return null;
   }
+}
+
+DateTime? _parseIsoDate(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return DateTime.tryParse(value);
+  return null;
 }

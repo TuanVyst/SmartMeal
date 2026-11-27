@@ -22,6 +22,8 @@ namespace BusinessObject.Dtos.ResponseModels
 
         public double PricePaid { get; set; }
         public double PlanPrice { get; set; }
+        public double OriginalPrice { get; set; }
+        public double DiscountPercent { get; set; }
         public string? PlanName { get; set; }
         public int PlanDurationDays { get; set; }
         public int PlanTier { get; set; }

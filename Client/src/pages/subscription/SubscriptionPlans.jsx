@@ -6,6 +6,26 @@ import { pendingPaymentStorage } from '../../utils/pendingPaymentStorage';
 import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import './SubscriptionPlans.css';
 
+const formatVnd = (value) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(value) || 0);
+
+const formatSaleEnd = (isoValue) => {
+  if (!isoValue) return '';
+  return new Date(isoValue).toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const daysUntil = (isoValue) => {
+  if (!isoValue) return 0;
+  const remaining = new Date(isoValue).getTime() - Date.now();
+  return Math.max(0, Math.ceil(remaining / (24 * 60 * 60 * 1000)));
+};
+
 export default function SubscriptionPlans() {
   const navigate = useNavigate();
   const { user, isPremium, subscription } = useAuth();
@@ -26,7 +46,9 @@ export default function SubscriptionPlans() {
       try {
         const { data } = await subscriptionService.getAllPlans();
         // Sort plans by price
-        const sortedPlans = (data.data || []).sort((a, b) => a.price - b.price);
+        const sortedPlans = (data.data || []).sort(
+          (a, b) => (a.effectivePrice ?? a.price) - (b.effectivePrice ?? b.price)
+        );
         setPlans(sortedPlans);
       } catch (err) {
         console.error('Lỗi khi tải gói dịch vụ:', err);
@@ -192,10 +214,12 @@ export default function SubscriptionPlans() {
           const isCurrent = subscription && subscription.plan_id === plan.plan_id;
           const isFree = plan.price === 0;
           const features = getFeaturesList(plan.features);
+          const effectivePrice = plan.effectivePrice ?? plan.price;
+          const activePlanPrice = activePlan?.effectivePrice ?? activePlan?.price ?? 0;
 
           const planTier = getEffectiveTier(plan);
-          const isLowerTier = isPremium && subscription && !isCurrent && (planTier < activeTier || plan.price < (activePlan?.price || 0));
-          const isHigherTier = isPremium && subscription && !isCurrent && (planTier > activeTier || plan.price > (activePlan?.price || 0));
+          const isLowerTier = isPremium && subscription && !isCurrent && (planTier < activeTier || effectivePrice < activePlanPrice);
+          const isHigherTier = isPremium && subscription && !isCurrent && (planTier > activeTier || effectivePrice > activePlanPrice);
 
           return (
             <div
@@ -208,22 +232,29 @@ export default function SubscriptionPlans() {
                 <div className="featured-badge">PHỔ BIẾN NHẤT</div>
               )}
 
+              {plan.isOnSale && (
+                <div className="plan-sale-badge">SALE -{plan.salePercent}%</div>
+              )}
+
               <div className="plan-card-header">
                 <h3 className="plan-name">{plan.name}</h3>
                 <p className="plan-desc">{plan.description}</p>
                 <div className="plan-price-container">
-                  <span className="plan-price">
-                    {plan.price === 0
-                      ? 'Miễn phí'
-                      : new Intl.NumberFormat('vi-VN', {
-                          style: 'currency',
-                          currency: 'VND',
-                        }).format(plan.price)}
+                  {plan.isOnSale && (
+                    <span className="plan-price-original">{formatVnd(plan.price)}</span>
+                  )}
+                  <span className={`plan-price${plan.isOnSale ? ' plan-price--sale' : ''}`}>
+                    {plan.price === 0 ? 'Miễn phí' : formatVnd(effectivePrice)}
                   </span>
                   {plan.price > 0 && (
                     <span className="plan-duration">/{plan.duration} ngày</span>
                   )}
                 </div>
+                {plan.isOnSale && (
+                  <div className="plan-sale-period">
+                    Khuyến mãi đến {formatSaleEnd(plan.saleEndAt)} · còn {daysUntil(plan.saleEndAt)} ngày
+                  </div>
+                )}
               </div>
 
               <div className="plan-card-body">

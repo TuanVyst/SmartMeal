@@ -54,6 +54,10 @@ namespace PresentationLayer.Controllers
                     StartDate = now,
                     Status = "pending",
                     PaymentRef = paymentResponse.OrderCode.ToString(),
+                    PricePaid = paymentResponse.Amount,
+                    OriginalPrice = paymentResponse.OriginalAmount,
+                    DiscountPercent = paymentResponse.DiscountPercent,
+                    PromotionId = paymentResponse.PromotionId,
                     PaymentProvider = "PayOS",
                     PaymentLinkId = paymentResponse.PaymentLinkId,
                     PaymentDescription = paymentResponse.TransferContent

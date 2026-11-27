@@ -15,24 +15,36 @@ namespace Service.Implements
     public class PlanService : IPlanService
     {
         private readonly IPlanRepo _planRepo;
+        private readonly IPromotionRepo _promotionRepo;
         private readonly ILogger<PlanService> _logger;
 
-        public PlanService(IPlanRepo planRepo, ILogger<PlanService> logger)
+        public PlanService(IPlanRepo planRepo, IPromotionRepo promotionRepo, ILogger<PlanService> logger)
         {
             _planRepo = planRepo;
+            _promotionRepo = promotionRepo;
             _logger = logger;
         }
 
         public async Task<List<PlanResponseDto>> GetAllPlans()
         {
             var items = await _planRepo.GetAllPlans();
-            return items.Select(MapToDto).ToList();
+            var now = DateTime.UtcNow;
+            var promotions = await _promotionRepo.GetActiveByPlanIdsAsync(
+                items.Select(i => i.Plan_id).ToList(), now);
+
+            return items
+                .Select(i => MapToDto(i, promotions.GetValueOrDefault(i.Plan_id), now))
+                .ToList();
         }
 
         public async Task<PlanResponseDto?> GetPlanById(Guid id)
         {
             var item = await _planRepo.GetPlanById(id);
-            return item == null ? null : MapToDto(item);
+            if (item == null) return null;
+
+            var now = DateTime.UtcNow;
+            var promotions = await _promotionRepo.GetActiveByPlanIdsAsync(new List<Guid> { id }, now);
+            return MapToDto(item, promotions.GetValueOrDefault(id), now);
         }
 
         public async Task<PlanResponseDto> CreatePlan(PlanRequest request)
@@ -53,7 +65,7 @@ namespace Service.Implements
 
                 var result = await _planRepo.CreatePlan(newItem);
                 _logger.LogInformation("Plan '{Plan_id}' created successfully", newItem.Plan_id);
-                return MapToDto(result);
+                return MapToDto(result, null, DateTime.UtcNow);
             }
             catch (Exception ex)
             {
@@ -79,7 +91,10 @@ namespace Service.Implements
 
                 var result = await _planRepo.UpdatePlan(existingItem);
                 _logger.LogInformation("Plan '{Plan_id}' updated successfully", existingItem.Plan_id);
-                return MapToDto(result);
+
+                var now = DateTime.UtcNow;
+                var promotions = await _promotionRepo.GetActiveByPlanIdsAsync(new List<Guid> { id }, now);
+                return MapToDto(result, promotions.GetValueOrDefault(id), now);
             }
             catch (Exception ex)
             {
@@ -91,13 +106,16 @@ namespace Service.Implements
         public async Task<PlanResponseDto> SoftDeletePlan(Guid id)
         {
             var result = await _planRepo.SoftDeletePlan(id);
-            return MapToDto(result);
+            return MapToDto(result, null, DateTime.UtcNow);
         }
-        
-        private PlanResponseDto MapToDto(Plan entity)
+
+        private PlanResponseDto MapToDto(Plan entity, Promotion? promotion, DateTime nowUtc)
         {
             if (entity == null) return null;
             int effectiveTier = PlanTierHelper.GetEffectiveTier(entity);
+
+            var effectivePrice = PlanPricingHelper.ResolveEffectivePrice(entity.Price, promotion, nowUtc);
+            var isOnSale = promotion != null && effectivePrice < entity.Price;
 
             return new PlanResponseDto
             {
@@ -108,7 +126,14 @@ namespace Service.Implements
                 Tier = effectiveTier,
                 Description = entity.Description,
                 Features = entity.Features,
-                IsDeleted = entity.IsDeleted
+                IsDeleted = entity.IsDeleted,
+                EffectivePrice = effectivePrice,
+                SalePercent = isOnSale ? promotion!.DiscountPercent : 0,
+                PromotionId = isOnSale ? promotion!.Promo_id : null,
+                PromotionName = isOnSale ? promotion!.Name : null,
+                SaleStartAt = isOnSale ? promotion!.StartAt : null,
+                SaleEndAt = isOnSale ? promotion!.EndAt : null,
+                IsOnSale = isOnSale
             };
         }
     }

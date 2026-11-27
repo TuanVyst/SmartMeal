@@ -10,6 +10,12 @@ import 'package:smart_meal/features/auth/presentation/providers/auth_provider.da
 import 'package:smart_meal/features/profile/data/subscription_service.dart';
 import 'package:smart_meal/features/profile/domain/subscription_model.dart';
 
+String _formatPromoEnd(DateTime value) {
+  final local = value.toLocal();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${two(local.day)}/${two(local.month)}/${local.year} ${two(local.hour)}:${two(local.minute)}';
+}
+
 class SubscriptionPlansScreen extends StatefulWidget {
   final bool showAppBar;
   final SubscriptionService? subscriptionService;
@@ -102,7 +108,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
       final checkoutUrl = paymentData['checkoutUrl']?.toString() ?? '';
       final orderCode = paymentData['orderCode']?.toString() ?? '';
-      final amount = (paymentData['amount'] as num?)?.toInt() ?? (plan.price?.toInt() ?? 49000);
+      final amount = (paymentData['amount'] as num?)?.toInt() ?? plan.chargeablePrice.toInt();
       final qrCode = paymentData['qrCode']?.toString() ?? '';
       final transferContent = paymentData['transferContent']?.toString() ?? 'SMARTMEAL $orderCode';
 
@@ -264,7 +270,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
           else ...[
             ..._plans.map((plan) {
               final isSelected = _selectedPlan?.planId == plan.planId;
-              final formattedPrice = currencyFormatter.format(plan.price ?? 49000);
+              final formattedPrice = currencyFormatter.format(plan.chargeablePrice);
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -299,15 +305,17 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.amber.shade100,
+                            color: plan.isOnSale ? const Color(0xFFFEE2E2) : Colors.amber.shade100,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
-                            'ƯU ĐÃI PAYOS',
+                          child: Text(
+                            plan.isOnSale
+                                ? 'SALE -${(plan.salePercent ?? 0).toStringAsFixed(0)}%'
+                                : 'ƯU ĐÃI PAYOS',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFB45309),
+                              color: plan.isOnSale ? const Color(0xFFB91C1C) : const Color(0xFFB45309),
                             ),
                           ),
                         ),
@@ -320,16 +328,46 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                       children: [
                         Text(
                           formattedPrice,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primaryDark,
+                            color: plan.isOnSale ? const Color(0xFFDC2626) : AppColors.primaryDark,
                           ),
                         ),
+                        if (plan.isOnSale) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            currencyFormatter.format(plan.price ?? 0),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ],
                         const SizedBox(width: 6),
                         Text('/ ${(plan.durationDays ?? 30)} ngày', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
                       ],
                     ),
+                    if (plan.isOnSale && plan.saleEndAt != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.schedule, size: 14, color: Color(0xFFB45309)),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Khuyến mãi đến ${_formatPromoEnd(plan.saleEndAt!)}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFB45309),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const Divider(height: 24),
                     const Text(
                       'Đặc quyền gói Pro:',
