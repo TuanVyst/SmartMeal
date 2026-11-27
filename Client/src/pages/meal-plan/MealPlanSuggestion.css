@@ -1004,11 +1004,11 @@
 }
 
 .mps-week-arrow-btn {
-  display: none; /* hidden on desktop; shown on mobile via media query */
+  display: inline-flex; /* always visible */
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 1.5px solid #d1fae5;
   background: #f0fdf4;
@@ -1016,10 +1016,16 @@
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(34,197,94,0.10);
 }
 .mps-week-arrow-btn:hover {
   background: #dcfce7;
   border-color: #22c55e;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.20);
+  transform: scale(1.07);
+}
+.mps-week-arrow-btn:active {
+  transform: scale(0.95);
 }
 
 .mps-missing-icon { font-size: 2rem; opacity: 0.45; line-height: 1; }

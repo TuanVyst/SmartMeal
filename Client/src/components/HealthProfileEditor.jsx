@@ -4,6 +4,13 @@ import { getLockedIngredientsForProfile, getActivityFactor, calculateDailyTarget
 import { useHealthProfile } from '../hooks/useHealthProfile';
 import { healthSurveyService } from '../services/healthSurveyService';
 import { formatDateVi } from '../utils/dateTime';
+import {
+  HEALTH_LIMITS,
+  isForbiddenNumberKey,
+  getBasicMetricErrors,
+  getTargetWeightError,
+  getTargetDaysError,
+} from '../utils/healthConstraints';
 import { FiTrendingDown, FiActivity, FiMinimize2, FiFileText, FiLock, FiEdit2, FiSave, FiInfo, FiZap, FiAlertTriangle } from 'react-icons/fi';
 
 const goalLabels = {
@@ -31,6 +38,7 @@ export default function HealthProfileEditor() {
   const { healthProfile, updateProfile, dailyCalorieBudget, lockedIngredients } = useHealthProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const [bmiHistory, setBmiHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [formData, setFormData] = useState({
@@ -61,6 +69,11 @@ export default function HealthProfileEditor() {
       }));
     }
   }, [formData.goal]);
+
+  const updateForm = (patch) => {
+    setValidationErrors({});
+    setFormData(prev => ({ ...prev, ...patch }));
+  };
 
   const bmiResult = useMemo(() => {
     if (formData.height && formData.weight && Number(formData.height) > 0 && Number(formData.weight) > 0) {
@@ -110,6 +123,21 @@ export default function HealthProfileEditor() {
   };
 
   const handleSave = async () => {
+    const errors = getBasicMetricErrors({ height: formData.height, weight: formData.weight });
+    const targetError = getTargetWeightError({
+      goal: formData.goal,
+      targetWeight: formData.targetWeight,
+      weight: formData.weight,
+    });
+    if (targetError) errors.targetWeight = targetError;
+    if (formData.goal === 'lose' || formData.goal === 'gain') {
+      const daysError = getTargetDaysError(formData.targetDays);
+      if (daysError) errors.targetDays = daysError;
+    }
+
+    setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setSaving(true);
     try {
       const finalTargetDays = formData.targetDays ? Number(formData.targetDays) : null;
@@ -182,7 +210,10 @@ export default function HealthProfileEditor() {
           {!isEditing && (
             <button
               type="button"
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                setValidationErrors({});
+                setIsEditing(true);
+              }}
               style={{
                 padding: '6px 14px', borderRadius: 8, border: 'none',
                 background: '#22C55E', color: 'white', fontSize: 12, fontWeight: 600,
@@ -258,12 +289,15 @@ export default function HealthProfileEditor() {
                 </label>
                 <input
                   type="number"
-                  min="1"
+                  min={HEALTH_LIMITS.height.min}
+                  max={HEALTH_LIMITS.height.max}
+                  step={HEALTH_LIMITS.height.step}
                   value={formData.height}
                   onChange={e => {
-                    let val = e.target.value;
-                    if (Number(val) < 0) val = '1';
-                    setFormData(prev => ({ ...prev, height: val }));
+                    updateForm({ height: e.target.value });
+                  }}
+                  onKeyDown={e => {
+                    if (isForbiddenNumberKey(e.key)) e.preventDefault();
                   }}
                   placeholder="170"
                   style={{
@@ -278,12 +312,15 @@ export default function HealthProfileEditor() {
                 </label>
                 <input
                   type="number"
-                  min="1"
+                  min={HEALTH_LIMITS.weight.min}
+                  max={HEALTH_LIMITS.weight.max}
+                  step={HEALTH_LIMITS.weight.step}
                   value={formData.weight}
                   onChange={e => {
-                    let val = e.target.value;
-                    if (Number(val) < 0) val = '1';
-                    setFormData(prev => ({ ...prev, weight: val }));
+                    updateForm({ weight: e.target.value });
+                  }}
+                  onKeyDown={e => {
+                    if (isForbiddenNumberKey(e.key)) e.preventDefault();
                   }}
                   placeholder="65"
                   style={{
@@ -298,12 +335,15 @@ export default function HealthProfileEditor() {
                 </label>
                 <input
                   type="number"
-                  min="1"
+                  min={HEALTH_LIMITS.targetWeight.min}
+                  max={HEALTH_LIMITS.targetWeight.max}
+                  step={HEALTH_LIMITS.targetWeight.step}
                   value={formData.targetWeight}
                   onChange={e => {
-                    let val = e.target.value;
-                    if (Number(val) < 0) val = '1';
-                    setFormData(prev => ({ ...prev, targetWeight: val }));
+                    updateForm({ targetWeight: e.target.value });
+                  }}
+                  onKeyDown={e => {
+                    if (isForbiddenNumberKey(e.key)) e.preventDefault();
                   }}
                   placeholder="Ví dụ: 60"
                   disabled={!['lose', 'gain'].includes(formData.goal)}
@@ -323,13 +363,15 @@ export default function HealthProfileEditor() {
                   type="number"
                   value={formData.targetDays}
                   onChange={e => {
-                    let val = e.target.value;
-                    if (Number(val) < 0) val = '1';
-                    setFormData(prev => ({ ...prev, targetDays: val }));
+                    updateForm({ targetDays: e.target.value });
+                  }}
+                  onKeyDown={e => {
+                    if (isForbiddenNumberKey(e.key)) e.preventDefault();
                   }}
                   placeholder="Ví dụ: 84"
-                  min="1"
-                  max="365"
+                  min={HEALTH_LIMITS.targetDays.min}
+                  max={HEALTH_LIMITS.targetDays.max}
+                  step={1}
                   disabled={!['lose', 'gain'].includes(formData.goal)}
                   style={{
                     width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0',
@@ -421,7 +463,7 @@ export default function HealthProfileEditor() {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, goal: key }))}
+                    onClick={() => updateForm({ goal: key })}
                     style={{
                       padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
                       border: `2px solid ${formData.goal === key ? '#22C55E' : '#e2e8f0'}`,
@@ -465,11 +507,23 @@ export default function HealthProfileEditor() {
               </p>
             </div>
 
+            {Object.keys(validationErrors).length > 0 && (
+              <div style={{
+                padding: '8px 12px', marginBottom: 12, borderRadius: 8,
+                background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: 12,
+              }}>
+                {Object.values(validationErrors).map(message => (
+                  <div key={message}>{message}</div>
+                ))}
+              </div>
+            )}
+
             {/* Save/Cancel */}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => {
+                  setValidationErrors({});
                   setIsEditing(false);
                   setFormData({
                     height: healthProfile.height || '',

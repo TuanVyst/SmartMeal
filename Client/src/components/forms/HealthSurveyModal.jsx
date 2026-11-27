@@ -1,6 +1,11 @@
 import { useReducer, useMemo } from 'react';
 import { calculateBMI } from '../../utils/bmiCalculator';
 import { getLockedIngredientsForProfile, getDailyCalorieBudget } from '../../utils/healthRules';
+import {
+  HEALTH_LIMITS,
+  isForbiddenNumberKey,
+  validateBasicMetrics,
+} from '../../utils/healthConstraints';
 import { useHealthProfile } from '../../hooks/useHealthProfile';
 import { FiTrendingDown, FiActivity, FiMinimize2, FiHeart, FiDroplet, FiLock } from 'react-icons/fi';
 
@@ -87,10 +92,7 @@ function validateStep(step, formData) {
     case 1: {
       if (!formData.height || !formData.weight || !formData.age || !formData.gender)
         return 'Vui lòng điền đầy đủ thông tin';
-      if (isNaN(formData.height) || Number(formData.height) <= 0) return 'Chiều cao không hợp lệ';
-      if (isNaN(formData.weight) || Number(formData.weight) <= 0) return 'Cân nặng không hợp lệ';
-      if (isNaN(formData.age) || Number(formData.age) <= 0 || Number(formData.age) > 150) return 'Tuổi không hợp lệ';
-      return '';
+      return validateBasicMetrics(formData);
     }
     case 2:
       if (!formData.activityLevel) return 'Vui lòng chọn mức độ vận động của bạn';
@@ -128,7 +130,7 @@ function StepIndicator({ current }) {
   );
 }
 
-function InputField({ label, value, onChange, type = 'text', placeholder, suffix, min = "1" }) {
+function InputField({ label, value, onChange, type = 'text', placeholder, suffix, min = "1", max, step }) {
   return (
     <div style={{ flex: 1 }}>
       <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>{label}</label>
@@ -136,13 +138,12 @@ function InputField({ label, value, onChange, type = 'text', placeholder, suffix
         <input
           type={type}
           min={type === 'number' ? min : undefined}
+          max={type === 'number' ? max : undefined}
+          step={type === 'number' ? step : undefined}
           value={value}
-          onChange={e => {
-            let val = e.target.value;
-            if (type === 'number' && Number(val) < 0) {
-              val = '1';
-            }
-            onChange(val);
+          onChange={e => onChange(e.target.value)}
+          onKeyDown={e => {
+            if (type === 'number' && isForbiddenNumberKey(e.key)) e.preventDefault();
           }}
           placeholder={placeholder}
           style={{
@@ -274,11 +275,14 @@ export default function HealthSurveyModal({ onComplete, mode = 'modal' }) {
               Nhập thông tin để chúng tôi tính toán chỉ số sức khoẻ của bạn
             </p>
             <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-              <InputField label="Chiều cao" value={height} onChange={v => dispatch({ type: 'SET_FIELD', field: 'height', value: v })} type="number" placeholder="170" suffix="cm" />
-              <InputField label="Cân nặng" value={weight} onChange={v => dispatch({ type: 'SET_FIELD', field: 'weight', value: v })} type="number" placeholder="65" suffix="kg" />
+              <InputField label="Chiều cao" value={height} onChange={v => dispatch({ type: 'SET_FIELD', field: 'height', value: v })} type="number" placeholder="170" suffix="cm"
+                min={HEALTH_LIMITS.height.min} max={HEALTH_LIMITS.height.max} step={HEALTH_LIMITS.height.step} />
+              <InputField label="Cân nặng" value={weight} onChange={v => dispatch({ type: 'SET_FIELD', field: 'weight', value: v })} type="number" placeholder="65" suffix="kg"
+                min={HEALTH_LIMITS.weight.min} max={HEALTH_LIMITS.weight.max} step={HEALTH_LIMITS.weight.step} />
             </div>
             <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-              <InputField label="Tuổi" value={age} onChange={v => dispatch({ type: 'SET_FIELD', field: 'age', value: v })} type="number" placeholder="25" suffix="tuổi" />
+              <InputField label="Tuổi" value={age} onChange={v => dispatch({ type: 'SET_FIELD', field: 'age', value: v })} type="number" placeholder="25" suffix="tuổi"
+                min={HEALTH_LIMITS.age.min} max={HEALTH_LIMITS.age.max} step={1} />
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: '#475569', marginBottom: 6 }}>Giới tính</label>
                 <div style={{ display: 'flex', gap: 8 }}>

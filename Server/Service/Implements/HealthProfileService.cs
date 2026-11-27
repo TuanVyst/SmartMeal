@@ -1,5 +1,6 @@
 using BusinessObject.Dtos.RequestModels;
 using BusinessObject.Entities;
+using BusinessObject.Helpers;
 using Repository.Interfaces;
 using Service.Interfaces;
 
@@ -12,6 +13,20 @@ namespace Service.Implements
         public HealthProfileService(IHealthProfileRepo healthProfileRepo)
         {
             _healthProfileRepo = healthProfileRepo;
+        }
+
+        private static void ValidateRequest(HealthProfileRequest request)
+        {
+            var error = HealthProfileValidator.ValidateAll(
+                request.Height,
+                request.Weight,
+                HealthProfileValidator.GetAge(request.DateOfBirth),
+                request.TargetWeight,
+                request.Goal,
+                request.TargetDays);
+
+            if (error != null)
+                throw new ArgumentException(error);
         }
 
         public async Task<List<HealthProfile>> GetAllHealthProfiles()
@@ -31,6 +46,8 @@ namespace Service.Implements
 
         public async Task<HealthProfile> CreateHealthProfile(HealthProfileRequest request)
         {
+            ValidateRequest(request);
+
             var healthProfile = new HealthProfile
             {
                 Profile_id = Guid.NewGuid(),
@@ -57,6 +74,8 @@ namespace Service.Implements
 
         public async Task<HealthProfile> UpdateHealthProfile(Guid id, HealthProfileRequest request)
         {
+            ValidateRequest(request);
+
             var healthProfile = await _healthProfileRepo.GetHealthProfileById(id);
 
             if (healthProfile == null)

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getDailyCalorieBudget } from '../../utils/healthRules';
+import { getDailyCalorieBudget, needsSafetyConfirmation } from '../../utils/healthRules';
 import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 export default function SafetyValidation({ profile, onAccept, onContinue }) {
@@ -7,8 +7,8 @@ export default function SafetyValidation({ profile, onAccept, onContinue }) {
     return getDailyCalorieBudget(profile);
   }, [profile]);
 
-  if (!assessment.goalTooAggressive && assessment.deficit === 0) {
-    return null; // Return null if nothing to warn about. But wait, we show this inline.
+  if (!needsSafetyConfirmation(assessment)) {
+    return null;
   }
 
   const isAggressive = assessment.goalTooAggressive;

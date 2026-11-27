@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_exceptions.dart';
+import '../../../../core/validators/health_validators.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/ui/smart_button.dart';
@@ -65,19 +66,21 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   String? _validateStep() {
     if (_step == 1) {
-      final h = double.tryParse(_heightCtrl.text);
-      final w = double.tryParse(_weightCtrl.text);
-      final a = int.tryParse(_ageCtrl.text);
-      if (h == null || h <= 0 || w == null || w <= 0 || a == null || a <= 0) {
-        return 'Vui lòng điền thông tin hợp lệ (chiều cao, cân nặng, tuổi)';
-      }
+      final error = HealthValidation.validateBasicMetrics(
+        age: _ageCtrl.text,
+        height: _heightCtrl.text,
+        weight: _weightCtrl.text,
+      );
+      if (error != null) return error;
     } else if (_step == 2) {
       if (_goal.isEmpty) return 'Vui lòng chọn mục tiêu';
       if (_goal == 'lose' || _goal == 'gain') {
-        final tw = double.tryParse(_targetWeightCtrl.text);
-        if (tw == null || tw <= 0) {
-          return 'Vui lòng nhập cân nặng mục tiêu hợp lệ';
-        }
+        final error = HealthValidation.validateTargetWeight(
+          targetWeight: _targetWeightCtrl.text,
+          weight: _weightCtrl.text,
+          goal: _goal,
+        );
+        if (error != null) return error;
       }
     } else if (_step == 3) {
       if (_activityLevel.isEmpty) return 'Vui lòng chọn mức độ vận động';
@@ -92,14 +95,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
     try {
       final provider = context.read<HealthProfileProvider>();
       
-      final height = double.tryParse(_heightCtrl.text) ?? 0;
-      final weight = double.tryParse(_weightCtrl.text) ?? 0;
-      final tw = double.tryParse(_targetWeightCtrl.text) ?? 0;
+      final height = double.tryParse(_heightCtrl.text.trim().replaceAll(',', '.')) ?? 0;
+      final weight = double.tryParse(_weightCtrl.text.trim().replaceAll(',', '.')) ?? 0;
+      final tw = double.tryParse(_targetWeightCtrl.text.trim().replaceAll(',', '.')) ?? 0;
       
       int targetDays = 84;
       if ((_goal == 'lose' || _goal == 'gain') && weight > 0 && tw > 0) {
         final calculatedDays = ((tw - weight).abs() / 0.5 * 7).ceil();
-        targetDays = calculatedDays < 14 ? 14 : calculatedDays;
+        targetDays = calculatedDays.clamp(HealthLimits.minTargetDays, HealthLimits.maxTargetDays).toInt();
       }
 
       final payload = {
@@ -209,13 +212,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
         const SizedBox(height: AppSpacing.xl),
         Row(
           children: [
-            Expanded(child: SmartTextField(controller: _heightCtrl, label: 'Chiều cao (cm)', keyboardType: TextInputType.number)),
+            Expanded(child: SmartTextField(controller: _heightCtrl, label: 'Chiều cao (cm)', keyboardType: const TextInputType.numberWithOptions(decimal: true), inputFormatters: [HealthDecimalInputFormatter()])),
             const SizedBox(width: AppSpacing.md),
-            Expanded(child: SmartTextField(controller: _weightCtrl, label: 'Cân nặng (kg)', keyboardType: TextInputType.number)),
+            Expanded(child: SmartTextField(controller: _weightCtrl, label: 'Cân nặng (kg)', keyboardType: const TextInputType.numberWithOptions(decimal: true), inputFormatters: [HealthDecimalInputFormatter()])),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        SmartTextField(controller: _ageCtrl, label: 'Tuổi', keyboardType: TextInputType.number),
+        SmartTextField(controller: _ageCtrl, label: 'Tuổi', keyboardType: TextInputType.number, inputFormatters: [HealthIntegerInputFormatter()]),
         const SizedBox(height: AppSpacing.lg),
         Text('Giới tính', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
@@ -273,7 +276,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
         }),
         if (_goal == 'lose' || _goal == 'gain') ...[
           const SizedBox(height: AppSpacing.lg),
-          SmartTextField(controller: _targetWeightCtrl, label: 'Cân nặng mục tiêu (kg)', keyboardType: TextInputType.number),
+          SmartTextField(controller: _targetWeightCtrl, label: 'Cân nặng mục tiêu (kg)', keyboardType: const TextInputType.numberWithOptions(decimal: true), inputFormatters: [HealthDecimalInputFormatter()]),
         ]
       ],
     );
